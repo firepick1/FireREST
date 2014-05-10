@@ -1,5 +1,5 @@
 #! /bin/bash
-if [ "$SUDO_USER" == "" ] || [ "$1" == "" ]; then
+if [ "$SUDO_USER" == "" ]; then
   echo "You must run this script as superuser:"
   echo 'sudo PATH=$PATH ./build'
   exit -1
