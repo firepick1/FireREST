@@ -6,8 +6,6 @@ var __appdir = "www";
 app.use(express.static(__appdir));
 app.use(express.bodyParser());
 
-console.log("loading typescript-require...");
-var tsr = require('typescript-require');
 console.log("loading firerest.js...");
 
 
@@ -32,6 +30,6 @@ app.get('/firemote/cv/1/gray/cve/calc-offset/process.json', function(req, res){
   res.sendfile('/dev/firefuse/cv/1/gray/cve/calc-offset/process.json');
 });
 
-var firerest_port=80;
+var firerest_port=8001;
 app.listen(firerest_port);
 console.log('FireREST listening on port ' + firerest_port);
