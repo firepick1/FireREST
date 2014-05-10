@@ -1,0 +1,12 @@
+{
+  "name": "FireREST",
+  "description": "FirePick REST services",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "express": "3.5.1"
+  },
+  "devDependencies": {
+    "karma-junit-reporter": "~0.1.0"
+  }
+}
