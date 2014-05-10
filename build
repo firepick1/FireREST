@@ -127,7 +127,7 @@ if [ ! -e /usr/lib/lib_firesight.so ]; then
   popd
 fi
 if [ ! -e /opt/node ] ;then
-  echo installing Nodejs...
+  echo "++++++++++++++++++ INSTALLING NodeJS dependencies ++++++++++++"
   mkdir /opt/node
   pushd /opt/node
   wget http://nodejs.org/dist/v0.10.22/node-v0.10.22-linux-arm-pi.tar.gz
@@ -138,7 +138,10 @@ if [ ! -e /opt/node ] ;then
   source /etc/profile
   popd
 fi
-npm install
+if [ ! -e node_modules ]; then
+  echo "++++++++++++++++++ INSTALLING NodeJS dependencies ++++++++++++"
+  npm install
+fi
 
 if [ ! -e /dev/firefuse ]; then 
   echo "++++++++++++++++++ BUILDING FireFUSE ++++++++++++"
