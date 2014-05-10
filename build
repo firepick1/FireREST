@@ -138,6 +138,7 @@ if [ ! -e /opt/node ] ;then
   source /etc/profile
   popd
 fi
+npm install
 
 if [ ! -e /dev/firefuse ]; then 
   echo "++++++++++++++++++ BUILDING FireFUSE ++++++++++++"
