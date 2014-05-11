@@ -5,10 +5,18 @@ if [ "$SUDO_USER" == "" ]; then
   exit -1
 fi
 
+if [ "$(type -p siege)" == "" ]; then
+  echo "++++++++++++++++++ INSTALLING siege ++++++++++++"
+  apt-get install -y siege
+else 
+  echo siege: installed
+fi
+
 if [ "$(arch)" != "armv6l" ] || [ "$(lsb_release -is)" != "Debian" ] ;then
   echo "========================== WARNING ==============================="
   echo "FireREST is currently only supported on Raspberry Pi with Raspbian"
   echo "=================================================================="
+  exit -1
 else 
   echo "Raspberry Pi Debian confirmed for installation"
 fi
@@ -57,7 +65,7 @@ if [ "$(type -p cmake)" == "" ]; then
     apt-get -y install cmake
   fi
 else
-  echo CMAKE OK
+  echo CMAKE: installed
 fi
 
 if [ ! -e /usr/local/include/jansson.h ] ; then
@@ -70,6 +78,8 @@ if [ ! -e /usr/local/include/jansson.h ] ; then
   cmake .
   make install
   popd
+else
+  echo jansson: installed
 fi
 
 if [ "$cv" == "make" ] ;then
@@ -112,6 +122,8 @@ if [ ! -e /usr/include/fuse.h ] ; then
   ex -s -c "g/#user_allow_other/s/#//" -c wq /etc/fuse.conf
   cp firefuse.conf /etc/ld.so.conf.d/
   ldconfig
+else
+  echo fuse: installed
 fi
 if [ ! -e /usr/lib/libfirepicam.so ]; then
   echo "++++++++++++++++++ INSTALLING firepicam C++ LIBRARY ++++++++++++"
@@ -121,6 +133,8 @@ if [ ! -e /usr/lib/libfirepicam.so ]; then
   pushd ../FirePiCam
   ./build
   popd
+else
+  echo firepicam: installed
 fi
 if [ ! -e /usr/lib/lib_firesight.so ]; then
   echo "++++++++++++++++++ INSTALLING firesight C++ LIBRARY ++++++++++++"
@@ -130,6 +144,8 @@ if [ ! -e /usr/lib/lib_firesight.so ]; then
   pushd ../FireSight
   ./build
   popd
+else
+  echo firesight: installed
 fi
 if [ ! -e /opt/node ] ;then
   echo "++++++++++++++++++ INSTALLING NodeJS dependencies ++++++++++++"
@@ -142,10 +158,14 @@ if [ ! -e /opt/node ] ;then
   ex -s -c 'g/PATH/s/"$/:\/opt\/node\/bin"/' -c wq /etc/profile
   source /etc/profile
   popd
+else
+  echo node: installed
 fi
 if [ ! -e node_modules ]; then
   echo "++++++++++++++++++ INSTALLING NodeJS dependencies ++++++++++++"
   npm install
+else
+  echo node_modules: installed
 fi
 
 if [ ! -e /dev/firefuse ]; then 
@@ -156,4 +176,6 @@ if [ ! -e /dev/firefuse ]; then
   pushd ../FireFireFUSE
   ./build
   popd
+else
+  echo /dev/firefuse: installed
 fi
