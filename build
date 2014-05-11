@@ -1,4 +1,8 @@
 #! /bin/bash
+
+ver=0.1
+echo "FireREST version $ver"
+
 if [ "$SUDO_USER" == "" ]; then
   echo "You must run this script as superuser:"
   echo '  sudo PATH=$PATH ./build'
@@ -10,6 +14,13 @@ if [ "$(type -p npm)" == "" ]; then
   exit -1
 fi
 
+if [ -e version-$ver ]; then
+  pullFireFuse=1
+else
+  pullFireFuse=0
+fi
+date > version-$ver
+
 if [ "$(type -p siege)" == "" ]; then
   echo "++++++++++++++++++ INSTALLING siege ++++++++++++"
   apt-get install -y siege
@@ -20,6 +31,7 @@ fi
 if [ "$(arch)" != "armv6l" ] || [ "$(lsb_release -is)" != "Debian" ] ;then
   echo "========================== WARNING ==============================="
   echo "FireREST is currently only supported on Raspberry Pi with Raspbian"
+  echo "However, you can use this computer for load testing"
   echo "=================================================================="
   exit -1
 else 
@@ -173,12 +185,13 @@ else
   echo node_modules: installed
 fi
 
-if [ ! -e /dev/firefuse ]; then 
+if [ ! -e /dev/firefuse ] || [ $pullFireFuse -ne 0 ] ; then 
   echo "++++++++++++++++++ BUILDING FireFUSE ++++++++++++"
-  pushd ..
-  sudo -u $SUDO_USER git clone git://github.com/firepick1/FireFUSE
-  popd
-  pushd ../FireFireFUSE
+  if [ ! -e FireFUSE ]; then
+    sudo -u $SUDO_USER git clone git://github.com/firepick1/FireFUSE
+  fi
+  pushd FireFUSE
+  sudo -u $SUDO_USER git pull
   ./build
   popd
 else
