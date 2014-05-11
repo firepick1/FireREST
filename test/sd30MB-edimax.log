@@ -1,87 +1,87 @@
 RUNNING LOAD TEST
-Sat May 10 19:20:07 PDT 2014
-http://192.168.1.97:8001/firerest/cv/1/gray/cve/calc-offset/save.json
+Sun May 11 07:51:27 PDT 2014
+http://firepick:8001/firerest/cv/1/gray/cve/calc-offset/save.json
 ** SIEGE 2.70
 ** Preparing 1 concurrent users for battle.
 The server is now under siege...      done.
 Transactions:		         100 hits
 Availability:		      100.00 %
-Elapsed time:		       60.76 secs
-Data transferred:	        0.00 MB
-Response time:		        0.61 secs
-Transaction rate:	        1.65 trans/sec
+Elapsed time:		       44.97 secs
+Data transferred:	        0.10 MB
+Response time:		        0.45 secs
+Transaction rate:	        2.22 trans/sec
 Throughput:		        0.00 MB/sec
 Concurrency:		        1.00
 Successful transactions:         100
 Failed transactions:	           0
-Longest transaction:	        1.36
+Longest transaction:	        0.75
 Shortest transaction:	        0.42
  
-http://192.168.1.97:8001/firerest/cv/1/gray/cve/calc-offset/process.json
+http://firepick:8001/firerest/cv/1/gray/cve/calc-offset/process.json
 ** SIEGE 2.70
 ** Preparing 1 concurrent users for battle.
 The server is now under siege...      done.
 Transactions:		         100 hits
 Availability:		      100.00 %
-Elapsed time:		       69.51 secs
-Data transferred:	        0.02 MB
-Response time:		        0.69 secs
-Transaction rate:	        1.44 trans/sec
+Elapsed time:		       59.43 secs
+Data transferred:	        0.00 MB
+Response time:		        0.59 secs
+Transaction rate:	        1.68 trans/sec
 Throughput:		        0.00 MB/sec
 Concurrency:		        1.00
 Successful transactions:         100
 Failed transactions:	           0
-Longest transaction:	        1.02
+Longest transaction:	        0.98
 Shortest transaction:	        0.56
  
-http://192.168.1.97:8001/firerest/cv/1/camera.jpg
+http://firepick:8001/firerest/cv/1/camera.jpg
 ** SIEGE 2.70
 ** Preparing 1 concurrent users for battle.
 The server is now under siege...      done.
 Transactions:		         100 hits
 Availability:		      100.00 %
-Elapsed time:		       11.92 secs
-Data transferred:	       11.38 MB
+Elapsed time:		       12.20 secs
+Data transferred:	       11.47 MB
 Response time:		        0.12 secs
-Transaction rate:	        8.39 trans/sec
-Throughput:		        0.95 MB/sec
+Transaction rate:	        8.20 trans/sec
+Throughput:		        0.94 MB/sec
 Concurrency:		        1.00
 Successful transactions:         100
 Failed transactions:	           0
-Longest transaction:	        0.37
-Shortest transaction:	        0.09
+Longest transaction:	        0.42
+Shortest transaction:	        0.10
  
-http://192.168.1.97:8001/firerest/cv/1/monitor.jpg
+http://firepick:8001/firerest/cv/1/monitor.jpg
 ** SIEGE 2.70
 ** Preparing 1 concurrent users for battle.
 The server is now under siege...      done.
 Transactions:		         100 hits
 Availability:		      100.00 %
-Elapsed time:		       13.07 secs
-Data transferred:	       11.39 MB
-Response time:		        0.13 secs
-Transaction rate:	        7.65 trans/sec
-Throughput:		        0.87 MB/sec
+Elapsed time:		       13.63 secs
+Data transferred:	       11.48 MB
+Response time:		        0.14 secs
+Transaction rate:	        7.34 trans/sec
+Throughput:		        0.84 MB/sec
 Concurrency:		        1.00
 Successful transactions:         100
 Failed transactions:	           0
-Longest transaction:	        1.07
-Shortest transaction:	        0.09
+Longest transaction:	        0.95
+Shortest transaction:	        0.10
  
-http://192.168.1.97:8001/firerest/cv/1/output.jpg
+http://firepick:8001/firerest/cv/1/output.jpg
 ** SIEGE 2.70
 ** Preparing 1 concurrent users for battle.
 The server is now under siege...      done.
 Transactions:		         100 hits
 Availability:		      100.00 %
-Elapsed time:		       50.56 secs
-Data transferred:	        3.62 MB
-Response time:		        0.51 secs
-Transaction rate:	        1.98 trans/sec
-Throughput:		        0.07 MB/sec
+Elapsed time:		       33.94 secs
+Data transferred:	        3.64 MB
+Response time:		        0.34 secs
+Transaction rate:	        2.95 trans/sec
+Throughput:		        0.11 MB/sec
 Concurrency:		        1.00
 Successful transactions:         100
 Failed transactions:	           0
-Longest transaction:	        0.92
-Shortest transaction:	        0.31
+Longest transaction:	        0.61
+Shortest transaction:	        0.30
  
