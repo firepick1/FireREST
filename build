@@ -16,12 +16,12 @@ if [ "$(type -p npm)" == "" ]; then
   exit -1
 fi
 
-if [ -e "version-$FIREREST_VERSION_MAJOR.$FIREREST_VERSION_MINOR" ]; then
-  echo "FireREST dependencies: out of date"
-  pullFireFuse=1
-else
+if [ -e version-$FIREREST_VERSION_MAJOR.$FIREREST_VERSION_MINOR ]; then
   echo "FireREST dependencies: OK"
   pullFireFuse=0
+else
+  echo "FireREST dependencies: out of date"
+  pullFireFuse=1
 fi
 date > version-$FIREREST_VERSION_MAJOR.$FIREREST_VERSION_MINOR
 
