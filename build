@@ -1,7 +1,12 @@
 #! /bin/bash
 if [ "$SUDO_USER" == "" ]; then
   echo "You must run this script as superuser:"
-  echo 'sudo PATH=$PATH ./build'
+  echo '  sudo PATH=$PATH ./build'
+  exit -1
+fi
+if [ "$(type -p npm)" == "" ]; then
+  echo "You must provide this environment's PATH:"
+  echo '  sudo PATH=$PATH ./build'
   exit -1
 fi
 
