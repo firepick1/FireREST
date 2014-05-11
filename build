@@ -1,7 +1,9 @@
 #! /bin/bash
 
-ver=0.1
-echo "FireREST version $ver"
+FIREREST_VERSION_MAJOR=0
+FIREREST_VERSION_MINOR=1
+FIREREST_VERSION_PATCH=1
+echo "FireREST version $FIREREST_VERSION_MAJOR.$FIREREST_VERSION_MINOR.$FIREREST_VERSION_PATCH"
 
 if [ "$SUDO_USER" == "" ]; then
   echo "You must run this script as superuser:"
@@ -14,12 +16,12 @@ if [ "$(type -p npm)" == "" ]; then
   exit -1
 fi
 
-if [ -e version-$ver ]; then
+if [ -e version-$FIREREST_VERSION_MAJOR.$FIREREST_VERSION_MINOR ]; then
   pullFireFuse=1
 else
   pullFireFuse=0
 fi
-date > version-$ver
+date > version-$FIREREST_VERSION_MAJOR.$FIREREST_VERSION_MINOR
 
 if [ "$(type -p siege)" == "" ]; then
   echo "++++++++++++++++++ INSTALLING siege ++++++++++++"
