@@ -17,6 +17,7 @@ if [ "$(type -p npm)" == "" ]; then
 fi
 
 if [ -e version-$FIREREST_VERSION_MAJOR.$FIREREST_VERSION_MINOR ]; then
+  echo "Updating FireREST dependencies"
   pullFireFuse=1
 else
   pullFireFuse=0
