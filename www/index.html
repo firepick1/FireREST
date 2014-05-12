@@ -88,6 +88,7 @@
   }
   .fr-row {
     position: relative;
+    margin: .2em;
   }
   .fr-cell-data {
     display: inline-block;
@@ -104,11 +105,13 @@
   }
   .fr-json {
    background: #eee;
+   min-width:30em;
   }
-  .fr-label-data {
+  .fr-data-label {
     font-family: Courier;
-    border-top: 1pt solid #eee;
-    text-align: right;
+    border-top: 1pt solid #eee; 
+    display:block;
+    text-align: left;
   }
 </style>
 </head>
@@ -123,51 +126,57 @@
   </div>
   <div class="container"> 
     <div class="fr-banner-space">&nbsp;</div>
+
+    <div class="row fr-data-label">firerest/cv/1/camera.jpg</div>
     <div class="fr-row row">
-      <div class="fr-label-data col-md-8">firerest/cv/1/camera.jpg</div>
+      <div class="fr-cell-btn col-md-2">
+	<button type="button" class="btn btn-default btn-sm" onclick="firerest_save()">GET</button>
+      </div>
       <div class="fr-cell-data col-md-6">
 	<img class="img-responsive img-rounded fr-img-sm" src="cv/1/camera.jpg"><br>
       </div>
+    </div>
+
+    <div class="row fr-data-label">firerest/cv/1/monitor.jpg</div>
+    <div class="fr-row row">
       <div class="fr-cell-btn col-md-2">
 	<button type="button" class="btn btn-default btn-sm" onclick="firerest_save()">GET</button>
       </div>
-    </div>
-    <div class="fr-row row">
-      <div class="fr-label-data col-md-8">firerest/cv/1/monitor.jpg</div>
       <div class="fr-cell-data col-md-6">
 	<img class="img-responsive img-rounded fr-img-sm" src="cv/1/monitor.jpg"><br>
       </div>
+    </div>
+
+    <div class="row fr-data-label">firerest/cv/1/output.jpg</div>
+    <div class="fr-row row">
       <div class="fr-cell-btn col-md-2">
 	<button type="button" class="btn btn-default btn-sm" onclick="firerest_save()">GET</button>
       </div>
-    </div>
-    <div class="fr-row row">
-      <div class="fr-label-data col-md-8">firerest/cv/1/output.jpg</div>
       <div class="fr-cell-data col-md-6">
-	<img class="img-responsive img-rounded fr-img-sm" src="cv/1/output.jpg"><br>
+	<img class="img-responsive img-rounded fr-img-lg" src="cv/1/output.jpg"><br>
       </div>
+    </div>
+
+    <div class="row fr-data-label">firerest/cv/1/gray/cve/calc-offset/save.json</div>
+    <div class="fr-row row">
       <div class="fr-cell-btn col-md-2">
 	<button type="button" class="btn btn-default btn-sm" onclick="firerest_save()">GET</button>
       </div>
-    </div>
-    <div class="fr-row row">
-      <div class="fr-label-data col-md-8">firerest/cv/1/gray/cve/calc-offset/save.json</div>
       <div class="fr-cell-data col-md-6">
 	<blockquote class="fr-json" id="save-json"/>
       </div>
-      <div class="fr-cell-btn col-md-2">
-	<button type="button" class="btn btn-default btn-sm" onclick="firerest_save()">GET</button>
-      </div>
     </div>
+    
+    <div class="row fr-data-label">firerest/cv/1/gray/cve/calc-offset/process.json</div>
     <div class="fr-row row">
-      <div class="fr-label-data col-md-8">firerest/cv/1/gray/cve/calc-offset/process.json</div>
-      <div class="fr-cell-data col-md-6">
-	<blockquote class="fr-json" id="process-json"/>
-      </div>
       <div class="fr-cell-btn col-md-2">
 	<button type="button" class="btn btn-default btn-sm" onclick="firerest_process()">GET</button>
       </div>
+      <div class="fr-cell-data col-md-6">
+	<blockquote class="fr-json" id="process-json"/>
+      </div>
     </div>
+
   </div>
 </body>
 </html>
