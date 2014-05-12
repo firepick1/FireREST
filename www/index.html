@@ -1,9 +1,5 @@
 <!doctype html>
-
-<!--
 <html lang="en" ng-app="FireREST">
--->
-<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,103 +13,10 @@
   <script src="lib/angular/angular.js"></script>
   <script src="lib/angular/angular-route.js"></script>
   <script src="lib/jquery/jquery-2.1.1.min.js"></script>
-  <!--
-  <script src="js/exports.js"></script>
-  <script src="js/firemote.js"></script>
   <script src="js/app.js"></script>
-  <script src="js/services.js"></script>
   <script src="js/controllers.js"></script>
-  <script src="js/filters.js"></script>
-  <script src="js/directives.js"></script>
-  -->
   <script src="bootstrap/js/ui-bootstrap-0.6.0.min.js"></script>
   <script src="bootstrap/js/ui-bootstrap-tpls-0.6.0.min.js"></script>
-    
-    <script>
-    function firerest_save() {
-	$.ajax({
-	  url: "cv/1/gray/cve/calc-offset/save.json",
-	  data: { r: Math.random() },
-	  success: function( data ) {
-	    var text = JSON.stringify(data);
-	    $( "#save-json" ).html( text );
-	  }
-	});
-      }
-    function firerest_process() {
-	$.ajax({
-	  url: "cv/1/gray/cve/calc-offset/process.json",
-	  data: { r: Math.random() },
-	  success: function( data ) {
-	    var text = JSON.stringify(data);
-	    $( "#process-json" ).html( text );
-	  }
-	});
-      }
-    </script>
-<style>
-  .fr-banner {
-    position: fixed;
-    top: 0;
-    width: 100%;
-    max-width: 60em;
-    height: 3.1em;
-    z-index: 99999999;
-    background: #eee;
-  }
-  .fr-banner-left {
-    position: absolute;
-    top: 0;
-    left: 0;
-  }
-  .fr-banner-logo {
-    height: 3em;
-    padding: 0.1em;
-    padding-left: 2em;
-  }
-  .fr-banner-right {
-    position: absolute;
-    top: 0;
-    right: 0;
-  }
-  .fr-banner-space {
-    height: 7em;
-  }
-  .fr-banner-title {
-    text-align: right;
-    padding: 0;
-    margin: 0;
-    margin-top: 0.5em;
-    margin-right: 1em;
-  }
-  .fr-row {
-    position: relative;
-    margin: .2em;
-  }
-  .fr-cell-data {
-    display: inline-block;
-  }
-  .fr-cell-btn {
-    display: inline-block;
-    text-align: right;
-  }
-  .fr-img-sm{
-    width:50%;
-  }
-  .fr-img-lg {
-    width:100%;
-  }
-  .fr-json {
-   background: #eee;
-   min-width:30em;
-  }
-  .fr-data-label {
-    font-family: Courier;
-    border-top: 1pt solid #eee; 
-    display:block;
-    text-align: left;
-  }
-</style>
 </head>
 <body>
   <div class="fr-banner"> 
@@ -124,56 +27,35 @@
       <h4 class="fr-banner-title">Computer Vision Test Page</h4>
     </div>
   </div>
-  <div class="container"> 
+  <div class="container" ng-controller="MainCtrl">  
     <div class="fr-banner-space">&nbsp;</div>
 
-    <div class="row fr-data-label">firerest/cv/1/camera.jpg</div>
-    <div class="fr-row row">
-      <div class="fr-cell-btn col-md-2">
-	<button type="button" class="btn btn-default btn-sm" onclick="firerest_save()">GET</button>
+    <div ng-repeat="image in ['camera.jpg', 'monitor.jpg','output.jpg']">
+      <div class="row fr-data-label">
+        <div class="col-md-6">firerest/cv/1/{{image}}</div>
       </div>
-      <div class="fr-cell-data col-md-6">
-	<img class="img-responsive img-rounded fr-img-sm" src="cv/1/camera.jpg"><br>
-      </div>
-    </div>
-
-    <div class="row fr-data-label">firerest/cv/1/monitor.jpg</div>
-    <div class="fr-row row">
-      <div class="fr-cell-btn col-md-2">
-	<button type="button" class="btn btn-default btn-sm" onclick="firerest_save()">GET</button>
-      </div>
-      <div class="fr-cell-data col-md-6">
-	<img class="img-responsive img-rounded fr-img-sm" src="cv/1/monitor.jpg"><br>
+      <div class="fr-row row">
+	<div class="fr-cell-btn col-md-1">
+	  <button type="button" class="btn btn-default btn-sm" ng-click="image_GET(image)">GET</button>
+	</div>
+	<div class="fr-cell-data col-md-7">
+	  <img class="img-responsive img-rounded {{image_class(image)}}" 
+	    ng-src="{{image_url(image)}}" ng-click="image_click(image)">
+	</div>
       </div>
     </div>
 
-    <div class="row fr-data-label">firerest/cv/1/output.jpg</div>
-    <div class="fr-row row">
-      <div class="fr-cell-btn col-md-2">
-	<button type="button" class="btn btn-default btn-sm" onclick="firerest_save()">GET</button>
+    <div ng-repeat="action in ['save', 'process']">
+      <div class="row fr-data-label">
+        <div class="col-md-6">firerest/cv/1/gray/cve/calc-offset/{{action}}.json</div>
       </div>
-      <div class="fr-cell-data col-md-6">
-	<img class="img-responsive img-rounded fr-img-lg" src="cv/1/output.jpg"><br>
-      </div>
-    </div>
-
-    <div class="row fr-data-label">firerest/cv/1/gray/cve/calc-offset/save.json</div>
-    <div class="fr-row row">
-      <div class="fr-cell-btn col-md-2">
-	<button type="button" class="btn btn-default btn-sm" onclick="firerest_save()">GET</button>
-      </div>
-      <div class="fr-cell-data col-md-6">
-	<blockquote class="fr-json" id="save-json"/>
-      </div>
-    </div>
-    
-    <div class="row fr-data-label">firerest/cv/1/gray/cve/calc-offset/process.json</div>
-    <div class="fr-row row">
-      <div class="fr-cell-btn col-md-2">
-	<button type="button" class="btn btn-default btn-sm" onclick="firerest_process()">GET</button>
-      </div>
-      <div class="fr-cell-data col-md-6">
-	<blockquote class="fr-json" id="process-json"/>
+      <div class="fr-row row">
+	<div class="fr-cell-btn col-md-1">
+	  <button type="button" class="btn btn-default btn-sm" ng-click="action_GET(action)">GET</button>
+	</div>
+	<div class="fr-cell-data col-md-7">
+	  <blockquote class="fr-json" id="{{action}}-json"/>
+	</div>
       </div>
     </div>
 
