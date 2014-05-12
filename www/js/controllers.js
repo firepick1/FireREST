@@ -24,7 +24,7 @@ controllers.controller('MainCtrl', ['$scope','$location',
       scope.imageInstances[image] = Math.random();
     };
     scope.action_GET = function(action) {
-    console.log("action_GET");
+	$( "#" + action + "-json" ).html( "..." );
 	$.ajax({
 	  url: "cv/1/gray/cve/calc-offset/" + action + ".json",
 	  data: { r: Math.random() },
