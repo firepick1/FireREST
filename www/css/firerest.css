@@ -1,0 +1,512 @@
+/* 
+firemote.css https://github.com/firepick1/FireMote/wiki
+
+Copyright (C) 2013  Karl Lew, <karl@firepick.org>
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 2.1 of the License, or (at your option) any later version.
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this library; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+*/
+
+
+body {
+	font: 10pt Verdana; 
+	padding-left: 5px;
+}
+
+button {
+	border: 1pt solid gray;
+	-webkit-border-radius: 5px;
+	width: 100px;
+	position: relative;
+	z-index: 10;
+	margin: 4px;
+	padding: 2px;
+	font: 10pt Verdana;
+}
+button: focus {
+	background-color: #FA0;
+}
+
+/* BOOTSTRAP */
+.nav, .pagination, .carousel a { cursor: pointer; }
+
+.angle-container {
+	position: relative;
+	top: 15px;
+}
+.angle-label {
+	position: relative;
+	left: 75px;
+	width: 150px;
+	text-align: center;
+}
+.angle-pointer {
+	position: relative;
+	top: -7px;	
+	left: 5px;
+	border-top: 4px solid #FA0;
+	border-bottom: 4px solid #eee;
+	width: 4px;
+	height: 28px;
+}
+.angle-slider {
+	position: relative;
+	background-color: #eee;
+	width: 200px;
+	height: 4px;
+}
+.big-button {
+	bottom: 0;
+	border: 2pt solid #444;
+	background-color: #FA0;
+	-webkit-border-radius: 15px;
+	
+	background-image: -webkit-linear-gradient(top, #AAF 0%, #008 100%);
+	color: #FFF;
+
+	width:80px;
+	height:30px;
+}
+.big-button2 {
+	bottom: 0;
+	border: 2pt solid #444;
+	background-color: #FA0;
+	-webkit-border-radius: 15px;
+	
+	background-image: -webkit-linear-gradient(top, #AAA 0%, #333 100%);
+	color: #FFF;
+
+	width:80px;
+	height:30px;
+}
+.big-button-group {
+	position: absolute;
+	right:0;
+}
+
+.btn-checkbox {
+  color: #FA0;
+  background-color: #eee;
+  border-color: #ccc !important;
+	-webkit-border-radius: 13px !important;
+	width: 20px;
+	height: 20px;
+	padding:0 !important;
+	border-width: 3px !important;
+	margin: 5px !important;
+}
+.btn-checkbox:hover,
+.btn-checkbox:focus {
+  color: #ffffff;
+	box-shadow: 0px 0px 5px #00F !important;
+}
+.btn-checkbox:active,
+.btn-checkbox.active,
+.open .dropdown-toggle.btn-checkbox {
+  color: #ffffff;
+	background-color: #FA0 !important;
+}
+.btn-checkbox:active,
+.btn-checkbox.active,
+.open .dropdown-toggle.btn-checkbox {
+  background-image: none;
+}
+.btn-checkbox.disabled,
+.btn-checkbox[disabled],
+fieldset[disabled] .btn-checkbox,
+.btn-checkbox.disabled:hover,
+.btn-checkbox[disabled]:hover,
+fieldset[disabled] .btn-checkbox:hover,
+.btn-checkbox.disabled:focus,
+.btn-checkbox[disabled]:focus,
+fieldset[disabled] .btn-checkbox:focus,
+.btn-checkbox.disabled:active,
+.btn-checkbox[disabled]:active,
+fieldset[disabled] .btn-checkbox:active,
+.btn-checkbox.disabled.active,
+.btn-checkbox[disabled].active,
+fieldset[disabled] .btn-checkbox.active {
+  background-color: #0F0;
+  border-color: #0f0;
+}
+.btn-checkbox .caret {
+  border-top-color: #F00;
+}
+.dropup .btn-checkbox .caret {
+  border-bottom-color: #F00;
+}
+
+.btn-jog{
+	border: 2pt solid #444 !important;
+	-webkit-border-radius: 15px !important;
+	background-image: -webkit-linear-gradient(top, #AAF 0%, #008 100%) !important;
+	color: #FFF;
+	width: 35px !important;
+	outline: none !important;
+}
+
+.btn-jog:hover,
+.btn-jog:focus {
+  color: #FFF !important;
+  background-color: #3276b1;
+	box-shadow: 0px 0px 5px #00F !important;
+  border-color: #FFF !important;
+}
+
+.btn-jog:active,
+.btn-jog.active,
+.open .dropdown-toggle.btn-jog {
+  background-image: none;
+  border-color: #00F !important;
+}
+
+.btn-jog.disabled,
+.btn-jog[disabled],
+fieldset[disabled] .btn-jog,
+.btn-jog.disabled:hover,
+.btn-jog[disabled]:hover,
+fieldset[disabled] .btn-jog:hover,
+.btn-jog.disabled:focus,
+.btn-jog[disabled]:focus,
+fieldset[disabled] .btn-jog:focus,
+.btn-jog.disabled:active,
+.btn-jog[disabled]:active,
+fieldset[disabled] .btn-jog:active,
+.btn-jog.disabled.active,
+.btn-jog[disabled].active,
+fieldset[disabled] .btn-jog.active {
+  background-color: #428bca;
+  border-color: #357ebd;
+}
+
+.btn-unit {
+  color: #FA0;
+  background-color: #FFF;
+  border-color: #FA0 !important;
+	width: 43px;
+}
+.btn-unit:hover,
+.btn-unit:focus,
+.btn-unit:active,
+.btn-unit.active,
+.open .dropdown-toggle.btn-unit {
+  color: #ffffff;
+  background-color: #FA0;
+  border-color: #0F0;
+}
+.btn-unit:active,
+.btn-unit.active,
+.open .dropdown-toggle.btn-unit {
+  background-image: none;
+}
+.btn-unit.disabled,
+.btn-unit[disabled],
+fieldset[disabled] .btn-unit,
+.btn-unit.disabled:hover,
+.btn-unit[disabled]:hover,
+fieldset[disabled] .btn-unit:hover,
+.btn-unit.disabled:focus,
+.btn-unit[disabled]:focus,
+fieldset[disabled] .btn-unit:focus,
+.btn-unit.disabled:active,
+.btn-unit[disabled]:active,
+fieldset[disabled] .btn-unit:active,
+.btn-unit.disabled.active,
+.btn-unit[disabled].active,
+fieldset[disabled] .btn-unit.active {
+  background-color: #0F0;
+  border-color: #0f0;
+}
+.btn-unit .caret {
+  border-top-color: #F00;
+}
+.dropup .btn-unit .caret {
+  border-bottom-color: #F00;
+}
+
+.cam-detail {
+	display: inline-block;
+	position:relative;
+	width:800px;
+	height:200px;
+	margin-top:5px;
+	overflow: hidden;
+}
+.cam-image {
+	position: absolute;
+	top:0;
+	left:0;
+	-webkit-border-radius: 5px;
+}
+.cam-thumb {
+	margin-top: 5px;
+	width:260px;
+	height:65px;
+}
+
+.checkbox-label{
+	display: inline-block;
+	height: 20px;
+	width: 100px;
+	text-align: right;
+}
+.debug {
+	position: fixed; 
+	bottom: 0;
+	left: 0;
+	width: 100%;
+	padding: 0;
+	padding-left: 5px;
+	margin: 0;
+	color: white;
+	background-color: #888;
+	z-index: 100;
+	font: 8pt Verdana;
+}
+.demo {
+	position: absolute;
+	top:25px;
+	left:220px;
+	color: #aaa;
+	font: 30px Verdana;
+	font-style:italic;
+}
+.detail-controls {
+	position: relative;
+	margin-top: 50px;
+}
+.error {
+	position:fixed;
+	top:0;
+	left:0; 
+	right:0;
+	z-index: 1;
+	padding: 5px;
+	padding-left: 20px;
+	color: #fff;
+	background-color: #a00;
+}
+.error-header {
+	float: left;
+	font: 20pt Arial;
+	padding-right: 20px;
+	border-right: 3px solid white;
+}
+.error-body {
+	float: left;
+	padding-left: 20px;
+}
+.form-control:focus {
+  border-color: #66afe9;
+  outline: 0;
+  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(0, 0, 255, 0.6) !important;
+          box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(0, 0, 255, 0.6) !important;
+}
+
+.form-wide {
+	width: 500px;
+}
+.hide {
+	display: none;
+	border:1pt solid red;
+}
+.hslider {
+	display: block;
+	width: 700px;
+	-webkit-appearance: none;
+	margin-top: 20px;
+	-webkit-border-radius: 5px;
+	height: 10px;
+	background: #eee;
+}
+.hslider::-webkit-slider-thumb {
+	-webkit-appearance: none !important;
+	background-color: #AAA;
+	border-left: 3px solid #FFF;
+	border-right: 3px solid #FFF;
+	height: 30px;
+	width: 36px;
+}
+.hslider:focus::-webkit-slider-thumb {
+	background-color: #FA0;
+}
+.hslider-container {
+	position: relative;
+	margin-top: 5px;
+	margin-bottom: 10px;
+}
+.hslider-number {
+	position: absolute;
+	top:20px;
+	border:0;
+	padding:0;
+	margin:0;
+	width: 36px;
+	text-align: center;
+}
+.hslider-number-light {
+	background-color: #FFC;
+	border: 1pt solid #FFC;
+	-webkit-border-radius: 5px;
+}
+.labeledButton {
+	display: inline-block;
+}
+.loading {
+	font: 20px Verdana;
+	color: #eee;
+}
+.log {
+	margin-top: 3px;
+	border: none;
+	border-bottom: 2pt solid #EEE;
+	width:800px;
+	height:500px;
+}
+.logo {
+	position: relative;
+	float: left;
+	margin-top: 13px;
+	margin-left: 2px;
+	margin-right: 230px;
+}
+.logo-tiny {
+	position: absolute;
+	top: -16px;
+	left: 16px;
+	width: 80px;
+}
+.logo {
+	margin-right: 230px;
+}
+.outline-blue {
+	outline-color: #00F !important;
+	outline-width: 1px !important;
+	outline-style: solid !important;
+}
+.outline-green {
+	outline-color: #0F0 !important;
+	outline-width: 1px !important;
+	outline-style: solid !important;
+}
+.outline-red {
+	outline-color: #F00 !important;
+	outline-width: 1px !important;
+	outline-style: solid !important;
+}
+.partials {
+	position: absolute;
+	left:104px;
+	top:0px;
+	border-left: 3pt solid #fa0;
+	padding: 5px;
+	padding-left: 10px;
+	z-index: 1;
+	min-height:300px;
+}
+.sidebar {
+	position: absolute;
+	left:0px;
+	top:0px;
+	text-align: left !important;
+	padding-left: 5pt;
+	padding-top: 10px;
+	margin-right: -3px;
+	width: 150px;
+}
+.sidebar-button {
+}
+.spindle {
+	position: absolute;
+	top: -18px;
+	width: 4px;
+	border: 0;
+	height: 42px !important;
+	border-top: 36px solid #AAA; 
+	margin-top: 2px;
+}
+.spindle-down {
+	border-top: 36px solid #000; 
+	margin-top: 8px;
+}
+.spindle-0 {
+	margin-left: -3px;
+}
+.spindle-1 {
+	margin-left: 35px;
+}
+.spindle-loaded {
+	border-bottom: 4px solid #FA0;
+}
+.spindle-on {
+	border-top: 36px solid #A4A;
+}
+.status-row > th {
+	border-collapse: true;
+	border-top: 1px solid #eee;
+	border-bottom: 1px solid #eee;
+	padding-left: 5px;
+	padding-right: 5px;
+	text-align: right;
+}
+.status-row > td {
+	border-collapse: true;
+	border-top: 1px solid #eee;
+	border-bottom: 1px solid #eee;
+	padding-right: 5px;
+}
+.tab-contents {
+	padding-top: 10px;
+}
+.vslider {
+	-webkit-appearance: slider-vertical;
+	margin: auto;
+	margin-top: 5px;
+	margin-bottom: 5px;
+	height: 100px;
+	width: 50px;
+	background: red;
+	display: block;
+}
+.vslider::-webkit-slider-thumb {
+	background-color: #AAA;
+	height: 50px;
+	width: 36px;
+}
+.vslider:focus::-webkit-slider-thumb {
+	background-color: #FA0;
+}
+.vslider-container {
+	position: relative;
+	display: inline-block;
+	width: 150px;
+}
+.vslider-containers {
+	position: relative;
+}
+/*
+.vslider-label {
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+	text-align: center;
+}
+.vslider-label2 {
+	position: absolute;
+	top:  16px;
+	left: 75px;
+	width: 150px;
+	text-align: center;
+}
+	*/
