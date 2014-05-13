@@ -5,6 +5,7 @@ var controllers = angular.module('FireREST.controllers', []);
 
 controllers.controller('MainCtrl', ['$scope','$location',
   function(scope, location) {
+    scope.demo = "";
     scope.server = "localhost";
     scope.port = 8001;
     scope.service = "/firerest";
@@ -12,13 +13,30 @@ controllers.controller('MainCtrl', ['$scope','$location',
     scope.profile = "gray";
     scope.cve = "calc-offset";
 
-    scope.camera_url = function() {
-      return "http://" + scope.server + ":"  + scope.port + scope.service + "/cv/" + scope.camera + "/";
+    scope.service_url = function() {
+      return "http://" + scope.server + ":"  + scope.port + scope.service;
     };
 
+    scope.camera_url = function() {
+      return scope.service_url() + "/cv/" + scope.camera + "/";
+    };
+
+    scope.check_demo = function() {
+      scope.demo = "...";
+      $.ajax({
+	url: scope.service_url() + "/demo.txt",
+	data: { r: Math.random() },
+	success: function( data ) {
+	  scope.$apply(function(){
+	    scope.demo = (data || "").trim();
+	  });
+	}
+      });
+    };
     scope.clear_results = function() {
       scope.action_response = {};
       scope.action_classname = {};
+      scope.check_demo();
     };
     scope.clear_results();
 

@@ -18,16 +18,16 @@
   <script src="bootstrap/js/ui-bootstrap-0.6.0.min.js"></script>
   <script src="bootstrap/js/ui-bootstrap-tpls-0.6.0.min.js"></script>
 </head>
-<body>
+<body ng-controller="MainCtrl">
   <div class="fr-banner"> 
     <div class="fr-banner-left">
       <img class="fr-banner-logo" src="img/FireREST-alpha.png">
     </div>
     <div class="fr-banner-right">
-      <h4 class="fr-banner-title">Computer Vision Test Page</h4>
+      <h4 class="fr-banner-title">Computer Vision Test Page <span class="fr-demo">{{demo}}</span></h4>
     </div>
   </div>
-  <div class="container" ng-controller="MainCtrl">  
+  <div class="container" >
     <div class="fr-banner-space">&nbsp;</div>
 
     <div class="fr-form">
