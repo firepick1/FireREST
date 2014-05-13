@@ -2,11 +2,17 @@ console.log("loading express...");
 var express = require('express');
 var fs = require('fs');
 var app = express();
+var content_source = "Demo";
 
 app.all('*', function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "X-Requested-With");
   next();
+});
+
+app.get("/firerest/content_source", function(req, res){
+  res.setHeader('Content-Type', 'text/plain');
+  res.send(content_source);
 });
 
 var firefuse_dir = "/dev/firefuse";
@@ -15,6 +21,7 @@ if (fs.existsSync("/dev/firefuse/cv/1/camera.jpg")) {
   app.use('/firerest', express.static(firefuse_dir));
   console.log("Found FireFUSE!");
   console.log("Mapping /firerest to: " + firefuse_dir);
+  content_source = "FireFUSE";
 } else {
   console.log("FireFUSE is not available. FireREST is demo mode only" );
 }
