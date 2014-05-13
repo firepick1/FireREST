@@ -25,7 +25,7 @@ controllers.controller('MainCtrl', ['$scope','$location',
       scope.content_source = "...";
       $.ajax({
 	url: scope.service_url() + "/content_source",
-	data: { r: Math.random() },
+	data: { r: Math.floor(Math.random()*1000000) },
 	success: function( data ) {
 	  scope.$apply(function(){
 	    scope.content_source = (data || "").trim();
@@ -40,11 +40,16 @@ controllers.controller('MainCtrl', ['$scope','$location',
     };
     scope.clear_results();
 
-    scope.imageInstances = {};
+    scope.show_image = ['monitor.jpg'];
+    scope.image_instances = {};
     scope.imageLarge = {};
     scope.image_url = function(image) {
-      var t = scope.imageInstances[image] || 0;
-      return scope.camera_url() + image + "?t=" + t;
+      var r = scope.image_instances[image] || 0;
+      if (image === 'saved.png') {
+	return scope.camera_url() + scope.profile + "/cve/" + scope.cve + "/" + image + "?r=" + r;
+      } else {
+	return scope.camera_url() + image + "?r=" + r;
+      }
     };
     scope.image_class = function(image) {
       var isLarge = scope.imageLarge[image] || false;
@@ -55,9 +60,10 @@ controllers.controller('MainCtrl', ['$scope','$location',
       scope.imageLarge[image] = !isLarge;
     };
     scope.image_GET = function(image) {
-      scope.imageInstances[image] = Math.random();
+      scope.image_instances[image] = Math.floor(Math.random()*1000000) ;
     };
     
+    scope.show_actions = ['save'];
     scope.action_text = function(action) {
       return scope.action_response[action] || "...";
     }
@@ -67,22 +73,28 @@ controllers.controller('MainCtrl', ['$scope','$location',
     scope.action_class = function(action) {
       return scope.action_classname[action] || "fr-json-ok";
     };
+    scope.action_XHR = function(action, classname, response) {
+      scope.$apply(function(){
+        console.log('action_XHR' + action + response);
+	scope.action_response[action] = response;
+	scope.action_classname[action] = classname;
+	var t = Math.floor(Math.random()*1000000) ;
+	scope.image_instances['camera.jpg'] = t;
+	scope.image_instances['monitor.jpg'] = t;
+	action === 'save' && (scope.image_instances['saved.png'] = t);
+	action === 'process' && (scope.image_instances['output.jpg'] = t);
+      });
+    }
     scope.action_GET = function(action) {
 	scope.action_response[action] = "...";
 	$.ajax({
 	  url: scope.action_url(action),
-	  data: { r: Math.random() },
+	  data: { r: Math.floor(Math.random()*1000000) },
 	  success: function( data ) {
-	    scope.$apply(function(){
-	      scope.action_response[action] = JSON.stringify(data);
-	      scope.action_classname[action] = "fr-json-ok";
-	    });
+	    scope.action_XHR(action, "fr-json-ok", JSON.stringify(data));
 	  },
 	  error: function( jqXHR, ex) {
-	    scope.$apply(function(){
-	      scope.action_classname[action] = "fr-json-err";
-	      scope.action_response[action] = JSON.stringify(jqXHR);
-	    });
+	    scope.action_XHR(action, "fr-json-err", JSON.stringify(jqXHR));
 	  }
 	});
       }

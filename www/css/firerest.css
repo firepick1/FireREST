@@ -1,3 +1,11 @@
+.fr-help {
+  border-radius: 8px;
+  background: #ccc;
+  color: #fff;
+  font-weight: 800;
+  padding-left: 0.3em;
+  padding-right: 0.3em;
+}
 .fr-content_source {
   color: #fa0;
 }
@@ -8,6 +16,7 @@
   height: 3.1em;
   z-index: 99999999;
   background: #eee;
+  padding-left: 1.0em;
 }
 .fr-banner-left {
   position: relative;
@@ -18,12 +27,11 @@
 .fr-banner-logo {
   height: 3em;
   padding: 0.1em;
-  padding-left: 2.75em;
 }
 .fr-banner-right {
-  position: relative;
-  display: inline-block;
+  position: absolute;
   top: 0;
+  right: 0;
 }
 .fr-banner-space {
   height: 3.5em;
@@ -46,7 +54,7 @@
   text-align: left;
 }
 .fr-img-sm{
-  width:25%;
+  width:50%;
 }
 .fr-img-lg {
   width:100%;
@@ -60,7 +68,6 @@
   padding:2px;
 }
 .fr-json-ok {
-  background: #efe;
   color: #080;
 }
 .fr-json-err {

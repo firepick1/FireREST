@@ -21,10 +21,19 @@
 <body ng-controller="MainCtrl">
   <div class="fr-banner"> 
     <div class="fr-banner-left">
-      <img class="fr-banner-logo" src="img/FireREST-alpha.png">
+      <h4 class="fr-banner-title">
+        <a title="FireREST-CV computer vision REST api" href="https://github.com/firepick1/FireREST/wiki/FireREST-CV">FireREST-CV</a> 
+	/
+	<a title="FireREST content source"  target="_blank"
+	  href="https://github.com/firepick1/FIreREST/wiki/{{content_source}}-content">{{content_source}}</a>
+	Test Page 
+      </h4>
     </div>
     <div class="fr-banner-right">
-      <h4 class="fr-banner-title">Computer Vision Test Page: <span class="fr-content_source">{{content_source}} Content</span></h4>
+      <a title="FireREST computer aided manufacturing REST services" 
+        href="https://github.com/firepick1/FireREST/wiki/Home" target="_blank">
+      <img class="fr-banner-logo" src="img/FireREST-alpha.png">
+      </a>
     </div>
   </div>
   <div class="container" >
@@ -36,30 +45,37 @@
 	<div class="col-md-2">
 	  <div class="control-label fr-control-label">server</div>
 	  <input type="text" ng-model="server" ng-change="clear_results()" class="form-control" placeholder="localhost">
-	</div>
-	<div class="col-md-1">
 	  <div class="control-label fr-control-label">port</div>
 	  <input type="text" ng-model="port" ng-change="clear_results()" class="form-control" placeholder="8001">
 	</div>
 	<div class="col-md-2">
 	  <div class="control-label fr-control-label">service</div>
 	  <input type="text" ng-model="service" ng-change="clear_results()" class="form-control" placeholder="localhost">
-	</div>
-	<div class="col-md-1">
 	  <div class="control-label fr-control-label">camera</div>
 	  <select ng-model="camera" ng-change="clear_results()" class="form-control">
 	    <option>1</option>
 	    <option>2</option>
 	  </select>
 	</div>
+	<div class="col-md-2">
+	  <div class="control-label fr-control-label">image</div>
+	  <select multiple ng-model="show_image" class="form-control">
+	    <option selected>monitor.jpg</option>
+	    <option>camera.jpg</option>
+	    <option>saved.png</option>
+	    <option>output.jpg</option>
+	  </select>
+	</div>
       </div>
-      <div ng-repeat="image in ['camera.jpg', 'monitor.jpg','output.jpg']">
+      <div ng-repeat="image in show_image">
 	<div class="row fr-data-label">
-	  <div class="col-md-8"><a href="{{image_url(image)}}">{{image_url(image)}}</a></div>
+	  <div class="col-md-8"><a href="{{image_url(image)}}">{{image_url(image)}}</a>
+	    <a target="_blank" class="fr-help" href="https://github.com/firepick1/FireREST/wiki/{{image}}">?</a>
+	  </div>
 	</div>
 	<div class="fr-row row">
 	  <div class="fr-cell-btn col-md-1">
-	    <button type="button" class="btn btn-default btn-sm" ng-click="image_GET(image)">GET</button>
+	    <button type="button" class="btn btn-primary btn-sm" ng-click="image_GET(image)">GET</button>
 	  </div>
 	  <div class="fr-cell-data col-md-7">
 	    <img class="img-responsive img-rounded {{image_class(image)}}" 
@@ -73,28 +89,36 @@
     <div class="fr-form">
       <h3>Computer Vision Endpoint</h3>
       <div class="row">
-	<div class="col-md-2">
+	<div class="col-md-3">
 	  <div class="control-label fr-control-label">profile</div>
 	  <select ng-model="profile" ng-change="clear_results()" class="form-control">
 	    <option>gray</option>
 	    <option>bgr</option>
 	  </select>
-	</div>
-	<div class="col-md-3">
 	  <div class="control-label fr-control-label">computer vision endpoint</div>
 	  <select ng-model="cve" ng-change="clear_results()" class="form-control">
 	    <option>calc-offset</option>
 	    <option>locate-part</option>
 	  </select>
 	</div>
+	<div class="col-md-3">
+	  <div class="control-label fr-control-label">action</div>
+	  <select multiple ng-model="show_actions" class="form-control">
+	    <option>save</option>
+	    <option>process</option>
+	    <option>firesight</option>
+	  </select>
+	</div>
       </div>
-      <div ng-repeat="action in ['save', 'process', 'firesight']">
+      <div ng-repeat="action in show_actions">
 	<div class="row fr-data-label">
-	  <div class="col-md-8"><a href="{{action_url(action)}}">{{action_url(action)}}</a></div>
+	  <div class="col-md-8"><a href="{{action_url(action)}}">{{action_url(action)}}</a>
+	    <a target="_blank" class="fr-help" href="https://github.com/firepick1/FireREST/wiki/{{action}}.json">?</a>
+	  </div>
 	</div>
 	<div class="fr-row row">
 	  <div class="fr-cell-btn col-md-1">
-	    <button type="button" class="btn btn-default btn-sm" ng-click="action_GET(action)">GET</button>
+	    <button type="button" class="btn btn-primary btn-sm" ng-click="action_GET(action)">GET</button>
 	  </div>
 	  <div class="fr-cell-data col-md-7">
 	    <div class="fr-json {{action_classname[action]}}" id="{{action}}-json">{{action_text(action)}}</div>
@@ -102,7 +126,6 @@
 	</div>
       </div>
     </div>
-
   </div>
 </body>
 </html>
