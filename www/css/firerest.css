@@ -3,31 +3,31 @@
   position: fixed;
   top: 0;
   width: 100%;
-  max-width: 60em;
   height: 3.1em;
   z-index: 99999999;
   background: #eee;
 }
 .fr-banner-left {
-  position: absolute;
+  position: relative;
+  display: inline-block;
   top: 0;
   left: 0;
 }
 .fr-banner-logo {
   height: 3em;
   padding: 0.1em;
-  padding-left: 2em;
+  padding-left: 2.75em;
 }
 .fr-banner-right {
-  position: absolute;
+  position: relative;
+  display: inline-block;
   top: 0;
-  right: 0;
 }
 .fr-banner-space {
-  height: 7em;
+  height: 3.5em;
 }
 .fr-banner-title {
-  text-align: right;
+  text-align: center;
   padding: 0;
   margin: 0;
   margin-top: 0.5em;
@@ -35,7 +35,6 @@
 }
 .fr-row {
   position: relative;
-  margin-bottom: 0.6em;
 }
 .fr-cell-data {
   display: inline-block;
@@ -50,16 +49,21 @@
 .fr-img-lg {
   width:100%;
 }
+.fr-control-label {
+  font-weight: bold;
+}
 .fr-json {
-  background: #eee;
+  color: #080;
   min-width:30em;
   min-height:2.2em;
-  border-radius: 5px;
   padding:2px;
 }
 .fr-data-label {
+  margin-top: 0.6em;
   font-family: Courier;
-  font-weight: bold;
   display:block;
   text-align: left;
+}
+.fr-form {
+  padding-bottom: 1em;
 }
