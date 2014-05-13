@@ -35,19 +35,19 @@
       <div class="row">
 	<div class="col-md-2">
 	  <div class="control-label fr-control-label">server</div>
-	  <input type="text" ng-model="server" class="form-control" placeholder="localhost">
+	  <input type="text" ng-model="server" ng-change="clear_results()" class="form-control" placeholder="localhost">
 	</div>
 	<div class="col-md-1">
 	  <div class="control-label fr-control-label">port</div>
-	  <input type="text" ng-model="port" class="form-control" placeholder="8001">
+	  <input type="text" ng-model="port" ng-change="clear_results()" class="form-control" placeholder="8001">
 	</div>
-	<div class="col-md-2">
+	<div class="col-md-3">
 	  <div class="control-label fr-control-label">service</div>
-	  <input type="text" ng-model="service" class="form-control" placeholder="localhost">
+	  <input type="text" ng-model="service" ng-change="clear_results()" class="form-control" placeholder="localhost">
 	</div>
 	<div class="col-md-1">
 	  <div class="control-label fr-control-label">camera</div>
-	  <select ng-model="camera" class="form-control">
+	  <select ng-model="camera" ng-change="clear_results()" class="form-control">
 	    <option>1</option>
 	    <option>2</option>
 	  </select>
@@ -63,6 +63,7 @@
 	  </div>
 	  <div class="fr-cell-data col-md-7">
 	    <img class="img-responsive img-rounded {{image_class(image)}}" 
+	      onerror="src='img/no-image.png'"
 	      ng-src="{{image_url(image)}}" ng-click="image_click(image)">
 	  </div>
 	</div>
@@ -74,14 +75,14 @@
       <div class="row">
 	<div class="col-md-2">
 	  <div class="control-label fr-control-label">profile</div>
-	  <select ng-model="profile" class="form-control">
+	  <select ng-model="profile" ng-change="clear_results()" class="form-control">
 	    <option>gray</option>
 	    <option>bgr</option>
 	  </select>
 	</div>
 	<div class="col-md-3">
 	  <div class="control-label fr-control-label">computer vision endpoint</div>
-	  <select ng-model="cve" class="form-control">
+	  <select ng-model="cve" ng-change="clear_results()" class="form-control">
 	    <option>calc-offset</option>
 	    <option>locate-part</option>
 	  </select>
@@ -96,7 +97,7 @@
 	    <button type="button" class="btn btn-default btn-sm" ng-click="action_GET(action)">GET</button>
 	  </div>
 	  <div class="fr-cell-data col-md-7">
-	    <div class="fr-json" id="{{action}}-json">...</div>
+	    <div class="fr-json {{action_classname[action]}}" id="{{action}}-json">{{action_text(action)}}</div>
 	  </div>
 	</div>
       </div>

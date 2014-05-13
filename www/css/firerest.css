@@ -1,4 +1,3 @@
-
 .fr-banner {
   position: fixed;
   top: 0;
@@ -53,10 +52,17 @@
   font-weight: bold;
 }
 .fr-json {
-  color: #080;
   min-width:30em;
   min-height:2.2em;
   padding:2px;
+}
+.fr-json-ok {
+  background: #efe;
+  color: #080;
+}
+.fr-json-err {
+  background: #fee;
+  color: #800;
 }
 .fr-data-label {
   margin-top: 0.6em;
