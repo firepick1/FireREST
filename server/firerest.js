@@ -3,6 +3,12 @@ var express = require('express');
 var fs = require('fs');
 var app = express();
 
+app.all('*', function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "X-Requested-With");
+  next();
+});
+
 var firefuse_dir = "/dev/firefuse";
 console.log("Looking for FireFUSE...");
 if (fs.existsSync("/dev/firefuse/cv/1/camera.jpg")) {
