@@ -14,9 +14,9 @@ if [ "$(type -p lsb_release)" == "" ]; then
   apt-get install -y lsb-release
 fi
 if [ "$(arch)" != "armv6l" ] || [ "$(lsb_release -is)" != "Debian" ] ;then
-  RASPBIAN=1
-else
   RASPBIAN=0
+else
+  RASPBIAN=1
 fi
 
 if [ "$SUDO_USER" == "" ]; then
