@@ -11,7 +11,7 @@ echo "SUDO_USER: $SUDO_USER"
 
 if [ "$(type -p lsb_release)" == "" ]; then
   echo "++++++++++++++++++ INSTALLING lsb_release ++++++++++++"
-  apt-get install -y lsb_release
+  apt-get install -y lsb-release
 fi
 if [ "$(arch)" != "armv6l" ] || [ "$(lsb_release -is)" != "Debian" ] ;then
   RASPBIAN=1
