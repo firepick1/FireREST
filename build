@@ -9,36 +9,51 @@ echo "PATH     : $PATH"
 echo "SHELL    : $SHELL"
 echo "SUDO_USER: $SUDO_USER"
 
+if [ "$(type -p lsb_release)" == "" ]; then
+  echo "++++++++++++++++++ INSTALLING lsb_release ++++++++++++"
+  apt-get install -y lsb_release
+fi
+if [ "$(arch)" != "armv6l" ] || [ "$(lsb_release -is)" != "Debian" ] ;then
+  RASPBIAN=1
+else
+  RASPBIAN=0
+fi
+
 if [ "$SUDO_USER" == "" ]; then
   echo "$SUDO_USER is not defined. You must run this script as superuser:"
   echo '  sudo PATH=$PATH ./build'
   exit -1
 fi
-if [ "$(type -p npm)" == "" ]; then
-  echo "You must provide this environment's PATH:"
-  echo '  sudo PATH=$PATH ./build'
-  exit -1
-fi
+
 if [ "$(type -p siege)" == "" ]; then
   echo "++++++++++++++++++ INSTALLING siege ++++++++++++"
   apt-get install -y siege
 else 
   echo COMPONENT siege: installed
 fi
+
 if [ "$(type -p node)" == "" ]; then
   echo "++++++++++++++++++ INSTALLING NodeJS ++++++++++++"
-  mkdir /opt/node
-  pushd /opt/node
-  wget http://nodejs.org/dist/v0.10.22/node-v0.10.22-linux-arm-pi.tar.gz
-  tar xvzf node-*-linux-arm-pi.tar.gz
-  rm node-v0.10.22-linux-arm-pi.tar.gz
-  mv node*/* .
-  ex -s -c 'g/PATH/s/"$/:\/opt\/node\/bin"/' -c wq /etc/profile
-  source /etc/profile
-  popd
+  if [ $RASPBIAN -eq 1 ]; then
+    mkdir /usr/local/bin/node
+    pushd /usr/local/bin/node
+    wget http://nodejs.org/dist/v0.11.9/node-v0.11.9-linux-arm-pi.tar.gz
+    tar xvzf node-*-linux-arm-pi.tar.gz
+    rm node-*-linux-arm-pi.tar.gz
+    mv node*/* .
+    popd
+  else
+   echo PLEASE INSTALL nodeJS
+   exit -1
+  fi
 else
   echo COMPONENT NodeJS: installed
 fi
+#if [ "$(type -p npm)" == "" ]; then
+#  echo "You must provide this environment's PATH:"
+#  echo '  sudo PATH=$PATH ./build'
+#  exit -1
+#fi
 if [ ! -e node_modules ]; then
   echo "++++++++++++++++++ INSTALLING NodeJS dependencies ++++++++++++"
   npm install
@@ -53,7 +68,7 @@ echo
 echo "Verify FireREST web service at http://localhost:8001"
 echo
 
-if [ "$(arch)" != "armv6l" ] || [ "$(lsb_release -is)" != "Debian" ] ;then
+if [ $RASPBIAN -eq 1 ]; then
   echo "COMPONENT Raspberry Pi Debian: NOT AVAILABLE"
   echo
   echo "========================== WARNING ==============================="
