@@ -37,7 +37,7 @@ if [ "$(type -p node)" == "" ]; then
   if [ $RASPBIAN -eq 1 ]; then
     mkdir /opt/node
     pushd /opt/node
-    wget http://nodejs.org/dist/v0.11.9/node-v0.11.9-linux-arm-pi.tar.gz
+    wget http://nodejs.org/dist/v0.10.22/node-v0.10.22-linux-arm-pi.tar.gz
     tar xvzf node-*-linux-arm-pi.tar.gz
     rm node-*-linux-arm-pi.tar.gz
     cd /usr/local/bin
