@@ -70,7 +70,7 @@ echo
 echo "Verify FireREST web service at http://localhost:8001"
 echo
 
-if [ $RASPBIAN -eq 1 ]; then
+if [ $RASPBIAN -ne 1 ]; then
   echo "COMPONENT Raspberry Pi Debian: NOT AVAILABLE"
   echo
   echo "========================== WARNING ==============================="
