@@ -1,0 +1,87 @@
+RUNNING LOAD TEST
+Wed May 14 20:45:33 PDT 2014
+http://firepick:8001/firerest/cv/1/gray/cve/calc-offset/save.json
+** SIEGE 2.70
+** Preparing 1 concurrent users for battle.
+The server is now under siege...      done.
+Transactions:		         100 hits
+Availability:		      100.00 %
+Elapsed time:		       33.53 secs
+Data transferred:	        0.10 MB
+Response time:		        0.34 secs
+Transaction rate:	        2.98 trans/sec
+Throughput:		        0.00 MB/sec
+Concurrency:		        1.00
+Successful transactions:         100
+Failed transactions:	           0
+Longest transaction:	        0.79
+Shortest transaction:	        0.23
+ 
+http://firepick:8001/firerest/cv/1/gray/cve/calc-offset/process.json
+** SIEGE 2.70
+** Preparing 1 concurrent users for battle.
+The server is now under siege...      done.
+Transactions:		         100 hits
+Availability:		      100.00 %
+Elapsed time:		       32.31 secs
+Data transferred:	        0.00 MB
+Response time:		        0.32 secs
+Transaction rate:	        3.10 trans/sec
+Throughput:		        0.00 MB/sec
+Concurrency:		        1.00
+Successful transactions:         100
+Failed transactions:	           0
+Longest transaction:	        0.66
+Shortest transaction:	        0.22
+ 
+http://firepick:8001/firerest/cv/1/camera.jpg
+** SIEGE 2.70
+** Preparing 1 concurrent users for battle.
+The server is now under siege...      done.
+Transactions:		         100 hits
+Availability:		      100.00 %
+Elapsed time:		       14.96 secs
+Data transferred:	       10.16 MB
+Response time:		        0.15 secs
+Transaction rate:	        6.68 trans/sec
+Throughput:		        0.68 MB/sec
+Concurrency:		        1.00
+Successful transactions:         100
+Failed transactions:	           0
+Longest transaction:	        0.93
+Shortest transaction:	        0.10
+ 
+http://firepick:8001/firerest/cv/1/monitor.jpg
+** SIEGE 2.70
+** Preparing 1 concurrent users for battle.
+The server is now under siege...      done.
+Transactions:		         100 hits
+Availability:		      100.00 %
+Elapsed time:		       18.45 secs
+Data transferred:	       10.16 MB
+Response time:		        0.18 secs
+Transaction rate:	        5.42 trans/sec
+Throughput:		        0.55 MB/sec
+Concurrency:		        1.00
+Successful transactions:         100
+Failed transactions:	           0
+Longest transaction:	        0.57
+Shortest transaction:	        0.11
+ 
+http://firepick:8001/firerest/cv/1/output.jpg
+** SIEGE 2.70
+** Preparing 1 concurrent users for battle.
+The server is now under siege...      done.
+Transactions:		         100 hits
+Availability:		      100.00 %
+Elapsed time:		       32.65 secs
+Data transferred:	        3.65 MB
+Response time:		        0.33 secs
+Transaction rate:	        3.06 trans/sec
+Throughput:		        0.11 MB/sec
+Concurrency:		        1.00
+Successful transactions:         100
+Failed transactions:	           0
+Longest transaction:	        0.61
+Shortest transaction:	        0.19
+ 

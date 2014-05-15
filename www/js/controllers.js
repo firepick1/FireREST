@@ -6,8 +6,8 @@ var controllers = angular.module('FireREST.controllers', []);
 controllers.controller('MainCtrl', ['$scope','$location',
   function(scope, location) {
     scope.content_source = "";
-    scope.server = "localhost";
-    scope.port = 8001;
+    scope.server = location.host() || "unknownhost";
+    scope.port = location.port() || "unknownport";
     scope.service = "/firerest";
     scope.camera = 1;
     scope.profile = "gray";
