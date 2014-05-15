@@ -4,3 +4,13 @@ FireREST&trade; is an [open-source](https://github.com/firepick1/FireREST/blob/m
 
 * [FireREST wiki](https://github.com/firepick1/FireREST/wiki)
 * [Raspberry Pi](Install Raspberry Pi)
+
+Run the FireREST Demo (<5m)
+
+Launch FireREST with demonstration images and data:
+
+1. `git clone git://github.com/firepick1/FireREST ~/FireREST; cd FireREST`
+1. `sudo ./build`
+1. `node server/firerest.js`
+1. Open a browser to view [http://localhost:8001](http://localhost:8001)
+
