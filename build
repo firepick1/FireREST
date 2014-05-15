@@ -41,8 +41,8 @@ if [ "$(type -p node)" == "" ]; then
     tar xvzf node-*-linux-arm-pi.tar.gz
     rm node-*-linux-arm-pi.tar.gz
     cd /usr/local/bin
-    ln -s /opt/node/bin/node node
-    ln -s /opt/node/bin/node/npm npm
+    ln -s /opt/node/node-*pi/bin/node node
+    ln -s /opt/node/node-*pi/bin/npm npm
     popd
   else
    echo PLEASE INSTALL nodeJS
