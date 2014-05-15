@@ -35,15 +35,14 @@ fi
 if [ "$(type -p node)" == "" ]; then
   echo "++++++++++++++++++ INSTALLING NodeJS ++++++++++++"
   if [ $RASPBIAN -eq 1 ]; then
-    mkdir /usr/local/bin/node
-    pushd /usr/local/bin/node
-    pwd
+    mkdir /opt/node
+    pushd /opt/node
     wget http://nodejs.org/dist/v0.11.9/node-v0.11.9-linux-arm-pi.tar.gz
     tar xvzf node-*-linux-arm-pi.tar.gz
     rm node-*-linux-arm-pi.tar.gz
-    cd ..
-    ln -s node/bin/node node
-    ln -s node/bin/node/npm
+    cd /usr/local/bin
+    ln -s /opt/node/bin/node node
+    ln -s /opt/node/bin/node/npm npm
     popd
   else
    echo PLEASE INSTALL nodeJS
