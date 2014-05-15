@@ -2,7 +2,7 @@
 
 FireREST&trade; is an [open-source](https://github.com/firepick1/FireREST/blob/master/LICENSE) REST protocol for computer aided manufacturing.
 
-<img src="https://github.com/firepick1/FireREST/wiki/FireREST-network.jpg">
+<img width="50%" src="https://github.com/firepick1/FireREST/wiki/FireREST-network.jpg">
 
 ### Tell me more...
 
@@ -19,4 +19,4 @@ Launch FireREST with demonstration images and data:
 
 ### Run FireREST with a camera
 
-* [Raspberry Pi](wiki/Raspberry-Pi-Installation)
+* [Raspberry Pi](../../wiki/Raspberry-Pi-Installation)
