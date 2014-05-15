@@ -3,15 +3,35 @@ var bootstrap = angular.module('FireREST.bootstrap', ['ui.bootstrap']);
 
 var controllers = angular.module('FireREST.controllers', []);
 
-controllers.controller('MainCtrl', ['$scope','$location',
-  function(scope, location) {
+controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
+  function(scope, location, bg) {
     scope.content_source = "";
     scope.server = location.host() || "unknownhost";
     scope.port = location.port() || "unknownport";
     scope.service = "/firerest";
     scope.camera = 1;
+    scope.auto_update = true;
+    scope.transmit = 1;
     scope.profile = "gray";
     scope.cve = "calc-offset";
+
+    scope.transmit_class = function() {
+      switch (scope.transmit) {
+	case 0: return "glyphicon-remove fr-transmit-dead";
+        case 1: return "glyphicon-ok fr-transmit-idle";
+	default: return "glyphicon-ok fr-transmit-active";
+      }
+    }
+    scope.transmit_start = function() {
+      scope.transmit = scope.transmit ? (scope.transmit+1) : 0;
+    }
+    scope.transmit_end = function(ok) {
+      if (ok) {
+	scope.transmit = scope.transmit > 1 ? (scope.transmit-1) : 1;
+      } else {
+        scope.transmit = 0;
+      }
+    }
 
     scope.collapse = {"camera":true, "cve":true, "service":true};
     scope.collapse_icon = function(value) {
@@ -35,14 +55,22 @@ controllers.controller('MainCtrl', ['$scope','$location',
 
     scope.check_content_source = function() {
       scope.content_source = "...";
+      scope.transmit_start();
       $.ajax({
 	url: scope.service_url() + "/content_source",
 	data: { r: Math.floor(Math.random()*1000000) },
 	success: function( data ) {
 	  scope.$apply(function(){
+	    scope.transmit_end(true);
 	    scope.content_source = (data || "").trim();
 	  });
+	},
+	error: function( data ) {
+	  scope.$apply(function(){
+	    scope.transmit_end(false);
+	  });
 	}
+	  
       });
     };
     scope.clear_results = function() {
@@ -110,15 +138,25 @@ controllers.controller('MainCtrl', ['$scope','$location',
     }
     scope.action_GET = function(action) {
 	scope.action_response[action] = "...";
+	scope.transmit_start();
 	$.ajax({
 	  url: scope.action_url(action),
 	  data: { r: Math.floor(Math.random()*1000000) },
 	  success: function( data ) {
+	    scope.transmit_end(true);
 	    scope.action_XHR(action, "fr-json-ok", JSON.stringify(data));
 	  },
 	  error: function( jqXHR, ex) {
+	    scope.transmit_end(false);
 	    scope.action_XHR(action, "fr-json-err", JSON.stringify(jqXHR));
 	  }
 	});
       }
+    
+     bg.worker = function(ticks) {
+       if (scope.transmit && scope.auto_update) {
+	 scope.image_GET('monitor.jpg');
+       }
+       return true;
+     }
 }]);

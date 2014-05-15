@@ -1,3 +1,12 @@
+.fr-transmit-idle {
+  color: #080;
+}
+.fr-transmit-active {
+  color: #8f8;
+}
+.fr-transmit-dead {
+  color: #a00;
+}
 .fr-service {
   font-family: Courier;
 }

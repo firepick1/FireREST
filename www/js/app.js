@@ -5,7 +5,7 @@ angular.module('FireREST', [
   'ngRoute',
   'FireREST.bootstrap',
 //  'FireREST.filters',
-//  'FireREST.services',
+  'FireREST.services',
 //  'FireREST.directives',
   'FireREST.controllers'
 ]).

@@ -14,6 +14,7 @@
   <script src="lib/angular/angular-route.js"></script>
   <script src="lib/jquery/jquery-2.1.1.min.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/services.js"></script>
   <script src="js/controllers.js"></script>
   <script src="bootstrap/js/ui-bootstrap-0.6.0.min.js"></script>
   <script src="bootstrap/js/ui-bootstrap-tpls-0.6.0.min.js"></script>
@@ -45,6 +46,7 @@
 	<div class="fr-collapse">
 	  <button class="btn btn-default btn-sm fr-collapse-btn" 
 	    ng-click="collapse_toggle('service')"><span class="{{collapse_icon('service')}}"></span></button>
+	  <span class="glyphicon {{transmit_class()}}"></span>
 	</div>
       </h3>
       <span class="fr-service">{{service_url()}}/</span>
@@ -76,6 +78,11 @@
 	    <option>1</option>
 	    <option>2</option>
 	  </select>
+	  <div class="checkbox">
+	    <label>
+	      <input type="checkbox" ng-model="auto_update"> auto-update
+	    </label>
+	  </div>
 	</div>
 	<div class="col-md-2">
 	  <div class="control-label fr-control-label">image</div>
