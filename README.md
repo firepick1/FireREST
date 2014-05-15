@@ -2,11 +2,11 @@
 
 FireREST&trade; is an [open-source](https://github.com/firepick1/FireREST/blob/master/LICENSE) REST protocol for computer aided manufacturing.
 
-### What is FireREST?
+### Tell me more...
 
 * [FireREST wiki](https://github.com/firepick1/FireREST/wiki)
 
-### Run the FireREST Demo (<5m)
+### Explore the FireREST Demo (<5m)
 
 Launch FireREST with demonstration images and data:
 
