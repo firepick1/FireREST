@@ -19,4 +19,4 @@ Launch FireREST with demonstration images and data:
 
 ### Run FireREST with a camera
 
-* [Raspberry Pi](Install Raspberry Pi)
+* [Raspberry Pi](Raspberry Pi Installation)
