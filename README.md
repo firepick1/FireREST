@@ -17,6 +17,6 @@ Launch FireREST with demonstration images and data:
 1. `node server/firerest.js`
 1. Open a browser to view [http://localhost:8001](http://localhost:8001)
 
-### Run FireREST with a camera
+### Use FireREST with a camera
 
 * [Raspberry Pi](../../wiki/Raspberry-Pi-Installation)
