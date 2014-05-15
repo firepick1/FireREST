@@ -13,10 +13,22 @@ controllers.controller('MainCtrl', ['$scope','$location',
     scope.profile = "gray";
     scope.cve = "calc-offset";
 
-    scope.service_url = function() {
-      return "http://" + scope.server + ":"  + scope.port + scope.service;
-    };
+    scope.collapse = {"camera":true, "cve":true, "service":true};
+    scope.collapse_icon = function(value) {
+      return "glyphicon fr-collapse-icon " +
+        (scope.collapse[value] ? "glyphicon-expand" : "glyphicon-collapse-down");
+    }
+    scope.collapse_class = function(value) {
+      return scope.collapse[value] ? "fr-hide" : "fr-show";
+    }
+    scope.collapse_toggle = function(value) {
+      scope.collapse[value] = !scope.collapse[value];
+    }
 
+    scope.service_url = function() {
+      var port = scope.port === "" ? "" : (":" + scope.port);
+      return "http://" + scope.server + port + scope.service;
+    };
     scope.camera_url = function() {
       return scope.service_url() + "/cv/" + scope.camera + "/";
     };
@@ -43,6 +55,14 @@ controllers.controller('MainCtrl', ['$scope','$location',
     scope.show_image = ['monitor.jpg'];
     scope.image_instances = {};
     scope.imageLarge = {};
+    scope.image_path = function(image) {
+      var r = scope.image_instances[image] || 0;
+      if (image === 'saved.png') {
+	return "/cv/" + scope.camera + "/" + scope.profile + "/cve/" + scope.cve + "/" + image + "?r=" + r;
+      } else {
+	return "/cv/" + scope.camera + "/" + image + "?r=" + r;
+      }
+    };
     scope.image_url = function(image) {
       var r = scope.image_instances[image] || 0;
       if (image === 'saved.png') {
@@ -67,6 +87,9 @@ controllers.controller('MainCtrl', ['$scope','$location',
     scope.action_text = function(action) {
       return scope.action_response[action] || "...";
     }
+    scope.action_path = function(action) {
+      return "/cv/" + scope.camera + "/" + scope.profile + "/cve/" + scope.cve + "/" + action + ".json";
+    };
     scope.action_url = function(action) {
       return scope.camera_url() + scope.profile + "/cve/" + scope.cve + "/" + action + ".json";
     };

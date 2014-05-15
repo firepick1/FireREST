@@ -1,6 +1,29 @@
+.fr-service {
+  font-family: Courier;
+}
+.fr-hide {
+  display: none;
+ }
+ .fr-body-text {
+   font-size: 14px;
+ }
+ .fr-show {
+   display: block;
+ }
+.fr-collapse {
+  display: inline-block;
+  margin-left: -0.2em;
+}
+.fr-collapse-icon {
+  color: #888;
+  font-size: 16pt;
+}
+.fr-collapse-btn {
+  border: none !important;
+}
 .fr-help {
   border-radius: 8px;
-  background: #ccc;
+  background: #888;
   color: #fff;
   font-weight: 800;
   padding-left: 0.3em;

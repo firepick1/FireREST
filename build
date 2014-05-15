@@ -20,7 +20,7 @@ else
 fi
 
 if [ "$SUDO_USER" == "" ]; then
-  echo "$SUDO_USER is not defined. You must run this script as superuser:"
+  echo "SUDO_USER is not defined. You must run this script as superuser:"
   echo '  sudo PATH=$PATH ./build'
   exit -1
 fi

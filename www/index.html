@@ -40,17 +40,37 @@
     <div class="fr-banner-space">&nbsp;</div>
 
     <div class="fr-form">
-      <h3>Camera</h3>
-      <div class="row">
+      <h3>
+	Service 
+	<div class="fr-collapse">
+	  <button class="btn btn-default btn-sm fr-collapse-btn" 
+	    ng-click="collapse_toggle('service')"><span class="{{collapse_icon('service')}}"></span></button>
+	</div>
+      </h3>
+      <span class="fr-service">{{service_url()}}/</span>
+      <div class="row {{collapse_class('service')}}">
 	<div class="col-md-2">
 	  <div class="control-label fr-control-label">server</div>
 	  <input type="text" ng-model="server" ng-change="clear_results()" class="form-control" placeholder="localhost">
+	</div>
+	<div class="col-md-2">
 	  <div class="control-label fr-control-label">port</div>
 	  <input type="text" ng-model="port" ng-change="clear_results()" class="form-control" placeholder="8001">
 	</div>
 	<div class="col-md-2">
 	  <div class="control-label fr-control-label">service</div>
 	  <input type="text" ng-model="service" ng-change="clear_results()" class="form-control" placeholder="localhost">
+	</div>
+      </div>
+      <h3>
+	Camera
+	<div class="fr-collapse">
+	  <button class="btn btn-default btn-sm fr-collapse-btn" 
+	    ng-click="collapse_toggle('camera')"><span class="{{collapse_icon('camera')}}"></span></button>
+	</div>
+      </h3>
+      <div class="row {{collapse_class('camera')}}">
+	<div class="col-md-2">
 	  <div class="control-label fr-control-label">camera</div>
 	  <select ng-model="camera" ng-change="clear_results()" class="form-control">
 	    <option>1</option>
@@ -69,7 +89,7 @@
       </div>
       <div ng-repeat="image in show_image">
 	<div class="row fr-data-label">
-	  <div class="col-md-8"><a href="{{image_url(image)}}">{{image_url(image)}}</a>
+	  <div class="col-md-8"><a href="{{image_url(image)}}">http://&hellip;&thinsp;{{image_path(image)}}</a>
 	    <a target="_blank" class="fr-help" href="https://github.com/firepick1/FireREST/wiki/{{image}}">?</a>
 	  </div>
 	</div>
@@ -87,8 +107,14 @@
     </div>
 
     <div class="fr-form">
-      <h3>Computer Vision Endpoint</h3>
-      <div class="row">
+      <h3>
+	Computer Vision Endpoint
+	<div class="fr-collapse">
+	  <button class="btn btn-default btn-sm fr-collapse-btn" 
+	    ng-click="collapse_toggle('cve')"><span class="{{collapse_icon('cve')}}"></span></button>
+	</div>
+      </h3>
+      <div class="row {{collapse_class('cve')}}">
 	<div class="col-md-3">
 	  <div class="control-label fr-control-label">profile</div>
 	  <select ng-model="profile" ng-change="clear_results()" class="form-control">
@@ -112,7 +138,7 @@
       </div>
       <div ng-repeat="action in show_actions">
 	<div class="row fr-data-label">
-	  <div class="col-md-8"><a href="{{action_url(action)}}">{{action_url(action)}}</a>
+	  <div class="col-md-8"><a href="{{action_url(action)}}">http://&hellip;&thinsp;{{action_path(action)}}</a>
 	    <a target="_blank" class="fr-help" href="https://github.com/firepick1/FireREST/wiki/{{action}}.json">?</a>
 	  </div>
 	</div>
