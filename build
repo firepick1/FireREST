@@ -37,10 +37,13 @@ if [ "$(type -p node)" == "" ]; then
   if [ $RASPBIAN -eq 1 ]; then
     mkdir /usr/local/bin/node
     pushd /usr/local/bin/node
+    pwd
     wget http://nodejs.org/dist/v0.11.9/node-v0.11.9-linux-arm-pi.tar.gz
     tar xvzf node-*-linux-arm-pi.tar.gz
     rm node-*-linux-arm-pi.tar.gz
-    mv node*/* .
+    cd ..
+    ln -s node/bin/node node
+    ln -s node/bin/node/npm
     popd
   else
    echo PLEASE INSTALL nodeJS
