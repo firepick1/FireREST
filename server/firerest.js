@@ -7,12 +7,14 @@ var content_source = "Unknown";
 app.all('*', function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "X-Requested-With");
+  console.log(JSON.stringify(req));
   next();
 });
 
 app.get("/firerest/content_source", function(req, res){
   res.setHeader('Content-Type', 'text/plain');
   res.send(content_source);
+  console.log("content_source: " + content_source);
 });
 
 var firefuse_dir = "/dev/firefuse";
