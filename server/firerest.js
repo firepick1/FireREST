@@ -7,7 +7,7 @@ var content_source = "Unknown";
 app.all('*', function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "X-Requested-With");
-  console.log(JSON.stringify(req));
+  console.log('%s %s %s', req.method, req.url, req.path);
   next();
 });
 
