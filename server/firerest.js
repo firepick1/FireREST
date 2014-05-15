@@ -2,7 +2,7 @@ console.log("loading express...");
 var express = require('express');
 var fs = require('fs');
 var app = express();
-var content_source = "Demo";
+var content_source = "Unknown";
 
 app.all('*', function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
@@ -23,8 +23,10 @@ if (fs.existsSync("/dev/firefuse/cv/1/camera.jpg")) {
   console.log("Mapping /firerest to: " + firefuse_dir);
   content_source = "FireFUSE";
 } else {
+  content_source = "Demo";
   console.log("FireFUSE is not available. FireREST is demo mode only" );
 }
+console.log("content_source: " + content_source);
 
 var __appdir = "www";
 app.use(express.static(__appdir));
