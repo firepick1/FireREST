@@ -110,6 +110,12 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
     scope.image_GET = function(image) {
       scope.image_instances[image] = Math.floor(Math.random()*1000000) ;
     };
+    scope.image_GET_class = function(image) {
+      if (scope.auto_update && (image === "camera.jpg" || image === "monitor.jpg")) {
+	return "btn-default";
+      }
+      return "btn-primary";
+    };
     
     scope.show_actions = ['save'];
     scope.action_text = function(action) {
@@ -156,6 +162,7 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
      bg.worker = function(ticks) {
        if (scope.transmit && scope.auto_update) {
 	 scope.image_GET('monitor.jpg');
+	 scope.image_GET('camera.jpg');
        }
        return true;
      }

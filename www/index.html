@@ -102,7 +102,7 @@
 	</div>
 	<div class="fr-row row">
 	  <div class="fr-cell-btn col-md-1">
-	    <button type="button" class="btn btn-primary btn-sm" ng-click="image_GET(image)">GET</button>
+	    <button type="button" class="btn {{image_GET_class(image)}} btn-sm" ng-click="image_GET(image)">GET</button>
 	  </div>
 	  <div class="fr-cell-data col-md-7">
 	    <img class="img-responsive img-rounded {{image_class(image)}}" 
