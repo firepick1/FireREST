@@ -21,3 +21,5 @@ test http://$1/firerest/cv/1/gray/cve/calc-offset/process.json
 test http://$1/firerest/cv/1/camera.jpg 
 test http://$1/firerest/cv/1/monitor.jpg 
 test http://$1/firerest/cv/1/output.jpg 
+test http://$1/firerest/cv/1/bgr/cve/calc-offset/save.json 
+test http://$1/firerest/cv/1/bgr/cve/calc-offset/process.json 
