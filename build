@@ -2,7 +2,7 @@
 
 FIREREST_VERSION_MAJOR=0
 FIREREST_VERSION_MINOR=2
-FIREREST_VERSION_PATCH=3
+FIREREST_VERSION_PATCH=4
 echo "FireREST version $FIREREST_VERSION_MAJOR.$FIREREST_VERSION_MINOR.$FIREREST_VERSION_PATCH"
 
 echo "PATH     : $PATH"
@@ -89,14 +89,14 @@ fi
 
 if [ -e version-$FIREREST_VERSION_MAJOR.$FIREREST_VERSION_MINOR ]; then
   echo "COMPONENT FireREST dependencies: OK"
-  pullFireFuse=0
+  pullFireFUSE=0
 else
   echo "COMPONENT FireREST dependencies: out of date"
-  pullFireFuse=1
+  pullFireFUSE=1
 fi
 date > version-$FIREREST_VERSION_MAJOR.$FIREREST_VERSION_MINOR
 
-if [ ! -e /dev/firefuse ] || [ $pullFireFuse -ne 0 ] ; then 
+if [ ! -e /dev/firefuse/status ] || [ $pullFireFUSE -ne 0 ] ; then 
   echo "++++++++++++++++++ BUILDING FireFUSE ++++++++++++"
   if [ ! -e FireFUSE ]; then
     sudo -u $SUDO_USER git clone git://github.com/firepick1/FireFUSE
@@ -104,6 +104,10 @@ if [ ! -e /dev/firefuse ] || [ $pullFireFuse -ne 0 ] ; then
   pushd FireFUSE
   sudo -u $SUDO_USER git pull
   ./build
+  if [ $? -ne 0 ]; then
+    echo COMPONENT /dev/firefuse: INSTALLATION FAILED
+    exit -1
+  fi
   popd
 else
   echo COMPONENT /dev/firefuse: installed
