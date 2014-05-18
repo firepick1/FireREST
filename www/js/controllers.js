@@ -17,6 +17,14 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
     scope.profile = "gray";
     scope.cve = "calc-offset";
 
+    scope.service_url = function() {
+      var port = scope.port === "" ? "" : (":" + scope.port);
+      return "http://" + scope.server + port + scope.service;
+    };
+    scope.camera_url = function() {
+      return scope.service_url() + "/cv/" + scope.camera + "/";
+    };
+
     scope.transmit_status = function() {
       switch (scope.transmit) {
 	case 0: return "glyphicon-remove fr-transmit-dead";
@@ -34,15 +42,42 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
     scope.transmit_isBusy = function() { return scope.transmit > 1; }
     scope.transmit_isError = function() { return scope.transmit == 0; }
     scope.transmit_start = function() {
-      scope.transmit = scope.transmit ? (scope.transmit+1) : 0;
+      scope.transmit = scope.transmit ? (scope.transmit+1) : 2;
     }
     scope.transmit_end = function(ok) {
       if (ok) {
-	scope.transmit = scope.transmit > 1 ? (scope.transmit-1) : 1;
+	scope.transmit = scope.transmit > 0 ? (scope.transmit-1) : 0;
       } else {
+        scope.transmit_enabled = false;
         scope.transmit = 0;
       }
     }
+    
+    scope.config_load = function() {
+      scope.transmit_start();
+      $.ajax({
+	url: scope.service_url() + "/config.json",
+	data: { },
+	success: function( data ) {
+	  scope.$apply(function(){
+	    scope.transmit_end(true);
+	    console.log(JSON.stringify(data));
+	    scope.config = data;
+	    scope.cves = Object.keys(data.cv.cves);
+	    scope.cameras = Object.keys(data.cv.cameras); 
+	  });
+	},
+	error: function( jqXHR, ex) {
+	  console.error("config_load() ex:" + ex + "," + JSON.stringify(jqXHR));
+	  scope.$apply(function(){
+	    scope.transmit_end(false);
+	    scope.cves = ["CVE n/a"];
+	    scope.cameras = ["camera n/a"];
+	  });
+	}
+      });
+    };
+    scope.config_load();
 
     scope.collapse = {"camera":true, "cve":true, "service":true};
     scope.collapse_icon = function(value) {
@@ -55,14 +90,6 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
     scope.collapse_toggle = function(value) {
       scope.collapse[value] = !scope.collapse[value];
     }
-
-    scope.service_url = function() {
-      var port = scope.port === "" ? "" : (":" + scope.port);
-      return "http://" + scope.server + port + scope.service;
-    };
-    scope.camera_url = function() {
-      return scope.service_url() + "/cv/" + scope.camera + "/";
-    };
 
     scope.check_content_source = function() {
       scope.content_source = "...";
@@ -141,7 +168,7 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
     };
     scope.resource_XHR = function(resource, classname, response, ok) {
       scope.$apply(function(){
-        console.log('resource_XHR' + resource + response);
+        //console.log('resource_XHR' + resource + response);
 	scope.resource_response[resource] = response;
 	scope.resource_classname[resource] = classname;
 	var t = Math.floor(Math.random()*1000000) ;
@@ -169,17 +196,17 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
 	  }
 	});
       }
-    
-     bg.worker = function(ticks) {
-       if (scope.transmit_isIdle() && scope.transmit_enabled) {
-	 if ((ticks % 5) === 0 ) {
-	   scope.resource_update && scope.show_resources.indexOf('process') >= 0 && scope.resource_GET('process');
-	 } else if ((ticks % 3) === 0 ) {
-	   scope.image_update && scope.image_GET('monitor.jpg');
-	 } else if ((ticks % 3) === 1 ) {
-	   scope.image_update && scope.image_GET('camera.jpg');
-	 }
+
+    bg.worker = function(ticks) {
+     if (scope.transmit_isIdle() && scope.transmit_enabled) {
+       if ((ticks % 5) === 0 ) {
+	 scope.resource_update && scope.show_resources.indexOf('process') >= 0 && scope.resource_GET('process');
+       } else if ((ticks % 3) === 0 ) {
+	 scope.image_update && scope.image_GET('monitor.jpg');
+       } else if ((ticks % 3) === 1 ) {
+	 scope.image_update && scope.image_GET('camera.jpg');
        }
-       return true;
      }
+     return true;
+    }
 }]);
