@@ -153,7 +153,7 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
       });
     }
     scope.resource_GET = function(resource) {
-	scope.resource_response[resource] = "...";
+	//scope.resource_response[resource] = "...";
 	scope.transmit_start();
 	$.ajax({
 	  url: scope.resource_url(resource),
