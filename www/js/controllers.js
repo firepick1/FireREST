@@ -9,6 +9,7 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
     scope.server = location.host() || "unknownhost";
     scope.port = location.port() || "unknownport";
     scope.service = "/firerest";
+    scope.transmit_enabled = true;
     scope.camera = 1;
     scope.image_update = true;
     scope.resource_update = true;
@@ -16,12 +17,26 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
     scope.profile = "gray";
     scope.cve = "calc-offset";
 
-    scope.transmit_class = function() {
-      switch (scope.transmit) {
-	case 0: return "glyphicon-remove fr-transmit-dead";
-        case 1: return "glyphicon-ok fr-transmit-idle";
-	default: return "glyphicon-ok fr-transmit-active";
+    scope.transmit_status = function() {
+      if (scope.transmit_enabled) {
+	switch (scope.transmit) {
+	  case 0: return "glyphicon-remove fr-transmit-dead";
+	  case 1: return "glyphicon-ok fr-transmit-idle";
+	  default: return "glyphicon-ok fr-transmit-active";
+	}
+      } else {
+	switch (scope.transmit) {
+	  case 0: return "glyphicon-minus-sign fr-transmit-dead";
+	  case 1: return "glyphicon-minus-sign fr-transmit-idle";
+	  default: return "glyphicon-minus-sign fr-transmit-active";
+	}
       }
+    }
+    scope.transmit_icon = function() {
+      return scope.transmit_enabled ?  "glyphicon-pause" : "glyphicon-play";
+    }
+    scope.transmit_click = function() {
+      scope.transmit_enabled = !scope.transmit_enabled;
     }
     scope.transmit_isIdle = function() { return scope.transmit == 1; }
     scope.transmit_isBusy = function() { return scope.transmit > 1; }
@@ -40,7 +55,7 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
     scope.collapse = {"camera":true, "cve":true, "service":true};
     scope.collapse_icon = function(value) {
       return "glyphicon fr-collapse-icon " +
-        (scope.collapse[value] ? "glyphicon-expand" : "glyphicon-collapse-down");
+        (scope.collapse[value] ? "glyphicon-wrench" : "glyphicon-wrench");
     }
     scope.collapse_class = function(value) {
       return scope.collapse[value] ? "fr-hide" : "fr-show";
@@ -154,7 +169,6 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
       });
     }
     scope.resource_GET = function(resource) {
-	//scope.resource_response[resource] = "...";
 	scope.transmit_start();
 	$.ajax({
 	  url: scope.resource_url(resource),
@@ -169,7 +183,7 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
       }
     
      bg.worker = function(ticks) {
-       if (scope.transmit_isIdle()) {
+       if (scope.transmit_isIdle() && scope.transmit_enabled) {
 	 if ((ticks % 5) === 0 ) {
 	   scope.resource_update && scope.show_resources.indexOf('process') >= 0 && scope.resource_GET('process');
 	 } else if ((ticks % 3) === 0 ) {
