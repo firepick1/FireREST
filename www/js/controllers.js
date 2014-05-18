@@ -140,7 +140,7 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
       }
       return "btn-primary";
     };
-    scope.resource_XHR = function(resource, classname, response) {
+    scope.resource_XHR = function(resource, classname, response, ok) {
       scope.$apply(function(){
         console.log('resource_XHR' + resource + response);
 	scope.resource_response[resource] = response;
@@ -150,6 +150,7 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
 	scope.image_instances['monitor.jpg'] = t;
 	resource === 'save' && (scope.image_instances['saved.png'] = t);
 	resource === 'process' && (scope.image_instances['output.jpg'] = t);
+	scope.transmit_end(true);
       });
     }
     scope.resource_GET = function(resource) {
@@ -159,16 +160,10 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
 	  url: scope.resource_url(resource),
 	  data: { r: Math.floor(Math.random()*1000000) },
 	  success: function( data ) {
-	    scope.$apply(function(){
-	      scope.transmit_end(true);
-	      scope.resource_XHR(resource, "fr-json-ok", JSON.stringify(data));
-	    });
+	    scope.resource_XHR(resource, "fr-json-ok", JSON.stringify(data), true);
 	  },
 	  error: function( jqXHR, ex) {
-	    scope.$apply(function(){
-	      scope.transmit_end(false);
-	      scope.resource_XHR(resource, "fr-json-err", JSON.stringify(jqXHR));
-	    });
+	    scope.resource_XHR(resource, "fr-json-err", JSON.stringify(jqXHR), false);
 	  }
 	});
       }
