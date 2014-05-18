@@ -1,3 +1,6 @@
+.fr-get {
+  margin-top: -2em;
+}
 .fr-enable {
   margin-left: 3em;
   color: #888 !important;
@@ -87,6 +90,12 @@
 }
 .fr-row {
   position: relative;
+  border-bottom: 1pt solid #ddd;
+  padding-bottom: 0.5em;
+}
+.fr-row:last-of-type {
+  position: relative;
+  border-bottom: none;
 }
 .fr-cell-data {
   display: inline-block;
@@ -121,6 +130,9 @@
   font-family: Courier;
   display:block;
   text-align: left;
+}
+.fr-data {
+  position: relative;
 }
 .fr-form {
   padding-bottom: 1em;

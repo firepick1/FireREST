@@ -18,22 +18,14 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
     scope.cve = "calc-offset";
 
     scope.transmit_status = function() {
-      if (scope.transmit_enabled) {
-	switch (scope.transmit) {
-	  case 0: return "glyphicon-remove fr-transmit-dead";
-	  case 1: return "glyphicon-ok fr-transmit-idle";
-	  default: return "glyphicon-ok fr-transmit-active";
-	}
-      } else {
-	switch (scope.transmit) {
-	  case 0: return "glyphicon-minus-sign fr-transmit-dead";
-	  case 1: return "glyphicon-minus-sign fr-transmit-idle";
-	  default: return "glyphicon-minus-sign fr-transmit-active";
-	}
+      switch (scope.transmit) {
+	case 0: return "glyphicon-remove fr-transmit-dead";
+	case 1: return "glyphicon-ok fr-transmit-idle";
+	default: return "glyphicon-ok fr-transmit-active";
       }
     }
     scope.transmit_icon = function() {
-      return scope.transmit_enabled ?  "glyphicon-pause" : "glyphicon-play";
+      return scope.transmit_enabled ?  "glyphicon-pause" : "glyphicon-repeat";
     }
     scope.transmit_click = function() {
       scope.transmit_enabled = !scope.transmit_enabled;
@@ -129,12 +121,10 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
     scope.image_GET = function(image) {
       scope.image_instances[image] = Math.floor(Math.random()*1000000) ;
     };
-    scope.image_GET_class = function(image) {
-      if (scope.image_update && (image === "camera.jpg" || image === "monitor.jpg")) {
-	return "btn-default";
-      }
-      return "btn-primary";
-    };
+    scope.image_GET_icon = function(image) {
+      return scope.transmit_enabled && (image === "camera.jpg" || image === 'monitor.jpg') ?
+        "glyphicon glyphicon-repeat" : "";
+    }
     
     scope.show_resources = ['save'];
     scope.resource_text = function(resource) {
@@ -149,12 +139,6 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
     scope.resource_class = function(resource) {
       return scope.resource_classname[resource] || "fr-json-ok";
     };
-    scope.resource_GET_class = function(resource) {
-      if (scope.resource_update && (resource === "process")) {
-	return "btn-default";
-      }
-      return "btn-primary";
-    };
     scope.resource_XHR = function(resource, classname, response, ok) {
       scope.$apply(function(){
         console.log('resource_XHR' + resource + response);
@@ -167,6 +151,10 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
 	resource === 'process' && (scope.image_instances['output.jpg'] = t);
 	scope.transmit_end(true);
       });
+    }
+    scope.resource_GET_icon = function(action) {
+      return scope.transmit_enabled && (action === "process") ?
+        "glyphicon glyphicon-repeat" : "";
     }
     scope.resource_GET = function(resource) {
 	scope.transmit_start();
