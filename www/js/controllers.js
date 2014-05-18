@@ -126,7 +126,7 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
         "glyphicon glyphicon-repeat" : "";
     }
     
-    scope.show_resources = ['save'];
+    scope.show_resources = ['save', 'process'];
     scope.resource_text = function(resource) {
       return scope.resource_response[resource] || "...";
     }
