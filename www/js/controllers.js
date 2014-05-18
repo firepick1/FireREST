@@ -159,23 +159,29 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
 	  url: scope.resource_url(resource),
 	  data: { r: Math.floor(Math.random()*1000000) },
 	  success: function( data ) {
-	    scope.transmit_end(true);
-	    scope.resource_XHR(resource, "fr-json-ok", JSON.stringify(data));
+	    scope.$apply(function(){
+	      scope.transmit_end(true);
+	      scope.resource_XHR(resource, "fr-json-ok", JSON.stringify(data));
+	    });
 	  },
 	  error: function( jqXHR, ex) {
-	    scope.transmit_end(false);
-	    scope.resource_XHR(resource, "fr-json-err", JSON.stringify(jqXHR));
+	    scope.$apply(function(){
+	      scope.transmit_end(false);
+	      scope.resource_XHR(resource, "fr-json-err", JSON.stringify(jqXHR));
+	    });
 	  }
 	});
       }
     
      bg.worker = function(ticks) {
-       if ((ticks % 5) == 0 && scope.transmit_isIdle() && scope.resource_update) {
-	 scope.show_resources.indexOf('process') >= 0 && scope.resource_GET('process');
-       } else if ((ticks % 3) == 0 && scope.transmit_isIdle() && scope.image_update) {
-	 scope.image_GET('monitor.jpg');
-       } else if ((ticks % 3) == 1 && scope.transmit_isIdle() && scope.image_update) {
-	 scope.image_GET('camera.jpg');
+       if (scope.transmit_isIdle()) {
+	 if ((ticks % 5) === 0 ) {
+	   scope.resource_update && scope.show_resources.indexOf('process') >= 0 && scope.resource_GET('process');
+	 } else if ((ticks % 3) === 0 ) {
+	   scope.image_update && scope.image_GET('monitor.jpg');
+	 } else if ((ticks % 3) === 1 ) {
+	   scope.image_update && scope.image_GET('camera.jpg');
+	 }
        }
        return true;
      }
