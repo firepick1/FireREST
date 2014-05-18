@@ -80,7 +80,7 @@
 	  </select>
 	  <div class="checkbox">
 	    <label>
-	      <input type="checkbox" ng-model="auto_update"> auto-update
+	      <input type="checkbox" ng-model="image_update"> auto-update
 	    </label>
 	  </div>
 	</div>
@@ -134,27 +134,34 @@
 	    <option>locate-part</option>
 	  </select>
 	</div>
-	<div class="col-md-3">
-	  <div class="control-label fr-control-label">action</div>
-	  <select multiple ng-model="show_actions" class="form-control">
+	<div class="col-md-2">
+	  <div class="control-label fr-control-label">resource</div>
+	  <select multiple ng-model="show_resources" class="form-control">
 	    <option>save</option>
 	    <option>process</option>
 	    <option>firesight</option>
 	  </select>
 	</div>
+	<div class="col-md-2">
+	  <div class="checkbox">
+	    <label>
+	      <input type="checkbox" ng-model="resource_update"> auto-update
+	    </label>
+	  </div>
+	</div>
       </div>
-      <div ng-repeat="action in show_actions">
+      <div ng-repeat="resource in show_resources">
 	<div class="row fr-data-label">
-	  <div class="col-md-8"><a href="{{action_url(action)}}">http://&hellip;&thinsp;{{action_path(action)}}</a>
-	    <a target="_blank" class="fr-help" href="https://github.com/firepick1/FireREST/wiki/{{action}}.json">?</a>
+	  <div class="col-md-8"><a href="{{resource_url(resource)}}">http://&hellip;&thinsp;{{resource_path(resource)}}</a>
+	    <a target="_blank" class="fr-help" href="https://github.com/firepick1/FireREST/wiki/{{resource}}.json">?</a>
 	  </div>
 	</div>
 	<div class="fr-row row">
 	  <div class="fr-cell-btn col-md-1">
-	    <button type="button" class="btn btn-primary btn-sm" ng-click="action_GET(action)">GET</button>
+	    <button type="button" class="btn {{resource_GET_class(resource)}} btn-sm" ng-click="resource_GET(resource)">GET</button>
 	  </div>
 	  <div class="fr-cell-data col-md-7">
-	    <div class="fr-json {{action_classname[action]}}" id="{{action}}-json">{{action_text(action)}}</div>
+	    <div class="fr-json {{resource_classname[resource]}}" id="{{resource}}-json">{{resource_text(resource)}}</div>
 	  </div>
 	</div>
       </div>

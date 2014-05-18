@@ -27,7 +27,6 @@ if (fs.existsSync("/dev/firefuse/cv/1/camera.jpg")) {
   content_source = "Demo";
   console.log("FireFUSE is not available. FireREST is demo mode only" );
 }
-console.log("content_source: " + content_source);
 
 var __appdir = "www";
 app.use(express.static(__appdir));

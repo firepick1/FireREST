@@ -1,0 +1,121 @@
+RUNNING LOAD TEST
+Fri May 16 22:01:31 PDT 2014
+http://firepick45:8001/firerest/cv/1/gray/cve/calc-offset/save.json
+** SIEGE 2.70
+** Preparing 1 concurrent users for battle.
+The server is now under siege...      done.
+Transactions:		         100 hits
+Availability:		      100.00 %
+Elapsed time:		       12.17 secs
+Data transferred:	        0.10 MB
+Response time:		        0.12 secs
+Transaction rate:	        8.22 trans/sec
+Throughput:		        0.01 MB/sec
+Concurrency:		        1.00
+Successful transactions:         100
+Failed transactions:	           0
+Longest transaction:	        0.37
+Shortest transaction:	        0.10
+ 
+http://firepick45:8001/firerest/cv/1/gray/cve/calc-offset/process.json
+** SIEGE 2.70
+** Preparing 1 concurrent users for battle.
+The server is now under siege...      done.
+Transactions:		         100 hits
+Availability:		      100.00 %
+Elapsed time:		       13.34 secs
+Data transferred:	        0.10 MB
+Response time:		        0.13 secs
+Transaction rate:	        7.50 trans/sec
+Throughput:		        0.01 MB/sec
+Concurrency:		        1.00
+Successful transactions:         100
+Failed transactions:	           0
+Longest transaction:	        0.30
+Shortest transaction:	        0.10
+ 
+http://firepick45:8001/firerest/cv/1/camera.jpg
+** SIEGE 2.70
+** Preparing 1 concurrent users for battle.
+The server is now under siege...      done.
+Transactions:		         100 hits
+Availability:		      100.00 %
+Elapsed time:		        7.06 secs
+Data transferred:	        6.66 MB
+Response time:		        0.07 secs
+Transaction rate:	       14.16 trans/sec
+Throughput:		        0.94 MB/sec
+Concurrency:		        0.99
+Successful transactions:         100
+Failed transactions:	           0
+Longest transaction:	        0.31
+Shortest transaction:	        0.04
+ 
+http://firepick45:8001/firerest/cv/1/monitor.jpg
+** SIEGE 2.70
+** Preparing 1 concurrent users for battle.
+The server is now under siege...      done.
+Transactions:		         100 hits
+Availability:		      100.00 %
+Elapsed time:		        6.44 secs
+Data transferred:	        6.66 MB
+Response time:		        0.06 secs
+Transaction rate:	       15.53 trans/sec
+Throughput:		        1.03 MB/sec
+Concurrency:		        1.00
+Successful transactions:         100
+Failed transactions:	           0
+Longest transaction:	        0.32
+Shortest transaction:	        0.04
+ 
+http://firepick45:8001/firerest/cv/1/output.jpg
+** SIEGE 2.70
+** Preparing 1 concurrent users for battle.
+The server is now under siege...      done.
+Transactions:		         100 hits
+Availability:		      100.00 %
+Elapsed time:		       10.45 secs
+Data transferred:	        2.40 MB
+Response time:		        0.10 secs
+Transaction rate:	        9.57 trans/sec
+Throughput:		        0.23 MB/sec
+Concurrency:		        1.00
+Successful transactions:         100
+Failed transactions:	           0
+Longest transaction:	        0.39
+Shortest transaction:	        0.08
+ 
+http://firepick45:8001/firerest/cv/1/bgr/cve/calc-offset/save.json
+** SIEGE 2.70
+** Preparing 1 concurrent users for battle.
+The server is now under siege...      done.
+Transactions:		         100 hits
+Availability:		      100.00 %
+Elapsed time:		        5.62 secs
+Data transferred:	        0.10 MB
+Response time:		        0.06 secs
+Transaction rate:	       17.79 trans/sec
+Throughput:		        0.02 MB/sec
+Concurrency:		        1.00
+Successful transactions:         100
+Failed transactions:	           0
+Longest transaction:	        0.35
+Shortest transaction:	        0.03
+ 
+http://firepick45:8001/firerest/cv/1/bgr/cve/calc-offset/process.json
+** SIEGE 2.70
+** Preparing 1 concurrent users for battle.
+The server is now under siege...      done.
+Transactions:		         100 hits
+Availability:		      100.00 %
+Elapsed time:		       21.98 secs
+Data transferred:	        0.10 MB
+Response time:		        0.22 secs
+Transaction rate:	        4.55 trans/sec
+Throughput:		        0.00 MB/sec
+Concurrency:		        1.00
+Successful transactions:         100
+Failed transactions:	           0
+Longest transaction:	        0.54
+Shortest transaction:	        0.17
+ 

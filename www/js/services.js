@@ -18,7 +18,7 @@ services.factory('BackgroundThread', ['$http', '$interval', function($http, $int
       console.log("Background thread exiting. ticks:" + ticks);
       $interval.cancel(promise);
     }
-  }, 1000);
+  }, 200);
 
   return backgroundThread;
 }]);

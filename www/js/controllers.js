@@ -10,8 +10,9 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
     scope.port = location.port() || "unknownport";
     scope.service = "/firerest";
     scope.camera = 1;
-    scope.auto_update = true;
-    scope.transmit = 1;
+    scope.image_update = true;
+    scope.resource_update = true;
+    scope.transmit = 1; // 0:error, 1:idle, >1:active-network-requests
     scope.profile = "gray";
     scope.cve = "calc-offset";
 
@@ -22,6 +23,9 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
 	default: return "glyphicon-ok fr-transmit-active";
       }
     }
+    scope.transmit_isIdle = function() { return scope.transmit == 1; }
+    scope.transmit_isBusy = function() { return scope.transmit > 1; }
+    scope.transmit_isError = function() { return scope.transmit == 0; }
     scope.transmit_start = function() {
       scope.transmit = scope.transmit ? (scope.transmit+1) : 0;
     }
@@ -74,8 +78,8 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
       });
     };
     scope.clear_results = function() {
-      scope.action_response = {};
-      scope.action_classname = {};
+      scope.resource_response = {};
+      scope.resource_classname = {};
       scope.check_content_source();
     };
     scope.clear_results();
@@ -111,57 +115,66 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
       scope.image_instances[image] = Math.floor(Math.random()*1000000) ;
     };
     scope.image_GET_class = function(image) {
-      if (scope.auto_update && (image === "camera.jpg" || image === "monitor.jpg")) {
+      if (scope.image_update && (image === "camera.jpg" || image === "monitor.jpg")) {
 	return "btn-default";
       }
       return "btn-primary";
     };
     
-    scope.show_actions = ['save'];
-    scope.action_text = function(action) {
-      return scope.action_response[action] || "...";
+    scope.show_resources = ['save'];
+    scope.resource_text = function(resource) {
+      return scope.resource_response[resource] || "...";
     }
-    scope.action_path = function(action) {
-      return "/cv/" + scope.camera + "/" + scope.profile + "/cve/" + scope.cve + "/" + action + ".json";
+    scope.resource_path = function(resource) {
+      return "/cv/" + scope.camera + "/" + scope.profile + "/cve/" + scope.cve + "/" + resource + ".json";
     };
-    scope.action_url = function(action) {
-      return scope.camera_url() + scope.profile + "/cve/" + scope.cve + "/" + action + ".json";
+    scope.resource_url = function(resource) {
+      return scope.camera_url() + scope.profile + "/cve/" + scope.cve + "/" + resource + ".json";
     };
-    scope.action_class = function(action) {
-      return scope.action_classname[action] || "fr-json-ok";
+    scope.resource_class = function(resource) {
+      return scope.resource_classname[resource] || "fr-json-ok";
     };
-    scope.action_XHR = function(action, classname, response) {
+    scope.resource_GET_class = function(resource) {
+      if (scope.resource_update && (resource === "process")) {
+	return "btn-default";
+      }
+      return "btn-primary";
+    };
+    scope.resource_XHR = function(resource, classname, response) {
       scope.$apply(function(){
-        console.log('action_XHR' + action + response);
-	scope.action_response[action] = response;
-	scope.action_classname[action] = classname;
+        console.log('resource_XHR' + resource + response);
+	scope.resource_response[resource] = response;
+	scope.resource_classname[resource] = classname;
 	var t = Math.floor(Math.random()*1000000) ;
 	scope.image_instances['camera.jpg'] = t;
 	scope.image_instances['monitor.jpg'] = t;
-	action === 'save' && (scope.image_instances['saved.png'] = t);
-	action === 'process' && (scope.image_instances['output.jpg'] = t);
+	resource === 'save' && (scope.image_instances['saved.png'] = t);
+	resource === 'process' && (scope.image_instances['output.jpg'] = t);
       });
     }
-    scope.action_GET = function(action) {
-	scope.action_response[action] = "...";
+    scope.resource_GET = function(resource) {
+	scope.resource_response[resource] = "...";
 	scope.transmit_start();
 	$.ajax({
-	  url: scope.action_url(action),
+	  url: scope.resource_url(resource),
 	  data: { r: Math.floor(Math.random()*1000000) },
 	  success: function( data ) {
 	    scope.transmit_end(true);
-	    scope.action_XHR(action, "fr-json-ok", JSON.stringify(data));
+	    scope.resource_XHR(resource, "fr-json-ok", JSON.stringify(data));
 	  },
 	  error: function( jqXHR, ex) {
 	    scope.transmit_end(false);
-	    scope.action_XHR(action, "fr-json-err", JSON.stringify(jqXHR));
+	    scope.resource_XHR(resource, "fr-json-err", JSON.stringify(jqXHR));
 	  }
 	});
       }
     
      bg.worker = function(ticks) {
-       if (scope.transmit && scope.auto_update) {
+       if ((ticks % 5) == 0 && scope.transmit_isIdle() && scope.resource_update) {
+	 scope.show_resources.indexOf('process') >= 0 && scope.resource_GET('process');
+       } else if ((ticks % 3) == 0 && scope.transmit_isIdle() && scope.image_update) {
 	 scope.image_GET('monitor.jpg');
+       } else if ((ticks % 3) == 1 && scope.transmit_isIdle() && scope.image_update) {
 	 scope.image_GET('camera.jpg');
        }
        return true;
