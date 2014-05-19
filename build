@@ -9,6 +9,12 @@ echo "PATH     : $PATH"
 echo "SHELL    : $SHELL"
 echo "SUDO_USER: $SUDO_USER"
 
+ps -ef | grep firerest.js | grep -v grep
+if [ $? -eq 0 ]; then
+  echo Kill the existing FireREST process before proceeding with the build
+  exit -1
+fi
+
 if [ "$(type -p lsb_release)" == "" ]; then
   echo "++++++++++++++++++ INSTALLING lsb_release ++++++++++++"
   apt-get install -y lsb-release
