@@ -80,7 +80,7 @@
 	<div class="col-md-2">
 	  <div class="control-label fr-control-label">camera</div>
 	  <select ng-model="camera" ng-change="clear_results()" class="form-control">
-	    <option ng-repeat="camera in cameras">{{camera}}</option>
+	    <option ng-repeat="camera in camera_map">{{camera}}</option>
 	  </select>
 	</div>
 	<div class="col-md-2">
@@ -132,7 +132,7 @@
 	  </select>
 	  <div class="control-label fr-control-label">computer vision endpoint</div>
 	  <select ng-model="cve" ng-change="clear_results()" class="form-control">
-	    <option ng-repeat="cve in cves">{{cve}}</option>
+	    <option ng-repeat="cve in cve_map">{{cve}}</option>
 	  </select>
 	</div>
 	<div class="col-md-2">

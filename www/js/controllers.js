@@ -63,16 +63,16 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
 	    scope.transmit_end(true);
 	    console.log(JSON.stringify(data));
 	    scope.config = data;
-	    scope.cves = Object.keys(data.cv.cves);
-	    scope.cameras = Object.keys(data.cv.cameras); 
+	    scope.cve_map = Object.keys(data.cv.cve_map);
+	    scope.camera_map = Object.keys(data.cv.camera_map); 
 	  });
 	},
 	error: function( jqXHR, ex) {
 	  console.error("config_load() ex:" + ex + "," + JSON.stringify(jqXHR));
 	  scope.$apply(function(){
 	    scope.transmit_end(false);
-	    scope.cves = ["CVE n/a"];
-	    scope.cameras = ["camera n/a"];
+	    scope.cve_map = ["CVE n/a"];
+	    scope.camera_map = ["camera n/a"];
 	  });
 	}
       });
