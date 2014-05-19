@@ -1,6 +1,6 @@
-{ "FireREST":{},
+{ "FireREST":{"title":"Raspberry Pi FireFUSE","provider":"FireFUSE"},
   "cv":{
-    "cves":{
+    "cve_map":{
       "calc-offset":{
 	"firesight": [
 	  {"op":"calcOffset", "name":"model", "minval":0.7, "roi":[350,50,100,100],
@@ -19,12 +19,12 @@
 	]
       }
     },
-    "cameras":{
+    "camera_map":{
       "1":{
-	"profiles":[
-	  { "profile":"gray", "cves":[ "calc-offset", "locate-part" ] },
-	  { "profile":"bgr", "cves":[ "calc-offset", "locate-part" ] }
-	]
+	"profile_map":{
+	  "gray":{ "cve_names":[ "calc-offset", "locate-part" ] },
+	  "bgr":{ "cve_names":[ "calc-offset", "locate-part" ] }
+	}
       }
     }
   }
