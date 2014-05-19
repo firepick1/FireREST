@@ -1,4 +1,4 @@
-{ "FireREST":{"title":"Raspberry Pi FireFUSE","provider":"FireFUSE"},
+{ "FireREST":{"title":"FireREST Demo","provider":"Demo"},
   "cv":{
     "cve_map":{
       "calc-offset":{

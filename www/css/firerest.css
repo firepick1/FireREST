@@ -23,15 +23,9 @@
 .fr-service {
   font-family: Courier;
 }
-.fr-hide {
-  display: none;
- }
- .fr-body-text {
-   font-size: 14px;
- }
- .fr-show {
-   display: block;
- }
+.fr-body-text {
+  font-size: 14px;
+}
 .fr-collapse {
   display: inline-block;
   margin-right: -0.2em;
