@@ -1,5 +1,10 @@
 #! /bin/bash
 
+sudo apt-get --purge remove -y netsurf-common
+sudo apt-get --purge remove -y netsurf-gtk
+sudo apt-get --purge remove -y penguinspuzzle
+sudo apt-get --purge remove -y xpdf
+sudo apt-get --purge remove -y libxapian-dev
 sudo apt-get --purge remove -y ruby1.9.1
 sudo apt-get --purge remove -y wolfram-engine
 sudo apt-get --purge remove -y libgfortran3:armhf
@@ -32,3 +37,4 @@ sudo apt-get --purge remove -y supercollider-server
 sudo apt-get --purge remove -y libsclang1
 sudo apt-get --purge remove -y libscsynth1
 sudo apt-get autoremove
+sudo apt-get clean
