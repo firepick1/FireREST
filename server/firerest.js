@@ -10,24 +10,36 @@ app.all('*', function(req, res, next) {
 });
 
 // By default, use reference implementation
-var __appdir = "www";
-app.use(express.static(__appdir));
-console.log("Mapping / to: " + __appdir);
+var __appdir = "www/firerest/";
+var config_file = 'www/firerest/config.json';
+var dirs = ['bootstrap', 'img', 'css', 'js', 'lib'];
+for (var i = 0; i < dirs.length; i++) {
+  var urlpath = '/firerest/' + dirs[i];
+  var filepath = __appdir + dirs[i];
+  app.use(urlpath, express.static(filepath));
+  console.log("Mapping urlpath:" + urlpath + " to:" + filepath);
+}
+app.get('/index.html', function(req,res) { res.sendfile('www/index.html'); });
+app.get('/firerest/cvtest.html', function(req,res) { res.sendfile('www/firerest/cvtest.html'); });
+
 app.use(express.bodyParser());
 
 // If possible, use FireFUSE
 console.log("Looking for FireFUSE...");
 var cv_dir = "/dev/firefuse/cv";
 if (fs.existsSync(cv_dir)) {
+  config_file = '/dev/firefuse/config.json';
   app.use('/firerest/cv', express.static(cv_dir));
-  app.get('/firerest/config.json', function(req,res) {
-    res.sendfile('/dev/firefuse/config.json');
-  });
   console.log("Found FireFUSE!");
   console.log("Mapping /firerest/cv to: " + cv_dir);
 } else {
+  app.use('/firerest/cv', express.static('www/firerest/cv'));
   console.log("FireFUSE is not available. FireREST is demo mode only" );
 }
+
+app.get('/firerest/config.json', function(req,res) {
+  res.sendfile(config_file);
+});
 
 var firerest_port=8001;
 app.listen(firerest_port);
