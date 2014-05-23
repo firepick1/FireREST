@@ -62,38 +62,6 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
       var profile = camera && camera.profile_map[scope.cv.profile_name];
       return profile && profile.cve_names || [];
     }
-    scope.config_load = function() {
-      scope.transmit_start();
-      $.ajax({
-	url: scope.config_url(),
-	data: { },
-	success: function( data ) {
-	  scope.$apply(function(){
-	    scope.transmit_end(true);
-	    console.log(JSON.stringify(data));
-	    scope.config = data;
-	    if (typeof scope.config.cv === 'object') {
-	      var cv = scope.cv;
-	      cv.camera_names = Object.keys(scope.config.cv.camera_map); 
-	      cv.camera_name = cv.camera_names[0];
-	      cv.image = ['monitor.jpg'];
-	      cv.profile_names = cv.camera_name && Object.keys(scope.config.cv.camera_map[cv.camera_name].profile_map);
-	      cv.profile_name = cv.profile_names[0];
-	      cv.cve_name = scope.cve_names()[0] || "no-CVE";
-	    }
-	  });
-	},
-	error: function( jqXHR, ex) {
-	  console.error("config_load() ex:" + ex + "," + JSON.stringify(jqXHR));
-	  scope.$apply(function(){
-	    scope.transmit_end(false);
-	    scope.cv.camera_names = ["camera n/a"];
-	  });
-	}
-      });
-    };
-    scope.config_load();
-
     scope.collapse_icon = function(value) {
       return "glyphicon fr-collapse-icon " +
         (scope.cv.collapse[value] ? "glyphicon-wrench" : "glyphicon-wrench");
@@ -106,8 +74,6 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
       scope.resource_response = {};
       scope.resource_classname = {};
     };
-    scope.clear_results();
-
     scope.image_path = function(image) {
       var r = scope.cv.image_instances[image] || 0;
       if (image === 'saved.png') {
@@ -182,8 +148,7 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
 	  }
 	});
       }
-
-    bg.worker = function(ticks) {
+    scope.worker = function(ticks) {
      if (scope.transmit_isIdle() && scope.transmit_enabled) {
        if ((ticks % 5) === 0 ) {
 	 scope.cv.resources.indexOf('process') >= 0 && scope.resource_GET('process');
@@ -195,4 +160,45 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
      }
      return true;
     }
+
+
+    scope.config_load = function() {
+      console.log("Loading config.json from " + scope.config_url());
+      scope.config = {"status":"loading..."};
+      scope.transmit_start();
+      $.ajax({
+	url: scope.config_url(),
+	data: { },
+	success: function( data ) {
+	  scope.$apply(function(){
+	    scope.transmit_end(true);
+	    console.log(JSON.stringify(data));
+	    scope.config = data;
+	    if (typeof scope.config.cv === 'object') {
+	      var cv = scope.cv;
+	      cv.camera_names = Object.keys(scope.config.cv.camera_map); 
+	      cv.camera_name = cv.camera_names[0];
+	      cv.image = ['monitor.jpg'];
+	      cv.profile_names = cv.camera_name && Object.keys(scope.config.cv.camera_map[cv.camera_name].profile_map);
+	      cv.profile_name = cv.profile_names[0];
+	      cv.cve_name = scope.cve_names()[0] || "no-CVE";
+	      scope.clear_results();
+	      bg.worker = scope.worker;
+	    }
+	  });
+	},
+	error: function( jqXHR, ex) {
+	  console.error("config_load() ex:" + ex + "," + JSON.stringify(jqXHR));
+	  scope.$apply(function(){
+	    scope.transmit_end(false);
+	    scope.cv.camera_names = ["camera n/a"];
+	    scope.clear_results();
+	  });
+	}
+      });
+    };
+
+    scope.clear_results();
+    scope.config_load();
+
 }]);

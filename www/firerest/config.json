@@ -1,4 +1,4 @@
-{ "FireREST":{"title":"FireREST Demo","provider":"Demo"},
+{ "FireREST":{"title":"FireREST Reference Service","provider":"Demo", "version":{"major":0, "minor":4, "patch":4}},
   "cv":{
     "cve_map":{
       "calc-offset":{
