@@ -19,6 +19,7 @@ for (var i = 0; i < dirs.length; i++) {
   app.use(urlpath, express.static(filepath));
   console.log("Mapping urlpath:" + urlpath + " to:" + filepath);
 }
+app.get('/', function(req,res) { res.sendfile('www/index.html'); });
 app.get('/index.html', function(req,res) { res.sendfile('www/index.html'); });
 app.get('/firerest/cvtest.html', function(req,res) { res.sendfile('www/firerest/cvtest.html'); });
 
@@ -37,9 +38,7 @@ if (fs.existsSync(cv_dir)) {
   console.log("FireFUSE is not available. FireREST is demo mode only" );
 }
 
-app.get('/firerest/config.json', function(req,res) {
-  res.sendfile(config_file);
-});
+app.get('/firerest/config.json', function(req,res) { res.sendfile(config_file); });
 
 var firerest_port=8001;
 app.listen(firerest_port);

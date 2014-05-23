@@ -68,53 +68,38 @@ else
   echo "COMPONENT: node_modules installed"
 fi
 
+function build_git() {
+  echo "++++++++++++++++++ BUILDING $1 ++++++++++++"
+  if [ ! -e FireFUSE ]; then
+    sudo -u $SUDO_USER git clone git://github.com/firepick1/$1
+  fi
+  pushd $1
+  sudo -u $SUDO_USER git pull
+  ./build
+  if [ $? -ne 0 ]; then
+    echo "COMPONENT: $1 INSTALLATION FAILED"
+    exit -1
+  fi
+  popd
+}
+
 if [ $RASPBIAN -ne 1 ]; then
   echo "PROVIDER : FireREST reference implementation. Static content only"
   echo "STATUS   : Build complete"
-  livecontent=0
 else 
-  livecontent=1
   echo "PROVIDER : Raspberry Pi FireFUSE with live content"
+  if [ -e version-$FIREREST_VERSION_MAJOR.$FIREREST_VERSION_MINOR ] && [ -e /dev/firefuse/status ] ; then
+    echo "COMPONENT: FireREST dependencies OK"
+  else
+    build_git FireSight
+    build_git FireFUSE
+  fi
 fi
 
+date > version-$FIREREST_VERSION_MAJOR.$FIREREST_VERSION_MINOR
+
+echo "STATUS    : FireREST build complete."
 echo "------------------------------------------"
 echo "Launch FireREST web service:"
 echo "  node server/firesight.js"
 echo "Verify FireREST web service at http://localhost:8001"
-
-if [ $livecontent -ne 1 ]; then
-  exit 0
-fi
-
-if [ "$SUDO_USER" == "" ]; then
-  echo "ERROR    : This script must be run with sudo command from a non-root user"
-  exit -1
-fi
-
-if [ -e version-$FIREREST_VERSION_MAJOR.$FIREREST_VERSION_MINOR ]; then
-  echo "COMPONENT: FireREST dependencies OK"
-  pullFireFUSE=0
-else
-  echo "COMPONENT: FireREST dependencies out of date"
-  pullFireFUSE=1
-fi
-date > version-$FIREREST_VERSION_MAJOR.$FIREREST_VERSION_MINOR
-
-if [ ! -e /dev/firefuse/status ] || [ $pullFireFUSE -ne 0 ] ; then 
-  echo "++++++++++++++++++ BUILDING FireFUSE ++++++++++++"
-  if [ ! -e FireFUSE ]; then
-    sudo -u $SUDO_USER git clone git://github.com/firepick1/FireFUSE
-  fi
-  pushd FireFUSE
-  sudo -u $SUDO_USER git pull
-  ./build
-  if [ $? -ne 0 ]; then
-    echo "COMPONENT: /dev/firefuse: INSTALLATION FAILED"
-    exit -1
-  fi
-  popd
-else
-  echo "COMPONENT: /dev/firefuse: installed"
-fi
-
-echo "STATUS    : FireREST build complete."

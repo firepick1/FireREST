@@ -1,3 +1,6 @@
+p {
+  max-width: 700px;
+}
 .fr-version {
   position: absolute;
   font-size: 8pt;
@@ -71,14 +74,15 @@
   left: 0;
 }
 .fr-banner-logo {
-  height: 3em;
+  height: 2.1em;
   padding: 0.1em;
+  padding-right: 0;
   display: inline-block;
 }
 .fr-banner-right {
   position: absolute;
-  top: 0;
-  right: 0;
+  top: 7px;
+  right: 10px;
 }
 .fr-banner-space {
   height: 1.5em;
