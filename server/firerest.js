@@ -13,6 +13,9 @@ var cv_dir = "/dev/firefuse/cv";
 console.log("Looking for FireFUSE...");
 if (fs.existsSync("/dev/firefuse/cv")) {
   app.use('/firerest/cv', express.static(cv_dir));
+  app.get('/firerest/config.json', function(req,res) {
+    res.sendfile('/dev/firefuse/config.json');
+  });
   console.log("Found FireFUSE!");
   console.log("Mapping /firerest/cv to: " + cv_dir);
 } else {
