@@ -9,12 +9,12 @@ app.all('*', function(req, res, next) {
   next();
 });
 
-var firefuse_dir = "/dev/firefuse";
+var cv_dir = "/dev/firefuse/cv";
 console.log("Looking for FireFUSE...");
-if (fs.existsSync("/dev/firefuse/cv/1/camera.jpg")) {
-  app.use('/firerest', express.static(firefuse_dir));
+if (fs.existsSync("/dev/firefuse/cv")) {
+  app.use('/firerest/cv', express.static(cv_dir));
   console.log("Found FireFUSE!");
-  console.log("Mapping /firerest to: " + firefuse_dir);
+  console.log("Mapping /firerest/cv to: " + cv_dir);
 } else {
   console.log("FireFUSE is not available. FireREST is demo mode only" );
 }
