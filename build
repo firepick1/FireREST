@@ -1,17 +1,16 @@
 #! /bin/bash
 
-FIREREST_VERSION_MAJOR=0
-FIREREST_VERSION_MINOR=4
-FIREREST_VERSION_PATCH=3 
-echo "FireREST version $FIREREST_VERSION_MAJOR.$FIREREST_VERSION_MINOR.$FIREREST_VERSION_PATCH"
-
+echo "CONFIG   : `grep version www/firerest/config.json`"
 echo "PATH     : $PATH"
 echo "SHELL    : $SHELL"
 echo "SUDO_USER: $SUDO_USER"
 
-ps -ef | grep firerest.js | grep -v grep
+ps -e | grep -E firerest.js > /dev/null
 if [ $? -eq 0 ]; then
-  echo Kill the existing FireREST process before proceeding with the build
+  echo "----------------------------------------"
+  echo "ERROR    : FireREST is already running"
+  echo "SOLUTION : Kill the existing FireREST process before proceeding with the build:"
+  echo "PID      : `ps -e -o pid,command | grep -E "firerest.js" | grep -v grep`"
   exit -1
 fi
 
@@ -27,7 +26,7 @@ fi
 
 if [ "$SUDO_USER" == "" ]; then
   echo "SUDO_USER is not defined. You must run this script as superuser:"
-  echo '  sudo PATH=$PATH ./build'
+  echo '  sudo ./build'
   exit -1
 fi
 
@@ -35,7 +34,7 @@ if [ "$(type -p siege)" == "" ]; then
   echo "++++++++++++++++++ INSTALLING siege ++++++++++++"
   apt-get install -y siege
 else 
-  echo COMPONENT siege: installed
+  echo "COMPONENT: siege installed"
 fi
 
 if [ "$(type -p node)" == "" ]; then
@@ -55,7 +54,7 @@ if [ "$(type -p node)" == "" ]; then
    exit -1
   fi
 else
-  echo COMPONENT NodeJS: installed
+  echo "COMPONENT: NodeJS installed"
 fi
 #if [ "$(type -p npm)" == "" ]; then
 #  echo "You must provide this environment's PATH:"
@@ -66,38 +65,37 @@ if [ ! -e node_modules ]; then
   echo "++++++++++++++++++ INSTALLING NodeJS dependencies ++++++++++++"
   npm install
 else
-  echo COMPONENT node_modules: installed
+  echo "COMPONENT: node_modules installed"
 fi
 
-echo
-echo "To launch FireREST web service:"
-echo "  node server/firesight.js"
-echo 
-echo "Verify FireREST web service at http://localhost:8001"
-echo
-
 if [ $RASPBIAN -ne 1 ]; then
-  echo "COMPONENT Raspberry Pi Debian: NOT AVAILABLE"
-  echo
-  echo "========================== WARNING ==============================="
-  echo "FireREST is currently only supported on Raspberry Pi with Raspbian"
-  echo "However, you can use this computer for FireREST demos and load testing"
-  echo "=================================================================="
-  exit 0
+  echo "PROVIDER : FireREST reference implementation. Static content only"
+  echo "STATUS   : Build complete"
+  livecontent=0
 else 
-  echo "COMPONENT Raspberry Pi Debian: installed"
+  livecontent=1
+  echo "PROVIDER : Raspberry Pi FireFUSE with live content"
+fi
+
+echo "------------------------------------------"
+echo "Launch FireREST web service:"
+echo "  node server/firesight.js"
+echo "Verify FireREST web service at http://localhost:8001"
+
+if [ $livecontent -ne 1 ]; then
+  exit 0
 fi
 
 if [ "$SUDO_USER" == "" ]; then
-  echo "This script must be run with sudo command from a non-root user"
+  echo "ERROR    : This script must be run with sudo command from a non-root user"
   exit -1
 fi
 
 if [ -e version-$FIREREST_VERSION_MAJOR.$FIREREST_VERSION_MINOR ]; then
-  echo "COMPONENT FireREST dependencies: OK"
+  echo "COMPONENT: FireREST dependencies OK"
   pullFireFUSE=0
 else
-  echo "COMPONENT FireREST dependencies: out of date"
+  echo "COMPONENT: FireREST dependencies out of date"
   pullFireFUSE=1
 fi
 date > version-$FIREREST_VERSION_MAJOR.$FIREREST_VERSION_MINOR
@@ -111,12 +109,12 @@ if [ ! -e /dev/firefuse/status ] || [ $pullFireFUSE -ne 0 ] ; then
   sudo -u $SUDO_USER git pull
   ./build
   if [ $? -ne 0 ]; then
-    echo COMPONENT /dev/firefuse: INSTALLATION FAILED
+    echo "COMPONENT: /dev/firefuse: INSTALLATION FAILED"
     exit -1
   fi
   popd
 else
-  echo COMPONENT /dev/firefuse: installed
+  echo "COMPONENT: /dev/firefuse: installed"
 fi
 
-echo "FireREST build complete."
+echo "STATUS    : FireREST build complete."
