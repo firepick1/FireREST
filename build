@@ -1,5 +1,10 @@
 #! /bin/bash
 
+FIREREST_VERSION_MAJOR=0
+FIREREST_VERSION_MINOR=5
+FIREREST_VERSION_PATCH=2
+
+echo "VERSION  : $FIREREST_VERSION_MAJOR.$FIREREST_VERSION_MINOR.$FIREREST_VERSION_PATCH"
 echo "CONFIG   : `grep version www/firerest/config.json`"
 echo "PATH     : $PATH"
 echo "SHELL    : $SHELL"
@@ -29,6 +34,12 @@ if [ "$SUDO_USER" == "" ]; then
   echo '  sudo ./build'
   exit -1
 fi
+
+sudo -u $SUDO_USER sed \
+  -e s/@@FIREREST_VERSION_MAJOR@@/$FIREREST_VERSION_MAJOR/ \
+  -e s/@@FIREREST_VERSION_MINOR@@/$FIREREST_VERSION_MINOR/ \
+  -e s/@@FIREREST_VERSION_PATCH@@/$FIREREST_VERSION_PATCH/ \
+  config.json > www/firerest/config.json
 
 if [ "$(type -p siege)" == "" ]; then
   echo "++++++++++++++++++ INSTALLING siege ++++++++++++"
@@ -98,7 +109,7 @@ fi
 
 date > version-$FIREREST_VERSION_MAJOR.$FIREREST_VERSION_MINOR
 
-echo "STATUS    : FireREST build complete."
+echo "STATUS   : FireREST build complete."
 echo "------------------------------------------"
 echo "Launch FireREST web service:"
 echo "  node server/firesight.js"

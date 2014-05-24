@@ -1,4 +1,4 @@
-{ "FireREST":{"title":"FireREST Reference Service","provider":"Demo", "version":{"major":0, "minor":5, "patch":2} },
+{ "FireREST":{"title":"FireREST Reference Service","provider":"Demo", "version":{"major":@@FIREREST_VERSION_MAJOR@@, "minor":@@FIREREST_VERSION_MINOR@@, "patch":@@FIREREST_VERSION_PATCH@@} },
   "cv":{
     "cve_map":{
       "calc-offset":{
