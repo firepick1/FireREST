@@ -28,11 +28,15 @@ public class JSONResultTest
   public void testCalcOffset_model() throws Exception {
     String json = new Scanner(new File("src/test/resources/calcOffset-model.json")).useDelimiter("\\Z").next();
     JSONResult result = new JSONResult(json);
-    JSONResult channel = result.get("calcOffset-stage").get("channels").get("0");
+    JSONResult stage = result.get("calcOffset-stage");
+    JSONResult channel = stage.get("channels").get("0");
     assertEquals(14, channel.get("dx").getInt());
     assertEquals(0, channel.get("dy").getInt());
     assertEquals("0.978238", channel.get("match").getString());
     assertEquals(0.978238d, channel.get("match").getDouble(), 0);
+
+    assertEquals(400, stage.get("rects").get(0).get("x").getInt());
+    assertEquals(736, stage.get("rects").get(1).get("width").getInt());
   }
 
   public void testCalcOffset_notfound() throws Exception {
