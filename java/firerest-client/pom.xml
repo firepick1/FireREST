@@ -4,7 +4,7 @@
   <groupId>org.firepick</groupId>
   <artifactId>firerest-client</artifactId>
   <packaging>jar</packaging>
-  <version>0.5-SNAPSHOT</version>
+  <version>0.5.5</version>
   <name>firerest-client</name>
   <url>http://github.com/firepick1/FireREST</url>
   <description>Java client for FireREST web services</description>
