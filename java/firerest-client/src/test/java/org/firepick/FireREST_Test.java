@@ -5,7 +5,6 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 // The following imports are required to run test content
-import java.util.Scanner;
 import java.io.File;
 import java.net.*;
 
@@ -42,6 +41,7 @@ public class JSONResultTest extends TestCase {
   public void testCalcOffset_model() {
     File file  = new File("src/test/resources/calcOffset-model.json");
     JSONResult result = FireREST.load(file);
+
     JSONResult stage = result.get("calcOffset-stage");
     JSONResult channel = stage.get("channels").get("0");
     assertEquals(14, channel.get("dx").getInt());
@@ -56,6 +56,7 @@ public class JSONResultTest extends TestCase {
   public void testCalcOffset_notfound() {
     File file  = new File("src/test/resources/calcOffset-notfound.json");
     JSONResult result = FireREST.load(file);
+
     JSONResult channel = result.get("calcOffset-stage").get("channels").get("0");
     assertTrue(channel.isNull());
   }
@@ -63,6 +64,7 @@ public class JSONResultTest extends TestCase {
   public void testProcessJson() throws MalformedURLException {
     URL processUrl = new URL("http://localhost:8001/firerest/cv/1/gray/cve/calc-offset/process.json");
     JSONResult result = FireREST.load(processUrl);
+
     JSONResult stage = result.get("model");
     JSONResult channel = stage.get("channels").get("0");
     assertEquals(0, channel.get("dx").getInt());
