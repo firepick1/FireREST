@@ -1,5 +1,8 @@
 package org.firepick;
 
+/**
+ * Unchecked exception wrapper for FireREST
+ */
 public class FireRESTException extends RuntimeException {
   public FireRESTException(Throwable e) {
     super(e);

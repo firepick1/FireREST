@@ -4,9 +4,33 @@
   <groupId>org.firepick</groupId>
   <artifactId>firerest-client</artifactId>
   <packaging>jar</packaging>
-  <version>1.0-SNAPSHOT</version>
+  <version>0.5.4</version>
   <name>firerest-client</name>
-  <url>http://maven.apache.org</url>
+  <url>http://github.com/firepick1/FireREST</url>
+  <description>Java client for FireREST web services</description>
+  <licenses>
+    <license>
+      <name>The MIT License (MIT)</name>
+      <url>https://github.com/firepick1/FireREST/blob/master/LICENSE</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <scm>
+    <url>https://github.com/firepick1/FireREST</url>
+    <connection>scm:git:git://github.com/firepick1/FireREST.git</connection>
+    <developerConnection>scm:git:git@github.com:firepick1/FireREST.git</developerConnection>
+  </scm>
+  <developers>
+    <developer>
+      <email>karl@firepick.org</email>
+      <name>Karl Lew</name>
+      <url>https://github.com/firepick1</url>
+      <id>firepick1</id>
+    </developer>
+  </developers>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -25,4 +49,45 @@
       <version>2.4</version>
     </dependency>
   </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+	<groupId>org.apache.maven.plugins</groupId>
+	<artifactId>maven-javadoc-plugin</artifactId>
+	<executions>
+	  <execution>
+	    <id>attach-javadocs</id>
+	    <goals>
+	      <goal>jar</goal>
+	    </goals>
+	  </execution>
+	</executions>
+      </plugin>
+      <plugin>
+	<groupId>org.apache.maven.plugins</groupId>
+	<artifactId>maven-source-plugin</artifactId>
+	<executions>
+	  <execution>
+	    <id>attach-sources</id>
+	    <goals>
+	      <goal>jar</goal>
+	    </goals>
+	  </execution>
+	</executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-gpg-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>sign-artifacts</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>sign</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 </project>
