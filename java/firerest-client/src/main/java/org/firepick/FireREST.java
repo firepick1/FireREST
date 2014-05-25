@@ -12,7 +12,7 @@ public class FireREST {
     try {
       String json = new Scanner(file).useDelimiter("\\Z").next();
       return new JSONResult(json);
-    } catch (Exception e) {
+    } catch (Throwable e) {
       throw new FireRESTException(e);
     }
   }
@@ -21,7 +21,7 @@ public class FireREST {
     try {
       String json = IOUtils.toString(url, Charsets.UTF_8);
       return new JSONResult(json);
-    } catch (Exception e) {
+    } catch (Throwable e) {
       throw new FireRESTException(e);
     }
   }

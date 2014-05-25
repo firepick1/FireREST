@@ -74,4 +74,17 @@ public class JSONResultTest extends TestCase {
     assertEquals(164, stage.get("rects").get(1).get("width").getInt());
   }
 
+  public void testBadUrl() throws MalformedURLException {
+    Exception caughtException = null;
+    try {
+      URL processUrl = new URL("http://localhost:8001/firerest/cv/1/gray/cve/NOSUCHTHING/process.json");
+      JSONResult result = FireREST.load(processUrl);
+    } catch (Exception e) {
+      System.out.println("CAUGHT EXPECTED EXCEPTION: " + e.getMessage());
+      caughtException = e;
+    }
+
+    assertNotNull(caughtException);
+  }
+
 }
