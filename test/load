@@ -2,7 +2,7 @@
 
 if [ "$1" == "" ]; then
   echo "Expected hostname:port of server to load test. For example:"
-  echo "  test/load firepick:8001"
+  echo "  test/load firepick"
   exit -1
 fi
 if [ ! -e target ]; then

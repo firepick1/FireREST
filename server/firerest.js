@@ -40,6 +40,6 @@ if (fs.existsSync(cv_dir)) {
 
 app.get('/firerest/config.json', function(req,res) { res.sendfile(config_file); });
 
-var firerest_port=8001;
+var firerest_port=80;
 app.listen(firerest_port);
 console.log('FireREST listening on port ' + firerest_port);

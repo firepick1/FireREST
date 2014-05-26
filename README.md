@@ -15,7 +15,7 @@ Launch FireREST with demonstration images and data:
 1. `git clone git://github.com/firepick1/FireREST ~/FireREST; cd FireREST`
 1. `sudo ./build`
 1. `node server/firerest.js`
-1. Open a browser to view [http://localhost:8001](http://localhost:8001)
+1. Open a browser to view [http://localhost](http://localhost)
 
 ### Use FireREST with a camera
 
