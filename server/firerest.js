@@ -40,6 +40,10 @@ if (fs.existsSync(cv_dir)) {
 
 app.get('/firerest/config.json', function(req,res) { res.sendfile(config_file); });
 
-var firerest_port=80;
+///////////////////////// CHOOSE HTTP PORT ////////////////////////
+// Choose port 80 if you are comfortable having your web server operate with root-level access
+//var firerest_port=80; // sudo node server/firerest.js
+var firerest_port=8080; // node server/firerest.js
+
 app.listen(firerest_port);
 console.log('FireREST listening on port ' + firerest_port);

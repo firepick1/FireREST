@@ -4,19 +4,13 @@ FireREST&trade; is an [open-source](https://github.com/firepick1/FireREST/blob/m
 
 <img width="50%" src="https://github.com/firepick1/FireREST/wiki/FireREST-network.jpg">
 
+### Explore the FireREST Demo 
+Following are test pages that exercise the _FireREST&trade;_ protocol
+using static content:
+
+* [FireREST/CV computer vision](http://firepick1.github.io/firerest/cvtest.html)
+
 ### Tell me more...
 
 * [FireREST wiki](https://github.com/firepick1/FireREST/wiki)
 
-### Explore the FireREST Demo (<5m)
-
-Launch FireREST with demonstration images and data:
-
-1. `git clone git://github.com/firepick1/FireREST ~/FireREST; cd FireREST`
-1. `sudo ./build`
-1. `node server/firerest.js`
-1. Open a browser to view [http://localhost](http://localhost)
-
-### Use FireREST with a camera
-
-* [Raspberry Pi](../../wiki/Raspberry-Pi-Installation)
