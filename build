@@ -81,7 +81,7 @@ fi
 
 function build_git() {
   echo "++++++++++++++++++ BUILDING $1 ++++++++++++"
-  if [ ! -e FireFUSE ]; then
+  if [ ! -e $1 ]; then
     sudo -u $SUDO_USER git clone git://github.com/firepick1/$1
   fi
   pushd $1
