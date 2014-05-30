@@ -126,13 +126,13 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
 	var t = Math.floor(Math.random()*1000000) ;
 	scope.cv.image_instances['camera.jpg'] = t;
 	scope.cv.image_instances['monitor.jpg'] = t;
-	resource === 'save' && (scope.cv.image_instances['saved.png'] = t);
-	resource === 'process' && (scope.cv.image_instances['output.jpg'] = t);
+	resource === 'save.fire' && (scope.cv.image_instances['saved.png'] = t);
+	resource === 'process.fire' && (scope.cv.image_instances['output.jpg'] = t);
 	scope.transmit_end(true);
       });
     }
     scope.resource_GET_icon = function(action) {
-      return scope.transmit_enabled && (action === "process") ?
+      return scope.transmit_enabled && (action === "process.fire") ?
         "glyphicon glyphicon-repeat" : "";
     }
     scope.resource_GET = function(resource) {
@@ -151,7 +151,7 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
     scope.worker = function(ticks) {
      if (scope.transmit_isIdle() && scope.transmit_enabled) {
        if ((ticks % 5) === 0 ) {
-	 scope.cv.resources.indexOf('process.fire') >= 0 && scope.resource_GET('process.cmd');
+	 scope.cv.resources.indexOf('process.fire') >= 0 && scope.resource_GET('process.fire');
        } else if ((ticks % 3) === 0 ) {
 	 scope.image_GET('monitor.jpg');
        } else if ((ticks % 3) === 1 ) {
