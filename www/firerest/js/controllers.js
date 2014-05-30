@@ -6,7 +6,7 @@ var controllers = angular.module('FireREST.controllers', []);
 controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
   function(scope, location, bg) {
     scope.cv = {
-      "resources":['save', 'process'],
+      "resources":['save.fire', 'process.fire'],
       "image":[],
       "server":location.host() || "unknownhost",
       "port":location.port() || "unknownport",
@@ -110,10 +110,10 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
       return scope.resource_response[resource] || " ";
     }
     scope.resource_path = function(resource) {
-      return "/cv/" + scope.cv.camera_name + "/" + scope.cv.profile_name + "/cve/" + scope.cv.cve_name + "/" + resource + ".json";
+      return "/cv/" + scope.cv.camera_name + "/" + scope.cv.profile_name + "/cve/" + scope.cv.cve_name + "/" + resource ;
     };
     scope.resource_url = function(resource) {
-      return scope.camera_url() + scope.cv.profile_name + "/cve/" + scope.cv.cve_name + "/" + resource + ".json";
+      return scope.camera_url() + scope.cv.profile_name + "/cve/" + scope.cv.cve_name + "/" + resource ;
     };
     scope.resource_class = function(resource) {
       return scope.resource_classname[resource] || "fr-json-ok";
@@ -151,7 +151,7 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
     scope.worker = function(ticks) {
      if (scope.transmit_isIdle() && scope.transmit_enabled) {
        if ((ticks % 5) === 0 ) {
-	 scope.cv.resources.indexOf('process') >= 0 && scope.resource_GET('process');
+	 scope.cv.resources.indexOf('process.fire') >= 0 && scope.resource_GET('process.cmd');
        } else if ((ticks % 3) === 0 ) {
 	 scope.image_GET('monitor.jpg');
        } else if ((ticks % 3) === 1 ) {

@@ -1,6 +1,6 @@
 RUNNING LOAD TEST
 Fri May 16 22:01:31 PDT 2014
-http://firepick45:8001/firerest/cv/1/gray/cve/calc-offset/save.cmd
+http://firepick45:8001/firerest/cv/1/gray/cve/calc-offset/save.fire
 ** SIEGE 2.70
 ** Preparing 1 concurrent users for battle.
 The server is now under siege...      done.
@@ -17,7 +17,7 @@ Failed transactions:	           0
 Longest transaction:	        0.37
 Shortest transaction:	        0.10
  
-http://firepick45:8001/firerest/cv/1/gray/cve/calc-offset/process.cmd
+http://firepick45:8001/firerest/cv/1/gray/cve/calc-offset/process.fire
 ** SIEGE 2.70
 ** Preparing 1 concurrent users for battle.
 The server is now under siege...      done.
@@ -85,7 +85,7 @@ Failed transactions:	           0
 Longest transaction:	        0.39
 Shortest transaction:	        0.08
  
-http://firepick45:8001/firerest/cv/1/bgr/cve/calc-offset/save.cmd
+http://firepick45:8001/firerest/cv/1/bgr/cve/calc-offset/save.fire
 ** SIEGE 2.70
 ** Preparing 1 concurrent users for battle.
 The server is now under siege...      done.
@@ -102,7 +102,7 @@ Failed transactions:	           0
 Longest transaction:	        0.35
 Shortest transaction:	        0.03
  
-http://firepick45:8001/firerest/cv/1/bgr/cve/calc-offset/process.cmd
+http://firepick45:8001/firerest/cv/1/bgr/cve/calc-offset/process.fire
 ** SIEGE 2.70
 ** Preparing 1 concurrent users for battle.
 The server is now under siege...      done.

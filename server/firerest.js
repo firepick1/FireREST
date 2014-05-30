@@ -3,6 +3,8 @@ var express = require('express');
 var fs = require('fs');
 var app = express();
 
+express.static.mime.define({'application/json': ['fire']});
+
 app.all('*', function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "X-Requested-With");

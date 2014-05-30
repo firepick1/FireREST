@@ -1,6 +1,6 @@
 RUNNING LOAD TEST
 Mon May 19 08:10:57 PDT 2014
-http://raspberrypi:8001/firerest/cv/1/gray/cve/calc-offset/save.cmd
+http://raspberrypi:8001/firerest/cv/1/gray/cve/calc-offset/save.fire
 ** SIEGE 2.70
 ** Preparing 1 concurrent users for battle.
 The server is now under siege...      done.
@@ -17,7 +17,7 @@ Failed transactions:	           0
 Longest transaction:	        0.20
 Shortest transaction:	        0.10
  
-http://raspberrypi:8001/firerest/cv/1/gray/cve/calc-offset/process.cmd
+http://raspberrypi:8001/firerest/cv/1/gray/cve/calc-offset/process.fire
 ** SIEGE 2.70
 ** Preparing 1 concurrent users for battle.
 The server is now under siege...      done.
@@ -85,7 +85,7 @@ Failed transactions:	           0
 Longest transaction:	        0.19
 Shortest transaction:	        0.08
  
-http://raspberrypi:8001/firerest/cv/1/bgr/cve/calc-offset/save.cmd
+http://raspberrypi:8001/firerest/cv/1/bgr/cve/calc-offset/save.fire
 ** SIEGE 2.70
 ** Preparing 1 concurrent users for battle.
 The server is now under siege...      done.
@@ -102,7 +102,7 @@ Failed transactions:	           0
 Longest transaction:	        0.31
 Shortest transaction:	        0.03
  
-http://raspberrypi:8001/firerest/cv/1/bgr/cve/calc-offset/process.cmd
+http://raspberrypi:8001/firerest/cv/1/bgr/cve/calc-offset/process.fire
 ** SIEGE 2.70
 ** Preparing 1 concurrent users for battle.
 The server is now under siege...      done.

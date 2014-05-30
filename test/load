@@ -16,10 +16,10 @@ function test() {
 
 echo "RUNNING LOAD TEST" > target/load.log
 date >> target/load.log
-test http://$1/firerest/cv/1/gray/cve/calc-offset/save.cmd 
-test http://$1/firerest/cv/1/gray/cve/calc-offset/process.cmd 
+test http://$1/firerest/cv/1/gray/cve/calc-offset/save.fire 
+test http://$1/firerest/cv/1/gray/cve/calc-offset/process.fire 
 test http://$1/firerest/cv/1/camera.jpg 
 test http://$1/firerest/cv/1/monitor.jpg 
 test http://$1/firerest/cv/1/output.jpg 
-test http://$1/firerest/cv/1/bgr/cve/calc-offset/save.cmd 
-test http://$1/firerest/cv/1/bgr/cve/calc-offset/process.cmd 
+test http://$1/firerest/cv/1/bgr/cve/calc-offset/save.fire 
+test http://$1/firerest/cv/1/bgr/cve/calc-offset/process.fire 
