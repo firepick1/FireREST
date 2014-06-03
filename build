@@ -10,7 +10,7 @@ echo "PATH     : $PATH"
 echo "SHELL    : $SHELL"
 echo "SUDO_USER: $SUDO_USER"
 
-ps -e | grep -E firerest.js > /dev/null
+ps -eo uid,args | grep -E firerest.js | grep node > /dev/null
 if [ $? -eq 0 ]; then
   echo "----------------------------------------"
   echo "ERROR    : FireREST is already running"

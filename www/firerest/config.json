@@ -18,7 +18,7 @@
 	  {"op":"stageImage", "stage":"input"},
 	  {"op":"drawRects", "model":"singleBlob", "thickness":"{{thickness}}", "color":"{{rectColor}}"}
 	],
-	"properties": { "rectColor":[32,255,32] }
+	"properties": { "rectColor":[32,255,255] }
       }
     },
     "camera_map":{
