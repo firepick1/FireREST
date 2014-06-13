@@ -2,6 +2,7 @@ console.log("loading express...");
 var express = require('express');
 var fs = require('fs');
 var app = express();
+var post_properties = false;
 
 express.static.mime.define({'application/json': ['fire']});
 
@@ -21,9 +22,6 @@ for (var i = 0; i < dirs.length; i++) {
   app.use(urlpath, express.static(filepath));
   console.log("Mapping urlpath:" + urlpath + " to:" + filepath);
 }
-app.post(/.*\/properties.json$/, function(req,res) { 
-  res.send('what-me-post'); 
-});
 app.get('/', function(req,res) { res.sendfile('www/index.html'); });
 app.get('/index.html', function(req,res) { res.sendfile('www/index.html'); });
 app.get('/firerest/cvtest.html', function(req,res) { res.sendfile('www/firerest/cvtest.html'); });
@@ -32,18 +30,35 @@ app.use(express.bodyParser());
 
 // If possible, use FireFUSE
 console.log("Looking for FireFUSE...");
+var firefuse_dir = "/dev/firefuse";
 var cv_dir = "/dev/firefuse/cv";
 if (fs.existsSync(cv_dir)) {
-  config_file = '/dev/firefuse/config.json';
+  config_file = firefuse_dir + '/config.json';
   app.use('/firerest/cv', express.static(cv_dir));
   console.log("Found FireFUSE!");
   console.log("Mapping /firerest/cv to: " + cv_dir);
+  post_properties = true;
 } else {
   app.use('/firerest/cv', express.static('www/firerest/cv'));
   console.log("FireFUSE is not available. FireREST is demo mode only" );
 }
 
 app.get('/firerest/config.json', function(req,res) { res.sendfile(config_file); });
+
+app.post(/.*\/properties.json$/, function(req,res,next) { 
+  var filepath = req.path.replace(/^\/firerest/, firefuse_dir);
+  var data = '';
+  req.on('data', function(datum){ data += datum; });
+  req.on('end', function (){
+    if (post_properties) {
+      console.log("POST file:"+filepath+" json:" + data);
+      fs.writeFile(filePath, data, function() { res.end(); });
+    } else {
+      console.log("POST HTTP405 file:"+filepath+" json:" + data);
+      res.send(405, {error:"This FireREST web service does not support properties.json updates"});
+    }
+  });
+});
 
 ///////////////////////// CHOOSE HTTP PORT ////////////////////////
 // Choose port 80 if you are comfortable having your web server operate with root-level access
