@@ -40,3 +40,6 @@ sudo apt-get --purge remove -y libscsynth1
 sudo apt-get autoremove
 sudo apt-get clean
 find . -name .git -execdir git gc --aggressive \;
+pushd FireSight; make clean; popd
+if [ -e FireSight/jannson ]; then pushd FireSight/jannson; make clean; popd; fi
+pushd FireFUSE; make clean; popd
