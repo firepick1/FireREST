@@ -129,7 +129,7 @@ p {
 .fr-json {
   min-width:25em;
   min-height:2.2em;
-  padding:2px;
+  padding:0px;
   border: none !important;
 }
 .fr-json-post {

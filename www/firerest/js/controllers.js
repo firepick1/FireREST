@@ -10,6 +10,7 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
       "image":[],
       "server":location.host() || "unknownhost",
       "port":location.port() || "unknownport",
+      "post_data":{},
       "service": "/firerest",
       "collapse": {"camera":true, "cve":true, "service":true},
       "image_instances":{},
@@ -123,11 +124,13 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
         //console.log('resource_XHR' + resource + response);
 	scope.resource_response[resource] = response;
 	scope.resource_classname[resource] = classname;
-	var t = Math.floor(Math.random()*1000000) ;
-	scope.cv.image_instances['camera.jpg'] = t;
-	scope.cv.image_instances['monitor.jpg'] = t;
-	resource === 'save.fire' && (scope.cv.image_instances['saved.png'] = t);
-	resource === 'process.fire' && (scope.cv.image_instances['output.jpg'] = t);
+        if (resource === 'save.fire' || resource === 'process.fire') {
+	  var t = Math.floor(Math.random()*1000000) ;
+	  scope.cv.image_instances['monitor.jpg'] = t;
+	  resource === 'save.fire' && (scope.cv.image_instances['saved.png'] = t);
+	  resource === 'process.fire' && (scope.cv.image_instances['output.jpg'] = t);
+	}
+
 	scope.transmit_end(true);
       });
     }
@@ -136,18 +139,44 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
         "glyphicon glyphicon-repeat" : "";
     }
     scope.resource_GET = function(resource) {
-	scope.transmit_start();
-	$.ajax({
-	  url: scope.resource_url(resource),
-	  data: { r: Math.floor(Math.random()*1000000) },
-	  success: function( data ) {
-	    scope.resource_XHR(resource, "fr-json-ok", JSON.stringify(data), true);
-	  },
-	  error: function( jqXHR, ex) {
-	    scope.resource_XHR(resource, "fr-json-err", JSON.stringify(jqXHR), false);
-	  }
-	});
+      scope.transmit_start();
+      $.ajax({
+	url: scope.resource_url(resource),
+	data: { r: Math.floor(Math.random()*1000000) },
+	success: function( data ) {
+	  scope.resource_XHR(resource, "fr-json-ok", JSON.stringify(data), true);
+	},
+	error: function( jqXHR, ex) {
+	  scope.resource_XHR(resource, "fr-json-err", JSON.stringify(jqXHR), false);
+	}
+      });
+    }
+    scope.isValidJSON = function(value) {
+      try {
+	JSON.parse(value);
+      } catch (e) {
+	return false;
       }
+      return true;
+    }
+    scope.resource_POST = function(resource) {
+      scope.transmit_start();
+      var data = scope.cv.post_data[resource];
+      $.ajax({
+        type:"POST",
+	url: scope.resource_url(resource),
+	data: data,
+	success: function() {
+	  scope.resource_XHR(resource, "fr-json-ok", data, true);
+	},
+	error: function( jqXHR, ex) {
+	  scope.resource_XHR(resource, "fr-json-err", JSON.stringify(jqXHR), false);
+	}
+      });
+    }
+    scope.resource_isPOST = function(resource) {
+      return resource === 'properties.json';
+    }
     scope.worker = function(ticks) {
      if (scope.transmit_isIdle() && scope.transmit_enabled) {
        if ((ticks % 5) === 0 ) {

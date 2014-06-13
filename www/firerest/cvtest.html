@@ -177,15 +177,15 @@
 	    </textarea>
 	  </div>
 	</div>
-	<div ng-if="resource === 'properties.json'" class="row">
+	<div ng-if="resource_isPOST(resource)" class="row">
 	  <div class="fr-cell-btn col-md-1">
-	    <button ng-if="resource==='properties.json'" title="{{resource_url(resource)}}" 
-	      type="button" class="btn btn-primary btn-sm fr-post" ng-click="resource_GET(resource)">
-	      POST&nbsp;<span class="{{resource_GET_icon(resource)}}"></span>
+	    <button ng-disabled="!isValidJSON(cv.post_data[resource])" title="{{resource_url(resource)}}" 
+	      type="button" class="btn btn-primary btn-sm fr-post" ng-click="resource_POST(resource)">
+	      POST&nbsp;
 	    </button>
 	  </div>
 	  <div class="fr-cell-data col-md-7">
-	    <textarea class="form-control fr-json-post" ></textarea>
+	    <textarea class="form-control fr-json-post" ng-model="cv.post_data[resource]"></textarea>
 	  </div>
 	</div>
       </div>
