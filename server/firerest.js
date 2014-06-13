@@ -52,7 +52,7 @@ app.post(/.*\/properties.json$/, function(req,res,next) {
   req.on('end', function (){
     if (post_properties) {
       console.log("POST file:"+filepath+" json:" + data);
-      fs.writeFile(filePath, data, function() { res.end(); });
+      fs.writeFile(filepath, data, function() { res.end(); });
     } else {
       console.log("POST HTTP405 file:"+filepath+" json:" + data);
       res.send(405, {error:"This FireREST web service does not support properties.json updates"});
