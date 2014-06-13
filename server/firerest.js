@@ -21,6 +21,9 @@ for (var i = 0; i < dirs.length; i++) {
   app.use(urlpath, express.static(filepath));
   console.log("Mapping urlpath:" + urlpath + " to:" + filepath);
 }
+app.post(/.*\/properties.json$/, function(req,res) { 
+  res.send('what-me-post'); 
+});
 app.get('/', function(req,res) { res.sendfile('www/index.html'); });
 app.get('/index.html', function(req,res) { res.sendfile('www/index.html'); });
 app.get('/firerest/cvtest.html', function(req,res) { res.sendfile('www/firerest/cvtest.html'); });
