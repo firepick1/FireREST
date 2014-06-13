@@ -27,15 +27,14 @@
   <div class="fr-banner"> 
     <div class="fr-banner-left">
       <h4 class="fr-banner-title">
-	<a title="FireREST content source"  target="_blank"
+	<a class="fr-title-minor" title="FireREST content source"  target="_blank"
 	  href="https://github.com/firepick1/FireREST/wiki/{{config.FireREST.provider}}-content">{{config.FireREST.title}}</a>
-	/
+	<br>
         <a target="_blank" title="FireREST-CV computer vision REST api" 
 	  href="https://github.com/firepick1/FireREST/wiki/FireREST-CV">FireREST-CV</a> 
 	Test Page 
       </h4>
     </div>
-    <div class="fr-version">version {{config.FireREST.version.major}}.{{config.FireREST.version.minor}}.{{config.FireREST.version.patch}}</div>
     <div class="fr-banner-right">
       <a title="FireREST computer aided manufacturing REST services" 
         href="https://github.com/firepick1/FireREST/wiki/Home" target="_blank">
@@ -48,15 +47,15 @@
 
     <div class="fr-form">
       <div class="fr-section-title">
-	<div class="fr-collapse">
-	  <button class="btn btn-default btn-sm fr-collapse-btn" 
-	    ng-click="collapse_toggle('service')"><span class="{{collapse_icon('service')}}"></span></button>
-	</div>
 	Service 
 	<span class="glyphicon {{transmit_status()}}"></span>
 	<button title="disable/enable auto-update" class="btn btn-default btn-sm fr-enable" ng-click="transmit_click()">
 	  <span class="glyphicon {{transmit_icon()}}"></span>
 	</button>
+	<div class="fr-collapse">
+	  <button class="btn btn-default btn-sm fr-collapse-btn" 
+	    ng-click="collapse_toggle('service')"><span class="{{collapse_icon('service')}}"></span></button>
+	</div>
       </div>
       <div ng-if="!cv.collapse.service" class="row">
 	<div class="col-md-2">
@@ -82,11 +81,11 @@
     </div>
     <div class="fr-form">
       <div class="fr-section-title">
+	Camera: {{cv.camera_name}}/{{cv.profile_name}}
 	<div class="fr-collapse">
 	  <button class="btn btn-default btn-sm fr-collapse-btn" 
 	    ng-click="collapse_toggle('camera')"><span class="{{collapse_icon('camera')}}"></span></button>
 	</div>
-	Camera: {{cv.camera_name}}/{{cv.profile_name}}
       </div>
       <div ng-if="!cv.collapse.camera" class="row">
 	<div class="col-md-2">
@@ -134,11 +133,11 @@
 
     <div class="fr-form">
       <div class="fr-section-title">
+	CVE: {{cv.cve_name}}
 	<div class="fr-collapse">
 	  <button class="btn btn-default btn-sm fr-collapse-btn" 
 	    ng-click="collapse_toggle('cve')"><span class="{{collapse_icon('cve')}}"></span></button>
 	</div>
-	CVE: {{cv.cve_name}}
       </div>
       <div ng-if="!cv.collapse.cve" class="row">
 	<div class="col-md-3">
@@ -173,12 +172,25 @@
 	    </button>
 	  </div>
 	  <div class="fr-cell-data col-md-7">
-	    <div title="{{resource_url(resource)}}" 
-	      class="fr-json {{resource_classname[resource]}}" id="{{resource}}">{{resource_text(resource)}}</div>
+	    <textarea readonly title="{{resource_url(resource)}}" 
+	      class="form-control fr-json {{resource_classname[resource]}}" id="{{resource}}">{{resource_text(resource)}}
+	    </textarea>
+	  </div>
+	</div>
+	<div ng-if="resource === 'properties.json'" class="row">
+	  <div class="fr-cell-btn col-md-1">
+	    <button ng-if="resource==='properties.json'" title="{{resource_url(resource)}}" 
+	      type="button" class="btn btn-primary btn-sm fr-post" ng-click="resource_GET(resource)">
+	      POST&nbsp;<span class="{{resource_GET_icon(resource)}}"></span>
+	    </button>
+	  </div>
+	  <div class="fr-cell-data col-md-7">
+	    <textarea class="form-control fr-json-post" ></textarea>
 	  </div>
 	</div>
       </div>
     </div>
   </div>
+  <div class="fr-version">&copy; firepick.org 2014 FireREST&trade; version {{config.FireREST.version.major}}.{{config.FireREST.version.minor}}.{{config.FireREST.version.patch}}</div>
 </body>
 </html>
