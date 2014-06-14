@@ -2,7 +2,7 @@
 
 FIREREST_VERSION_MAJOR=0
 FIREREST_VERSION_MINOR=7
-FIREREST_VERSION_PATCH=1
+FIREREST_VERSION_PATCH=2
 
 if [ "$SUDO_USER" == "" ]; then
   echo "SUDO_USER is not defined. You must run this script as superuser:"
