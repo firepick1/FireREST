@@ -2,7 +2,7 @@
 
 FIREREST_VERSION_MAJOR=0
 FIREREST_VERSION_MINOR=7
-FIREREST_VERSION_PATCH=0
+FIREREST_VERSION_PATCH=1
 
 function pull_git() {
   echo "++++++++++++++++++ UPDATING $1 ++++++++++++"
