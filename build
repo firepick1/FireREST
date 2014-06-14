@@ -4,6 +4,12 @@ FIREREST_VERSION_MAJOR=0
 FIREREST_VERSION_MINOR=7
 FIREREST_VERSION_PATCH=1
 
+if [ "$SUDO_USER" == "" ]; then
+  echo "SUDO_USER is not defined. You must run this script as superuser:"
+  echo '  sudo ./build'
+  exit -1
+fi
+
 function pull_git() {
   echo "++++++++++++++++++ UPDATING $1 ++++++++++++"
   if [ ! -e $1 ]; then
@@ -11,12 +17,14 @@ function pull_git() {
   fi
   pushd $1
   sudo -E -u $SUDO_USER git pull
+  popd
 }
 pull_git FireSight
 pull_git FireFUSE
 
 function build_git() {
   echo "++++++++++++++++++ BUILDING $1 ++++++++++++"
+  pushd $1
   ./build
   if [ $? -ne 0 ]; then
     echo "COMPONENT: $1 INSTALLATION FAILED"
@@ -48,12 +56,6 @@ if [ "$(arch)" != "armv6l" ] || [ "$(lsb_release -is)" != "Debian" ] ;then
   RASPBIAN=0
 else
   RASPBIAN=1
-fi
-
-if [ "$SUDO_USER" == "" ]; then
-  echo "SUDO_USER is not defined. You must run this script as superuser:"
-  echo '  sudo ./build'
-  exit -1
 fi
 
 sudo -u $SUDO_USER sed \
