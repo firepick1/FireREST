@@ -1,4 +1,4 @@
-{ "FireREST":{"title":"FireREST Reference Service","provider":"Demo", "version":{"major":0, "minor":6, "patch":0} },
+{ "FireREST":{"title":"FireREST Reference Service","provider":"Demo", "version":{"major":0, "minor":7, "patch":0} },
   "cv":{
     "cve_map":{
       "calc-offset":{
@@ -18,7 +18,7 @@
 	  {"op":"stageImage", "stage":"input"},
 	  {"op":"drawRects", "model":"singleBlob", "thickness":"{{thickness}}", "color":"{{rectColor}}"}
 	],
-	"properties": { "rectColor":[32,255,255] }
+	"properties": { "rectColor":[32,255,32] }
       }
     },
     "camera_map":{
