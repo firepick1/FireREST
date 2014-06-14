@@ -144,7 +144,11 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
 	url: scope.resource_url(resource),
 	data: { r: Math.floor(Math.random()*1000000) },
 	success: function( data ) {
-	  scope.resource_XHR(resource, "fr-json-ok", JSON.stringify(data), true);
+	  if (typeof data === 'object') {
+	    data = JSON.stringify(data);
+	  }
+	  data = ("" + data).trim();
+	  scope.resource_XHR(resource, "fr-json-ok", data, true);
 	},
 	error: function( jqXHR, ex) {
 	  scope.resource_XHR(resource, "fr-json-err", JSON.stringify(jqXHR), false);
