@@ -4,6 +4,27 @@ FIREREST_VERSION_MAJOR=0
 FIREREST_VERSION_MINOR=7
 FIREREST_VERSION_PATCH=0
 
+function pull_git() {
+  echo "++++++++++++++++++ UPDATING $1 ++++++++++++"
+  if [ ! -e $1 ]; then
+    sudo -u $SUDO_USER git clone git://github.com/firepick1/$1
+  fi
+  pushd $1
+  sudo -E -u $SUDO_USER git pull
+}
+pull_git FireSight
+pull_git FireFUSE
+
+function build_git() {
+  echo "++++++++++++++++++ BUILDING $1 ++++++++++++"
+  ./build
+  if [ $? -ne 0 ]; then
+    echo "COMPONENT: $1 INSTALLATION FAILED"
+    exit -1
+  fi
+  popd
+}
+
 echo "VERSION  : $FIREREST_VERSION_MAJOR.$FIREREST_VERSION_MINOR.$FIREREST_VERSION_PATCH"
 echo "CONFIG   : `grep version www/firerest/config.json`"
 echo "PATH     : $PATH"
@@ -78,21 +99,6 @@ if [ ! -e node_modules ]; then
 else
   echo "COMPONENT: node_modules installed"
 fi
-
-function build_git() {
-  echo "++++++++++++++++++ BUILDING $1 ++++++++++++"
-  if [ ! -e $1 ]; then
-    sudo -u $SUDO_USER git clone git://github.com/firepick1/$1
-  fi
-  pushd $1
-  sudo -u $SUDO_USER git pull
-  ./build
-  if [ $? -ne 0 ]; then
-    echo "COMPONENT: $1 INSTALLATION FAILED"
-    exit -1
-  fi
-  popd
-}
 
 if [ $RASPBIAN -ne 1 ]; then
   echo "PROVIDER : FireREST reference implementation. Static content only"
