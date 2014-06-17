@@ -23,6 +23,8 @@
     },
     "camera_map":{
       "1":{
+        "width":800,
+	"height":200,
 	"profile_map":{
 	  "gray":{ "cve_names":[ "calc-offset", "locate-part" ] },
 	  "bgr":{ "cve_names":[ "calc-offset", "locate-part" ] }
