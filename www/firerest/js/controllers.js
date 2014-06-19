@@ -12,6 +12,7 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
       "port":location.port() || "unknownport",
       "post_data":{},
       "service": "/firerest",
+      "protocol":"",
       "collapse": {"camera":true, "cve":true, "service":true},
       "image_instances":{},
       "image_large":{}
@@ -24,7 +25,7 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
       return "http://" + scope.cv.server + port + scope.cv.service;
     };
     scope.camera_url = function() {
-      return scope.service_url() + "/cv/" + scope.cv.camera_name + "/";
+      return scope.service_url() + scope.cv.protocol + "/cv/" + scope.cv.camera_name + "/";
     };
 
     scope.transmit_status = function() {

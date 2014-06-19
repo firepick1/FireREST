@@ -32,14 +32,18 @@ app.use(express.bodyParser());
 console.log("Looking for FireFUSE...");
 var firefuse_dir = "/dev/firefuse";
 var cv_dir = "/dev/firefuse/cv";
+var sync_dir = "/dev/firefuse/sync";
 if (fs.existsSync(cv_dir)) {
   config_file = firefuse_dir + '/config.json';
   app.use('/firerest/cv', express.static(cv_dir));
+  app.use('/firerest/sync', express.static(sync_dir));
   console.log("Found FireFUSE!");
   console.log("Mapping /firerest/cv to: " + cv_dir);
+  console.log("Mapping /firerest/sync to: " + sync_dir);
   post_properties = true;
 } else {
   app.use('/firerest/cv', express.static('www/firerest/cv'));
+  app.use('/firerest/sync/cv', express.static('www/firerest/cv'));
   console.log("FireFUSE is not available. FireREST is demo mode only" );
 }
 
