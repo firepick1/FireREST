@@ -28,6 +28,9 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
       return scope.service_url() + scope.cv.protocol + "/cv/" + scope.cv.camera_name + "/";
     };
 
+    scope.transmit_class = function(level) {
+      return scope.transmit > level ? "fr-transmit-on" : "";
+    }
     scope.transmit_status = function() {
       switch (scope.transmit) {
 	case 0: return "glyphicon-remove fr-transmit-dead";

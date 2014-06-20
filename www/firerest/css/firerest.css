@@ -24,6 +24,17 @@ p {
   font-size:20px;
   margin-top: 0.8em;
 }
+.fr-transmit {
+  display: inline-block;
+  font-size: 10pt;
+  color: #eee;
+  width:8px;
+  padding:0;
+  margin:2px;
+}
+.fr-transmit-on {
+  color: #0f0;
+}
 .fr-transmit-idle {
   color: #080;
 }
