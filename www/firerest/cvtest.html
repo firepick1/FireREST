@@ -72,10 +72,10 @@
 	  <input type="text" ng-model="cv.service" ng-change="config_load()" class="form-control" placeholder="localhost">
 	</div>
 	<div class="col-md-3">
-	  <div class="control-label fr-control-label">protocol</div>
+	  <div class="control-label fr-control-label">return</div>
 	  <select ng-model="cv.protocol" ng-change="clear_results()" class="form-control">
-	    <option value="">cached (fast and robust)</option>
-	    <option value="/sync">synchronous (blocking)</option>
+	    <option value="">Fast Data (cached)</option>
+	    <option value="/sync">Fresh Data (synchronous/blocking)</option>
 	  </select>
 	</div>
       </div>
