@@ -12,14 +12,13 @@ fi
 
 echo "SUDO	: require password for changing machine configuration"
 sudo -k
-echo "COMMAND	: time sudo -E ./build &> build.log"
-time sudo -E ./build &> build.log
+sudo echo "SUDO	: confirmed"
+echo "COMMAND	: sudo -E ./build |& tee build.log"
+sudo -E ./build |& tee build.log
 if [ $? -ne 0 ]; then
   echo "----------------------------------"
   echo "ERROR	: Could not build FireREST"
   echo "ERROR	: See build.log"
   exit -1
 fi
-echo "----------------------------------"
-echo "LOG	: build.log"
-echo "SUCCESS	: FireREST updated and built"
+echo "LOG	: See build.log"
