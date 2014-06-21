@@ -72,7 +72,7 @@ if [ "$(type -p siege)" == "" ]; then
   echo "++++++++++++++++++ INSTALLING siege ++++++++++++"
   apt-get install -y siege
 else 
-  echo "ACTION	: siege installed"
+  echo "STATUS	: siege installed"
 fi
 
 if [ "$(type -p node)" == "" ]; then
@@ -92,13 +92,13 @@ if [ "$(type -p node)" == "" ]; then
    exit -1
   fi
 else
-  echo "ACTION	: NodeJS installed"
+  echo "STATUS	: NodeJS installed"
 fi
 if [ ! -e node_modules ]; then
   echo "++++++++++++++++++ INSTALLING NodeJS dependencies ++++++++++++"
   npm install
 else
-  echo "ACTION	: node_modules installed"
+  echo "STATUS	: node_modules installed"
 fi
 
 if [ $RASPBIAN -ne 1 ]; then
@@ -107,7 +107,7 @@ if [ $RASPBIAN -ne 1 ]; then
 else 
   echo "CONTENT	: Raspberry Pi FireFUSE with live content"
   if [ -e version-$FIREREST_VERSION_MAJOR.$FIREREST_VERSION_MINOR ] && [ -e /dev/firefuse/status ] ; then
-    echo "ACTION	: FireREST dependencies OK"
+    echo "STATUS	: FireREST dependencies OK"
   else
     build_git FireSight
     build_git FireFUSE
