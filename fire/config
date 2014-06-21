@@ -11,10 +11,10 @@ function help() {
   echo "	Print this documentation:"
   echo "	   fire/config -h"
   echo
-  echo "	Apply default configuration file:
+  echo "	Apply default configuration file:"
   echo "	  fire/config www/firerest/config.json"
   echo 
-  echo "	Apply custom configuration file:
+  echo "	Apply custom configuration file:"
   echo "	  fire/config custom/myconfig.json"
   echo 
   echo "SEE ALSO"
