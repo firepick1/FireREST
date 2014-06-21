@@ -2,26 +2,26 @@
 
 FIREREST_VERSION_MAJOR=0
 FIREREST_VERSION_MINOR=8
-FIREREST_VERSION_PATCH=1
+FIREREST_VERSION_PATCH=2
 
 function pull_git() {
-  echo "++++++++++++++++++ UPDATING $1 ++++++++++++"
+  echo "GIT	: UPDATING $1"
   if [ ! -e $1 ]; then
     sudo -E -u $SUDO_USER git clone git://github.com/firepick1/$1
   fi
-  pushd $1
+  pushd $1 &> /dev/null
   sudo -E -u $SUDO_USER git pull
-  popd
+  popd &> /dev/null
 }
 function build_git() {
-  echo "++++++++++++++++++ BUILDING $1 ++++++++++++"
-  pushd $1
+  echo "STATUS	: BUILDING $1"
+  pushd $1 &> /dev/null
   ./build
   if [ $? -ne 0 ]; then
-    echo "COMPONENT: $1 INSTALLATION FAILED"
+    echo "ERROR	: $1 INSTALLATION FAILED"
     exit -1
   fi
-  popd
+  popd &> /dev/null
 }
 
 echo "COMMAND	: ../FireREST/build"
