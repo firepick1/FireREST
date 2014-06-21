@@ -24,16 +24,18 @@ function build_git() {
   popd
 }
 
-echo "VERSION  : $FIREREST_VERSION_MAJOR.$FIREREST_VERSION_MINOR.$FIREREST_VERSION_PATCH"
-echo "CONFIG   : `grep version www/firerest/config.json`"
-echo "PATH     : $PATH"
-echo "SHELL    : $SHELL"
-echo "SUDO_USER: $SUDO_USER"
-echo "SSH_AGENT_PID: $SSH_AGENT_PID"
+echo "COMMAND	: ../FireREST/build"
+echo "VERSION	: $FIREREST_VERSION_MAJOR.$FIREREST_VERSION_MINOR.$FIREREST_VERSION_PATCH"
+echo "CONFIG	: `grep version www/firerest/config.json`"
+echo "PATH	: $PATH"
+echo "SHELL	: $SHELL"
+echo "SUDO	: SUDO_USER: $SUDO_USER"
+echo "SSH	: SSH_AGENT_PID: $SSH_AGENT_PID"
 
 if [ "$SUDO_USER" == "" ]; then
-  echo "SUDO_USER is not defined. You must run this script as superuser:"
-  echo '  sudo ./build'
+  echo "ERROR	: SUDO_USER is not defined"
+  echo "TRY	: You must run this script as superuser:"
+  echo 'TRY	:   sudo ./build'
   exit -1
 fi
 
@@ -43,9 +45,9 @@ pull_git FireFUSE
 ps -eo uid,args | grep -E firerest.js | grep node > /dev/null
 if [ $? -eq 0 ]; then
   echo "----------------------------------------"
-  echo "ERROR    : FireREST is already running"
-  echo "SOLUTION : Kill the existing FireREST process before proceeding with the build:"
-  echo "PID      : `ps -e -o pid,command | grep -E "firerest.js" | grep -v grep`"
+  echo "ERROR	: FireREST is already running"
+  echo "TRY	: Kill the existing FireREST process before proceeding with the build:"
+  echo "PID	: `ps -e -o pid,command | grep -E "firerest.js" | grep -v grep`"
   exit -1
 fi
 
@@ -69,7 +71,7 @@ if [ "$(type -p siege)" == "" ]; then
   echo "++++++++++++++++++ INSTALLING siege ++++++++++++"
   apt-get install -y siege
 else 
-  echo "COMPONENT: siege installed"
+  echo "ACTION	: siege installed"
 fi
 
 if [ "$(type -p node)" == "" ]; then
@@ -89,27 +91,22 @@ if [ "$(type -p node)" == "" ]; then
    exit -1
   fi
 else
-  echo "COMPONENT: NodeJS installed"
+  echo "ACTION	: NodeJS installed"
 fi
-#if [ "$(type -p npm)" == "" ]; then
-#  echo "You must provide this environment's PATH:"
-#  echo '  sudo PATH=$PATH ./build'
-#  exit -1
-#fi
 if [ ! -e node_modules ]; then
   echo "++++++++++++++++++ INSTALLING NodeJS dependencies ++++++++++++"
   npm install
 else
-  echo "COMPONENT: node_modules installed"
+  echo "ACTION	: node_modules installed"
 fi
 
 if [ $RASPBIAN -ne 1 ]; then
-  echo "PROVIDER : FireREST reference implementation. Static content only"
-  echo "STATUS   : Build complete"
+  echo "CONTENT	: FireREST reference implementation. Static content only"
+  echo "SUCCESS	: Build complete"
 else 
-  echo "PROVIDER : Raspberry Pi FireFUSE with live content"
+  echo "CONTENT	: Raspberry Pi FireFUSE with live content"
   if [ -e version-$FIREREST_VERSION_MAJOR.$FIREREST_VERSION_MINOR ] && [ -e /dev/firefuse/status ] ; then
-    echo "COMPONENT: FireREST dependencies OK"
+    echo "ACTION	: FireREST dependencies OK"
   else
     build_git FireSight
     build_git FireFUSE
@@ -118,8 +115,8 @@ fi
 
 date > version-$FIREREST_VERSION_MAJOR.$FIREREST_VERSION_MINOR
 
-echo "STATUS   : FireREST build complete."
 echo "------------------------------------------"
-echo "Launch FireREST web service:"
-echo "  node server/firesight.js"
-echo "Verify FireREST web service at http://localhost:8080"
+echo "SUCCESS	: FireREST build complete."
+echo "TEST	: Launch FireREST web service:"
+echo "TEST	;   node server/firesight.js"
+echo "TEST	; Verify FireREST web service at http://localhost:8080"
