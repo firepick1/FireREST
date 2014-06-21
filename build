@@ -4,24 +4,15 @@ FIREREST_VERSION_MAJOR=0
 FIREREST_VERSION_MINOR=7
 FIREREST_VERSION_PATCH=3
 
-if [ "$SUDO_USER" == "" ]; then
-  echo "SUDO_USER is not defined. You must run this script as superuser:"
-  echo '  sudo ./build'
-  exit -1
-fi
-
 function pull_git() {
   echo "++++++++++++++++++ UPDATING $1 ++++++++++++"
   if [ ! -e $1 ]; then
-    sudo -u $SUDO_USER git clone git://github.com/firepick1/$1
+    sudo -E -u $SUDO_USER git clone git://github.com/firepick1/$1
   fi
   pushd $1
   sudo -E -u $SUDO_USER git pull
   popd
 }
-pull_git FireSight
-pull_git FireFUSE
-
 function build_git() {
   echo "++++++++++++++++++ BUILDING $1 ++++++++++++"
   pushd $1
@@ -38,6 +29,16 @@ echo "CONFIG   : `grep version www/firerest/config.json`"
 echo "PATH     : $PATH"
 echo "SHELL    : $SHELL"
 echo "SUDO_USER: $SUDO_USER"
+echo "SSH_AGENT_PID: $SSH_AGENT_PID"
+
+if [ "$SUDO_USER" == "" ]; then
+  echo "SUDO_USER is not defined. You must run this script as superuser:"
+  echo '  sudo ./build'
+  exit -1
+fi
+
+pull_git FireSight
+pull_git FireFUSE
 
 ps -eo uid,args | grep -E firerest.js | grep node > /dev/null
 if [ $? -eq 0 ]; then
