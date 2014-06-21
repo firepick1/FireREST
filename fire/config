@@ -1,0 +1,51 @@
+#! /bin/bash
+
+function help() {
+  echo "NAME"
+  echo "	fire/config - Update FireREST/FireFUSE configuration"
+  echo""
+  echo "SYNOPSIS"
+  echo "	fire/config "`tput smul`"config.json"`tput rmul`
+  echo ""
+  echo "EXAMPLES"
+  echo "	Print this documentation:"
+  echo "	   fire/config -h"
+  echo
+  echo "	Apply configuration file named \"config.json\"":
+  echo "	  fire/config config.json"
+  echo ""
+  echo "SEE ALSO"
+  echo "	https://github.com/firepick1/FireREST/wiki/config.json"
+}
+
+if [ "$1" == "" ] || [ "$1" == "-h" ]; then help; exit 0; fi
+if [ ! -e "$1" ]; then
+  echo "ERROR: $1 not found"
+  exit -1;
+fi
+if [ ! -e /dev/firefuse ]; then
+  echo "ERROR: FireFUSE is not installed and cannot be configured" 
+  exit -1;
+fi
+
+sudo -k
+if [ -e /dev/firefuse/status ]; then
+  sudo fusermount -u /dev/firefuse
+  if [ $? -ne 0 ]; then
+    echo "ERROR: /dev/firefuse could not be unmounted"
+    exit -1
+  fi
+fi
+sudo cp $1 /var/firefuse/config
+if [ $? -ne 0 ]; then
+  echo "ERROR: could not copy configuration $1 to /var/firefuse/config"
+  exit -1
+fi
+pushd ~/FireREST/FireFUSE
+  sudo target/firefuse -o allow_other /dev/firefuse
+  if [ $? -ne 0 ]; then
+    echo "ERROR: /dev/firefuse could not be restarted"
+    exit -1
+  fi
+popd
+echo "SUCCESS: Configuration installed"
