@@ -25,6 +25,8 @@ function build_git() {
 }
 
 echo "COMMAND	: ../FireREST/build"
+echo "ETA	: 1-30 minutes"
+echo "HELP	: https://github.com/firepick1/FireREST/wiki/Build-FireREST"
 echo "DATE	: `date`"
 echo "VERSION	: $FIREREST_VERSION_MAJOR.$FIREREST_VERSION_MINOR.$FIREREST_VERSION_PATCH"
 echo "CONFIG	: `grep version www/firerest/config.json`"
@@ -118,7 +120,7 @@ date > version-$FIREREST_VERSION_MAJOR.$FIREREST_VERSION_MINOR
 
 echo "------------------------------------------"
 echo "DATE	: `date`"
-echo "SUCCESS	: FireREST build complete."
+echo "SUCCESS	: ../FireREST/build complete"
 echo "TEST	: Launch FireREST web service:"
 echo "TEST	;   node server/firesight.js"
 echo "TEST	; Verify FireREST web service at http://localhost:8080"
