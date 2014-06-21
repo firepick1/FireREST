@@ -1,6 +1,7 @@
 #! /bin/bash
 
-echo "COMMAND	: fire/udpate"
+echo "COMMAND	: fire/update"
+echo "ETA	: 1-20 minutes, interaction required"
 
 echo "GIT	: `git config remote.origin.url`"
 git pull
@@ -11,9 +12,14 @@ fi
 
 echo "SUDO	: require password for changing machine configuration"
 sudo -k
-sudo -E ./build &> build.log
+echo "COMMAND	: time sudo -E ./build &> build.log"
+time sudo -E ./build &> build.log
 if [ $? -ne 0 ]; then
+  echo "----------------------------------"
   echo "ERROR	: Could not build FireREST"
+  echo "ERROR	: See build.log"
   exit -1
 fi
+echo "----------------------------------"
+echo "LOG	: build.log"
 echo "SUCCESS	: FireREST updated and built"

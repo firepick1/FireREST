@@ -25,6 +25,7 @@ function build_git() {
 }
 
 echo "COMMAND	: ../FireREST/build"
+echo "DATE	: `date`"
 echo "VERSION	: $FIREREST_VERSION_MAJOR.$FIREREST_VERSION_MINOR.$FIREREST_VERSION_PATCH"
 echo "CONFIG	: `grep version www/firerest/config.json`"
 echo "PATH	: $PATH"
@@ -116,6 +117,7 @@ fi
 date > version-$FIREREST_VERSION_MAJOR.$FIREREST_VERSION_MINOR
 
 echo "------------------------------------------"
+echo "DATE	: `date`"
 echo "SUCCESS	: FireREST build complete."
 echo "TEST	: Launch FireREST web service:"
 echo "TEST	;   node server/firesight.js"
