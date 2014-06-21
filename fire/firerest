@@ -1,17 +1,2 @@
 #! /bin/bash
-if [ ! -e target/firerest*jar-with-dependencies.jar ]; then
-  VER=1.0.3
-  JAR=firerest-cmd-$VER-jar-with-dependencies.jar
-  URL=https://oss.sonatype.org/content/repositories/releases/org/firepick/firerest-cmd/$VER/$JAR
-  mkdir -p target
-  pushd target
-  if [ `type -p curl` ]; then
-    curl $URL -o $JAR
-  elif [ `type -p wget` ]; then
-    wget $URL
-  else 
-    mvn clean install
-  fi
-  popd
-fi
-java -jar target/firerest*jar-with-dependencies.jar $@
+java -jar fire/firerest*jar-with-dependencies.jar $@
