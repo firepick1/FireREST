@@ -1,0 +1,27 @@
+#! /bin/bash
+
+echo "COMMAND	: fire/upgrade"
+echo "ETA	: 1-30 minutes"
+echo "HELP	: https://github.com/firepick1/FireREST/wiki/Upgrade-FireREST"
+
+echo "GIT	: `git config remote.origin.url`"
+git pull
+if [ $? -ne 0 ]; then
+  echo "ERROR	: Could not retrieve latest source from GitHub"
+  exit -1;
+fi
+
+echo "SUDO	: require password for changing machine configuration"
+sudo -k
+sudo echo "SUDO	: confirmed"
+echo "COMMAND	: sudo -E ./build |& tee build.log"
+sudo -E ./build |& tee build.log
+if [ $? -ne 0 ]; then
+  echo "----------------------------------"
+  echo "ERROR	: Could not build FireREST"
+  echo "ERROR	: See build.log"
+  exit -1
+fi
+echo "LOG	: See build.log"
+echo "SUCCESS	: fire/upgrade - FireREST upgrade complete"
+
