@@ -9,3 +9,5 @@ FireMote
 opencv
 node_modules
 core
+
+*.log
