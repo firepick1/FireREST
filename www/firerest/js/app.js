@@ -10,10 +10,10 @@ angular.module('FireREST', [
   'FireREST.controllers'
 ]).
 config(['$routeProvider', function($routeProvider) {
-//  $routeProvider.when('/status', {templateUrl: 'partials/status.html', controller: 'StatusCtrl'});
+//  $routeProvider.when('/cvtest', {templateUrl: '../../partials/cvtest.html', controller: 'ServiceCtrl'});
 //  $routeProvider.when('/spindle', {templateUrl: 'partials/spindle.html', controller: 'SpindleCtrl'});
 //  $routeProvider.when('/camera', {templateUrl: 'partials/camera.html', controller: 'CameraCtrl'});
 //  $routeProvider.when('/move', {templateUrl: 'partials/move.html', controller: 'MoveCtrl'});
 //  $routeProvider.when('/configure', {templateUrl: 'partials/configure.html', controller: 'ConfigureCtrl'});
-//  $routeProvider.otherwise({redirectTo: '/status'});
+//  $routeProvider.otherwise({redirectTo: '/main'});
 }]);

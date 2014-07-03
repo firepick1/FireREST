@@ -4,89 +4,31 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FireREST&trade;</title>
-  <link rel="stylesheet" href="css/firerest.css"/>
-  <link rel="stylesheet" href="bootstrap/css/bootstrap.css"/>
-
-  <!-- In production use:
-  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.min.js"></script>
-  -->
-  <script src="lib/angular/angular.js"></script>
-  <script src="lib/angular/angular-route.js"></script>
-  <script src="lib/jquery/jquery-2.1.1.min.js"></script>
-  <script src="js/app.js"></script>
-  <script src="js/services.js"></script>
-  <script src="js/controllers.js"></script>
-  <script src="bootstrap/js/ui-bootstrap-0.6.0.min.js"></script>
-  <script src="bootstrap/js/ui-bootstrap-tpls-0.6.0.min.js"></script>
+  <link rel="stylesheet" href="../../css/firerest.css"/>
+  <link rel="stylesheet" href="../../bootstrap/css/bootstrap.css"/>
+  <script src="../../lib/angular/angular.js"></script>
+  <script src="../../lib/angular/angular-route.js"></script>
+  <script src="../../lib/jquery/jquery-2.1.1.min.js"></script>
+  <script src="../../js/app.js"></script>
+  <script src="../../js/services.js"></script>
+  <script src="controllers.js"></script>
+  <script src="../../bootstrap/js/ui-bootstrap-0.6.0.min.js"></script>
+  <script src="../../bootstrap/js/ui-bootstrap-tpls-0.6.0.min.js"></script>
 </head>
-<body ng-controller="MainCtrl">
-  <a href="firerest/test.html">
-    <img class="fr-banner-logo" src="img/FireREST-alpha.png">
-  </a>
+<body ng-controller="MainCtrl as main">
 
-  <div class="fr-banner"> 
-    <div class="fr-banner-left">
-      <h4 class="fr-banner-title">
-	<a class="fr-title-minor" title="FireREST content source"  target="_blank"
-	  href="https://github.com/firepick1/FireREST/wiki/{{config.FireREST.provider}}-content">{{config.FireREST.title}}</a>
-	<br>
-        <a target="_blank" title="FireREST-CV computer vision REST api" 
-	  href="https://github.com/firepick1/FireREST/wiki/FireREST-CV">FireREST-CV</a> 
-	Test Page 
-      </h4>
-    </div>
-    <div class="fr-banner-right">
-      <a title="FireREST computer aided manufacturing REST services" 
-        href="https://github.com/firepick1/FireREST/wiki/Home" target="_blank">
-      <img class="fr-banner-logo" src="img/FireREST-alpha.png">
-      </a>
-    </div>
+<!-- ///////////// BEGIN APPLICATION CODE ///////////// -->
+
+  <div ng-include src="'../../partials/banner.html'" onload="
+      bannerTitle='FireREST-CV computer vision REST api';
+      bannerUrl='https://github.com/firepick1/FireREST/wiki/FireREST-CV';
+      bannerName='FireREST-CV'">
   </div>
+
   <div class="container" >
     <div class="fr-banner-space">&nbsp;</div>
+    <div ng-include src="'../../partials/service.html'"></div>
 
-    <div class="fr-form">
-      <div class="fr-section-title">
-	Service 
-	<span class="glyphicon {{transmit_status()}}"></span>
-	<button title="disable/enable auto-update" class="btn btn-default btn-sm fr-enable" ng-click="transmit_click()">
-	  <span class="glyphicon {{transmit_icon()}}"></span>
-	</button>
-	<div class="fr-collapse">
-	  <button class="btn btn-default btn-sm fr-collapse-btn" 
-	    ng-click="collapse_toggle('service')"><span class="{{collapse_icon('service')}}"></span></button>
-	</div>
-	<div ng-repeat="level in [1,2,3,4,5]" class="fr-transmit {{transmit_class(level)}}">&#x25a0;</div>
-      </div>
-      <div ng-if="!cv.collapse.service" class="row">
-	<div class="col-md-2">
-	  <div class="control-label fr-control-label">server</div>
-	  <input type="text" ng-model="cv.server" ng-change="config_load()" class="form-control" placeholder="localhost">
-	</div>
-	<div class="col-md-2">
-	  <div class="control-label fr-control-label">port</div>
-	  <input type="text" ng-model="cv.port" ng-change="config_load()" class="form-control" placeholder="8080">
-	</div>
-	<div class="col-md-2">
-	  <div class="control-label fr-control-label">service</div>
-	  <input type="text" ng-model="cv.service" ng-change="config_load()" class="form-control" placeholder="localhost">
-	</div>
-	<div class="col-md-3">
-	  <div class="control-label fr-control-label">return</div>
-	  <select ng-model="cv.protocol" ng-change="clear_results()" class="form-control">
-	    <option value="">Fast Data (cached)</option>
-	    <option value="/sync">Fresh Data (synchronous/blocking)</option>
-	  </select>
-	</div>
-      </div>
-      <div class="row fr-data-label">
-	<div class="col-md-8">
-	  <a target="_blank" href="{{config_url()}}">{{config_url()}}</a>
-	  <a target="_blank" class="fr-help" href="https://github.com/firepick1/FireREST/wiki/config.json">?</a>
-	</div>
-      </div>
-      <pre ng-if="!cv.collapse.service" class="fr-json" id="config-json">{{config}}</pre>
-    </div>
     <div class="fr-form">
       <div class="fr-section-title">
 	Camera: {{cv.camera_name}}/{{cv.profile_name}}
@@ -132,7 +74,7 @@
 	  </div>
 	  <div class="fr-cell-data col-md-7">
 	    <img title="{{image_url(image)}}" class="img-responsive img-rounded {{image_class(image)}}" 
-	      onerror="src='img/no-image.png'"
+	      onerror="src='../../img/no-image.png'"
 	      ng-src="{{image_url(image)}}" ng-click="image_click(image)">
 	  </div>
 	</div>
@@ -199,6 +141,6 @@
       </div>
     </div>
   </div>
-  <div class="fr-version">&copy; firepick.org 2014 FireREST&trade; version {{config.FireREST.version.major}}.{{config.FireREST.version.minor}}.{{config.FireREST.version.patch}}</div>
-</body>
-</html>
+
+<!-- ///////////// END APPLICATION CODE ///////////// -->
+<div ng-include src="'../../partials/footer.html'"></div></body></html>

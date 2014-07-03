@@ -1,0 +1,42 @@
+<div class="fr-form">
+  <div class="fr-section-title">
+    Service 
+    <span class="glyphicon {{transmit_status()}}"></span>
+    <button title="disable/enable auto-update" class="btn btn-default btn-sm fr-enable" ng-click="transmit_click()">
+      <span class="glyphicon {{transmit_icon()}}"></span>
+    </button>
+    <div class="fr-collapse">
+      <button class="btn btn-default btn-sm fr-collapse-btn" 
+	ng-click="collapse_toggle('service')"><span class="{{collapse_icon('service')}}"></span></button>
+    </div>
+    <div ng-repeat="level in [1,2,3,4,5]" class="fr-transmit {{transmit_class(level)}}">&#x25a0;</div>
+  </div>
+  <div ng-if="!cv.collapse.service" class="row">
+    <div class="col-md-2">
+      <div class="control-label fr-control-label">server</div>
+      <input type="text" ng-model="cv.server" ng-change="config_load()" class="form-control" placeholder="localhost">
+    </div>
+    <div class="col-md-2">
+      <div class="control-label fr-control-label">port</div>
+      <input type="text" ng-model="cv.port" ng-change="config_load()" class="form-control" placeholder="8080">
+    </div>
+    <div class="col-md-2">
+      <div class="control-label fr-control-label">service</div>
+      <input type="text" ng-model="cv.service" ng-change="config_load()" class="form-control" placeholder="localhost">
+    </div>
+    <div class="col-md-3">
+      <div class="control-label fr-control-label">return</div>
+      <select ng-model="cv.protocol" ng-change="clear_results()" class="form-control">
+	<option value="">Fast Data (cached)</option>
+	<option value="/sync">Fresh Data (synchronous/blocking)</option>
+      </select>
+    </div>
+  </div>
+  <div class="row fr-data-label">
+    <div class="col-md-8">
+      <a target="_blank" href="{{config_url()}}">{{config_url()}}</a>
+      <a target="_blank" class="fr-help" href="https://github.com/firepick1/FireREST/wiki/config.json">?</a>
+    </div>
+  </div>
+  <pre ng-if="!cv.collapse.service" class="fr-json" id="config-json">{{config}}</pre>
+</div>

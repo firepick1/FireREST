@@ -46,6 +46,8 @@ if (fs.existsSync(cv_dir)) {
   app.use('/firerest/sync/cv', express.static('www/firerest/cv'));
   console.log("FireFUSE is not available. FireREST is demo mode only" );
 }
+app.use('/firerest/html', express.static('www/firerest/html'));
+app.use('/firerest/partials', express.static('www/firerest/partials'));
 
 app.get('/firerest/config.json', function(req,res) { res.sendfile(config_file); });
 
