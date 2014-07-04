@@ -1,6 +1,9 @@
 p {
   max-width: 700px;
 }
+.fr-version:hover {
+  color: #000;
+}
 .fr-version {
   font-size: 8pt;
   top: 26px;

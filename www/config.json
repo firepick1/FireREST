@@ -1,4 +1,4 @@
-{ "FireREST":{"title":"FireREST Reference Services","provider":"Demo", "version":{"major":0, "minor":8, "patch":3} },
+{ "FireREST":{"title":"FireREST Reference Service","provider":"Demo", "version":{"major":0, "minor":9, "patch":0} },
   "cv":{
     "cve_map":{
       "calc-offset":{
@@ -29,6 +29,15 @@
 	  "gray":{ "cve_names":[ "calc-offset", "locate-part" ] },
 	  "bgr":{ "cve_names":[ "calc-offset", "locate-part" ] }
 	}
+      }
+    }
+  },
+  "cnc":{ 
+    "tinyg":{ 
+      "protocol":"gcode",
+      "serial": {
+        "path":"/dev/ttyUSB0",
+	"stty":"cs8 115200"
       }
     }
   }

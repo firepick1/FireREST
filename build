@@ -67,7 +67,7 @@ sudo -u $SUDO_USER sed \
   -e s/@@FIREREST_VERSION_MAJOR@@/$FIREREST_VERSION_MAJOR/ \
   -e s/@@FIREREST_VERSION_MINOR@@/$FIREREST_VERSION_MINOR/ \
   -e s/@@FIREREST_VERSION_PATCH@@/$FIREREST_VERSION_PATCH/ \
-  config.json.tmpl > www/firerest/config.json
+  config.json.tmpl > www/config.json
 echo "CONFIG	: `grep version www/firerest/config.json`"
 
 if [ "$(type -p siege)" == "" ]; then
