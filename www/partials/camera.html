@@ -9,11 +9,11 @@
   <div ng-if="service.expand.camera" class="row">
     <div class="col-md-2">
       <div class="control-label fr-control-label">camera</div>
-      <select ng-model="cv.camera_name" ng-change="clear_results()" class="form-control">
+      <select ng-model="cv.camera_name" ng-change="cv.clear_results()" class="form-control">
 	<option ng-repeat="camera in cv.camera_names">{{camera}}</option>
       </select>
       <div class="control-label fr-control-label">profile</div>
-      <select ng-model="cv.profile_name" ng-change="clear_results()" class="form-control">
+      <select ng-model="cv.profile_name" ng-change="cv.clear_results()" class="form-control">
 	<option ng-repeat="profile in cv.profile_names">{{profile}}</option>
       </select>
     </div>

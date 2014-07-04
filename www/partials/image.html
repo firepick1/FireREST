@@ -1,19 +1,19 @@
 <div class="row fr-data-label">
   <div class="col-md-1">&nbsp;</div>
   <div class="col-md-8">
-    <a title="{{image_url(image)}}" href="{{image_url(image)}}">{{image}}</a>
+    <a title="{{cv.image_url(image)}}" href="{{cv.image_url(image)}}">{{image}}</a>
     <a target="_blank" class="fr-help" href="https://github.com/firepick1/FireREST/wiki/{{image}}">?</a>
   </div>
 </div>
 <div class="row fr-data">
   <div class="fr-cell-btn col-md-1">
-    <button title="{{image_url(image)}}" type="button" class="btn btn-primary btn-sm fr-get" ng-click="image_GET(image)">
-      GET&nbsp;<span class="{{image_GET_icon(image)}}"></span>
+    <button title="{{cv.image_url(image)}}" type="button" class="btn btn-primary btn-sm fr-get" ng-click="cv.image_GET(image)">
+      GET&nbsp;<span class="{{cv.image_GET_icon(image)}}"></span>
     </button>
   </div>
   <div class="fr-cell-data col-md-7">
-    <img title="{{image_url(image)}}" class="img-responsive img-rounded {{image_class(image)}}" 
+    <img title="{{cv.image_url(image)}}" class="img-responsive img-rounded {{cv.image_class(image)}}" 
       onerror="src='../../img/no-image.png'"
-      ng-src="{{image_url(image)}}" ng-click="image_click(image)">
+      ng-src="{{cv.image_url(image)}}" ng-click="cv.image_click(image)">
   </div>
 </div>
