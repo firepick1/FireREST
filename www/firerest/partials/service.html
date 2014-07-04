@@ -24,7 +24,7 @@
     </div>
     <div class="col-md-2">
       <div class="control-label fr-control-label">service</div>
-      <input type="text" ng-model="cv.service" ng-change="config_load()" class="form-control" placeholder="localhost">
+      <input type="text" ng-model="service.name" ng-change="config_load()" class="form-control" placeholder="localhost">
     </div>
     <div class="col-md-3">
       <div class="control-label fr-control-label">return</div>
@@ -36,7 +36,7 @@
   </div>
   <div class="row fr-data-label">
     <div class="col-md-8">
-      <a target="_blank" href="{{config_url()}}">{{config_url()}}</a>
+      <a target="_blank" href="{{service.config_url()}}">{{service.config_url()}}</a>
       <a target="_blank" class="fr-help" href="https://github.com/firepick1/FireREST/wiki/config.json">?</a>
     </div>
   </div>

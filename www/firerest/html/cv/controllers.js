@@ -5,33 +5,30 @@ var controllers = angular.module('FireREST.controllers', []);
 
 controllers.controller('MainCtrl', 
   ['$scope','$location', 'BackgroundThread', 'ServiceConfig', 'AjaxAdapter',
-  function(scope, location, bg, config, transmit) {
+  function(scope, location, bg, service, transmit) {
+    transmit.clear();
+    scope.transmit = transmit;
+    scope.service = service;
+
     scope.cv = {
       "resources":['save.fire', 'process.fire'],
       "image":[],
+
       "server":location.host() || "unknownhost",
       "port":location.port() || "unknownport",
       "post_data":{},
       "service": "/firerest",
       "protocol":"",
+
       "collapse": {"camera":true, "cve":true, "service":true},
       "image_instances":{},
       "image_large":{}
       };
-    transmit.clear();
-    scope.transmit = transmit;
 
-    scope.service_url = function() {
-      var port = scope.cv.port === "" ? "" : (":" + scope.cv.port);
-      return "http://" + scope.cv.server + port + scope.cv.service;
-    };
     scope.camera_url = function() {
-      return scope.service_url() + scope.cv.protocol + "/cv/" + scope.cv.camera_name + "/";
+      return service.service_url() + scope.cv.protocol + "/cv/" + scope.cv.camera_name + "/";
     };
 
-    scope.config_url = function() {
-      return scope.service_url() + "/config.json";
-    }
     scope.cve_names = function() {
       var camera = scope.cv.camera_name && scope.config.cv.camera_map[scope.cv.camera_name];
       var profile = camera && camera.profile_map[scope.cv.profile_name];
@@ -169,11 +166,11 @@ controllers.controller('MainCtrl',
     }
 
     scope.config_load = function() {
-      console.log("Loading config.json from " + scope.config_url());
+      console.log("Loading config.json from " + service.config_url());
       scope.config = {"status":"loading..."};
       transmit.start();
       $.ajax({
-	url: scope.config_url(),
+	url: service.config_url(),
 	data: { },
 	success: function( data ) {
 	  scope.$apply(function(){
@@ -207,8 +204,9 @@ controllers.controller('MainCtrl',
     scope.clear_results();
     scope.config_load();
 
-    console.log(JSON.stringify(config));
+    console.log(JSON.stringify(service));
     console.log(JSON.stringify(transmit));
+    console.log(service.config_url());
 
 }]);
 
