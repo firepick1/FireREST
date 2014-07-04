@@ -3,8 +3,9 @@ var bootstrap = angular.module('FireREST.bootstrap', ['ui.bootstrap']);
 
 var controllers = angular.module('FireREST.controllers', []);
 
-controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
-  function(scope, location, bg) {
+controllers.controller('MainCtrl', 
+  ['$scope','$location', 'BackgroundThread', 'ServiceConfig', 'AjaxAdapter',
+  function(scope, location, bg, config, transmit) {
     scope.cv = {
       "resources":['save.fire', 'process.fire'],
       "image":[],
@@ -17,8 +18,8 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
       "image_instances":{},
       "image_large":{}
       };
-    scope.transmit_enabled = false;
-    scope.transmit = 1; // 0:error, 1:idle, >1:active-network-requests
+    transmit.clear();
+    scope.transmit = transmit;
 
     scope.service_url = function() {
       var port = scope.cv.port === "" ? "" : (":" + scope.cv.port);
@@ -28,37 +29,6 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
       return scope.service_url() + scope.cv.protocol + "/cv/" + scope.cv.camera_name + "/";
     };
 
-    scope.transmit_class = function(level) {
-      return scope.transmit > level ? "fr-transmit-on" : "";
-    }
-    scope.transmit_status = function() {
-      switch (scope.transmit) {
-	case 0: return "glyphicon-remove fr-transmit-dead";
-	case 1: return "glyphicon-ok fr-transmit-idle";
-	default: return "glyphicon-ok fr-transmit-active";
-      }
-    }
-    scope.transmit_icon = function() {
-      return scope.transmit_enabled ?  "glyphicon-pause" : "glyphicon-repeat";
-    }
-    scope.transmit_click = function() {
-      scope.transmit_enabled = !scope.transmit_enabled;
-    }
-    scope.transmit_isIdle = function() { return scope.transmit == 1; }
-    scope.transmit_isBusy = function() { return scope.transmit > 1; }
-    scope.transmit_isError = function() { return scope.transmit == 0; }
-    scope.transmit_start = function() {
-      scope.transmit = scope.transmit ? (scope.transmit+1) : 2;
-    }
-    scope.transmit_end = function(ok) {
-      if (ok) {
-	scope.transmit = scope.transmit > 0 ? (scope.transmit-1) : 0;
-      } else {
-        scope.transmit_enabled = false;
-        scope.transmit = 0;
-      }
-    }
-    
     scope.config_url = function() {
       return scope.service_url() + "/config.json";
     }
@@ -107,7 +77,7 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
       scope.cv.image_instances[image] = Math.floor(Math.random()*1000000) ;
     };
     scope.image_GET_icon = function(image) {
-      return scope.transmit_enabled && (image === "camera.jpg" || image === 'monitor.jpg') ?
+      return transmit.enabled && (image === "camera.jpg" || image === 'monitor.jpg') ?
         "glyphicon glyphicon-repeat" : "";
     }
     
@@ -135,15 +105,15 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
 	  resource === 'process.fire' && (scope.cv.image_instances['output.jpg'] = t);
 	}
 
-	scope.transmit_end(true);
+	transmit.end(true);
       });
     }
     scope.resource_GET_icon = function(action) {
-      return scope.transmit_enabled && (action === "process.fire") ?
+      return transmit.enabled && (action === "process.fire") ?
         "glyphicon glyphicon-repeat" : "";
     }
     scope.resource_GET = function(resource) {
-      scope.transmit_start();
+      transmit.start();
       $.ajax({
 	url: scope.resource_url(resource),
 	data: { r: Math.floor(Math.random()*1000000) },
@@ -168,7 +138,7 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
       return true;
     }
     scope.resource_POST = function(resource) {
-      scope.transmit_start();
+      transmit.start();
       var data = scope.cv.post_data[resource];
       $.ajax({
         type:"POST",
@@ -186,7 +156,7 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
       return resource === 'properties.json';
     }
     scope.worker = function(ticks) {
-     if (scope.transmit_isIdle() && scope.transmit_enabled) {
+     if (transmit.isIdle() && transmit.enabled) {
        if ((ticks % 5) === 0 ) {
 	 scope.cv.resources.indexOf('process.fire') >= 0 && scope.resource_GET('process.fire');
        } else if ((ticks % 3) === 0 ) {
@@ -201,13 +171,13 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
     scope.config_load = function() {
       console.log("Loading config.json from " + scope.config_url());
       scope.config = {"status":"loading..."};
-      scope.transmit_start();
+      transmit.start();
       $.ajax({
 	url: scope.config_url(),
 	data: { },
 	success: function( data ) {
 	  scope.$apply(function(){
-	    scope.transmit_end(true);
+	    transmit.end(true);
 	    console.log(JSON.stringify(data));
 	    scope.config = data;
 	    if (typeof scope.config.cv === 'object') {
@@ -226,7 +196,7 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
 	error: function( jqXHR, ex) {
 	  console.error("config_load() ex:" + ex + "," + JSON.stringify(jqXHR));
 	  scope.$apply(function(){
-	    scope.transmit_end(false);
+	    transmit.end(false);
 	    scope.cv.camera_names = ["camera n/a"];
 	    scope.clear_results();
 	  });
@@ -236,6 +206,9 @@ controllers.controller('MainCtrl', ['$scope','$location', 'BackgroundThread',
 
     scope.clear_results();
     scope.config_load();
+
+    console.log(JSON.stringify(config));
+    console.log(JSON.stringify(transmit));
 
 }]);
 
