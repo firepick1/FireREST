@@ -1,15 +1,17 @@
 <div class="fr-form">
-  <div class="fr-section-title">
-    Service 
-    <span class="glyphicon {{transmit_status()}}"></span>
-    <button title="disable/enable auto-update" class="btn btn-default btn-sm fr-enable" ng-click="transmit_click()">
-      <span class="glyphicon {{transmit_icon()}}"></span>
-    </button>
-    <div class="fr-collapse">
-      <button class="btn btn-default btn-sm fr-collapse-btn" 
-	ng-click="collapse_toggle('service')"><span class="{{collapse_icon('service')}}"></span></button>
+  <div class="fr-section-title row">
+    <div class="col-md-5">
+      Service 
+      <span class="glyphicon {{transmit_status()}}"></span>
+      <button title="disable/enable auto-update" class="btn btn-default btn-sm fr-enable" ng-click="transmit_click()">
+	<span class="glyphicon {{transmit_icon()}}"></span>
+      </button>
+      <div class="fr-collapse">
+	<button class="btn btn-default btn-sm fr-collapse-btn" 
+	  ng-click="collapse_toggle('service')"><span class="{{collapse_icon('service')}}"></span></button>
+      </div>
+      <div ng-repeat="level in [1,2,3,4,5]" class="fr-transmit {{transmit_class(level)}}">&#x25a0;</div>
     </div>
-    <div ng-repeat="level in [1,2,3,4,5]" class="fr-transmit {{transmit_class(level)}}">&#x25a0;</div>
   </div>
   <div ng-if="!cv.collapse.service" class="row">
     <div class="col-md-2">
@@ -40,3 +42,56 @@
   </div>
   <pre ng-if="!cv.collapse.service" class="fr-json" id="config-json">{{config}}</pre>
 </div>
+
+<div class="fr-form">
+  <div class="fr-section-title">
+    Camera: {{cv.camera_name}}/{{cv.profile_name}}
+    <div class="fr-collapse">
+      <button class="btn btn-default btn-sm fr-collapse-btn" 
+	ng-click="collapse_toggle('camera')"><span class="{{collapse_icon('camera')}}"></span></button>
+    </div>
+  </div>
+  <div ng-if="!cv.collapse.camera" class="row">
+    <div class="col-md-2">
+      <div class="control-label fr-control-label">camera</div>
+      <select ng-model="cv.camera_name" ng-change="clear_results()" class="form-control">
+	<option ng-repeat="camera in cv.camera_names">{{camera}}</option>
+      </select>
+      <div class="control-label fr-control-label">profile</div>
+      <select ng-model="cv.profile_name" ng-change="clear_results()" class="form-control">
+	<option ng-repeat="profile in cv.profile_names">{{profile}}</option>
+      </select>
+    </div>
+    <div class="col-md-2">
+      <div class="control-label fr-control-label">image</div>
+      <select multiple ng-model="cv.image" class="form-control">
+	<option selected>monitor.jpg</option>
+	<option>camera.jpg</option>
+	<option>saved.png</option>
+	<option>output.jpg</option>
+      </select>
+    </div>
+  </div>
+  <div class="fr-row" ng-repeat="image in cv.image">
+    <div class="row fr-data-label">
+      <div class="col-md-1">&nbsp;</div>
+      <div class="col-md-8">
+	<a title="{{image_url(image)}}" href="{{image_url(image)}}">{{image}}</a>
+	<a target="_blank" class="fr-help" href="https://github.com/firepick1/FireREST/wiki/{{image}}">?</a>
+      </div>
+    </div>
+    <div class="row fr-data">
+      <div class="fr-cell-btn col-md-1">
+	<button title="{{image_url(image)}}" type="button" class="btn btn-primary btn-sm fr-get" ng-click="image_GET(image)">
+	  GET&nbsp;<span class="{{image_GET_icon(image)}}"></span>
+	</button>
+      </div>
+      <div class="fr-cell-data col-md-7">
+	<img title="{{image_url(image)}}" class="img-responsive img-rounded {{image_class(image)}}" 
+	  onerror="src='../../img/no-image.png'"
+	  ng-src="{{image_url(image)}}" ng-click="image_click(image)">
+      </div>
+    </div>
+  </div>
+</div>
+

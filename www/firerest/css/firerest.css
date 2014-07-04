@@ -21,7 +21,7 @@ p {
 }
 .fr-section-title {
   position: relative;
-  font-size:20px;
+  font-size:18px;
   margin-top: 0.8em;
 }
 .fr-transmit {
@@ -61,16 +61,34 @@ p {
 .fr-collapse-btn {
   border: none !important;
 }
+.fr-help:hover {
+  border: 1px solid #88f;
+}
 .fr-help {
+  font-size: 14px;
   border-radius: 8px;
-  background: #888;
+  background: #bbb;
   color: #fff;
   font-weight: 800;
   padding-left: 0.3em;
   padding-right: 0.3em;
+  margin-bottom: 1em;
+  cursor: help;
+}
+.fr-icon {
+  position: fixed;
+  top: 50px;
+  right: 15px;
+  font-size:40pt;
+  color: rgba(0,0,0,0.2);
+  z-index: -1;
 }
 .fr-content_source {
   color: #fa0;
+}
+.fr-title-major{
+  padding-top: .2em;
+  cursor: pointer;
 }
 .fr-title-minor{
   font-size: 8pt;
@@ -142,6 +160,28 @@ p {
   min-height:2.2em;
   padding:0px;
   border: none !important;
+}
+.fr-nav-dismiss {
+  background-color: rgba(128,128,128,.5);
+  position: fixed;
+  left: -2em;
+  width: 150%;
+  height: 150%;
+  z-index: -1;
+}
+.fr-nav-menu li:hover {
+  font-weight: bold;
+}
+.fr-nav-menu {
+  display:none;
+  float: left;
+  font: 10pt Verdana;
+  border-right: 2px solid #888;
+  border-bottom: 2px solid #888;
+  padding: 5px;
+  background: #eee;
+  min-width: 20em;
+  border-bottom-right-radius: 8px;
 }
 .fr-json-post {
   min-width:25em;

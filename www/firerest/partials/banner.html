@@ -4,9 +4,18 @@
       <a class="fr-title-minor" title="FireREST content source"  target="_blank"
 	href="https://github.com/firepick1/FireREST/wiki/{{config.FireREST.provider}}-content">{{config.FireREST.title}}</a>
       <br>
-      <a target="_blank" title="{{bannerTitle}}" href="{{bannerUrl}}">{{bannerName}}</a> 
-      Test Page 
+      <div class="fr-title-major" onclick="$('nav').toggle();" title="{{bannerTitle}}">
+        {{bannerName}} Service <sup><a target="_blank" class="fr-help" href="{{bannerUrl}}">?</a></sup>
+      </div> 
     </h4>
+    <nav class="fr-nav-menu">
+    <div class="fr-nav-dismiss" onclick="$('nav').toggle();"></div>
+    <ul class="nav">
+      <li><a href="../cv" title="FireREST/CV Computer Vision">CV Computer Vision Service</a>
+      <li><a href="../cnc" title="FireREST/CNC Machine Control">CNC Machine Control Service</a>
+      <li><a href="../cal" title="FireREST/CAL Machine Calibration">CAL Machine Calibration Service</a>
+    </ul>
+  </nav>
   </div>
   <div class="fr-banner-right">
     <a title="FireREST computer aided manufacturing REST services" 
@@ -14,4 +23,7 @@
     <img class="fr-banner-logo" src="../../img/FireREST-alpha.png">
     </a>
   </div>
+</div>
+<div class="fr-icon">
+  <span class="glyphicon {{bannerIcon}}"></span>
 </div>
