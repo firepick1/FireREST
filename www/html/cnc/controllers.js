@@ -16,7 +16,6 @@ controllers.controller('MainCtrl',
       "image":[],
       "post_data":{},
       "protocol":"",
-      "collapse": {"camera":true, "cve":true, "service":true},
       "image_instances":{},
       "image_large":{}
       };
@@ -30,14 +29,6 @@ controllers.controller('MainCtrl',
       var profile = camera && camera.profile_map[scope.cv.profile_name];
       return profile && profile.cve_names || [];
     }
-    scope.collapse_icon = function(value) {
-      return "glyphicon fr-collapse-icon " +
-        (scope.cv.collapse[value] ? "glyphicon-wrench" : "glyphicon-wrench");
-    }
-    scope.collapse_toggle = function(value) {
-      scope.cv.collapse[value] = !scope.cv.collapse[value];
-    }
-
     scope.clear_results = function() {
       scope.resource_response = {};
       scope.resource_classname = {};
@@ -70,7 +61,7 @@ controllers.controller('MainCtrl',
       scope.cv.image_instances[image] = Math.floor(Math.random()*1000000) ;
     };
     scope.image_GET_icon = function(image) {
-      return transmit.enabled && (image === "camera.jpg" || image === 'monitor.jpg') ?
+      return transmit.autoRefresh && (image === "camera.jpg" || image === 'monitor.jpg') ?
         "glyphicon glyphicon-repeat" : "";
     }
     
@@ -102,7 +93,7 @@ controllers.controller('MainCtrl',
       });
     }
     scope.resource_GET_icon = function(action) {
-      return transmit.enabled && (action === "process.fire") ?
+      return transmit.autoRefresh && (action === "process.fire") ?
         "glyphicon glyphicon-repeat" : "";
     }
     scope.resource_GET = function(resource) {
@@ -141,14 +132,12 @@ controllers.controller('MainCtrl',
       return resource === 'properties.json';
     }
     scope.worker = function(ticks) {
-     if (transmit.isIdle() && transmit.enabled) {
-       if ((ticks % 5) === 0 ) {
-	 scope.cv.resources.indexOf('process.fire') >= 0 && scope.resource_GET('process.fire');
-       } else if ((ticks % 3) === 0 ) {
-	 scope.image_GET('monitor.jpg');
-       } else if ((ticks % 3) === 1 ) {
-	 scope.image_GET('camera.jpg');
-       }
+     if ((ticks % 5) === 0 ) {
+       scope.cv.resources.indexOf('process.fire') >= 0 && scope.resource_GET('process.fire');
+     } else if ((ticks % 3) === 0 ) {
+       scope.image_GET('monitor.jpg');
+     } else if ((ticks % 3) === 1 ) {
+       scope.image_GET('camera.jpg');
      }
      return true;
     }

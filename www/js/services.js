@@ -8,7 +8,7 @@ services.factory('AjaxAdapter', ['$http',
 function($http) {
   console.log("Initializing AjaxAdapter");
   var ajaxAdapter = {
-    enabled: false,
+    autoRefresh: false,
     transmit: 1, // 0:error, 1:idle, >1:active-network-requests
     class: function(level) { return ajaxAdapter.transmit > level ? "fr-transmit-on" : ""; },
     status: function() {
@@ -18,9 +18,9 @@ function($http) {
 	default: return "glyphicon-ok fr-transmit-active";
       }
     },
-    icon: function() { return ajaxAdapter.enabled ?  "glyphicon-pause" : "glyphicon-repeat"; },
-    click: function() { ajaxAdapter.enabled = !ajaxAdapter.enabled; },
-    clear: function() { ajaxAdapter.enabled = false; ajaxAdapter.transmit = 1; },
+    icon: function() { return ajaxAdapter.autoRefresh ?  "glyphicon-pause" : "glyphicon-repeat"; },
+    click: function() { ajaxAdapter.autoRefresh = !ajaxAdapter.autoRefresh; },
+    clear: function() { ajaxAdapter.autoRefresh = false; ajaxAdapter.transmit = 1; },
     isIdle: function() { return ajaxAdapter.transmit == 1; },
     isBusy: function() { return ajaxAdapter.transmit > 1; },
     isError: function() { return ajaxAdapter.transmit == 0; },
@@ -29,7 +29,7 @@ function($http) {
       if (ok) {
 	ajaxAdapter.transmit = ajaxAdapter.transmit > 0 ? (ajaxAdapter.transmit-1) : 0;
       } else {
-        ajaxAdapter.enabled = false;
+        ajaxAdapter.autoRefresh = false;
         ajaxAdapter.transmit = 0;
       }
     }
@@ -45,6 +45,9 @@ function($http, transmit, location, $q) {
     port: location.port() || "unknownport",
     name: "/firerest",
     protocol: "",
+    expand: {},
+    expand_icon: function(value) { return "glyphicon fr-collapse-icon glyphicon-wrench"; },
+    expand_toggle: function(value) { service.expand[value] = !service.expand[value]; },
     service_url: function() {
       var port = service.port === "" ? "" : (":" + service.port);
       return "http://" + service.server + port + service.name;
@@ -89,8 +92,8 @@ function($http, transmit, location, $q) {
   return service;
 }]);
 
-services.factory('BackgroundThread', ['$http', '$interval', 
-function($http, $interval){
+services.factory('BackgroundThread', ['$http', '$interval', 'AjaxAdapter', 
+function($http, $interval, transmit){
   console.log("Initializing BackgroundThread");
   var backgroundThread = {
     worker: function(ticks){return true;},
@@ -100,9 +103,11 @@ function($http, $interval){
 
   var promise = $interval(function(ticks) {
     backgroundThread.t++;
-    if (!backgroundThread.worker(ticks)) {
-      console.log("Background thread exiting. ticks:" + ticks);
-      $interval.cancel(promise);
+    if (transmit.isIdle() && transmit.autoRefresh) {
+      if (!backgroundThread.worker(ticks)) {
+	console.log("Background thread exiting. ticks:" + ticks);
+	$interval.cancel(promise);
+      }
     }
   }, 200);
 

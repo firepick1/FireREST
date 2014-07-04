@@ -20,27 +20,27 @@
 <!-- ///////////// BEGIN APPLICATION CODE ///////////// -->
 
   <div ng-include src="'../../partials/banner.html'" onload="
-      bannerTitle='FireREST-CAL machine calibration REST service';
-      bannerUrl='https://github.com/firepick1/FireREST/wiki/FireREST-CAL';
-      bannerName='CAL Machine Calibration';
-      bannerIcon='glyphicon-cog'">
+      bannerTitle='FireREST-CNC computer nuerical control REST api';
+      bannerUrl='https://github.com/firepick1/FireREST/wiki/FireREST-CNC';
+      bannerName='CNC Machine Control';
+      bannerIcon='glyphicon-play-circle'">
   </div>
 
   <div class="container" >
     <div class="fr-banner-space">&nbsp;</div>
 
     <div ng-include src="'../../partials/service.html'"></div>
-    <div ng-include src="'../../partials/camera.html'"></div>
+    <div ng-include src="'../../partials/monitor.html'"></div>
 
     <div class="fr-form">
       <div class="fr-section-title">
-	CVE: {{cv.cve_name}}
+	DCE: {{cnc.dce_name}}
 	<div class="fr-collapse">
 	  <button class="btn btn-default btn-sm fr-collapse-btn" 
-	    ng-click="collapse_toggle('cve')"><span class="{{collapse_icon('cve')}}"></span></button>
+	    ng-click="service.expand_toggle('cve')"><span class="{{service.expand_icon('cve')}}"></span></button>
 	</div>
       </div>
-      <div ng-if="!cv.collapse.cve" class="row">
+      <div ng-if="service.expand.cve" class="row">
 	<div class="col-md-3">
 	  <div class="control-label fr-control-label">computer vision endpoint</div>
 	  <select ng-model="cv.cve_name" ng-change="clear_results()" class="form-control">

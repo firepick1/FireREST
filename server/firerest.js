@@ -13,8 +13,8 @@ app.all('*', function(req, res, next) {
 });
 
 // By default, use reference implementation
-var __appdir = "www/firerest/";
-var config_file = 'www/firerest/config.json';
+var __appdir = "www/";
+var config_file = __appdir + 'config.json';
 var dirs = ['bootstrap', 'img', 'css', 'js', 'lib'];
 for (var i = 0; i < dirs.length; i++) {
   var urlpath = '/firerest/' + dirs[i];
@@ -22,8 +22,9 @@ for (var i = 0; i < dirs.length; i++) {
   app.use(urlpath, express.static(filepath));
   console.log("Mapping urlpath:" + urlpath + " to:" + filepath);
 }
-app.get('/', function(req,res) { res.sendfile('www/index.html'); });
-app.get('/index.html', function(req,res) { res.sendfile('www/index.html'); });
+app.get('/firerest/index.html', function(req,res) { res.sendfile('www/index.html'); });
+app.get('/', function(req,res) { res.redirect('firerest/index.html'); });
+app.get('/index.html', function(req,res) { res.redirect('firerest/index.html'); });
 
 app.use(express.bodyParser());
 
@@ -44,12 +45,12 @@ if (fs.existsSync(cv_dir)) {
   console.log("Mapping /firerest/cnc to: " + cnc_dir);
   post_properties = true;
 } else {
-  app.use('/firerest/cv', express.static('www/firerest/cv'));
-  app.use('/firerest/sync/cv', express.static('www/firerest/cv'));
+  app.use('/firerest/cv', express.static('www/cv'));
+  app.use('/firerest/sync/cv', express.static('www/cv'));
   console.log("FireFUSE is not available. FireREST is demo mode only" );
 }
-app.use('/firerest/html', express.static('www/firerest/html'));
-app.use('/firerest/partials', express.static('www/firerest/partials'));
+app.use('/firerest/html', express.static('www/html'));
+app.use('/firerest/partials', express.static('www/partials'));
 
 app.get('/firerest/config.json', function(req,res) { res.sendfile(config_file); });
 

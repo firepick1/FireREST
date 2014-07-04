@@ -3,10 +3,10 @@
     Camera: {{cv.camera_name}}/{{cv.profile_name}}
     <div class="fr-collapse">
       <button class="btn btn-default btn-sm fr-collapse-btn" 
-	ng-click="collapse_toggle('camera')"><span class="{{collapse_icon('camera')}}"></span></button>
+	ng-click="service.expand_toggle('camera')"><span class="{{service.expand_icon('camera')}}"></span></button>
     </div>
   </div>
-  <div ng-if="!cv.collapse.camera" class="row">
+  <div ng-if="service.expand.camera" class="row">
     <div class="col-md-2">
       <div class="control-label fr-control-label">camera</div>
       <select ng-model="cv.camera_name" ng-change="clear_results()" class="form-control">
