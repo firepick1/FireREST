@@ -80,7 +80,7 @@
 	</div>
 	<div ng-if="resource_isPOST(resource)" class="row">
 	  <div class="fr-cell-btn col-md-1">
-	    <button ng-disabled="!isValidJSON(cv.post_data[resource])" title="{{resource_url(resource)}}" 
+	    <button ng-disabled="!service.isValidJSON(cv.post_data[resource])" title="{{resource_url(resource)}}" 
 	      type="button" class="btn btn-primary btn-sm fr-post" ng-click="resource_POST(resource)">
 	      POST&nbsp;
 	    </button>

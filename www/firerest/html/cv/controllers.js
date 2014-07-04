@@ -9,17 +9,13 @@ controllers.controller('MainCtrl',
     transmit.clear();
     scope.transmit = transmit;
     scope.service = service;
+    scope.config = {};
 
     scope.cv = {
       "resources":['save.fire', 'process.fire'],
       "image":[],
-
-      "server":location.host() || "unknownhost",
-      "port":location.port() || "unknownport",
       "post_data":{},
-      "service": "/firerest",
       "protocol":"",
-
       "collapse": {"camera":true, "cve":true, "service":true},
       "image_instances":{},
       "image_large":{}
@@ -126,14 +122,6 @@ controllers.controller('MainCtrl',
 	}
       });
     }
-    scope.isValidJSON = function(value) {
-      try {
-	JSON.parse(value);
-      } catch (e) {
-	return false;
-      }
-      return true;
-    }
     scope.resource_POST = function(resource) {
       transmit.start();
       var data = scope.cv.post_data[resource];
@@ -165,48 +153,29 @@ controllers.controller('MainCtrl',
      return true;
     }
 
-    scope.config_load = function() {
-      console.log("Loading config.json from " + service.config_url());
-      scope.config = {"status":"loading..."};
-      transmit.start();
-      $.ajax({
-	url: service.config_url(),
-	data: { },
-	success: function( data ) {
-	  scope.$apply(function(){
-	    transmit.end(true);
-	    console.log(JSON.stringify(data));
-	    scope.config = data;
-	    if (typeof scope.config.cv === 'object') {
-	      var cv = scope.cv;
-	      cv.camera_names = Object.keys(scope.config.cv.camera_map); 
-	      cv.camera_name = cv.camera_names[0];
-	      cv.image = ['monitor.jpg'];
-	      cv.profile_names = cv.camera_name && Object.keys(scope.config.cv.camera_map[cv.camera_name].profile_map);
-	      cv.profile_name = cv.profile_names[0];
-	      cv.cve_name = scope.cve_names()[0] || "no-CVE";
-	      scope.clear_results();
-	      bg.worker = scope.worker;
-	    }
-	  });
-	},
-	error: function( jqXHR, ex) {
-	  console.error("config_load() ex:" + ex + "," + JSON.stringify(jqXHR));
-	  scope.$apply(function(){
-	    transmit.end(false);
-	    scope.cv.camera_names = ["camera n/a"];
-	    scope.clear_results();
-	  });
-	}
-      });
-    };
-
     scope.clear_results();
-    scope.config_load();
-
-    console.log(JSON.stringify(service));
-    console.log(JSON.stringify(transmit));
-    console.log(service.config_url());
+    service.load_config().then( function(config) {
+      console.log("processing configuration" );
+      scope.config = config;
+      if (typeof config.cv === 'object') {
+	var cv = scope.cv;
+	cv.camera_names = Object.keys(config.cv.camera_map); 
+	cv.camera_name = cv.camera_names[0];
+	cv.image = ['monitor.jpg'];
+	cv.profile_names = cv.camera_name && Object.keys(config.cv.camera_map[cv.camera_name].profile_map);
+	cv.profile_name = cv.profile_names[0];
+	cv.cve_name = scope.cve_names()[0] || "no-CVE";
+	scope.clear_results();
+	bg.worker = scope.worker;
+      }
+    }, function(ex) {
+      scope.$apply(function(){
+	scope.cv.camera_names = ["camera n/a"];
+	scope.clear_results();
+      });
+    }, function(notify) {
+      console.log("promise notify " + notify);
+    });
 
 }]);
 

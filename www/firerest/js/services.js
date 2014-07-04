@@ -37,8 +37,8 @@ function($http) {
   return ajaxAdapter;
 }]);
 
-services.factory('ServiceConfig', ['$http', 'AjaxAdapter', '$location', 
-function($http, transmit, location) {
+services.factory('ServiceConfig', ['$http', 'AjaxAdapter', '$location',  '$q',
+function($http, transmit, location, $q) {
   console.log("Initializing ServiceConfig");
   var service = {
     server: location.host() || "unknownhost",
@@ -51,6 +51,39 @@ function($http, transmit, location) {
     },
     config_url: function() {
       return service.service_url() + "/config.json";
+    },
+    isValidJSON: function(value) {
+      try {
+	JSON.parse(value);
+      } catch (e) {
+      console.log("JSON invalid:" + value);
+	return false;
+      }
+      return true;
+    },
+    load_config: function() {
+      var deferred = $q.defer();
+
+      console.log("ServiceConfig.config_load(" + service.config_url() + ")");
+      service.config = {"status":"loading..."};
+      transmit.start();
+      deferred.notify("Sending service config.json request");
+      $.ajax({
+	url: service.config_url(),
+	data: { },
+	success: function( data ) {
+	  transmit.end(true);
+	  console.log("config_load() => " + JSON.stringify(data.FireREST));
+	  service.config = data;
+	  deferred.resolve(service.config);
+	},
+	error: function( jqXHR, ex) {
+	  console.error("ServiceConfig.config_load() ex:" + ex + "," + JSON.stringify(jqXHR));
+	  transmit.end(false);
+	  deferred.reject(ex);
+	}
+      });
+      return deferred.promise;
     }
   }
   return service;
