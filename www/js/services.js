@@ -66,6 +66,7 @@ function($http, transmit, location, $q) {
     },
     load_config: function(scope) {
       service.scope = scope;
+      service.cv = scope.cv;
       var deferred = $q.defer();
       console.log("ServiceConfig.config_load(" + service.config_url() + ")");
       service.config = {"status":"loading..."};
@@ -78,9 +79,13 @@ function($http, transmit, location, $q) {
 	  transmit.end(true);
 	  console.log("config_load() => " + JSON.stringify(data.FireREST));
 	  service.config = data;
+	  service.cv.on_load_config(data);
 	  deferred.resolve(service.config);
 	},
 	error: function( jqXHR, ex) {
+	  scope.$apply(function(){
+	    service.cv.on_load_config(null);
+	  });
 	  console.error("ServiceConfig.config_load() ex:" + ex + "," + JSON.stringify(jqXHR));
 	  transmit.end(false);
 	  deferred.reject(ex);
@@ -123,6 +128,18 @@ function($http, $interval, transmit, service){
     post_data:{},
     image_instances:{},
     image_large:{},
+    on_load_config: function(config) {
+      cv.camera_names = ["camera n/a"];
+      if (config && typeof config.cv === 'object') {
+	cv.camera_names = Object.keys(config.cv.camera_map); 
+	cv.camera_name = cv.camera_names[0];
+	cv.image = ['monitor.jpg'];
+	cv.profile_names = cv.camera_name && Object.keys(config.cv.camera_map[cv.camera_name].profile_map);
+	cv.profile_name = cv.profile_names[0];
+	cv.cve_name = cv.cve_names()[0] || "no-CVE";
+      }
+      cv.clear_results();
+    },
     camera_url: function() {
       return service.service_url() + service.sync + "/cv/" + cv.camera_name + "/";
     },
