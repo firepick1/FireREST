@@ -57,7 +57,7 @@
 	<div class="row fr-data-label">
 	  <div class="col-md-1">&nbsp;</div>
 	  <div class="col-md-8">
-	    <a title="{{cv.resource_url(resource)}}" href="{{cv.resource_url(resource)}}" >{{resource}}</a>
+	    <a title="{{cnc.resource_url(resource)}}" href="{{cnc.resource_url(resource)}}" >{{resource}}</a>
 	    <a target="_blank" class="fr-help" href="https://github.com/firepick1/FireREST/wiki/{{resource}}">?</a>
 	  </div>
 	</div>
@@ -68,7 +68,7 @@
 	      GET&nbsp;<span class="{{cnc.resource_GET_icon(resource)}}"></span>
 	    </button>
 	  </div>
-	  <div class="fr-cell-data col-md-7">
+	  <div class="fr-cell-data col-md-8">
 	    <textarea readonly title="{{cnc.resource_url(resource)}}" 
 	      class="form-control fr-json {{cnc.resource_classname[resource]}}" id="{{resource}}">{{cnc.resource_text(resource)}}
 	    </textarea>
@@ -76,27 +76,33 @@
 	</div>
 	<div ng-if="resource === 'gcode.fire'" class="row">
 	  <div class="fr-cell-btn col-md-1">
-	    <button title="{{cv.resource_url(resource)}}" 
-	      type="button" class="btn btn-primary btn-sm fr-post" ng-click="cv.resource_POST(resource)">
+	    <button title="{{cnc.resource_url(resource)}}" 
+	      type="button" class="btn {{cnc.resource_armed_class('move')}} btn-sm fr-post" 
+	        ng-focus="cnc.focus=this; cnc.armed=null"
+	        ng-blur="cnc.armed=null"
+	      	ng-click="cnc.resource_POST(resource, 'move')"
+	      	ng-dblclick="cnc.armed='move';cnc.resource_POST(resource, 'move')">
 	      POST&nbsp;
 	    </button>
+	    <div class="fr-confirm" ng-if="cnc.armed==='move'">Click again to send</div>
 	  </div>
 	  <div ng-repeat="axis in cnc.axes" class="fr-cell-data col-md-2">
-	    <form class="form-horizontal">
+	    <form class="form-inline fr-form-inline">
 	      <div class="form-group">
 		<div class="input-group">
 		  <div class="input-group-addon">G0{{axis.id}}</div>
-		  <input class="form-control " ng-model="axis.value" type="text">
+		  <input class="form-control" ng-focus="cnc.focus=axis" ng-model="axis.value" 
+		    type="number" step="{{axis.resolution}}">
 		</div>
 	      </div>
-	      <div class="form-group">
+	      <div ng-if="axis===cnc.focus" class="form-group fr-form-inline-group">
 		<button class="btn " ng-click="cnc.jog(axis,-axis.jog)">-{{axis.jog}}</button> 
 		<button class="btn " ng-click="cnc.jog(axis,axis.jog)">+{{axis.jog}}</button> 
 	      </div>
-	      <div class="form-group">
+	      <div ng-if="axis===cnc.focus" class="form-group fr-form-inline-group">
 		<div class="input-group">
-		  <div class="input-group-addon">JOG{{axis.id}}</div>
-		  <input class="form-control " ng-model="axis.jog" type="text">
+		  <div class="input-group-addon">&#x00b1;{{axis.id}}</div>
+		  <input class="form-control" ng-model="axis.jog" type="number" step="{{axis.resolution}}">
 		</div>
 	      </div>
 	    </form>

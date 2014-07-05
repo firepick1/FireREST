@@ -17,13 +17,17 @@ controllers.controller('MainCtrl',
       dce_names:["(no DCE's)"],
       dce_list:{},
       axes:[
-      	{id:'X', value:0, jog:1},
-      	{id:'Y', value:0, jog:1},
-      	{id:'Z', value:0, jog:1},
-      	{id:'A', value:0, jog:1}
+      	{id:'X', value:0, jog:1, resolution:0.001},
+      	{id:'Y', value:0, jog:1, resolution:0.001},
+      	{id:'Z', value:0, jog:1, resolution:0.001},
+      	{id:'A', value:0, jog:1, resolution:0.001}
       ],
       jog: function(axis, value) {
         axis.value = Number(axis.value) + Number(value);
+	if (axis.resolution < 1) {
+	  var divisor = Math.round(1/axis.resolution);
+	  axis.value = Math.round(axis.value/axis.resolution)*1.0/divisor;
+	}
       },
       resource_text: function(resource) {
 	  return cnc.resource_response[resource] || " ";
@@ -72,20 +76,36 @@ controllers.controller('MainCtrl',
 	  }
 	});
       },
-      resource_POST: function(resource) {
-	transmit.start();
-	var data = cnc.post_data[resource];
-	$.ajax({
-	  type:"POST",
-	  url: cnc.resource_url(resource),
-	  data: data,
-	  success: function() {
-	    cnc.resource_XHR(resource, "fr-json-ok", data, true);
-	  },
-	  error: function( jqXHR, ex) {
-	    cnc.resource_XHR(resource, "fr-json-err", JSON.stringify(jqXHR), false);
+      resource_armed_class: function(armed) {
+        return cnc.armed === armed ? "btn-warning" : "btn-primary";
+      },
+      resource_POST: function(resource, armed) {
+	if (cnc.armed === armed) {
+	  transmit.start();
+	  var data="(no-data)";
+	  if (armed === 'move') {
+	    data = "G0";
+	    cnc.axes.forEach(function(axis) { 
+	    	data += axis.id;
+		data += axis.value;
+	    });
 	  }
-	});
+	  console.log("POST:" + data);
+	  $.ajax({
+	    type:"POST",
+	    url: cnc.resource_url(resource),
+	    data: data,
+	    success: function() {
+	      cnc.resource_XHR(resource, "fr-json-ok", data, true);
+	    },
+	    error: function( jqXHR, ex) {
+	      cnc.resource_XHR(resource, "fr-json-err", JSON.stringify(jqXHR), false);
+	    }
+	  });
+	  cnc.armed = null;
+	} else {
+	  cnc.armed = armed;
+	}
       },
       resource_isPOST: function(resource) {
 	return resource === 'gcode.fire';

@@ -3,6 +3,7 @@ var express = require('express');
 var fs = require('fs');
 var app = express();
 var post_properties = false;
+var firerest={};
 
 express.static.mime.define({'application/json': ['fire']});
 
@@ -46,7 +47,9 @@ if (fs.existsSync(cv_dir)) {
   post_properties = true;
 } else {
   app.use('/firerest/cv', express.static('www/cv'));
+  app.use('/firerest/cnc', express.static('www/cnc'));
   app.use('/firerest/sync/cv', express.static('www/cv'));
+  app.use('/firerest/sync/cnc', express.static('www/cnc'));
   console.log("FireFUSE is not available. FireREST is demo mode only" );
 }
 app.use('/firerest/html', express.static('www/html'));
@@ -54,7 +57,7 @@ app.use('/firerest/partials', express.static('www/partials'));
 
 app.get('/firerest/config.json', function(req,res) { res.sendfile(config_file); });
 
-app.post(/.*\/properties.json$/, function(req,res,next) { 
+firerest.post_firefuse = function(req,res,next) { 
   var filepath = req.path.replace(/^\/firerest/, firefuse_dir);
   var data = '';
   req.on('data', function(datum){ data += datum; });
@@ -67,6 +70,11 @@ app.post(/.*\/properties.json$/, function(req,res,next) {
       res.send(405, {error:"This FireREST web service does not support properties.json updates"});
     }
   });
+};
+
+app.post(/.*\/properties.json$/, firerest.post_firefuse);
+app.post(/.*\/gcode.fire$/, function(req,res,next) { 
+  res.send(405, {error:"This FireREST web service does not support POST to gcode.fire"});
 });
 
 ///////////////////////// CHOOSE HTTP PORT ////////////////////////
