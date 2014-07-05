@@ -12,22 +12,111 @@ controllers.controller('MainCtrl',
     scope.config = {};
     scope.cv = cv;
 
+    var cnc = {
+      resources:['gcode.fire'],
+      dce_names:["(no DCE's)"],
+      dce_list:{},
+      axes:[
+      	{id:'X', value:0, jog:1},
+      	{id:'Y', value:0, jog:1},
+      	{id:'Z', value:0, jog:1},
+      	{id:'A', value:0, jog:1}
+      ],
+      jog: function(axis, value) {
+        axis.value = Number(axis.value) + Number(value);
+      },
+      resource_text: function(resource) {
+	  return cnc.resource_response[resource] || " ";
+      },
+      resource_path: function(resource) {
+	return "/cnc/" + cnc.dce_name + "/" + resource ;
+      },
+      resource_url: function(resource) {
+	return service.service_url() + "/cnc/" + cnc.dce_name + "/" + resource ;
+      },
+      resource_class: function(resource) {
+	return cnc.resource_classname[resource] || "fr-json-ok";
+      },
+      resource_XHR: function(resource, classname, response, ok) {
+	service.scope.$apply(function(){
+	  console.log('resource_XHR' + resource + response);
+	  cnc.resource_response[resource] = response;
+	  cnc.resource_classname[resource] = classname;
+	  transmit.end(true);
+	});
+      },
+      clear_results: function() {
+	cnc.resource_response = {};
+	cnc.resource_classname = {};
+        cnc.dce_names = [];
+	cnc.dce_list = {};
+      },
+      resource_GET_icon: function(action) {
+	return transmit.autoRefresh && (action === "gcode.fire") ? "glyphicon glyphicon-repeat" : "";
+      },
+      resource_GET: function(resource) {
+	console.log("GET " + resource);
+	transmit.start();
+	$.ajax({
+	  url: cnc.resource_url(resource),
+	  data: { r: Math.floor(Math.random()*1000000) },
+	  success: function( data ) {
+	    if (typeof data === 'object') {
+	      data = JSON.stringify(data);
+	    }
+	    data = ("" + data).trim();
+	    cnc.resource_XHR(resource, "fr-json-ok", data, true);
+	  },
+	  error: function( jqXHR, ex) {
+	    cnc.resource_XHR(resource, "fr-json-err", JSON.stringify(jqXHR), false);
+	  }
+	});
+      },
+      resource_POST: function(resource) {
+	transmit.start();
+	var data = cnc.post_data[resource];
+	$.ajax({
+	  type:"POST",
+	  url: cnc.resource_url(resource),
+	  data: data,
+	  success: function() {
+	    cnc.resource_XHR(resource, "fr-json-ok", data, true);
+	  },
+	  error: function( jqXHR, ex) {
+	    cnc.resource_XHR(resource, "fr-json-err", JSON.stringify(jqXHR), false);
+	  }
+	});
+      },
+      resource_isPOST: function(resource) {
+	return resource === 'gcode.fire';
+      }
+    };
+    scope.cnc = cnc;
+
     scope.worker = function(ticks) {
      if ((ticks % 5) === 0 ) {
-       cv.resources.indexOf('process.fire') >= 0 && cv.resource_GET('process.fire');
-     } else if ((ticks % 3) === 0 ) {
-       cv.image_GET('monitor.jpg');
-     } else if ((ticks % 3) === 1 ) {
-       cv.image_GET('camera.jpg');
+       cnc.resources.indexOf('gcode.fire') >= 0 && cnc.resource_GET('gcode.fire');
      }
      return true;
     }
 
-    cv.clear_results();
+    cnc.clear_results();
     service.load_config(scope).then( function(config) {
       console.log("processing config.json" );
       scope.config = config;
-      if (typeof config.cv === 'object') {
+      if (typeof config.cnc === 'object') {
+        cnc.dce_names = [];
+	for (var dce_name in config.cnc) {
+	  if (config.cnc.hasOwnProperty(dce_name)) {
+	    var dce = config.cnc[dce_name];
+	    console.log("dce " + dce_name + ":" + JSON.stringify(dce));
+	    dce.name = dce_name;
+	    cnc.dce_names.push(dce_name);
+	    cnc.dce_list[dce_name] = dce;
+	    cnc.dce_name = dce_name;
+	    cnc.dce = dce;
+	  }
+	}
 	bg.worker = scope.worker;
       }
     }, function(ex) {

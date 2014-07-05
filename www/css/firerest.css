@@ -10,6 +10,11 @@ p {
   text-align: center;
   color: #ccc;
 }
+.fr-inline-control {
+}
+.fr-prop-name {
+  text-align: right;
+}
 .fr-service-info {
   font-size: 14px;
   font-family: Courier;
