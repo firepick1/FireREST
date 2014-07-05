@@ -17,11 +17,19 @@ controllers.controller('MainCtrl',
       dce_names:["(no DCE's)"],
       dce_list:{},
       axes:[
-      	{id:'X', value:0, jog:1, resolution:0.001},
-      	{id:'Y', value:0, jog:1, resolution:0.001},
-      	{id:'Z', value:0, jog:1, resolution:0.001},
+      	{id:'X', value:0, jog:1, resolution:0.001, min:0, max:300},
+      	{id:'Y', value:0, jog:1, resolution:0.001, min:0, max:300},
+      	{id:'Z', value:0, jog:1, resolution:0.001, min:0, max:300},
       	{id:'A', value:0, jog:1, resolution:0.001}
       ],
+      axis_class: function(axis) {
+        if (typeof axis.min === "number" && axis.value < axis.min) {
+	  return "fr-axis-error-min";
+	} else if (typeof axis.max === "number" && axis.max < axis.value) {
+	  return "fr-axis-error-max";
+	}
+	return "";
+      },
       jog: function(axis, value) {
         axis.value = Number(axis.value) + Number(value);
 	if (axis.resolution < 1) {
@@ -62,8 +70,7 @@ controllers.controller('MainCtrl',
 	console.log("GET " + resource);
 	transmit.start();
 	$.ajax({
-	  url: cnc.resource_url(resource),
-	  data: { r: Math.floor(Math.random()*1000000) },
+	  url: cnc.resource_url(resource), data: { r: Math.floor(Math.random()*1000000) },
 	  success: function( data ) {
 	    if (typeof data === 'object') {
 	      data = JSON.stringify(data);

@@ -4,6 +4,14 @@ p {
 .fr-version:hover {
   color: #000;
 }
+.fr-axis-error-min {
+  color: red !important;
+  border-bottom: 2pt solid red !important;
+}
+.fr-axis-error-max {
+  color: red !important;
+  border-top: 2pt solid red !important;
+}
 .fr-version {
   font-size: 8pt;
   top: 26px;

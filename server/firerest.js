@@ -29,34 +29,6 @@ app.get('/index.html', function(req,res) { res.redirect('firerest/index.html'); 
 
 app.use(express.bodyParser());
 
-// If possible, use FireFUSE
-console.log("Looking for FireFUSE...");
-var firefuse_dir = "/dev/firefuse";
-var cv_dir = "/dev/firefuse/cv";
-var cnc_dir = "/dev/firefuse/cnc";
-var sync_dir = "/dev/firefuse/sync";
-if (fs.existsSync(cv_dir)) {
-  config_file = firefuse_dir + '/config.json';
-  app.use('/firerest/cv', express.static(cv_dir));
-  app.use('/firerest/sync', express.static(sync_dir));
-  app.use('/firerest/cnc', express.static(cnc_dir));
-  console.log("Found FireFUSE!");
-  console.log("Mapping /firerest/cv to: " + cv_dir);
-  console.log("Mapping /firerest/sync to: " + sync_dir);
-  console.log("Mapping /firerest/cnc to: " + cnc_dir);
-  post_properties = true;
-} else {
-  app.use('/firerest/cv', express.static('www/cv'));
-  app.use('/firerest/cnc', express.static('www/cnc'));
-  app.use('/firerest/sync/cv', express.static('www/cv'));
-  app.use('/firerest/sync/cnc', express.static('www/cnc'));
-  console.log("FireFUSE is not available. FireREST is demo mode only" );
-}
-app.use('/firerest/html', express.static('www/html'));
-app.use('/firerest/partials', express.static('www/partials'));
-
-app.get('/firerest/config.json', function(req,res) { res.sendfile(config_file); });
-
 firerest.post_firefuse = function(req,res,next) { 
   var filepath = req.path.replace(/^\/firerest/, firefuse_dir);
   var data = '';
@@ -72,10 +44,42 @@ firerest.post_firefuse = function(req,res,next) {
   });
 };
 
+// If possible, use FireFUSE
+console.log("Looking for FireFUSE...");
+var firefuse_dir = "/dev/firefuse";
+var cv_dir = "/dev/firefuse/cv";
+var cnc_dir = "/dev/firefuse/cnc";
+var sync_dir = "/dev/firefuse/sync";
+var post_gcode_fire;
+
+if (fs.existsSync(cv_dir)) {
+  config_file = firefuse_dir + '/config.json';
+  app.use('/firerest/cv', express.static(cv_dir));
+  app.use('/firerest/sync', express.static(sync_dir));
+  app.use('/firerest/cnc', express.static(cnc_dir));
+  console.log("Found FireFUSE!");
+  console.log("Mapping /firerest/cv to: " + cv_dir);
+  console.log("Mapping /firerest/sync to: " + sync_dir);
+  console.log("Mapping /firerest/cnc to: " + cnc_dir);
+  post_properties = true;
+  post_gcode_fire = post_firefuse;
+} else {
+  app.use('/firerest/cv', express.static('www/cv'));
+  app.use('/firerest/cnc', express.static('www/cnc'));
+  app.use('/firerest/sync/cv', express.static('www/cv'));
+  app.use('/firerest/sync/cnc', express.static('www/cnc'));
+  post_gcode_fire = function(req,res,next) { 
+    res.send(405, {error:"This FireREST web service does not support POST to gcode.fire"});
+  };
+  console.log("FireFUSE is not available. FireREST is demo mode only" );
+}
+app.use('/firerest/html', express.static('www/html'));
+app.use('/firerest/partials', express.static('www/partials'));
+
+app.get('/firerest/config.json', function(req,res) { res.sendfile(config_file); });
+
 app.post(/.*\/properties.json$/, firerest.post_firefuse);
-app.post(/.*\/gcode.fire$/, function(req,res,next) { 
-  res.send(405, {error:"This FireREST web service does not support POST to gcode.fire"});
-});
+app.post(/.*\/gcode.fire$/, post_gcode_fire);
 
 ///////////////////////// CHOOSE HTTP PORT ////////////////////////
 // Choose port 80 if you are comfortable having your web server operate with root-level access

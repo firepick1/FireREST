@@ -32,85 +32,9 @@
     <div ng-include src="'../../partials/service.html'"></div>
     <div ng-include src="'../../partials/monitor.html'"></div>
 
-    <div class="fr-form">
-      <div class="fr-section-title">
-	DCE: {{cnc.dce_name}}
-	<div class="fr-collapse">
-	  <button class="btn btn-default btn-sm fr-collapse-btn" 
-	    ng-click="service.expand_toggle('dce')"><span class="{{service.expand_icon('dce')}}"></span></button>
-	</div>
-      </div>
-      <div ng-if="service.expand.dce" class="row">
-	<div class="col-md-4">
-	  <div class="control-label fr-control-label">device control endpoint</div>
-	  <select ng-model="cnc.dce_name" ng-change="cnc.clear_results()" class="form-control">
-	    <option ng-repeat="dce in cnc.dce_names">{{dce}}</option>
-	  </select>
-	  <table class="table table-condensed ">
-	    <tr><th class="fr-prop-name">protocol:</th><td>{{cnc.dce.protocol}}</td></tr>
-	    <tr><th class="fr-prop-name">serial.path:</th><td>{{cnc.dce.serial.path}}</td></tr>
-	    <tr><th class="fr-prop-name">serial.stty:</th><td>{{cnc.dce.serial.stty}}</td></tr>
-	  </table>
-	</div>
-      </div>
-      <div class="fr-row" ng-repeat="resource in ['gcode.fire']">
-	<div class="row fr-data-label">
-	  <div class="col-md-1">&nbsp;</div>
-	  <div class="col-md-8">
-	    <a title="{{cnc.resource_url(resource)}}" href="{{cnc.resource_url(resource)}}" >{{resource}}</a>
-	    <a target="_blank" class="fr-help" href="https://github.com/firepick1/FireREST/wiki/{{resource}}">?</a>
-	  </div>
-	</div>
-	<div class="row">
-	  <div class="fr-cell-btn col-md-1">
-	    <button title="{{cnc.resource_url(resource)}}" 
-	      type="button" class="btn btn-primary btn-sm fr-get" ng-click="cnc.resource_GET(resource)">
-	      GET&nbsp;<span class="{{cnc.resource_GET_icon(resource)}}"></span>
-	    </button>
-	  </div>
-	  <div class="fr-cell-data col-md-8">
-	    <textarea readonly title="{{cnc.resource_url(resource)}}" 
-	      class="form-control fr-json {{cnc.resource_classname[resource]}}" id="{{resource}}">{{cnc.resource_text(resource)}}
-	    </textarea>
-	  </div>
-	</div>
-	<div ng-if="resource === 'gcode.fire'" class="row">
-	  <div class="fr-cell-btn col-md-1">
-	    <button title="{{cnc.resource_url(resource)}}" 
-	      type="button" class="btn {{cnc.resource_armed_class('move')}} btn-sm fr-post" 
-	        ng-focus="cnc.focus=this; cnc.armed=null"
-	        ng-blur="cnc.armed=null"
-	      	ng-click="cnc.resource_POST(resource, 'move')"
-	      	ng-dblclick="cnc.armed='move';cnc.resource_POST(resource, 'move')">
-	      POST&nbsp;
-	    </button>
-	    <div class="fr-confirm" ng-if="cnc.armed==='move'">Click again to send</div>
-	  </div>
-	  <div ng-repeat="axis in cnc.axes" class="fr-cell-data col-md-2">
-	    <form class="form-inline fr-form-inline">
-	      <div class="form-group">
-		<div class="input-group">
-		  <div class="input-group-addon">G0{{axis.id}}</div>
-		  <input class="form-control" ng-focus="cnc.focus=axis" ng-model="axis.value" 
-		    type="number" step="{{axis.resolution}}">
-		</div>
-	      </div>
-	      <div ng-if="axis===cnc.focus" class="form-group fr-form-inline-group">
-		<button class="btn " ng-click="cnc.jog(axis,-axis.jog)">-{{axis.jog}}</button> 
-		<button class="btn " ng-click="cnc.jog(axis,axis.jog)">+{{axis.jog}}</button> 
-	      </div>
-	      <div ng-if="axis===cnc.focus" class="form-group fr-form-inline-group">
-		<div class="input-group">
-		  <div class="input-group-addon">&#x00b1;{{axis.id}}</div>
-		  <input class="form-control" ng-model="axis.jog" type="number" step="{{axis.resolution}}">
-		</div>
-	      </div>
-	    </form>
-	  </div>
-	</div>
-      </div>
-    </div>
-  </div>
+    <div ng-include src="'../../partials/dce-start.html'"></div>
+    <div ng-include src="'../../partials/dce-move.html'"></div>
+    <div ng-include src="'../../partials/dce-end.html'"></div>
 
 <!-- ///////////// END APPLICATION CODE ///////////// -->
 <div ng-include src="'../../partials/footer.html'"></div></body></html>
