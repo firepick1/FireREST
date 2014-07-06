@@ -9,6 +9,13 @@
 	],
 	"properties": { "roi":[350,50,100,100], "rectColor":[32,255,32], "xtol":32, "ytol":32, "threshold":0.7 }
       },
+      "find-crash-dummy":{ 
+        "firesight": [
+	  {"op":"matchTemplate", "name":"fiducial", "corr":"{{corr}}", "template":"www/img/{{img}}"},
+	  {"op":"drawRects", "model":"fiducial", "color":"{{rectColor}}"}
+	],
+	"properties": { "corr":0.95, "rectColor":[32,255,32], "img":"bwwb.png" }
+      },
       "locate-part":{
 	"firesight": [
 	  {"op":"absdiff", "path":"{{saved}}"},
@@ -26,8 +33,8 @@
         "width":800,
 	"height":200,
 	"profile_map":{
-	  "gray":{ "cve_names":[ "calc-offset", "locate-part" ] },
-	  "bgr":{ "cve_names":[ "calc-offset", "locate-part" ] }
+	  "gray":{ "cve_names":[ "calc-offset", "find-crash-dummy", "locate-part" ] },
+	  "bgr":{ "cve_names":[ "calc-offset", "find-crash-dummy", "locate-part" ] }
 	}
       }
     }
