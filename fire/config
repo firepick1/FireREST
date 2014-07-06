@@ -12,7 +12,7 @@ function help() {
   echo "	   fire/config -h"
   echo
   echo "	Apply default configuration file:"
-  echo "	  fire/config www/firerest/config.json"
+  echo "	  fire/config -d"
   echo 
   echo "	Apply custom configuration file:"
   echo "	  fire/config custom/myconfig.json"
@@ -24,7 +24,8 @@ function help() {
 if [ "$1" == "" ] || [ "$1" == "-h" ]; then help; exit 0; fi
 
 CONFIG_FILE=$1
-if [ "$1" == "DEFAULT" ]; then CONFIG_FILE=www/firerest/config.json; fi
+if [ "$1" == "-d" ]; then CONFIG_FILE=www/config.json; fi
+if [ "$1" == "DEFAULT" ]; then CONFIG_FILE=www/config.json; fi
 if [ ! -e "$CONFIG_FILE" ]; then
   echo "ERROR	: $CONFIG_FILE not found"
   exit -1;
