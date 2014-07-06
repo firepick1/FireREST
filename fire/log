@@ -1,0 +1,59 @@
+#! /bin/bash
+
+function help() {
+  echo "NAME"
+  echo "	fire/log - FireFUSE log utility"
+  echo""
+  echo "SYNOPSIS"
+  echo "	fire/log [-t|-d|-i|-h]"
+  echo ""
+  echo "EXAMPLES"
+  echo "	Show recent entries"
+  echo "	  fire/log"
+  echo 
+  echo "	Log at TRACE level and show fully detailed information about FireFUSE activity"
+  echo "	  fire/log -t"
+  echo 
+  echo "	Log at DEBUG level and show some detailed information about FireFUSE activity"
+  echo "	  fire/log -i"
+  echo 
+  echo "	Log at INFO level (default):"
+  echo "	  fire/log -i"
+  echo 
+  echo "	Print this documentation:"
+  echo "	   fire/log -h"
+}
+
+if [ "$1" == "-h" ]; then help; exit 0; fi
+
+sudo -k
+ls /dev | grep firefuse
+if [ $? -ne 0 ]; then
+  echo "ERROR	: FireFUSE is not installed" 
+  exit -1;
+fi
+
+ls /dev/firefuse
+if [ $? -ne 0 ]; then
+  echo "ERROR	: FireFUSE may have crashed." 
+  echo "TRYE	: fire/config -d" 
+  exit -1
+fi
+
+if [ "%1" == "-t" ]; then
+  echo t > /dev/firefuse/firelog
+  echo "LOG	: Logging set to TRACE level. See /var/log/firefuse.log"
+fi 
+
+if [ "%1" == "-d" ]; then
+  echo i > /dev/firefuse/firelog
+  echo "LOG	: Logging set to INFO level. See /var/log/firefuse.log"
+fi
+
+if [ "%1" == "-i" ]; then
+  echo i > /dev/firefuse/firelog
+  echo "LOG	: Logging set to INFO level. See /var/log/firefuse.log"
+fi
+
+echo "--------------------------------"
+tail -100 /var/log/firefuse.log

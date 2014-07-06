@@ -5,7 +5,7 @@ function help() {
   echo "	fire/config - Update FireREST/FireFUSE configuration"
   echo""
   echo "SYNOPSIS"
-  echo "	fire/config [-d|-t|-i]"
+  echo "	fire/config [-d]"
   echo "	fire/config "`tput smul`"config.json"`tput rmul`
   echo ""
   echo "EXAMPLES"
@@ -14,12 +14,6 @@ function help() {
   echo 
   echo "	Apply custom configuration file:"
   echo "	  fire/config custom/myconfig.json"
-  echo 
-  echo "	Log at TRACE level and show detailed information about FireFUSE activity:"
-  echo "	  fire/config -t"
-  echo 
-  echo "	Log at INFO level (default):"
-  echo "	  fire/config -i"
   echo 
   echo "	Print this documentation:"
   echo "	   fire/config -h"
@@ -53,22 +47,6 @@ if [ $? -ne 0 ]; then
     echo "ERROR	: /dev/firefuse could not be unmounted"
     exit -1
   fi
-fi
-
-if [ "%1" == "-t" ]; then
-  echo t > /dev/firefuse/firelog
-  echo "LOG	: Logging set to TRACE level. See /var/log/firefuse.log"
-  echo "--------------------------------"
-  tail /var/log/firefuse.log
-  exit 0
-fi
-
-if [ "%1" == "-i" ]; then
-  echo i > /dev/firefuse/firelog
-  echo "LOG	: Logging set to INFO level. See /var/log/firefuse.log"
-  echo "--------------------------------"
-  tail /var/log/firefuse.log
-  exit 0
 fi
 
 if [ -e /dev/firefuse/status ]; then
