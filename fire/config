@@ -5,18 +5,19 @@ function help() {
   echo "	fire/config - Update FireREST/FireFUSE configuration"
   echo""
   echo "SYNOPSIS"
+  echo "	fire/config -d"
   echo "	fire/config "`tput smul`"config.json"`tput rmul`
   echo ""
   echo "EXAMPLES"
-  echo "	Print this documentation:"
-  echo "	   fire/config -h"
-  echo
   echo "	Apply default configuration file:"
   echo "	  fire/config -d"
   echo 
   echo "	Apply custom configuration file:"
   echo "	  fire/config custom/myconfig.json"
   echo 
+  echo "	Print this documentation:"
+  echo "	   fire/config -h"
+  echo
   echo "SEE ALSO"
   echo "	https://github.com/firepick1/FireREST/wiki/config.json"
 }
