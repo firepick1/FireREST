@@ -32,16 +32,31 @@ if [ ! -e "$CONFIG_FILE" ]; then
 fi
 
 sudo -k
-if [ ! -e /dev/firefuse ]; then
+ls /dev | grep firefuse
+if [ $? -ne 0 ]; then
   echo "ERROR	: FireFUSE is not installed and cannot be configured" 
   exit -1;
 fi
-if [ -e /dev/firefuse/status ]; then
+
+ls /dev/firefuse
+if [ $? -ne 0 ]; then
+  echo "WARNING	: FireFUSE may have crashed. Attempting to unmount /dev/firefuse..." 
   sudo fusermount -u /dev/firefuse
   if [ $? -ne 0 ]; then
     echo "ERROR	: /dev/firefuse could not be unmounted"
     exit -1
   fi
+fi
+
+if [ -e /dev/firefuse/status ]; then
+  echo "FireFUSE: Unmounting running instance: /dev/firefuse..."
+  sudo fusermount -u /dev/firefuse
+  if [ $? -ne 0 ]; then
+    echo "ERROR	: /dev/firefuse could not be unmounted"
+    exit -1
+  fi
+else 
+  echo "FireFUSE: No existing instance detected at /dev/firefuse"
 fi
 
 echo "CONFIG	: $CONFIG_FILE"
