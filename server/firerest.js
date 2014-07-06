@@ -62,7 +62,7 @@ if (fs.existsSync(cv_dir)) {
   console.log("Mapping /firerest/sync to: " + sync_dir);
   console.log("Mapping /firerest/cnc to: " + cnc_dir);
   post_properties = true;
-  post_gcode_fire = post_firefuse;
+  post_gcode_fire = firerest.post_firefuse;
 } else {
   app.use('/firerest/cv', express.static('www/cv'));
   app.use('/firerest/cnc', express.static('www/cnc'));
