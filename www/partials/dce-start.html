@@ -1,0 +1,21 @@
+    <div class="fr-form">
+      <div class="fr-section-title">
+	DCE: {{cnc.dce_name}}
+	<div class="fr-collapse">
+	  <button class="btn btn-default btn-sm fr-collapse-btn" 
+	    ng-click="service.expand_toggle('dce')"><span class="{{service.expand_icon('dce')}}"></span></button>
+	</div>
+      </div>
+      <div ng-if="service.expand.dce" class="row">
+	<div class="col-md-4">
+	  <div class="control-label fr-control-label">device control endpoint</div>
+	  <select ng-model="cnc.dce_name" ng-change="cnc.clear_results()" class="form-control">
+	    <option ng-repeat="dce in cnc.dce_names">{{dce}}</option>
+	  </select>
+	  <table class="table table-condensed ">
+	    <tr><th class="fr-prop-name">protocol:</th><td>{{cnc.dce.protocol}}</td></tr>
+	    <tr><th class="fr-prop-name">serial.path:</th><td>{{cnc.dce.serial.path}}</td></tr>
+	    <tr><th class="fr-prop-name">serial.stty:</th><td>{{cnc.dce.serial.stty}}</td></tr>
+	  </table>
+	</div>
+      </div>

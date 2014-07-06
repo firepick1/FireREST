@@ -31,5 +31,20 @@
 	}
       }
     }
+  },
+  "cnc":{ 
+    "tinyg":{ 
+      "protocol":"gcode",
+      "axes":[
+	{"id":"X", "value":0, "jog":1, "resolution":0.001, "min":0, "max":300, "units":"mm", "steps":20, "enabled":true},
+	{"id":"Y", "value":0, "jog":1, "resolution":0.001, "min":0, "max":300, "units":"mm", "steps":20, "enabled":true},
+	{"id":"Z", "value":0, "jog":1, "resolution":0.001, "min":0, "max":300, "units":"mm", "steps":20, "enabled":true},
+	{"id":"A", "value":0, "jog":1, "resolution":0.001, "units":"degrees", "steps":10, "enabled":true}
+      ],
+      "serial": {
+        "path":"/dev/ttyUSB0",
+	"stty":"cs8 115200"
+      }
+    }
   }
 }

@@ -4,6 +4,9 @@ p {
 .fr-version:hover {
   color: #000;
 }
+.fr-axis-disabled {
+  background-color: #aaa !important;
+}
 .fr-axis-error-min {
   color: red !important;
   border-bottom: 2pt solid red !important;

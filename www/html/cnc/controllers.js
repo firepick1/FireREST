@@ -17,18 +17,16 @@ controllers.controller('MainCtrl',
       dce_names:["(no DCE's)"],
       dce_list:{},
       axes:[
-      	{id:'X', value:0, jog:1, resolution:0.001, min:0, max:300},
-      	{id:'Y', value:0, jog:1, resolution:0.001, min:0, max:300},
-      	{id:'Z', value:0, jog:1, resolution:0.001, min:0, max:300},
-      	{id:'A', value:0, jog:1, resolution:0.001}
+      	{id:'(none)', value:0, jog:1, resolution:0.001, min:0, max:1, steps:1, units:"mm", enabled:false},
       ],
       axis_class: function(axis) {
+        var result = axis.enabled ? "" : "fr-axis-disabled ";
         if (typeof axis.min === "number" && axis.value < axis.min) {
-	  return "fr-axis-error-min";
+	  result = "fr-axis-error-min";
 	} else if (typeof axis.max === "number" && axis.max < axis.value) {
-	  return "fr-axis-error-max";
+	  result += "fr-axis-error-max";
 	}
-	return "";
+	return result;
       },
       jog: function(axis, value) {
         axis.value = Number(axis.value) + Number(value);
@@ -93,8 +91,10 @@ controllers.controller('MainCtrl',
 	  if (armed === 'move') {
 	    data = "G0";
 	    cnc.axes.forEach(function(axis) { 
-	    	data += axis.id;
-		data += axis.value;
+		if (axis.enabled) {
+		  data += axis.id;
+		  data += axis.value * axis.steps;
+		}
 	    });
 	  }
 	  console.log("POST:" + data);
@@ -141,6 +141,7 @@ controllers.controller('MainCtrl',
 	    cnc.dce_names.push(dce_name);
 	    cnc.dce_list[dce_name] = dce;
 	    cnc.dce_name = dce_name;
+	    dce.axes = dce.axes;
 	    cnc.dce = dce;
 	  }
 	}
