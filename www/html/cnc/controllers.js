@@ -16,9 +16,11 @@ controllers.controller('MainCtrl',
       resources:['gcode.fire'],
       dce_names:["(no DCE's)"],
       dce_list:{},
-      axes:[
-      	{id:'(none)', value:0, jog:1, resolution:0.001, min:0, max:1, steps:1, units:"mm", enabled:false},
-      ],
+      dce:{
+	axes:[
+	  {id:'(none)', value:0, jog:1, resolution:0.001, min:0, max:1, steps:1, units:"mm", enabled:false},
+	]
+      },
       axis_class: function(axis) {
         var result = axis.enabled ? "" : "fr-axis-disabled ";
         if (typeof axis.min === "number" && axis.value < axis.min) {
@@ -90,7 +92,7 @@ controllers.controller('MainCtrl',
 	  var data="(no-data)";
 	  if (armed === 'move') {
 	    data = "G0";
-	    cnc.axes.forEach(function(axis) { 
+	    cnc.dce.axes.forEach(function(axis) { 
 		if (axis.enabled) {
 		  data += axis.id;
 		  data += axis.value * axis.steps;
@@ -141,8 +143,8 @@ controllers.controller('MainCtrl',
 	    cnc.dce_names.push(dce_name);
 	    cnc.dce_list[dce_name] = dce;
 	    cnc.dce_name = dce_name;
-	    dce.axes = dce.axes;
 	    cnc.dce = dce;
+	    console.log("configured DCE " + dce.name );
 	  }
 	}
 	bg.worker = scope.worker;
