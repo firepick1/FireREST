@@ -76,5 +76,5 @@ popd > /dev/null
 echo "SUCCESS	: Configuration installed"
 echo "LOG	: To monitor FireFUSE activity, see /var/log/firefuse.log"
 echo "------------------------------"
-echo "
+echo 
 tail /var/log/firefuse.log
