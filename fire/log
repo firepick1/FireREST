@@ -51,17 +51,17 @@ fi
 
 if [ "$1" == "-t" ]; then
   echo "LOG	: Logging set to TRACE level. See /var/log/firefuse.log"
-  echo t > /dev/firefuse/firefuse.log
+  echo t > /dev/firefuse/firelog
 fi 
 
 if [ "$1" == "-d" ]; then
   echo "LOG	: Logging set to DEBUG level. See /var/log/firefuse.log"
-  echo d > /dev/firefuse/firefuse.log
+  echo d > /dev/firefuse/firelog
 fi
 
 if [ "$1" == "-i" ]; then
   echo "LOG	: Logging set to INFO level. See /var/log/firefuse.log"
-  echo i > /dev/firefuse/firefuse.log
+  echo i > /dev/firefuse/firelog
 fi
 
 echo "--------------------------------"
