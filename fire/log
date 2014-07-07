@@ -43,23 +43,23 @@ if [ $? -ne 0 ]; then
   exit -1
 fi
 
-if [ "%1" == "-c" ]; then
+if [ "$1" == "-c" ]; then
   echo "LOG	: Copy log entries to stdout. CTRL-C to quit."
   tail -f /dev/firefuse/firelog
   exit 0
 fi 
 
-if [ "%1" == "-t" ]; then
+if [ "$1" == "-t" ]; then
   echo "LOG	: Logging set to TRACE level. See /var/log/firefuse.log"
   echo t > /dev/firefuse/firelog
 fi 
 
-if [ "%1" == "-d" ]; then
+if [ "$1" == "-d" ]; then
   echo "LOG	: Logging set to DEBUG level. See /var/log/firefuse.log"
   echo d > /dev/firefuse/firelog
 fi
 
-if [ "%1" == "-i" ]; then
+if [ "$1" == "-i" ]; then
   echo "LOG	: Logging set to INFO level. See /var/log/firefuse.log"
   echo i > /dev/firefuse/firelog
 fi
