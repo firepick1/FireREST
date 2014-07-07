@@ -1,4 +1,5 @@
 { "FireREST":{"title":"FireREST Reference Service","provider":"Demo", "version":{"major":0, "minor":9, "patch":0} },
+  "background-worker":{ "idle-period":900 },
   "cv":{
     "cve_map":{
       "calc-offset":{
