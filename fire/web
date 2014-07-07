@@ -1,0 +1,48 @@
+#! /bin/bash
+
+function help() {
+  echo "SYNOPSIS: fire/web [-h|-k|-s]"
+  echo "EXAMPLES: Launch FireREST web server in background for current user"
+  echo "	:   fire/web -s"
+  echo "	: Kill FireREST web server if it is running"
+  echo "	:   fire/web -k"
+  echo "	: Print this documentation:"
+  echo "	:   fire/web -h"
+}
+
+if [ "$1" == "-h" ]; then help; exit 0; fi
+
+echo "COMMAND	: fire/web - FireREST web server utility"
+process=`ps -eo pid,args | grep node.*[f]irerest\.js`
+echo "PROCESS	: $process" 
+
+if [ "$1" == "-k" ]; then
+  ps -eo pid,args | grep node.*[f]irerest\.js > /dev/null
+  if [ $? == 0 ]; then
+    echo "KILL	: kill "`echo $process | grep -Eo "[0-9]+"`
+    kill `echo $process | grep -Eo "[0-9]+"`
+    if [ $? == 0 ]; then
+      echo "SUCCESS	: FireREST web server is no longer running" 
+    else 
+      echo "ERROR	: Could not kill FireREST web server process" 
+      exit -1
+    fi
+  else
+    echo "SUCCESS	: FireREST web server is not running" 
+  fi
+  exit 0
+fi
+
+if [ "$1" == "-s" ]; then
+  ps -eo pid,args | grep node.*[f]irerest\.js > /dev/null
+  if [ $? == 0 ]; then
+    echo "ERROR	: FireREST web server is already running" 
+  else
+    echo "COMMAND	: node server/firerest.js"
+    echo "-----------------------------------"
+    node server/firerest.js &
+  fi
+  exit 0
+fi
+
+help

@@ -4,8 +4,8 @@ var bootstrap = angular.module('FireREST.bootstrap', ['ui.bootstrap']);
 var controllers = angular.module('FireREST.controllers', []);
 
 controllers.controller('MainCtrl', 
-  ['$scope','$location', 'BackgroundThread', 'ServiceConfig', 'AjaxAdapter', 'CvService',
-  function(scope, location, bg, service, transmit, cv) {
+  ['$scope','$location', 'BackgroundThread', 'ServiceConfig', 'AjaxAdapter', 'CvService', '$interpolate',
+  function(scope, location, bg, service, transmit, cv, interpolate) {
     transmit.clear();
     scope.transmit = transmit;
     scope.service = service;
@@ -14,6 +14,7 @@ controllers.controller('MainCtrl',
 
     var cnc = {
       resources:['gcode.fire'],
+      controls:['move','home'],
       dce_names:["(no DCE's)"],
       dce_list:{},
       dce:{
@@ -21,20 +22,38 @@ controllers.controller('MainCtrl',
 	  {id:'(none)', value:0, jog:1, resolution:0.001, min:0, max:1, steps:1, units:"mm", enabled:false},
 	]
       },
-      axis_class: function(axis) {
+      on_focus: function(tag,key) { cnc.focus = tag + key; },
+      is_focus: function(tag,key) { return cnc.focus === tag + key; },
+      gcode_context: function() {
+	var context = {axis_steps:"", home_steps:""};
+	cnc.dce.axes.forEach(function(axis) { 
+	  var home_type = typeof axis.home;
+	  if (axis.enabled) {
+	    context.axis = axis;
+	    if (axis.hasOwnProperty('home')) {
+	      context.home_steps += interpolate('{{axis.id}}{{axis.home*axis.steps}}')(context);
+	    }
+	    context.axis_steps += interpolate('{{axis.id}}{{axis.value*axis.steps}}')(context);
+	  }
+	});
+	return context;
+      },
+      gcode_home: function() { return interpolate(cnc.dce.gcode.home)(cnc.gcode_context()); },
+      gcode_move: function() { return interpolate(cnc.dce.gcode.move)(cnc.gcode_context()); },
+      axis_class: function(axis, value) {
         var result = axis.enabled ? "" : "fr-axis-disabled ";
-        if (typeof axis.min === "number" && axis.value < axis.min) {
+        if (typeof axis.min === "number" && value < axis.min) {
 	  result = "fr-axis-error-min";
-	} else if (typeof axis.max === "number" && axis.max < axis.value) {
+	} else if (typeof axis.max === "number" && axis.max < value) {
 	  result += "fr-axis-error-max";
 	}
 	return result;
       },
-      jog: function(axis, value) {
-        axis.value = Number(axis.value) + Number(value);
+      jog: function(axis, key, value) {
+        axis[key] = Number(axis[key]) + Number(value);
 	if (axis.resolution < 1) {
 	  var divisor = Math.round(1/axis.resolution);
-	  axis.value = Math.round(axis.value/axis.resolution)*1.0/divisor;
+	  axis[key] = Math.round(axis[key]/axis.resolution)*1.0/divisor;
 	}
       },
       resource_text: function(resource) {
@@ -91,13 +110,7 @@ controllers.controller('MainCtrl',
 	  transmit.start();
 	  var data="(no-data)";
 	  if (armed === 'move') {
-	    data = "G0";
-	    cnc.dce.axes.forEach(function(axis) { 
-		if (axis.enabled) {
-		  data += axis.id;
-		  data += axis.value * axis.steps;
-		}
-	    });
+	    data = cnc.gcode_move();
 	  }
 	  console.log("POST:" + data);
 	  $.ajax({

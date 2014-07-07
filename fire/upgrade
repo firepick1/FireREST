@@ -1,8 +1,10 @@
 #! /bin/bash
 
-echo "COMMAND	: fire/upgrade"
+echo "COMMAND	: fire/upgrade - Get and build latest version of FireREST"
 echo "ETA	: 1-30 minutes"
 echo "HELP	: https://github.com/firepick1/FireREST/wiki/Upgrade-FireREST"
+
+fire/web -k
 
 echo "GIT	: `git config remote.origin.url`"
 git pull
@@ -22,6 +24,6 @@ if [ $? -ne 0 ]; then
   echo "ERROR	: See build.log"
   exit -1
 fi
-echo "LOG	: See build.log"
+echo "LOG	: `pwd`/build.log"
 echo "SUCCESS	: fire/upgrade - FireREST upgrade complete"
 

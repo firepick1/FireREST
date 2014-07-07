@@ -1,30 +1,21 @@
 #! /bin/bash
 
+echo "COMMAND	: fire/log - FireFUSE log utility"
+
 function help() {
-  echo "NAME"
-  echo "	fire/log - FireFUSE log utility"
-  echo""
-  echo "SYNOPSIS"
-  echo "	fire/log [-c|-t|-d|-i|-h]"
-  echo ""
-  echo "EXAMPLES"
-  echo "	Show recent entries"
-  echo "	  fire/log"
-  echo 
-  echo "	Continuously copy log entries to console (CTRL-C to quit)"
-  echo "	  fire/log -c"
-  echo 
-  echo "	Log at TRACE level and show fully detailed information about FireFUSE activity"
-  echo "	  fire/log -t"
-  echo 
-  echo "	Log at DEBUG level and show some detailed information about FireFUSE activity"
-  echo "	  fire/log -d"
-  echo 
-  echo "	Log at INFO level (default):"
-  echo "	  fire/log -i"
-  echo 
-  echo "	Print this documentation:"
-  echo "	   fire/log -h"
+  echo "SYNOPSIS: fire/log [-c|-t|-d|-i|-h]"
+  echo "EXAMPLES: Show recent entries"
+  echo "	:   fire/log"
+  echo "	: Continuously copy log entries to console (CTRL-C to quit)"
+  echo "	:   fire/log -c"
+  echo "	: Log at TRACE level and show fully detailed information about FireFUSE activity"
+  echo "	:   fire/log -t"
+  echo "	: Log at DEBUG level and show some detailed information about FireFUSE activity"
+  echo "	:   fire/log -d"
+  echo "	: Log at INFO level (default):"
+  echo "	:   fire/log -i"
+  echo "	: Print this documentation:"
+  echo "	:   fire/log -h"
 }
 
 if [ "$1" == "-h" ]; then help; exit 0; fi

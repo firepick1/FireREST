@@ -1,6 +1,9 @@
 p {
   max-width: 700px;
 }
+code {
+  color: #080 !important;
+}
 .fr-version:hover {
   color: #000;
 }

@@ -4,6 +4,8 @@ FIREREST_VERSION_MAJOR=0
 FIREREST_VERSION_MINOR=10
 FIREREST_VERSION_PATCH=0
 
+echo "NAME	: ../FireREST/build -- compile FireREST"
+
 function pull_git() {
   echo "GIT	: UPDATING $1"
   if [ ! -e $1 ]; then
@@ -31,7 +33,6 @@ sudo -u $SUDO_USER sed \
   config.json.tmpl > www/config.json
 echo "CONFIG	: `grep version www/config.json`"
 
-echo "COMMAND	: ../FireREST/build"
 echo "ETA	: 1-30 minutes"
 echo "HELP	: https://github.com/firepick1/FireREST/wiki/Build-FireREST"
 echo "DATE	: `date`"
@@ -40,6 +41,8 @@ echo "PATH	: $PATH"
 echo "SHELL	: $SHELL"
 echo "SUDO	: SUDO_USER: $SUDO_USER"
 echo "SSH	: SSH_AGENT_PID: $SSH_AGENT_PID"
+
+fire/web -k
 
 if [ "$SUDO_USER" == "" ]; then
   echo "ERROR	: SUDO_USER is not defined"
@@ -122,5 +125,5 @@ echo "------------------------------------------"
 echo "DATE	: `date`"
 echo "SUCCESS	: ../FireREST/build complete"
 echo "TEST	: Launch FireREST web service:"
-echo "TEST	;   node server/firesight.js"
+echo "TEST	;   fire/web -s"
 echo "TEST	; Verify FireREST web service at http://localhost:8080"

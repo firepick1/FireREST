@@ -1,25 +1,16 @@
 #! /bin/bash
 
+  echo "COMMAND	: fire/config - Update FireREST/FireFUSE configuration"
 function help() {
-  echo "NAME"
-  echo "	fire/config - Update FireREST/FireFUSE configuration"
-  echo""
-  echo "SYNOPSIS"
-  echo "	fire/config [-d]"
-  echo "	fire/config "`tput smul`"config.json"`tput rmul`
-  echo ""
-  echo "EXAMPLES"
-  echo "	Apply default configuration file:"
-  echo "	  fire/config -d"
-  echo 
-  echo "	Apply custom configuration file:"
-  echo "	  fire/config custom/myconfig.json"
-  echo 
-  echo "	Print this documentation:"
-  echo "	   fire/config -h"
-  echo
-  echo "SEE ALSO"
-  echo "	https://github.com/firepick1/FireREST/wiki/config.json"
+  echo "SYNOPSIS: fire/config [-d]"
+  echo "	: fire/config "`tput smul`"config.json"`tput rmul`
+  echo "EXAMPLES: Apply default configuration file:"
+  echo "	:   fire/config -d"
+  echo "	: Apply custom configuration file:"
+  echo "	:   fire/config custom/myconfig.json"
+  echo "	: Print this documentation:"
+  echo "	:   fire/config -h"
+  echo "SEE ALSO: https://github.com/firepick1/FireREST/wiki/config.json"
 }
 
 if [ "$1" == "" ] || [ "$1" == "-h" ]; then help; exit 0; fi
