@@ -30,13 +30,13 @@ function help() {
 if [ "$1" == "-h" ]; then help; exit 0; fi
 
 sudo -k
-ls /dev | grep firefuse
+ls /dev | grep firefuse > /dev/null
 if [ $? -ne 0 ]; then
   echo "ERROR	: FireFUSE is not installed" 
   exit -1;
 fi
 
-ls /dev/firefuse | grep status
+ls /dev/firefuse | grep status > /dev/null
 if [ $? -ne 0 ]; then
   echo "ERROR	: FireFUSE may have crashed." 
   echo "TRY	: fire/config -d" 
