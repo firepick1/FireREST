@@ -29,7 +29,7 @@ sudo -u $SUDO_USER sed \
   -e s/@@FIREREST_VERSION_MINOR@@/$FIREREST_VERSION_MINOR/ \
   -e s/@@FIREREST_VERSION_PATCH@@/$FIREREST_VERSION_PATCH/ \
   config.json.tmpl > www/config.json
-echo "CONFIG	: `grep version www/firerest/config.json`"
+echo "CONFIG	: `grep version www/config.json`"
 
 echo "COMMAND	: ../FireREST/build"
 echo "ETA	: 1-30 minutes"

@@ -12,10 +12,10 @@
       },
       "find-crash-dummy":{ 
         "firesight": [
-	  {"op":"matchTemplate", "name":"fiducial", "corr":"{{corr}}", "template":"{{img}}"},
+	  {"op":"matchTemplate", "name":"fiducial", "corr":"{{corr}}", "template":"{{img}}", "threshold":"{{threshold}}"},
 	  {"op":"drawRects", "model":"fiducial", "color":"{{rectColor}}"}
 	],
-	"properties": { "corr":0.95, "rectColor":[32,255,32], "img":"/home/pi/FireREST/www/img/bwwb.png" }
+	"properties": { "corr":0.95, "threshold":0.8, "rectColor":[32,255,32], "img":"/home/pi/FireREST/www/img/bwwb.png" }
       },
       "locate-part":{
 	"firesight": [
