@@ -33,13 +33,13 @@ if [ ! -e "$CONFIG_FILE" ]; then
 fi
 
 sudo -k
-ls /dev | grep firefuse
+ls /dev | grep firefuse > /dev/null
 if [ $? -ne 0 ]; then
   echo "ERROR	: FireFUSE is not installed and cannot be configured" 
   exit -1;
 fi
 
-ls /dev/firefuse
+ls /dev/firefuse > /dev/null
 if [ $? -ne 0 ]; then
   echo "WARNING	: FireFUSE may have crashed. Attempting to unmount /dev/firefuse..." 
   sudo fusermount -u /dev/firefuse
