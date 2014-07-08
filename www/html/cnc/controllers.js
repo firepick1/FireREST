@@ -4,17 +4,18 @@ var bootstrap = angular.module('FireREST.bootstrap', ['ui.bootstrap']);
 var controllers = angular.module('FireREST.controllers', []);
 
 controllers.controller('MainCtrl', 
-  ['$scope','$location', 'BackgroundThread', 'ServiceConfig', 'AjaxAdapter', 'CvService', '$interpolate',
-  function(scope, location, bg, service, transmit, cv, interpolate) {
+  ['$scope','$location', 'BackgroundThread', 'ServiceConfig', 'AjaxAdapter', 'CvService', '$interpolate', 'DeltaCalculator',
+  function(scope, location, bg, service, transmit, cv, interpolate, delta) {
     transmit.clear();
     scope.transmit = transmit;
     scope.service = service;
     scope.config = {};
     scope.cv = cv;
+    scope.delta = delta;
 
     var cnc = {
       resources:['gcode.fire'],
-      controls:['move','home'],
+      controls:['move','home','delta'],
       dce_names:["(no DCE's)"],
       dce_list:{},
       dce:{
@@ -22,6 +23,7 @@ controllers.controller('MainCtrl',
 	  {id:'(none)', value:0, jog:1, resolution:0.001, min:0, max:1, steps:1, units:"mm", enabled:false},
 	]
       },
+      magic: function() { return 1+Math.pow(Math.sin(30.0),2); },
       on_focus: function(tag,key) { cnc.focus = tag + key; },
       is_focus: function(tag,key) { return cnc.focus === tag + key; },
       gcode_context: function() {
@@ -29,11 +31,16 @@ controllers.controller('MainCtrl',
 	cnc.dce.axes.forEach(function(axis) { 
 	  var home_type = typeof axis.home;
 	  if (axis.enabled) {
+	    var id = axis.id.toLowerCase();
 	    context.axis = axis;
 	    if (axis.hasOwnProperty('home')) {
-	      context.home_steps += interpolate('{{axis.id}}{{axis.home*axis.steps}}')(context);
+	      context.home_steps += "\u2009";
+	      context.home_steps += id;
+	      context.home_steps += axis.home*axis.steps;
 	    }
-	    context.axis_steps += interpolate('{{axis.id}}{{axis.value*axis.steps}}')(context);
+	    context.axis_steps += " ";
+	    context.axis_steps += id;
+	    context.axis_steps += axis.value*axis.steps;
 	  }
 	});
 	return context;
@@ -50,6 +57,7 @@ controllers.controller('MainCtrl',
 	return result;
       },
       jog: function(axis, key, value) {
+	console.log(key, ':', axis[key] , "+=", value);
         axis[key] = Number(axis[key]) + Number(value);
 	if (axis.resolution < 1) {
 	  var divisor = Math.round(1/axis.resolution);

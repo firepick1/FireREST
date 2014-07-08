@@ -16,6 +16,7 @@
       <select multiple ng-model="cnc.controls" class="form-control">
 	<option value="move" title="Rapid move (G0)">Move</option>
 	<option value="home" title="Seek limit switch home (G28...)">Home</option>
+	<option value="delta" title="Delta conversion">Delta</option>
       </select>
     </div>
     <div class="col-md-10">
@@ -27,7 +28,7 @@
     </div>
   </div>
 
-  <div ng-repeat="resource in ['gcode.fire']" class="row fr-data-label">
+  <div ng-repeat="resource in ['gcode.fire']" class="row ">
     <div class="col-md-1">&nbsp;</div>
     <div class="col-md-8">
       <a title="{{cnc.resource_url(resource)}}" href="{{cnc.resource_url(resource)}}" >{{resource}}</a>

@@ -1,8 +1,16 @@
 p {
   max-width: 700px;
 }
-code {
+.fr-gcode {
+  font-family: Impact, Charcoal, sans-serif ;
+  font-size: 12px;
   color: #080 !important;
+  cursor: default;
+  text-align:right;
+}
+.fr-row-title {
+  max-width: 65em;
+  padding-top: 0.5em;
 }
 .fr-version:hover {
   color: #000;
