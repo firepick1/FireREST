@@ -23,9 +23,9 @@ function($http) {
     re: 232.0,
     rf: 112.0,
     ok: true,
-    x0:0,
-    y0:0,
-    z0:-100,
+    X:0,
+    Y:0,
+    Z:-100,
     theta1:0,
     theta2:0,
     theta3:0,
@@ -38,7 +38,7 @@ function($http) {
       var t = (delta.f-delta.e)*tan30/2;
       var theta1 = delta.theta1 * dtr;
       var theta2 = delta.theta2 * dtr;
-      var theta3 = delta.theta2 * dtr;
+      var theta3 = delta.theta3 * dtr;
       var y1 = -(t + delta.rf*Math.cos(theta1));
       var z1 = -delta.rf*Math.sin(theta1);
       var y2 = (t + delta.rf*Math.cos(theta2))*sin30;
@@ -59,16 +59,16 @@ function($http) {
       var b2 = ((w2-w1)*x3 - (w3-w1)*x2)/2.0;
       // a*z^2 + b*z + c = 0
       var a = a1*a1 + a2*a2 + dnm*dnm;
-      var b = 2*(a1*b1 + a2*(b2-y1*dnm) - z1*dnm*dnm);
+      var b = 2.0*(a1*b1 + a2*(b2-y1*dnm) - z1*dnm*dnm);
       var c = (b2-y1*dnm)*(b2-y1*dnm) + b1*b1 + dnm*dnm*(z1*z1 - delta.re*delta.re);
       // discriminant
       var d = b*b - 4.0*a*c;
       if (d < 0) { // point exists
         delta.ok = false;
       } else {
-	delta.z0 = delta.nicenum(-0.5*(b+Math.sqrt(d))/a);
-	delta.x0 = delta.nicenum((a1*delta.z0 + b1)/dnm);
-	delta.y0 = delta.nicenum((a2*delta.z0 + b2)/dnm);
+	delta.Z = delta.nicenum(-0.5*(b+Math.sqrt(d))/a);
+	delta.X = delta.nicenum((a1*delta.Z + b1)/dnm);
+	delta.Y = delta.nicenum((a2*delta.Z + b2)/dnm);
 	delta.ok = true ;
       }
       return delta.ok;
@@ -76,36 +76,36 @@ function($http) {
  
     // inverse kinematics
     // helper functions, calculates angle theta1 (for YZ-pane)
-    calcAngleYZ: function(x0,y0,z0) {
+    calcAngleYZ: function(X,Y,Z) {
       var y1 = -tan30_half * delta.f; // f/2 * tg 30
-      y0 -= tan30_half * delta.e;    // shift center to edge
+      Y -= tan30_half * delta.e;    // shift center to edge
       // z = a + b*y
-      var a = (x0*x0 + y0*y0 + z0*z0 +delta.rf*delta.rf - delta.re*delta.re - y1*y1)/(2*z0);
-      var b = (y1-y0)/z0;
+      var a = (X*X + Y*Y + Z*Z +delta.rf*delta.rf - delta.re*delta.re - y1*y1)/(2.0*Z);
+      var b = (y1-Y)/Z;
       // discriminant
       var d = -(a+b*y1)*(a+b*y1)+delta.rf*(b*b*delta.rf+delta.rf); 
       if (d < 0) {
 	delta.ok = false;
       } else {
 	delta.ok = true;
-	var yj = (y1 - a*b - Math.sqrt(d))/(b*b + 1); // choosing outer point
+	var yj = (y1 - a*b - Math.sqrt(d))/(b*b + 1.0); // choosing outer point
 	var zj = a + b*yj;
 	return 180.0*Math.atan(-zj/(y1 - yj))/pi + ((yj>y1) ? 180.0 : 0.0);
       }
       return -1;
     },
  
-    // inverse kinematics: (x0, y0, z0) -> (theta1, theta2, theta3)
+    // inverse kinematics: (X, Y, Z) -> (theta1, theta2, theta3)
     // returned status: 0=OK, -1=non-existing position
     calcInverse: function() {
-      var theta1 = delta.calcAngleYZ(delta.x0, delta.y0, delta.z0);
+      var theta1 = delta.calcAngleYZ(delta.X, delta.Y, delta.Z);
       var theta2 = delta.theta2;
       var theta3 = delta.theta3;
       if (delta.ok) {
-	theta2 = delta.calcAngleYZ(delta.x0*cos120 + delta.y0*sin120, delta.y0*cos120-delta.x0*sin120, delta.z0);  // rotate coords to +120 deg
+	theta2 = delta.calcAngleYZ(delta.X*cos120 + delta.Y*sin120, delta.Y*cos120-delta.X*sin120, delta.Z);  // rotate coords to +120 deg
       }
       if (delta.ok) {
-	theta3 = delta.calcAngleYZ(delta.x0*cos120 - delta.y0*sin120, delta.y0*cos120+delta.x0*sin120, delta.z0);  // rotate coords to -120 deg
+	theta3 = delta.calcAngleYZ(delta.X*cos120 - delta.Y*sin120, delta.Y*cos120+delta.X*sin120, delta.Z);  // rotate coords to -120 deg
       }
       if (delta.ok) {
 	delta.theta1 = theta1;
@@ -116,30 +116,34 @@ function($http) {
     },
 
     testInverse: function() {
-      var x0 = delta.x0;
-      var y0 = delta.y0;
-      var z0 = delta.z0;
+      var X = delta.X;
+      var Y = delta.Y;
+      var Z = delta.Z;
       delta.calcInverse();
-      delta.calcForward();
-      delta.errX = delta.x0-x0;
-      delta.errY = delta.y0-y0;
-      delta.errZ = delta.z0-z0;
-      delta.x0 = x0;
-      delta.y0 = y0;
-      delta.z0 = z0;
+      if (delta.ok) {
+	delta.calcForward();
+	delta.errX = delta.X-X;
+	delta.errY = delta.Y-Y;
+	delta.errZ = delta.Z-Z;
+	delta.X = X;
+	delta.Y = Y;
+	delta.Z = Z;
+      }
     },
     testForward: function() {
       var theta1 = delta.theta1;
       var theta2 = delta.theta2;
       var theta3 = delta.theta3;
       delta.calcForward();
-      delta.calcInverse();
-      delta.errTheta1 = delta.theta1-theta1;
-      delta.errTheta2 = delta.theta2-theta2;
-      delta.errTheta3 = delta.theta3-theta3;
-      delta.theta1 = theta1;
-      delta.theta2 = theta2;
-      delta.theta3 = theta3;
+      if (delta.ok) {
+	delta.calcInverse();
+	delta.errTheta1 = delta.theta1-theta1;
+	delta.errTheta2 = delta.theta2-theta2;
+	delta.errTheta3 = delta.theta3-theta3;
+	delta.theta1 = theta1;
+	delta.theta2 = theta2;
+	delta.theta3 = theta3;
+      }
     }
 
   };

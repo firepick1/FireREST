@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en" ng-app="FireREST">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FireREST&trade;</title>
+  <link rel="stylesheet" href="../../css/firerest.css"/>
+  <link rel="stylesheet" href="../../bootstrap/css/bootstrap.css"/>
+  <script src="../../lib/angular/angular.js"></script>
+  <script src="../../lib/angular/angular-route.js"></script>
+  <script src="../../lib/jquery/jquery-2.1.1.min.js"></script>
+  <script src="../../js/app.js"></script>
+  <script src="../../js/services.js"></script>
+  <script src="controllers.js"></script>
+  <script src="../../bootstrap/js/ui-bootstrap-0.6.0.min.js"></script>
+  <script src="../../bootstrap/js/ui-bootstrap-tpls-0.6.0.min.js"></script>
+  <script src="../../lib/threejs/three.min.js"></script>
+
+  <style>canvas { width: 100%; height: 100% }</style>
+</head>
+<body id="body" ng-controller="MainCtrl as main">
+
+<!-- ///////////// BEGIN APPLICATION CODE ///////////// -->
+
+  <div ng-include src="'../../partials/banner.html'" onload="
+      bannerTitle='FirePick&trade; Delta Machine Simulator';
+      bannerUrl='http://forums.trossenrobotics.com/tutorials/introduction-129/delta-robot-kinematics-3276/';
+      bannerName='Delta Machine Simulator';
+      bannerIcon='glyphicon-chevron-down'">
+  </div>
+
+  <div class="container" >
+    <div class="fr-banner-space">&nbsp;</div>
+
+    <div ng-include src="'../../partials/delta.html'"></div>
+
+
+    <script>
+      function makeTextSprite( message, parameters ) {
+	parameters =  parameters || { fontsize: 32, backgroundColor: {r:255, g:255, b:100, a:.5} };
+
+	var fontface = parameters.fontface || "Arial";
+	var fontsize = parameters.fontsize || 18;
+	var borderThickness = parameters.borderThickness !== undefined ? parameters.borderThickness : 4;
+	var borderColor = parameters.borderColor || { r:0, g:0, b:0, a:1.0 };
+	var backgroundColor = parameters.backgroundColor || { r:255, g:255, b:255, a:1.0 };
+	var canvas = document.createElement('canvas');
+	var context = canvas.getContext('2d');
+	context.font = "Bold " + fontsize + "px " + fontface;
+	  
+	// get size data (height depends only on font size)
+	var metrics = context.measureText( message );
+	var textWidth = metrics.width;
+
+	context.fillStyle   = "rgba(" + backgroundColor.r + "," + backgroundColor.g + "," + backgroundColor.b + "," + backgroundColor.a + ")";
+	context.strokeStyle = "rgba(" + borderColor.r + "," + borderColor.g + "," + borderColor.b + "," + borderColor.a + ")";
+	context.lineWidth = borderThickness;
+	roundRect(context, borderThickness/2, borderThickness/2, textWidth + borderThickness, fontsize * 1.4 + borderThickness, 6);
+	// 1.4 is extra height factor for text below baseline: g,j,p,q.
+
+	// text color
+	context.fillStyle = "rgba(0, 0, 0, 1.0)";
+	context.fillText( message, borderThickness, fontsize + borderThickness);
+
+	// canvas contents will be used for a texture
+	var texture = new THREE.Texture(canvas) 
+	texture.needsUpdate = true;
+
+	var spriteMaterial = new THREE.SpriteMaterial({ map:texture, useScreenCoordinates:false });
+	var sprite = new THREE.Sprite( spriteMaterial );
+	sprite.scale.set(80,50,1.0);
+	console.log("textWidth:" + textWidth);
+	//sprite.position.x -= textWidth/2;
+	return sprite;  
+      }
+
+      // function for drawing rounded rectangles
+      function roundRect(ctx, x, y, w, h, r) {
+	ctx.beginPath();
+	ctx.moveTo(x+r, y);
+	ctx.lineTo(x+w-r, y);
+	ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+	ctx.lineTo(x+w, y+h-r);
+	ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+	ctx.lineTo(x+r, y+h);
+	ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+	ctx.lineTo(x, y+r);
+	ctx.quadraticCurveTo(x, y, x+r, y);
+	ctx.closePath();
+	ctx.fill();
+	ctx.stroke();   
+      }
+
+      var scene = new THREE.Scene();
+      var aspectW = 1;
+      var aspectH = 1;
+      var renderer = new THREE.WebGLRenderer();
+      renderer.setSize(400,400);
+      
+      document.body.appendChild(renderer.domElement);
+      var effectorMat = new THREE.MeshLambertMaterial({ color: 0xff88ff});
+      var effectorR = 115/Math.sqrt(3);
+      var effectorGeom = new THREE.CylinderGeometry( effectorR, effectorR, 5, 3);        
+      var effector = new THREE.Mesh( effectorGeom, effectorMat );
+      effector.rotation.x += Math.PI/2;
+      scene.add( effector );
+      var baseMat = new THREE.MeshLambertMaterial({ color: 0x88ffff});
+      var baseR = 190.526/Math.sqrt(3);
+      var baseGeom = new THREE.CylinderGeometry( baseR, baseR, 5, 3);        
+      var base = new THREE.Mesh( baseGeom, baseMat );
+      base.rotation.x += Math.PI/2;
+      base.position.set(0,0,2.5);
+      scene.add( base );
+      for (var i = 0; i < baseGeom.vertices.length; i++) {
+	var spritey = makeTextSprite( " " + i + " ");
+	spritey.position = baseGeom.vertices[i].clone().multiplyScalar(1.1);
+	scene.add( spritey );
+      }
+      var spriteX = makeTextSprite(" X ");
+      spriteX.position.x += 100;
+      scene.add(spriteX);
+      var spriteY = makeTextSprite("Y");
+      spriteY.position.y += 100;
+      scene.add(spriteY);
+      var spriteZ = makeTextSprite(" Z-100 ");
+      spriteZ.position.z += -100;
+      scene.add(spriteZ);
+
+      var cubeGeom = new THREE.CubeGeometry(10,10,10);
+      var cubeMat = new THREE.MeshBasicMaterial({color: 0xffff00});
+      var cube = new THREE.Mesh(cubeGeom, cubeMat);
+      cube.position.set(0,0,-100);
+      scene.add(cube);
+      var blueMat = new THREE.LineBasicMaterial({ color: 0x8888ff });
+      var xyGeom = new THREE.Geometry();
+      xyGeom.vertices.push( new THREE.Vector3( 100, 0, 0 ) );
+      xyGeom.vertices.push( new THREE.Vector3( 0, 0, 0 ) );
+      xyGeom.vertices.push( new THREE.Vector3( 0, 100, 0 ) );
+      var xyline = new THREE.Line( xyGeom, blueMat );
+      scene.add( xyline );
+      var zGeom = new THREE.Geometry();
+      zGeom.vertices.push( new THREE.Vector3( 0, 0, -100 ) );
+      zGeom.vertices.push( new THREE.Vector3( 0, 0, 0 ) );
+      var zLine = new THREE.Line( zGeom, blueMat );
+      scene.add(zLine);
+
+      var ambient = new THREE.AmbientLight( 0x404040 );
+      scene.add(ambient);
+
+      var light1 = new THREE.PointLight( 0xffaaaa, 10, 200 );
+      light1.position.set(0,100,-10);
+      scene.add( light1 );
+      var light2 = new THREE.PointLight( 0xaaaaff, 10, 200 );
+      light1.position.set(100,0,-10);
+      scene.add( light2 );
+
+      var camera = new THREE.PerspectiveCamera(50, aspectW/aspectH, 0.1, 1000);
+      camera.position.z = -50;
+      camera.position.x = 0;
+      camera.position.y = 300;
+      camera.up = new THREE.Vector3(0,0,1);
+      camera.lookAt(new THREE.Vector3( 0, 0, -100 ));
+      var cameraR = 300;
+      var cameraAngle = 0;
+
+      var render = function () {
+	var bodyElt = document.getElementById('body');
+	//console.log("bodyElt:" + typeof bodyElt);
+	var bodyScope = angular.element(bodyElt).scope();
+	//console.log("bodyScope:" + typeof bodyScope);
+	requestAnimationFrame(render);
+	cube.rotation.z += 0.01;
+	light1.rotation.z += 0.1;
+	cameraAngle += 0.01;
+	camera.position.x = cameraR * Math.sin(cameraAngle);
+	camera.position.y = cameraR * Math.cos(cameraAngle);
+	camera.lookAt(new THREE.Vector3( 0, 0, -100 ));
+	if ('object' === typeof bodyScope) {
+	  effector.position.set( bodyScope.delta.X, bodyScope.delta.Y, bodyScope.delta.Z );
+	  //effector.rotation.y += 0.01;
+	  //base.rotation.y += 0.01;
+	}
+	renderer.render(scene, camera);
+      };
+      render();
+    </script>
+    {{delta.X}}
+
+<!-- ///////////// END APPLICATION CODE ///////////// -->
+<div ng-include src="'../../partials/footer.html'"></div></body></html>

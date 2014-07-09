@@ -1,6 +1,13 @@
 p {
   max-width: 700px;
 }
+.fr-button-valid-false{
+  background-color: #f00 !important;
+  border-color: #f00  !important;
+}
+.fr-button {
+  min-width: 5em;
+}
 .fr-gcode {
   font-family: Impact, Charcoal, sans-serif ;
   font-size: 12px;
