@@ -34,6 +34,12 @@
 
     <div ng-include src="'../../partials/delta.html'"></div>
 
+    <div class="row">
+      <div class="fr-cell-btn col-md-1">&nbsp;</div>
+      <div class="fr-cell-data col-md-8">
+	<div id="viewport1" class="fr-viewport"></div>
+      </div>
+    </div>
 
     <script>
       function makeTextSprite( message, parameters ) {
@@ -105,7 +111,9 @@
       var renderer = new THREE.WebGLRenderer();
       renderer.setSize(500,500);
       
-      document.body.appendChild(renderer.domElement);
+      var viewport = document.getElementById("viewport1");
+      console.log("viewport is:" + viewport);
+      viewport.appendChild(renderer.domElement);
 
       var machineSize = new THREE.Vector3(300,300,300);
       var rf = 90;
@@ -244,35 +252,44 @@
 	  self.base.rotation.x += Math.PI/2;
 	}
 	self.group.add(self.base);
+	self.labels = [];
+	for (var i = 0; i < self.arms.length; i++) {
+	  self.labels[i] = makeTextSprite("" + i);
+	  self.group.add(self.labels[i]);
+	}
 	self.updateWorld = function() {
 	  for (var i = 0; i < self.arms.length; i++) {
 	    self.arms[i].updateWorld();
-            var label = makeTextSprite(""+(i+1));
-	    label.position = self.arms[i].tip.world;
+	    var label = self.labels[i];
+	    //label.position.set(self.arms[i].tip.world);
+	    label.position.x = self.arms[i].tip.world.x;
+	    label.position.y = self.arms[i].tip.world.y;
+	    label.position.z = self.arms[i].tip.world.z;
 	    label.position.z += 10;
-	    self.group.add(label);
 	  }
 	};
 	self.group.updateMatrixWorld();
 	return self;
       }; // createDeltaBase
 
-      var createDeltaEffector = function(e, detail) {
+      var createDeltaEffector = function(e, base, detail) {
         var self = {
-	  effector: null, // effector THREE.Object3D
-	  jointRadius:3,  // radius for default effector arm joint
-	  jointMat: null,  // THREE.Material for default effector arm joint
-	  jointGeom: null,  // THREE.Geometry for default effector arm joint
-	  triangleMat: null, // THREE.Material for default triangle guideline
-	  triangleGeom: null, // THREE.Geometry for default triangle guideline
-	  e: e, // side length of equilateral triangle that defines the effector
-	  joints:[], // array of three Object3D for arm joints
-	  geometry: null, // default effector THREE.Geometry
-	  height: 5, // default effector thickness 
-	  material: null, // default effector THREE.Material
-	  sides: 6, // default effector number of sides
+	  effector: null, 	// effector THREE.Object3D
+	  jointRadius:3,  	// radius for default effector arm joint
+	  jointMat: null,  	// THREE.Material for default effector arm joint
+	  jointGeom: null,  	// THREE.Geometry for default effector arm joint
+	  triangleMat: null, 	// THREE.Material for default triangle guideline
+	  triangleGeom: null, 	// THREE.Geometry for default triangle guideline
+	  armMat: null, 	// THREE.Material for default effector arm
+	  e: e, 		// side length of equilateral triangle that defines the effector
+	  joints:[], 		// array of three Object3D for arm joints
+	  geometry: null, 	// default effector THREE.Geometry
+	  height: 5, 		// default effector thickness 
+	  material: null, 	// default effector THREE.Material
+	  sides: 6, 		// default effector number of sides
 	};
 	applyProps(self, detail);
+	self.base = base;
 	self.jointMat = self.jointMat || new THREE.MeshBasicMaterial({color:0xFFA62F}),
 	self.jointGeom = self.jointGeom || new THREE.IcosahedronGeometry(self.jointRadius),
 	self.joints = self.joints.size || [ 
@@ -317,6 +334,7 @@
 	  self.group.add(joint) 
 	  decorate(joint, "world", new THREE.Vector3());
 	});
+
 	self.updateWorld = function() {
 	  self.joints.forEach(function(joint){ 
 	    joint.world.setFromMatrixPosition( joint.matrixWorld );
@@ -324,32 +342,47 @@
 	}
 	self.group.updateMatrixWorld();
 	return self;
-      };
-      /*
-      var arm1 = createArm(rf, {offset:baseRin});
-      arm1.group.rotation.z += Math.PI/2;
-      arm1.arm.rotation.y += Math.PI/4;
-      scene.add(arm1.group);
-      var arm2 = createArm(rf, {offset:baseRin});
-      arm2.group.rotation.z += Math.PI/2 + 2*Math.PI/3;
-      arm2.arm.rotation.y += Math.PI/5;
-      scene.add(arm2.group);
-      var arm3 = createArm(rf, {offset:baseRin});
-      arm3.group.rotation.z += Math.PI/2 - 2*Math.PI/3;
-      arm3.arm.rotation.y += Math.PI/6;
-      scene.add(arm3.group);
-      */
+      }; // createDeltaEffector
+
+      var createDeltaSimulator = function(f,e,rf,details) {
+        var self = {
+	  effector: null, 	// effector simulation
+	  base: null, 		// base simulation
+	};
+	self.group = new THREE.Object3D();
+	self.base = self.base || createDeltaBase(f, rf, details);
+	self.group.add(self.base.group);
+	self.effector = self.effector || createDeltaEffector(e, self.base, details);
+	self.group.add(self.effector.group);
+	self.armMat = self.armMat || new THREE.LineBasicMaterial({ color:0x88ff88, linewidth:5 });
+	self.arms = [];
+	for (var i = 0; i < 3; i++) {
+	  var armGeom = new THREE.Geometry();
+	  armGeom.vertices.push( self.effector.joints[i].world );
+	  armGeom.vertices.push( self.base.arms[i].tip.world );
+	  self.arms[i] = new THREE.Line(armGeom, self.armMat);
+	  self.group.add(self.arms[i]);
+	}
+
+	self.updateWorld = function() {
+	  self.base.updateWorld();
+	  self.effector.updateWorld();
+	  for (var i = 0; i < 3; i++) {
+	    self.arms[i].position.x = self.effector.joints[i].world.x;
+	    self.arms[i].position.y = self.effector.joints[i].world.y;
+	    self.arms[i].position.z = self.effector.joints[i].world.z;
+	  }
+	}
+	return self;
+      }; // createDeltaSimulator
 
       scene.add(baseGuide);
 
-      var effector = createDeltaEffector(e, {});
-      scene.add(effector.group);
-
-      var base = createDeltaBase(f, rf, {});
-      scene.add(base.group);
+      var simulator = createDeltaSimulator(f,e,rf, {});
+      scene.add(simulator.group);
 
       var baseGuide = new THREE.Object3D();
-      var baseGuideGeom = new THREE.CircleGeometry(base.radiusOut, 36);
+      var baseGuideGeom = new THREE.CircleGeometry(simulator.base.radiusOut, 36);
       var baseGuideLine = new THREE.Line(baseGuideGeom, guideMat);
       baseGuide.add(baseGuideLine);
 
@@ -385,20 +418,6 @@
       var currentZ = new THREE.Line(currentZGeom, currentZMat);
       scene.add(currentZ);
 
-      /*
-      scene.updateMatrixWorld();
-      var armE1Geom = new THREE.Geometry();
-      effector.updateWorld();
-      armE1Geom.vertices.push( effector.joints[0].world );
-      armE1Geom.vertices.push( base.arms[0].tip.world );
-      var armE1Mat = new THREE.LineBasicMaterial({ color:0x88ff88, linewidth:5 });
-      var armE1Line = new THREE.Line(armE1Geom, armE1Mat);
-      scene.add(armE1Line);
-      base.arms[0].arm.rotation.y -= Math.PI/5;
-      scene.updateMatrixWorld();
-      base.arms[0].updateWorld();
-      */
-
       var ambient = new THREE.AmbientLight( 0x404040 );
       scene.add(ambient);
 
@@ -418,21 +437,18 @@
       ringLight3.position.set(100*Math.cos(angle),100*Math.sin(angle),-50);
       scene.add( ringLight3 );
 
-      var camera = new THREE.PerspectiveCamera(50, aspectW/aspectH, 1.0* machineSize.x, 1000);
+      var camera = new THREE.PerspectiveCamera(50, aspectW/aspectH, 1.05* machineSize.x, 1000);
       camera.position.z = -machineSize.z/4;
       camera.up = new THREE.Vector3(0,0,1);
       var cameraR = 1.6*machineSize.x;
-      var cameraAngle = 0;
-      cameraAngle += 0.01;
-      camera.position.x = cameraR * Math.sin(cameraAngle);
-      camera.position.y = cameraR * Math.cos(cameraAngle);
+      var cameraAngle = Math.PI / 6;
+      camera.position.x = cameraR * Math.cos(cameraAngle);
+      camera.position.y = cameraR * Math.sin(cameraAngle);
       camera.lookAt(new THREE.Vector3( 0, 0, -3*machineSize.z/5 ));
 
       var render = function () {
 	var bodyElt = document.getElementById('body');
-	//console.log("bodyElt:" + typeof bodyElt);
 	var bodyScope = angular.element(bodyElt).scope();
-	//console.log("bodyScope:" + typeof bodyScope);
 	requestAnimationFrame(render);
 	if ('object' === typeof bodyScope) {
 	  if (bodyScope.delta.orbit_camera) {
@@ -441,14 +457,13 @@
 	    camera.position.y = cameraR * Math.cos(cameraAngle);
 	    camera.lookAt(new THREE.Vector3( 0, 0, -3*machineSize.z/5 ));
 	  }
-	  effector.group.position.set( bodyScope.delta.X, bodyScope.delta.Y, bodyScope.delta.Z );
-	  base.arms[0].arm.rotation.y = bodyScope.delta.theta1 * Math.PI / 180;
-	  base.arms[1].arm.rotation.y = bodyScope.delta.theta2 * Math.PI / 180;
-	  base.arms[2].arm.rotation.y = bodyScope.delta.theta3 * Math.PI / 180;
+	  simulator.effector.group.position.set( bodyScope.delta.X, bodyScope.delta.Y, bodyScope.delta.Z );
+	  simulator.base.arms[0].arm.rotation.y = bodyScope.delta.theta1 * Math.PI / 180;
+	  simulator.base.arms[1].arm.rotation.y = bodyScope.delta.theta2 * Math.PI / 180;
+	  simulator.base.arms[2].arm.rotation.y = bodyScope.delta.theta3 * Math.PI / 180;
 	  currentZ.position.z = bodyScope.delta.Z;
 	}
-	base.updateWorld();
-	effector.updateWorld();
+	simulator.updateWorld();
 	renderer.render(scene, camera);
       };
       render();
