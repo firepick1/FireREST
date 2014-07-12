@@ -144,13 +144,6 @@
       var jointMat = new THREE.MeshBasicMaterial({color: 0xFFA62F});
       var guideMat = new THREE.LineDashedMaterial({color: 0x004400, linewidth:2, dashSize: 3, gapSize:3});
 
-      var decorate = function(obj, name, value) {
-        if (obj.hasOwnProperty(name)) {
-	  throw "Cannot decorate object with existing property:"+name;
-	}
-	obj[name] = value;
-	return obj;
-      }
       var applyProps = function(props, customProps) {
         for (key in customProps) {
 	  if (props.hasOwnProperty(key)) {
@@ -181,6 +174,7 @@
 	self.joint.position = position1;
 	self.tip = new THREE.Mesh(self.jointGeom, self.jointMat);
 	self.tip.position = position2;
+	self.tip.userData.world = new THREE.Vector3();
 	self.armMesh = new THREE.Mesh(self.armGeom, self.armMat);
 	self.armMesh.rotation.z -= Math.PI/2;
 	self.armMesh.position.x += length/2;
@@ -192,10 +186,10 @@
 	self.offsetGroup.add(self.arm);
 	self.offsetGroup.position.x += self.offset;
 	self.group = new THREE.Object3D();
+	self.group.userData = self;
 	self.group.add(self.offsetGroup);
-	decorate(self.tip, "world", new THREE.Vector3());
 	self.updateWorld = function() {
-	  self.tip.world.setFromMatrixPosition( self.tip.matrixWorld );
+	  self.tip.userData.world.setFromMatrixPosition( self.tip.matrixWorld );
 	}
 	self.group.updateMatrixWorld();
 	return self;
@@ -215,6 +209,7 @@
 	};
 	applyProps(self, detail);
 	self.group = new THREE.Object3D();
+	self.group.userData = self;
 	var radiusIn = 0.5*f/Math.sqrt(3); // radius of inscribed circle
 	self.arms = [
 	  createArm(rf, {offset:radiusIn}),
@@ -254,17 +249,14 @@
 	self.group.add(self.base);
 	self.labels = [];
 	for (var i = 0; i < self.arms.length; i++) {
-	  self.labels[i] = makeTextSprite("" + i);
+	  self.labels[i] = makeTextSprite("" + (1+i));
 	  self.group.add(self.labels[i]);
 	}
 	self.updateWorld = function() {
 	  for (var i = 0; i < self.arms.length; i++) {
 	    self.arms[i].updateWorld();
 	    var label = self.labels[i];
-	    //label.position.set(self.arms[i].tip.world);
-	    label.position.x = self.arms[i].tip.world.x;
-	    label.position.y = self.arms[i].tip.world.y;
-	    label.position.z = self.arms[i].tip.world.z;
+	    label.position.copy(self.arms[i].tip.userData.world);
 	    label.position.z += 10;
 	  }
 	};
@@ -328,16 +320,17 @@
 	  self.effector.rotation.x += Math.PI/2;
 	}
 	self.group = new THREE.Object3D();
+	self.group.userData = self;
 	self.group.add(self.effector);
 	self.group.add(self.triangle);
 	self.joints.forEach(function(joint){ 
 	  self.group.add(joint) 
-	  decorate(joint, "world", new THREE.Vector3());
+	  joint.userData.world = new THREE.Vector3();
 	});
 
 	self.updateWorld = function() {
 	  self.joints.forEach(function(joint){ 
-	    joint.world.setFromMatrixPosition( joint.matrixWorld );
+	    joint.userData.world.setFromMatrixPosition( joint.matrixWorld );
 	  });
 	}
 	self.group.updateMatrixWorld();
@@ -350,16 +343,17 @@
 	  base: null, 		// base simulation
 	};
 	self.group = new THREE.Object3D();
+	self.group.userData = self;
 	self.base = self.base || createDeltaBase(f, rf, details);
 	self.group.add(self.base.group);
 	self.effector = self.effector || createDeltaEffector(e, self.base, details);
 	self.group.add(self.effector.group);
-	self.armMat = self.armMat || new THREE.LineBasicMaterial({ color:0x88ff88, linewidth:5 });
+	self.armMat = self.armMat || new THREE.LineBasicMaterial({ color:0x444488, linewidth:5 });
 	self.arms = [];
 	for (var i = 0; i < 3; i++) {
 	  var armGeom = new THREE.Geometry();
-	  armGeom.vertices.push( self.effector.joints[i].world );
-	  armGeom.vertices.push( self.base.arms[i].tip.world );
+	  armGeom.vertices.push( self.base.arms[i].tip.userData.world );
+	  armGeom.vertices.push( self.effector.joints[i].userData.world );
 	  self.arms[i] = new THREE.Line(armGeom, self.armMat);
 	  self.group.add(self.arms[i]);
 	}
@@ -368,9 +362,7 @@
 	  self.base.updateWorld();
 	  self.effector.updateWorld();
 	  for (var i = 0; i < 3; i++) {
-	    self.arms[i].position.x = self.effector.joints[i].world.x;
-	    self.arms[i].position.y = self.effector.joints[i].world.y;
-	    self.arms[i].position.z = self.effector.joints[i].world.z;
+	    self.arms[i].geometry.verticesNeedUpdate = true;
 	  }
 	}
 	return self;
@@ -386,7 +378,7 @@
       var baseGuideLine = new THREE.Line(baseGuideGeom, guideMat);
       baseGuide.add(baseGuideLine);
 
-      var coordMat = new THREE.LineBasicMaterial({ color:0x8888ff, linewidth:1 });
+      var coordMat = new THREE.LineBasicMaterial({ color:0xff00ff, linewidth:1 });
       var xAxisGeom = new THREE.Geometry();
       xAxisGeom.vertices.push( new THREE.Vector3( -machineSize.x/2, 0, 0 ) );
       xAxisGeom.vertices.push( new THREE.Vector3( machineSize.x/2, 0, 0 ) );
