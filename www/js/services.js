@@ -29,6 +29,7 @@ function($http) {
     theta1:0,
     theta2:0,
     theta3:0,
+    orbit_camera:false,
     nicenum: function(value) {
       var factor = 1000.0;
       return Math.round(value * factor)/factor;

@@ -107,40 +107,34 @@
       
       document.body.appendChild(renderer.domElement);
 
+      var machineSize = new THREE.Vector3(300,300,300);
+      var rf = 90;
+      var f = 190.536;
+      var e = 115;
+      var thetaMin = -80*2*Math.PI/360;
+      var thetaMax = 80*2*Math.PI/360;
+
       var bgBoxGeometry = new THREE.BoxGeometry( 2000, 2000, 2000 );
       var bgBoxMaterial = new THREE.MeshBasicMaterial( { color:0x202020, side:THREE.BackSide } );
       var bgBox = new THREE.Mesh( bgBoxGeometry, bgBoxMaterial );
       scene.add(bgBox);
 
       var spriteX = makeTextSprite("X");
-      spriteX.position.x += 100;
+      spriteX.position.x += machineSize.x/2;
       scene.add(spriteX);
       var spriteY = makeTextSprite("Y");
-      spriteY.position.y += 100;
+      spriteY.position.y += machineSize.y/2;
       scene.add(spriteY);
-      for (z = -50; z > -500; z -= 50) {
+      for (z = -0; z > -machineSize.z; z -= 50) {
 	var spriteZ = makeTextSprite("" + z);
 	spriteZ.position.z += z;
+	spriteZ.position.x += machineSize.x/2;
+	spriteZ.position.y += machineSize.y/2;
 	scene.add(spriteZ);
       }
 
-      var rf = 90;
-      var f = 190.536;
-      var thetaMin = -80*2*Math.PI/360;
-      var thetaMax = 80*2*Math.PI/360;
       var jointMat = new THREE.MeshBasicMaterial({color: 0xFFA62F});
       var guideMat = new THREE.LineDashedMaterial({color: 0x004400, linewidth:2, dashSize: 3, gapSize:3});
-      var armMat = new THREE.LineBasicMaterial({color: 0x444488, linewidth:10});
-      var baseMat = new THREE.MeshLambertMaterial({ });
-
-      var baseR = f/Math.sqrt(3);
-      var baseRin = baseR/2;
-
-      var baseGeom = new THREE.CylinderGeometry( baseR, baseR, 5, 3);        
-      var base = new THREE.Mesh( baseGeom, baseMat );
-      base.rotation.x += Math.PI/2;
-      base.position.set(0,0,0);
-      scene.add( base );
 
       var decorate = function(obj, name, value) {
         if (obj.hasOwnProperty(name)) {
@@ -160,9 +154,9 @@
       //console.log(JSON.stringify(applyProps({a:1,b:2,d:null},{a:11,c:33,d:44})));
       var createArm = function(length, detail) {
         var self = {
-	  ballRadius:3, 
-	  ballMat: null,
-	  ballGeom: null,
+	  jointRadius:3, 
+	  jointMat: null,
+	  jointGeom: null,
 	  armRadius: 1.5,
 	  armGeom: null,
 	  armMat: null,
@@ -171,13 +165,13 @@
 	applyProps(self, detail);
 	var position1 = new THREE.Vector3(0,0,0);
 	var position2 = new THREE.Vector3(length,0,0);
-	self.ballMat = self.ballMat || new THREE.MeshBasicMaterial({color:0xFFA62F}),
-	self.ballGeom = self.ballGeom || new THREE.IcosahedronGeometry(self.ballRadius),
+	self.jointMat = self.jointMat || new THREE.MeshBasicMaterial({color:0xFFA62F}),
+	self.jointGeom = self.jointGeom || new THREE.IcosahedronGeometry(self.jointRadius),
 	self.armMat = self.armMat || new THREE.LineBasicMaterial({color: 0x444488, linewidth:10});
 	self.armGeom = self.armGeom || new THREE.CylinderGeometry( self.armRadius, self.armRadius, length, 24);        
-	self.joint = new THREE.Mesh(self.ballGeom, self.ballMat);
+	self.joint = new THREE.Mesh(self.jointGeom, self.jointMat);
 	self.joint.position = position1;
-	self.tip = new THREE.Mesh(self.ballGeom, self.ballMat);
+	self.tip = new THREE.Mesh(self.jointGeom, self.jointMat);
 	self.tip.position = position2;
 	self.armMesh = new THREE.Mesh(self.armGeom, self.armMat);
 	self.armMesh.rotation.z -= Math.PI/2;
@@ -197,60 +191,141 @@
 	}
 	self.group.updateMatrixWorld();
 	return self;
-      }
-      var createDeltaEffector = function(width, detail) {
+      }; // createArm
+
+      var createDeltaBase = function(f, rf, detail) {
+        var self = {
+	  base: null, 		// base THREE.Object3D
+	  triangleMat: null,	// THREE.Material for default triangle guideline
+	  triangleGeom: null,	// THREE.Geometry for default triangle guideline
+	  f: f, 		// side length of equilateral triangle that defines the base
+	  rf: rf, 		// arm length
+	  geometry: null, 	// default base THREE.Geometry
+	  height: 5, 		// default base thickness 
+	  material: null, 	// default base THREE.Material
+	  sides: 6, 		// default base number of sides
+	};
+	applyProps(self, detail);
+	self.group = new THREE.Object3D();
+	var radiusIn = 0.5*f/Math.sqrt(3); // radius of inscribed circle
+	self.arms = [
+	  createArm(rf, {offset:radiusIn}),
+	  createArm(rf, {offset:radiusIn}),
+	  createArm(rf, {offset:radiusIn}),
+	];
+	var angle = -Math.PI/2;
+	self.arms.forEach(function(arm){
+	  arm.group.rotation.z = angle;
+	  angle += 2*Math.PI/3;
+	  self.group.add(arm.group);
+	});
+
+	self.radiusOut = 2 * radiusIn; // radius of circumscribed circle
+	angle = Math.PI/2;
+	self.triangleMat = self.triangleMat || new THREE.LineDashedMaterial({ color:0x008800, linewidth:1, gapsize:40 });
+	self.triangleGeom = self.triangleGeom || new THREE.Geometry();
+	self.triangleGeom.vertices.push(new THREE.Vector3(self.radiusOut*Math.cos(angle), self.radiusOut*Math.sin(angle), 0));
+	angle += 2*Math.PI/3;
+	self.triangleGeom.vertices.push(new THREE.Vector3(self.radiusOut*Math.cos(angle), self.radiusOut*Math.sin(angle), 0));
+	angle += 2*Math.PI/3;
+	self.triangleGeom.vertices.push(new THREE.Vector3(self.radiusOut*Math.cos(angle), self.radiusOut*Math.sin(angle), 0));
+	angle += 2*Math.PI/3;
+	self.triangleGeom.vertices.push(new THREE.Vector3(self.radiusOut*Math.cos(angle), self.radiusOut*Math.sin(angle), 0));
+	self.triangle = new THREE.Line(self.triangleGeom, self.triangleMat);
+	self.group.add(self.triangle);
+
+	self.material = self.baseMat || new THREE.MeshLambertMaterial({});
+        self.geometry = self.geometry || new THREE.CylinderGeometry(radiusIn, radiusIn, self.height, self.sides);        
+	if (!self.base) {
+	  self.base = new THREE.Mesh(self.geometry, self.material);
+	  if (self.sides % 2 === 0) {
+	    self.base.rotation.y += Math.PI/self.sides;
+	  }
+	  self.base.rotation.x += Math.PI/2;
+	}
+	self.group.add(self.base);
+	self.updateWorld = function() {
+	  for (var i = 0; i < self.arms.length; i++) {
+	    self.arms[i].updateWorld();
+            var label = makeTextSprite(""+(i+1));
+	    label.position = self.arms[i].tip.world;
+	    label.position.z += 10;
+	    self.group.add(label);
+	  }
+	};
+	self.group.updateMatrixWorld();
+	return self;
+      }; // createDeltaBase
+
+      var createDeltaEffector = function(e, detail) {
         var self = {
 	  effector: null, // effector THREE.Object3D
-	  ballRadius:3,  // radius for default effector arm joint
-	  ballMat: null,  // THREE.Material for default effector arm joint
-	  ballGeom: null,  // THREE.Geometry for default effector arm joint
-	  width: width,
+	  jointRadius:3,  // radius for default effector arm joint
+	  jointMat: null,  // THREE.Material for default effector arm joint
+	  jointGeom: null,  // THREE.Geometry for default effector arm joint
+	  triangleMat: null, // THREE.Material for default triangle guideline
+	  triangleGeom: null, // THREE.Geometry for default triangle guideline
+	  e: e, // side length of equilateral triangle that defines the effector
 	  joints:[], // array of three Object3D for arm joints
 	  geometry: null, // default effector THREE.Geometry
 	  height: 5, // default effector thickness 
 	  material: null, // default effector THREE.Material
-	  sides: 24, // default effector number of sides
+	  sides: 6, // default effector number of sides
 	};
 	applyProps(self, detail);
-	self.ballMat = self.ballMat || new THREE.MeshBasicMaterial({color:0xFFA62F}),
-	self.ballGeom = self.ballGeom || new THREE.IcosahedronGeometry(self.ballRadius),
+	self.jointMat = self.jointMat || new THREE.MeshBasicMaterial({color:0xFFA62F}),
+	self.jointGeom = self.jointGeom || new THREE.IcosahedronGeometry(self.jointRadius),
 	self.joints = self.joints.size || [ 
-	  new THREE.Mesh(self.ballGeom, self.ballMat),
-	  new THREE.Mesh(self.ballGeom, self.ballMat),
-	  new THREE.Mesh(self.ballGeom, self.ballMat)
+	  new THREE.Mesh(self.jointGeom, self.jointMat),
+	  new THREE.Mesh(self.jointGeom, self.jointMat),
+	  new THREE.Mesh(self.jointGeom, self.jointMat)
 	];
-	var radius = 0.5*width/Math.sqrt(3);
-	var angle = Math.PI/2;
-	self.joints[0].position.set(radius*Math.cos(angle), radius*Math.sin(angle), 0);
+	var radiusIn = 0.5*e/Math.sqrt(3); // radius of inscribed circle
+	var angle = -Math.PI/2;
+	self.joints[0].position.set(radiusIn*Math.cos(angle), radiusIn*Math.sin(angle), 0);
 	angle += 2*Math.PI/3;
-	self.joints[1].position.set(radius*Math.cos(angle), radius*Math.sin(angle), 0);
+	self.joints[1].position.set(radiusIn*Math.cos(angle), radiusIn*Math.sin(angle), 0);
 	angle += 2*Math.PI/3;
-	self.joints[2].position.set(radius*Math.cos(angle), radius*Math.sin(angle), 0);
+	self.joints[2].position.set(radiusIn*Math.cos(angle), radiusIn*Math.sin(angle), 0);
 	self.material = self.effectorMat || new THREE.MeshLambertMaterial({});
-        self.geometry = self.geometry || new THREE.CylinderGeometry(radius, radius, self.height, self.sides);        
+	angle = Math.PI/2;
+
+	self.radiusOut = 2 * radiusIn; // radius of circumscribed circle
+	self.triangleMat = self.triangleMat || new THREE.LineDashedMaterial({ color:0x008800, linewidth:1, gapsize:40 });
+	self.triangleGeom = self.triangleGeom || new THREE.Geometry();
+	self.triangleGeom.vertices.push(new THREE.Vector3(self.radiusOut*Math.cos(angle), self.radiusOut*Math.sin(angle), 0));
+	angle += 2*Math.PI/3;
+	self.triangleGeom.vertices.push(new THREE.Vector3(self.radiusOut*Math.cos(angle), self.radiusOut*Math.sin(angle), 0));
+	angle += 2*Math.PI/3;
+	self.triangleGeom.vertices.push(new THREE.Vector3(self.radiusOut*Math.cos(angle), self.radiusOut*Math.sin(angle), 0));
+	angle += 2*Math.PI/3;
+	self.triangleGeom.vertices.push(new THREE.Vector3(self.radiusOut*Math.cos(angle), self.radiusOut*Math.sin(angle), 0));
+	self.triangle = new THREE.Line(self.triangleGeom, self.triangleMat);
+
+        self.geometry = self.geometry || new THREE.CylinderGeometry(radiusIn, radiusIn, self.height, self.sides);        
 	if (!self.effector) {
 	  self.effector = new THREE.Mesh(self.geometry, self.material);
+	  if (self.sides % 2 === 0) {
+	    self.effector.rotation.y += Math.PI/self.sides;
+	  }
 	  self.effector.rotation.x += Math.PI/2;
 	}
 	self.group = new THREE.Object3D();
 	self.group.add(self.effector);
-	self.joints.forEach(function(ball){ 
-	  self.group.add(ball) 
-	  decorate(ball, "world", new THREE.Vector3());
+	self.group.add(self.triangle);
+	self.joints.forEach(function(joint){ 
+	  self.group.add(joint) 
+	  decorate(joint, "world", new THREE.Vector3());
 	});
 	self.updateWorld = function() {
-	  self.joints.forEach(function(ball){ 
-	    ball.world.setFromMatrixPosition( ball.matrixWorld );
+	  self.joints.forEach(function(joint){ 
+	    joint.world.setFromMatrixPosition( joint.matrixWorld );
 	  });
 	}
 	self.group.updateMatrixWorld();
 	return self;
-      }
-      var baseGuide = new THREE.Object3D();
-      var baseGuideGeom = new THREE.CircleGeometry(baseR, 36);
-      var baseGuideLine = new THREE.Line(baseGuideGeom, guideMat);
-      baseGuide.add(baseGuideLine);
-
+      };
+      /*
       var arm1 = createArm(rf, {offset:baseRin});
       arm1.group.rotation.z += Math.PI/2;
       arm1.arm.rotation.y += Math.PI/4;
@@ -263,36 +338,66 @@
       arm3.group.rotation.z += Math.PI/2 - 2*Math.PI/3;
       arm3.arm.rotation.y += Math.PI/6;
       scene.add(arm3.group);
+      */
 
       scene.add(baseGuide);
 
-      var effector = createDeltaEffector(115);
+      var effector = createDeltaEffector(e, {});
       scene.add(effector.group);
 
-      var blueMat = new THREE.LineBasicMaterial({ color:0x8888ff, linewidth:1 });
-      var xyGeom = new THREE.Geometry();
-      xyGeom.vertices.push( new THREE.Vector3( 100, 0, 0 ) );
-      xyGeom.vertices.push( new THREE.Vector3( 0, 0, 0 ) );
-      xyGeom.vertices.push( new THREE.Vector3( 0, 100, 0 ) );
-      var xyline = new THREE.Line( xyGeom, blueMat );
-      scene.add( xyline );
-      var zGeom = new THREE.Geometry();
-      zGeom.vertices.push( new THREE.Vector3( 0, 0, -100 ) );
-      zGeom.vertices.push( new THREE.Vector3( 0, 0, 0 ) );
-      var zLine = new THREE.Line( zGeom, blueMat );
-      scene.add(zLine);
+      var base = createDeltaBase(f, rf, {});
+      scene.add(base.group);
 
+      var baseGuide = new THREE.Object3D();
+      var baseGuideGeom = new THREE.CircleGeometry(base.radiusOut, 36);
+      var baseGuideLine = new THREE.Line(baseGuideGeom, guideMat);
+      baseGuide.add(baseGuideLine);
+
+      var coordMat = new THREE.LineBasicMaterial({ color:0x8888ff, linewidth:1 });
+      var xAxisGeom = new THREE.Geometry();
+      xAxisGeom.vertices.push( new THREE.Vector3( -machineSize.x/2, 0, 0 ) );
+      xAxisGeom.vertices.push( new THREE.Vector3( machineSize.x/2, 0, 0 ) );
+      var xAxis = new THREE.Line( xAxisGeom, coordMat );
+      scene.add( xAxis );
+      var yAxisGeom = new THREE.Geometry();
+      yAxisGeom.vertices.push( new THREE.Vector3( 0, -machineSize.x/2, 0 ) );
+      yAxisGeom.vertices.push( new THREE.Vector3( 0, machineSize.x/2, 0 ) );
+      var yAxis = new THREE.Line( yAxisGeom, coordMat );
+      scene.add( yAxis );
+      var zAxisGeom = new THREE.Geometry();
+      zAxisGeom.vertices.push( new THREE.Vector3( 0, 0, 0) );
+      zAxisGeom.vertices.push( new THREE.Vector3( 0, 0, -machineSize.x) );
+      var zAxis = new THREE.Line( zAxisGeom, coordMat );
+      scene.add( zAxis );
+
+      var currentZMat = new THREE.LineBasicMaterial({color:0x0ffff00});
+      var machine = new THREE.BoxHelper();
+      machine.material.color.setRGB( 1, 0, 0 );
+      machine.scale.set(machineSize.x/2, machineSize.y/2, machineSize.z/2);
+      machine.position.z -= machineSize.z/2;
+      scene.add( machine );
+      var currentZGeom = new THREE.Geometry();
+      currentZGeom.vertices.push( new THREE.Vector3(machineSize.x/2, -machineSize.x/2, 0) );
+      currentZGeom.vertices.push( new THREE.Vector3(machineSize.x/2, machineSize.x/2, 0) );
+      currentZGeom.vertices.push( new THREE.Vector3(-machineSize.x/2, machineSize.x/2, 0) );
+      currentZGeom.vertices.push( new THREE.Vector3(-machineSize.x/2, -machineSize.x/2, 0) );
+      currentZGeom.vertices.push( new THREE.Vector3(machineSize.x/2, -machineSize.x/2, 0) );
+      var currentZ = new THREE.Line(currentZGeom, currentZMat);
+      scene.add(currentZ);
+
+      /*
       scene.updateMatrixWorld();
       var armE1Geom = new THREE.Geometry();
       effector.updateWorld();
       armE1Geom.vertices.push( effector.joints[0].world );
-      armE1Geom.vertices.push( arm1.tip.world );
+      armE1Geom.vertices.push( base.arms[0].tip.world );
       var armE1Mat = new THREE.LineBasicMaterial({ color:0x88ff88, linewidth:5 });
       var armE1Line = new THREE.Line(armE1Geom, armE1Mat);
       scene.add(armE1Line);
-      arm1.arm.rotation.y -= Math.PI/5;
+      base.arms[0].arm.rotation.y -= Math.PI/5;
       scene.updateMatrixWorld();
-      arm1.updateWorld();
+      base.arms[0].updateWorld();
+      */
 
       var ambient = new THREE.AmbientLight( 0x404040 );
       scene.add(ambient);
@@ -313,12 +418,15 @@
       ringLight3.position.set(100*Math.cos(angle),100*Math.sin(angle),-50);
       scene.add( ringLight3 );
 
-      var camera = new THREE.PerspectiveCamera(50, aspectW/aspectH, 0.1, 1000);
-      camera.position.z = -50;
+      var camera = new THREE.PerspectiveCamera(50, aspectW/aspectH, 1.0* machineSize.x, 1000);
+      camera.position.z = -machineSize.z/4;
       camera.up = new THREE.Vector3(0,0,1);
-      camera.lookAt(new THREE.Vector3( 0, 0, -100 ));
-      var cameraR = 300;
+      var cameraR = 1.6*machineSize.x;
       var cameraAngle = 0;
+      cameraAngle += 0.01;
+      camera.position.x = cameraR * Math.sin(cameraAngle);
+      camera.position.y = cameraR * Math.cos(cameraAngle);
+      camera.lookAt(new THREE.Vector3( 0, 0, -3*machineSize.z/5 ));
 
       var render = function () {
 	var bodyElt = document.getElementById('body');
@@ -326,26 +434,25 @@
 	var bodyScope = angular.element(bodyElt).scope();
 	//console.log("bodyScope:" + typeof bodyScope);
 	requestAnimationFrame(render);
-	cameraAngle += 0.001;
-	camera.position.x = cameraR * Math.sin(cameraAngle);
-	camera.position.y = cameraR * Math.cos(cameraAngle);
-	camera.lookAt(new THREE.Vector3( 0, 0, -100 ));
 	if ('object' === typeof bodyScope) {
+	  if (bodyScope.delta.orbit_camera) {
+	    cameraAngle += 0.01;
+	    camera.position.x = cameraR * Math.sin(cameraAngle);
+	    camera.position.y = cameraR * Math.cos(cameraAngle);
+	    camera.lookAt(new THREE.Vector3( 0, 0, -3*machineSize.z/5 ));
+	  }
 	  effector.group.position.set( bodyScope.delta.X, bodyScope.delta.Y, bodyScope.delta.Z );
-	  arm1.arm.rotation.y = bodyScope.delta.theta1 * Math.PI / 180;
-	  arm2.arm.rotation.y = bodyScope.delta.theta2 * Math.PI / 180;
-	  arm3.arm.rotation.y = bodyScope.delta.theta3 * Math.PI / 180;
+	  base.arms[0].arm.rotation.y = bodyScope.delta.theta1 * Math.PI / 180;
+	  base.arms[1].arm.rotation.y = bodyScope.delta.theta2 * Math.PI / 180;
+	  base.arms[2].arm.rotation.y = bodyScope.delta.theta3 * Math.PI / 180;
+	  currentZ.position.z = bodyScope.delta.Z;
 	}
-	arm1.updateWorld();
-	arm2.updateWorld();
-	arm3.updateWorld();
+	base.updateWorld();
 	effector.updateWorld();
 	renderer.render(scene, camera);
       };
       render();
     </script>
-    delta.theta1:{{delta.theta1}}
-    arm1.arm.rotation.y:{{arm1.arm.rotation.y}}
 
 <!-- ///////////// END APPLICATION CODE ///////////// -->
 <div ng-include src="'../../partials/footer.html'"></div></body></html>
