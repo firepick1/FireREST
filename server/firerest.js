@@ -2,7 +2,7 @@ console.log("loading express...");
 var express = require('express');
 var fs = require('fs');
 var app = express();
-var post_properties = false;
+var post_enabled = false;
 var firerest={};
 
 express.static.mime.define({'application/json': ['fire']});
@@ -29,12 +29,34 @@ app.get('/index.html', function(req,res) { res.redirect('firerest/index.html'); 
 
 app.use(express.bodyParser());
 
+firerest.post_saved_png = function(req, res){
+  var filepath = req.path.replace(/^\/firerest/, firefuse_dir);
+  var data = [];
+
+  req.on('data', function(datum){ 
+    data[data.length] = datum;
+  });
+  req.on('end', function (){
+    if (post_enabled) {
+      var buf = Buffer.concat(data);
+      console.log('POST file:'+filepath+' buf:'+ buf.length);
+      fs.writeFileSync(filepath, buf);
+      res.end();
+    } else {
+      console.log("POST HTTP405 file:"+filepath+" json:" + data);
+      res.send(405, {error:"This FireREST web service does not support properties.json updates"});
+    }
+  });
+
+  res.send({status:"ok"});
+};
+
 firerest.post_firefuse = function(req,res,next) { 
   var filepath = req.path.replace(/^\/firerest/, firefuse_dir);
   var data = '';
   req.on('data', function(datum){ data += datum; });
   req.on('end', function (){
-    if (post_properties) {
+    if (post_enabled) {
       console.log("POST file:"+filepath+" json:" + data);
       fs.writeFile(filepath, data, function() { res.end(); });
     } else {
@@ -61,7 +83,7 @@ if (fs.existsSync(cv_dir)) {
   console.log("Mapping /firerest/cv to: " + cv_dir);
   console.log("Mapping /firerest/sync to: " + sync_dir);
   console.log("Mapping /firerest/cnc to: " + cnc_dir);
-  post_properties = true;
+  post_enabled = true;
   post_gcode_fire = firerest.post_firefuse;
 } else {
   app.use('/firerest/cv', express.static('www/cv'));
@@ -79,6 +101,7 @@ app.use('/firerest/partials', express.static('www/partials'));
 app.get('/firerest/config.json', function(req,res) { res.sendfile(config_file); });
 
 app.post(/.*\/properties.json$/, firerest.post_firefuse);
+app.post(/.*\/saved.png$/, firerest.post_saved_png);
 app.post(/.*\/gcode.fire$/, post_gcode_fire);
 
 ///////////////////////// CHOOSE HTTP PORT ////////////////////////
