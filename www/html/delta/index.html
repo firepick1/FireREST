@@ -136,8 +136,8 @@
       for (z = -0; z > -machineSize.z; z -= 50) {
 	var spriteZ = makeTextSprite("" + z);
 	spriteZ.position.z += z;
-	spriteZ.position.x += machineSize.x/2;
-	spriteZ.position.y += machineSize.y/2;
+	spriteZ.position.x += machineSize.x/2 - 5;
+	spriteZ.position.y += machineSize.y/2 - 5;
 	scene.add(spriteZ);
       }
 
@@ -281,6 +281,8 @@
 	  sides: 6, 		// default effector number of sides
 	};
 	applyProps(self, detail);
+	self.group = new THREE.Object3D();
+	self.group.userData = self;
 	self.base = base;
 	self.jointMat = self.jointMat || new THREE.MeshBasicMaterial({color:0xFFA62F}),
 	self.jointGeom = self.jointGeom || new THREE.IcosahedronGeometry(self.jointRadius),
@@ -297,8 +299,12 @@
 	angle += 2*Math.PI/3;
 	self.joints[2].position.set(radiusIn*Math.cos(angle), radiusIn*Math.sin(angle), 0);
 	self.material = self.effectorMat || new THREE.MeshLambertMaterial({});
-	angle = Math.PI/2;
+	self.joints.forEach(function(joint){ 
+	  self.group.add(joint) 
+	  joint.userData.world = new THREE.Vector3();
+	});
 
+	angle = Math.PI/2;
 	self.radiusOut = 2 * radiusIn; // radius of circumscribed circle
 	self.triangleMat = self.triangleMat || new THREE.LineDashedMaterial({ color:0x008800, linewidth:1, gapsize:40 });
 	self.triangleGeom = self.triangleGeom || new THREE.Geometry();
@@ -310,6 +316,7 @@
 	angle += 2*Math.PI/3;
 	self.triangleGeom.vertices.push(new THREE.Vector3(self.radiusOut*Math.cos(angle), self.radiusOut*Math.sin(angle), 0));
 	self.triangle = new THREE.Line(self.triangleGeom, self.triangleMat);
+	self.group.add(self.triangle);
 
         self.geometry = self.geometry || new THREE.CylinderGeometry(radiusIn, radiusIn, self.height, self.sides);        
 	if (!self.effector) {
@@ -319,14 +326,10 @@
 	  }
 	  self.effector.rotation.x += Math.PI/2;
 	}
-	self.group = new THREE.Object3D();
-	self.group.userData = self;
 	self.group.add(self.effector);
-	self.group.add(self.triangle);
-	self.joints.forEach(function(joint){ 
-	  self.group.add(joint) 
-	  joint.userData.world = new THREE.Vector3();
-	});
+
+	var light = new THREE.PointLight( 0xffffff, 1, 200 );
+	self.group.add( light );
 
 	self.updateWorld = function() {
 	  self.joints.forEach(function(joint){ 
@@ -395,18 +398,30 @@
       var zAxis = new THREE.Line( zAxisGeom, coordMat );
       scene.add( zAxis );
 
-      var currentZMat = new THREE.LineBasicMaterial({color:0x0ffff00});
+      var imgBaseMat = new THREE.MeshPhongMaterial( { 
+	map: THREE.ImageUtils.loadTexture('../../img/FirePick-Delta-base.jpg') 
+      } );
+      var imgNoneMat = new THREE.MeshPhongMaterial( { map: THREE.ImageUtils.loadTexture('../../img/no-image.png') } );
+      var machineBaseGeom = new THREE.PlaneGeometry( machineSize.x, machineSize.y);
+      var machineBase = new THREE.Mesh(machineBaseGeom, imgBaseMat);
+      machineBase.position.z = -machineSize.z;
+      machineBase.rotation.z -= Math.PI/2;
+      scene.add(machineBase);
+
       var machine = new THREE.BoxHelper();
+      //machine.material = imgMat;
       machine.material.color.setRGB( 1, 0, 0 );
       machine.scale.set(machineSize.x/2, machineSize.y/2, machineSize.z/2);
       machine.position.z -= machineSize.z/2;
       scene.add( machine );
+
       var currentZGeom = new THREE.Geometry();
       currentZGeom.vertices.push( new THREE.Vector3(machineSize.x/2, -machineSize.x/2, 0) );
       currentZGeom.vertices.push( new THREE.Vector3(machineSize.x/2, machineSize.x/2, 0) );
       currentZGeom.vertices.push( new THREE.Vector3(-machineSize.x/2, machineSize.x/2, 0) );
       currentZGeom.vertices.push( new THREE.Vector3(-machineSize.x/2, -machineSize.x/2, 0) );
       currentZGeom.vertices.push( new THREE.Vector3(machineSize.x/2, -machineSize.x/2, 0) );
+      var currentZMat = new THREE.LineBasicMaterial({color:0x0ffff00});
       var currentZ = new THREE.Line(currentZGeom, currentZMat);
       scene.add(currentZ);
 
