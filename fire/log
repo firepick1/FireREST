@@ -1,6 +1,7 @@
 #! /bin/bash
 
-echo "COMMAND	: fire/log - FireFUSE log utility"
+echo "COMMAND	: fire/log shows latest FireFUSE log emtries"
+echo "HELP	: fire/log -h	"
 
 function help() {
   echo "SYNOPSIS: fire/log [-c|-t|-d|-i|-h]"
