@@ -45,8 +45,14 @@ controllers.controller('MainCtrl',
 	});
 	return context;
       },
-      gcode_home: function() { return interpolate(cnc.dce.gcode.home)(cnc.gcode_context()); },
-      gcode_move: function() { return interpolate(cnc.dce.gcode.move)(cnc.gcode_context()); },
+      gcode_home: function() { 
+	var home = cnc.dce && cnc.dce.gcode && cnc.dce.gcode.home || "G0{{home_steps}}";
+        return interpolate(home)(cnc.gcode_context()); 
+	},
+      gcode_move: function() { 
+	var move = cnc.dce && cnc.dce.gcode && cnc.dce.gcode.move || "G0{{axis_steps}}";
+        return interpolate(move)(cnc.gcode_context()); 
+	},
       axis_class: function(axis, value) {
         var result = axis.enabled ? "" : "fr-axis-disabled ";
         if (typeof axis.min === "number" && value < axis.min) {
