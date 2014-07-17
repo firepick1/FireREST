@@ -90,6 +90,9 @@ controllers.controller('MainCtrl',
 	  transmit.end(true);
 	});
       },
+      dce_change: function() {
+	cnc.dce = cnc.dce_list[cnc.dce_name]
+      },
       clear_results: function() {
 	cnc.resource_response = {};
 	cnc.resource_classname = {};

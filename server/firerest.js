@@ -21,7 +21,7 @@ for (var i = 0; i < dirs.length; i++) {
   var urlpath = '/firerest/' + dirs[i];
   var filepath = __appdir + dirs[i];
   app.use(urlpath, express.static(filepath));
-  console.log("Mapping urlpath:" + urlpath + " to:" + filepath);
+  console.log("INFO\t: Mapping urlpath:" + urlpath + " to:" + filepath);
 }
 app.get('/firerest/index.html', function(req,res) { res.sendfile('www/index.html'); });
 app.get('/', function(req,res) { res.redirect('firerest/index.html'); });
@@ -39,11 +39,11 @@ firerest.post_saved_png = function(req, res){
   req.on('end', function (){
     if (post_enabled) {
       var buf = Buffer.concat(data);
-      console.log('POST file:'+filepath+' buf:'+ buf.length);
+      console.log('INFO\t: POST file:'+filepath+' buf:'+ buf.length);
       fs.writeFileSync(filepath, buf);
       res.end();
     } else {
-      console.log("POST HTTP405 file:"+filepath+" json:" + data);
+      console.log("INFO\t: POST HTTP405 file:"+filepath+" json:" + data);
       res.send(405, {error:"This FireREST web service does not support properties.json updates"});
     }
   });
@@ -57,17 +57,17 @@ firerest.post_firefuse = function(req,res,next) {
   req.on('data', function(datum){ data += datum; });
   req.on('end', function (){
     if (post_enabled) {
-      console.log("POST file:"+filepath+" json:" + data);
+      console.log("INFO\t: POST file:"+filepath+" json:" + data);
       fs.writeFile(filepath, data, function() { res.end(); });
     } else {
-      console.log("POST HTTP405 file:"+filepath+" json:" + data);
+      console.log("INFO\t: POST HTTP405 file:"+filepath+" json:" + data);
       res.send(405, {error:"This FireREST web service does not support properties.json updates"});
     }
   });
 };
 
 // If possible, use FireFUSE
-console.log("Looking for FireFUSE...");
+console.log("INFO\t: Looking for FireFUSE...");
 var firefuse_dir = "/dev/firefuse";
 var cv_dir = "/dev/firefuse/cv";
 var cnc_dir = "/dev/firefuse/cnc";
@@ -79,10 +79,10 @@ if (fs.existsSync(cv_dir)) {
   app.use('/firerest/cv', express.static(cv_dir));
   app.use('/firerest/sync', express.static(sync_dir));
   app.use('/firerest/cnc', express.static(cnc_dir));
-  console.log("Found FireFUSE!");
-  console.log("Mapping /firerest/cv to: " + cv_dir);
-  console.log("Mapping /firerest/sync to: " + sync_dir);
-  console.log("Mapping /firerest/cnc to: " + cnc_dir);
+  console.log("INFO\t: Found FireFUSE!");
+  console.log("INFO\t: Mapping /firerest/cv to: " + cv_dir);
+  console.log("INFO\t: Mapping /firerest/sync to: " + sync_dir);
+  console.log("INFO\t: Mapping /firerest/cnc to: " + cnc_dir);
   post_enabled = true;
   post_gcode_fire = firerest.post_firefuse;
 } else {
@@ -93,7 +93,7 @@ if (fs.existsSync(cv_dir)) {
   post_gcode_fire = function(req,res,next) { 
     res.send(405, {error:"This FireREST web service does not support POST to gcode.fire"});
   };
-  console.log("FireFUSE is not available. FireREST is demo mode only" );
+  console.log("INFO\t: FireFUSE is not available. FireREST is demo mode only" );
 }
 app.use('/firerest/html', express.static('www/html'));
 app.use('/firerest/partials', express.static('www/partials'));
@@ -110,4 +110,4 @@ app.post(/.*\/gcode.fire$/, post_gcode_fire);
 var firerest_port=8080; // node server/firerest.js
 
 app.listen(firerest_port);
-console.log('FireREST listening on port ' + firerest_port);
+console.log('SUCCESS\t: FireREST listening on port ' + firerest_port);

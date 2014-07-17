@@ -35,20 +35,35 @@ module.exports = function(grunt) {
     }}
   }
 
-  grunt.registerTask('config-custom', 'Customize FireREST JSON config file', function(config, custom) {
-    if (typeof config === "undefined") {
-      throw grunt.util.error(this.name + " expected path of FireREST configuration file");
+  var customizeJSONFile = function(original, customFile) {
+    if (typeof customFile !== "undefined") {
+      var custom = grunt.file.readJSON(customFile);
+      customizeJSON(original, custom);
     }
-    if (typeof custom === "undefined") {
-      throw grunt.util.error(this.name + " expected path of FireREST custom configuration file");
-    }
-    var json = grunt.file.readJSON(config);
-    var custom = grunt.file.readJSON(custom);
-    customizeJSON(json, custom);
-    grunt.file.write(config, JSON.stringify(json, null, "  "));
-  });
+  }
 
-  grunt.registerTask('config-version', 'Add version to given FireREST JSON config file', function(src, dst, major, minor, patch) {
+  grunt.registerTask('cfg-custom', 'Customize FireREST JSON config file', 
+    function(config, custom1, custom2, custom3, custom4, custom5, customEnd) {
+      if (typeof config === "undefined") {
+	throw grunt.util.error(this.name + " expected path of FireREST configuration file");
+      }
+      if (typeof custom1 === "undefined") {
+	throw grunt.util.error(this.name + " expected path of FireREST custom configuration file(s)");
+      }
+      if (typeof customEnd !== "undefined") {
+	throw grunt.util.error(this.name + " too many customization filess");
+      }
+      var json = grunt.file.readJSON(config);
+      customizeJSONFile(json, custom1);
+      customizeJSONFile(json, custom2);
+      customizeJSONFile(json, custom3);
+      customizeJSONFile(json, custom4);
+      customizeJSONFile(json, custom5);
+      grunt.file.write(config, JSON.stringify(json, null, "  "));
+    }
+  );
+
+  grunt.registerTask('cfg-version', 'Add version to given FireREST JSON config file', function(src, dst, major, minor, patch) {
     if (typeof src === "undefined") {
       throw grunt.util.error(this.name + " expected path of source FireREST configuration file");
     }

@@ -1,12 +1,15 @@
 #! /bin/bash
 
-  echo "COMMAND	: fire/config - Update FireREST/FireFUSE configuration"
+  echo "COMMAND	: fire/config # Update FireREST/FireFUSE configuration"
 function help() {
   echo "SYNOPSIS: fire/config [-d]"
   echo "	: fire/config "`tput smul`"config.json"`tput rmul`
+  echo "	: fire/config -e "`tput smul`"edit.json"`tput rmul`
   echo "EXAMPLES: Apply default configuration file:"
   echo "	:   fire/config -d"
-  echo "	: Apply custom configuration file:"
+  echo "EXAMPLES: Edit current configuration file to use 400x400 camera:"
+  echo "	:   fire/config -e examples/400x400.json"
+  echo "EXAMPLES: Apply custom configuration file:"
   echo "	:   fire/config custom/myconfig.json"
   echo "	: Print this documentation:"
   echo "	:   fire/config -h"
@@ -14,6 +17,7 @@ function help() {
 }
 
 if [ "$1" == "" ] || [ "$1" == "-h" ]; then help; exit 0; fi
+if [ "$1" == "-e" ]; then EDIT=1; shift; else EDIT=0; fi
 
 CONFIG_FILE=$1
 if [ "$1" == "-d" ]; then CONFIG_FILE=www/config.json; fi
@@ -51,10 +55,15 @@ else
   echo "FireFUSE: No existing instance detected at /dev/firefuse"
 fi
 
-echo "CONFIG	: $CONFIG_FILE"
-sudo cp $CONFIG_FILE /var/firefuse/config.json
+if [ $EDIT -ne 0 ]; then
+  echo "CONFIG	: /var/firefuse/config.json + $CONFIG_FILE"
+  grunt cfg-custom:/var/firefuse/config.json:$CONFIG_FILE
+else
+  echo "CONFIG	: $CONFIG_FILE"
+  sudo cp $CONFIG_FILE /var/firefuse/config.json
+fi
 if [ $? -ne 0 ]; then
-  echo "ERROR	: could not copy configuration $CONFIG_FILE to /var/firefuse/config.json"
+  echo "ERROR	: could not update /var/firefuse/config.json"
   exit -1
 fi
 pushd ~/FireREST/FireFUSE > /dev/null

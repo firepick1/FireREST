@@ -1,10 +1,16 @@
 #! /bin/bash
 
-FIREREST_VERSION_MAJOR=0
-FIREREST_VERSION_MINOR=11
-FIREREST_VERSION_PATCH=0
+VERSION_MAJOR=0
+VERSION_MINOR=11
+VERSION_PATCH=0
 
 echo "NAME	: ../FireREST/build -- compile FireREST"
+echo "ETA	: 1-30 minutes"
+echo "HELP	: https://github.com/firepick1/FireREST/wiki/Build-FireREST"
+echo "DATE	: `date`"
+echo "VERSION	: $VERSION_MAJOR.$VERSION_MINOR.$VERSION_PATCH"
+echo "PATH	: $PATH"
+echo "SHELL	: $SHELL"
 
 function pull_git() {
   echo "GIT	: UPDATING $1"
@@ -26,20 +32,17 @@ function build_git() {
   popd &> /dev/null
 }
 
-echo "GRUNT	: generating www/config.json"
-grunt config-version:config/FireREST.json:www/config.json:$FIREREST_VERSION_MAJOR:$FIREREST_VERSION_MINOR:$FIREREST_VERSION_PATCH 
-grunt config-custom:www/config.json:config/cv.json  config-custom:www/config.json:config/cnc-tinyg.json 
-grunt config-version:config/FireREST.json:examples/config-tinyg.json:$FIREREST_VERSION_MAJOR:$FIREREST_VERSION_MINOR:$FIREREST_VERSION_PATCH 
-grunt config-custom:examples/config-tinyg.json:config/cv.json  config-custom:examples/config-tinyg.json:config/cnc-tinyg.json 
-grunt config-version:config/FireREST.json:examples/config-marlin.json:$FIREREST_VERSION_MAJOR:$FIREREST_VERSION_MINOR:$FIREREST_VERSION_PATCH 
-grunt config-custom:examples/config-marlin.json:config/cv.json  config-custom:examples/config-marlin.json:config/cnc-marlin.json 
+if [ "$FIREREST_CONFIG" == "" ]; then FIREREST_CONFIG=examples/cfg-firepick1.json; fi
 
-echo "ETA	: 1-30 minutes"
-echo "HELP	: https://github.com/firepick1/FireREST/wiki/Build-FireREST"
-echo "DATE	: `date`"
-echo "VERSION	: $FIREREST_VERSION_MAJOR.$FIREREST_VERSION_MINOR.$FIREREST_VERSION_PATCH"
-echo "PATH	: $PATH"
-echo "SHELL	: $SHELL"
+echo "GRUNT	: generating FireREST configuration files (see examples)"
+sudo -E -u $SUDO_USER grunt cfg-version:config/FireREST.json:examples/cfg-firepick1.json:$VERSION_MAJOR:$VERSION_MINOR:$VERSION_PATCH \
+  cfg-custom:examples/cfg-firepick1.json:config/cv.json:config/cnc-firepick1.json 
+sudo -E -u $SUDO_USER grunt cfg-version:config/FireREST.json:examples/cfg-firepick-delta.json:$VERSION_MAJOR:$VERSION_MINOR:$VERSION_PATCH \
+  cfg-custom:examples/cfg-firepick-delta.json:config/cv.json:config/cnc-firepick-delta.json 
+
+cp $FIREREST_CONFIG www/config.json
+
+echo "CONFIG	: $FIREREST_CONFIG"
 echo "SUDO	: SUDO_USER: $SUDO_USER"
 echo "SSH	: SSH_AGENT_PID: $SSH_AGENT_PID"
 
@@ -122,7 +125,7 @@ if [ $RASPBIAN -ne 1 ]; then
   echo "SUCCESS	: Build complete"
 else 
   echo "CONTENT	: Raspberry Pi FireFUSE with live content"
-  if [ -e version-$FIREREST_VERSION_MAJOR.$FIREREST_VERSION_MINOR ] && [ -e /dev/firefuse/status ] ; then
+  if [ -e version-$VERSION_MAJOR.$VERSION_MINOR ] && [ -e /dev/firefuse/status ] ; then
     echo "STATUS	: FireREST dependencies OK"
   else
     build_git FireSight
@@ -130,7 +133,7 @@ else
   fi
 fi
 
-date > version-$FIREREST_VERSION_MAJOR.$FIREREST_VERSION_MINOR
+date > version-$VERSION_MAJOR.$VERSION_MINOR
 
 echo "------------------------------------------"
 echo "DATE	: `date`"
