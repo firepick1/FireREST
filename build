@@ -26,12 +26,13 @@ function build_git() {
   popd &> /dev/null
 }
 
-sudo -u $SUDO_USER sed \
-  -e s/@@FIREREST_VERSION_MAJOR@@/$FIREREST_VERSION_MAJOR/ \
-  -e s/@@FIREREST_VERSION_MINOR@@/$FIREREST_VERSION_MINOR/ \
-  -e s/@@FIREREST_VERSION_PATCH@@/$FIREREST_VERSION_PATCH/ \
-  config.json.tmpl > www/config.json
-echo "CONFIG	: `grep version www/config.json`"
+echo "GRUNT	: generating www/config.json"
+grunt config-version:config/FireREST.json:www/config.json:$FIREREST_VERSION_MAJOR:$FIREREST_VERSION_MINOR:$FIREREST_VERSION_PATCH 
+grunt config-custom:www/config.json:config/cv.json  config-custom:www/config.json:config/cnc-tinyg.json 
+grunt config-version:config/FireREST.json:examples/config-tinyg.json:$FIREREST_VERSION_MAJOR:$FIREREST_VERSION_MINOR:$FIREREST_VERSION_PATCH 
+grunt config-custom:examples/config-tinyg.json:config/cv.json  config-custom:examples/config-tinyg.json:config/cnc-tinyg.json 
+grunt config-version:config/FireREST.json:examples/config-marlin.json:$FIREREST_VERSION_MAJOR:$FIREREST_VERSION_MINOR:$FIREREST_VERSION_PATCH 
+grunt config-custom:examples/config-marlin.json:config/cv.json  config-custom:examples/config-marlin.json:config/cnc-marlin.json 
 
 echo "ETA	: 1-30 minutes"
 echo "HELP	: https://github.com/firepick1/FireREST/wiki/Build-FireREST"
@@ -63,9 +64,16 @@ if [ $? -eq 0 ]; then
   exit -1
 fi
 
+if [ "$(type -p grunt)" == "" ]; then
+  echo "INSTALL	: grunt"
+  npm install -g grunt-cli
+  if [ $? -ne 0 ]; then echo "ERROR	: installation failred"; exit -1; fi
+fi
+
 if [ "$(type -p lsb_release)" == "" ]; then
-  echo "++++++++++++++++++ INSTALLING lsb_release ++++++++++++"
+  echo "INSTALL	: lsb_release"
   apt-get install -y lsb-release
+  if [ $? -ne 0 ]; then echo "ERROR	: installation failred"; exit -1; fi
 fi
 if [ "$(arch)" != "armv6l" ] || [ "$(lsb_release -is)" != "Debian" ] ;then
   RASPBIAN=0
@@ -74,14 +82,15 @@ else
 fi
 
 if [ "$(type -p siege)" == "" ]; then
-  echo "++++++++++++++++++ INSTALLING siege ++++++++++++"
+  echo "INSTALL	: siege"
   apt-get install -y siege
+  if [ $? -ne 0 ]; then echo "ERROR	: installation failred"; exit -1; fi
 else 
   echo "STATUS	: siege installed"
 fi
 
 if [ "$(type -p node)" == "" ]; then
-  echo "++++++++++++++++++ INSTALLING NodeJS ++++++++++++"
+  echo "INSTALL	: NodeJS"
   if [ $RASPBIAN -eq 1 ]; then
     mkdir /opt/node
     pushd /opt/node
@@ -93,15 +102,17 @@ if [ "$(type -p node)" == "" ]; then
     ln -s /opt/node/node-*pi/bin/npm npm
     popd
   else
-   echo PLEASE INSTALL nodeJS
+   echo "ERROR	: automatic installation of NodeJS failed"
+   echo "TRY	: install NodeJS manually"
    exit -1
   fi
 else
   echo "STATUS	: NodeJS installed"
 fi
 if [ ! -e node_modules ]; then
-  echo "++++++++++++++++++ INSTALLING NodeJS dependencies ++++++++++++"
+  echo "INSTALL	: NodeJS dependencies" 
   npm install
+  if [ $? -ne 0 ]; then echo "ERROR	: installation failred"; exit -1; fi
 else
   echo "STATUS	: node_modules installed"
 fi

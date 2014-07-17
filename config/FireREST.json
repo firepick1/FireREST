@@ -1,0 +1,10 @@
+{ 
+  "FireREST":{
+    "title":"FireREST Reference Service",
+    "provider":"Demo", 
+    "version":{"major":0, "minor":0, "patch":0} 
+  },
+  "background-worker":{ 
+    "idle-period":900 
+  }
+}
