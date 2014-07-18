@@ -12,19 +12,26 @@ echo "VERSION	: $VERSION_MAJOR.$VERSION_MINOR.$VERSION_PATCH"
 echo "PATH	: $PATH"
 echo "SHELL	: $SHELL"
 
+if [ "$SUDO_USER" != "" ]; then
+  echo "ERROR	: This script will call sudo as required and must be run by non-root user"
+  echo "TRY	:   . ./build"
+  echo "NOTE	:   ^extra period is significant"
+  exit -1
+fi
+
 function pull_git() {
   echo "GIT	: UPDATING $1"
   if [ ! -e $1 ]; then
-    sudo -E -u $SUDO_USER git clone git://github.com/firepick1/$1
+    git clone git://github.com/firepick1/$1
   fi
   pushd $1 &> /dev/null
-  sudo -E -u $SUDO_USER git pull
+  git pull
   popd &> /dev/null
 }
 function build_git() {
   echo "STATUS	: BUILDING $1"
   pushd $1 &> /dev/null
-  ./build
+  . ./build
   if [ $? -ne 0 ]; then
     echo "ERROR	: $1 INSTALLATION FAILED"
     exit -1
@@ -35,9 +42,9 @@ function build_git() {
 if [ "$FIREREST_CONFIG" == "" ]; then FIREREST_CONFIG=examples/cfg-firepick1.json; fi
 
 echo "GRUNT	: generating FireREST configuration files (see examples)"
-sudo -E -u $SUDO_USER grunt cfg-version:config/FireREST.json:examples/cfg-firepick1.json:$VERSION_MAJOR:$VERSION_MINOR:$VERSION_PATCH \
+grunt cfg-version:config/FireREST.json:examples/cfg-firepick1.json:$VERSION_MAJOR:$VERSION_MINOR:$VERSION_PATCH \
   cfg-custom:examples/cfg-firepick1.json:config/cv.json:config/cnc-firepick1.json 
-sudo -E -u $SUDO_USER grunt cfg-version:config/FireREST.json:examples/cfg-firepick-delta.json:$VERSION_MAJOR:$VERSION_MINOR:$VERSION_PATCH \
+grunt cfg-version:config/FireREST.json:examples/cfg-firepick-delta.json:$VERSION_MAJOR:$VERSION_MINOR:$VERSION_PATCH \
   cfg-custom:examples/cfg-firepick-delta.json:config/cv.json:config/cnc-firepick-delta.json 
 
 cp $FIREREST_CONFIG www/config.json
@@ -47,13 +54,6 @@ echo "SUDO	: SUDO_USER: $SUDO_USER"
 echo "SSH	: SSH_AGENT_PID: $SSH_AGENT_PID"
 
 fire/web -k
-
-if [ "$SUDO_USER" == "" ]; then
-  echo "ERROR	: SUDO_USER is not defined"
-  echo "TRY	: You must run this script as superuser:"
-  echo 'TRY	:   sudo ./build'
-  exit -1
-fi
 
 pull_git FireSight
 pull_git FireFUSE
@@ -69,56 +69,55 @@ fi
 
 if [ "$(type -p grunt)" == "" ]; then
   echo "INSTALL	: grunt"
-  npm install -g grunt-cli
-  if [ $? -ne 0 ]; then echo "ERROR	: installation failred"; exit -1; fi
+  sudo npm install -g grunt-cli
+  if [ $? -ne 0 ]; then echo "ERROR	: installation failed"; exit -1; fi
 fi
 
 if [ "$(type -p lsb_release)" == "" ]; then
   echo "INSTALL	: lsb_release"
-  apt-get install -y lsb-release
-  if [ $? -ne 0 ]; then echo "ERROR	: installation failred"; exit -1; fi
+  sudo apt-get install -y lsb-release
+  if [ $? -ne 0 ]; then echo "ERROR	: installation failed"; exit -1; fi
 fi
 if [ "$(arch)" != "armv6l" ] || [ "$(lsb_release -is)" != "Debian" ] ;then
   RASPBIAN=0
+  echo "SYSTEM	: other (FireFUSE not supported)"
 else
   RASPBIAN=1
+  echo "SYSTEM	: Raspberry Pi with Rasbian"
 fi
 
 if [ "$(type -p siege)" == "" ]; then
   echo "INSTALL	: siege"
-  apt-get install -y siege
-  if [ $? -ne 0 ]; then echo "ERROR	: installation failred"; exit -1; fi
-else 
-  echo "STATUS	: siege installed"
+  sudo apt-get install -y siege
+  if [ $? -ne 0 ]; then echo "ERROR	: installation failed"; exit -1; fi
 fi
+echo "STATUS	: siege installed"
 
 if [ "$(type -p node)" == "" ]; then
   echo "INSTALL	: NodeJS"
   if [ $RASPBIAN -eq 1 ]; then
     mkdir /opt/node
     pushd /opt/node
-    wget http://nodejs.org/dist/v0.10.22/node-v0.10.22-linux-arm-pi.tar.gz
-    tar xvzf node-*-linux-arm-pi.tar.gz
-    rm node-*-linux-arm-pi.tar.gz
-    cd /usr/local/bin
-    ln -s /opt/node/node-*pi/bin/node node
-    ln -s /opt/node/node-*pi/bin/npm npm
+    sudo wget http://nodejs.org/dist/v0.10.22/node-v0.10.22-linux-arm-pi.tar.gz
+    sudo tar xvzf node-*-linux-arm-pi.tar.gz
+    sudo rm node-*-linux-arm-pi.tar.gz
+    sudo cd /usr/local/bin
+    sudo ln -s /opt/node/node-*pi/bin/node node
+    sudo ln -s /opt/node/node-*pi/bin/npm npm
     popd
   else
    echo "ERROR	: automatic installation of NodeJS failed"
    echo "TRY	: install NodeJS manually"
    exit -1
   fi
-else
-  echo "STATUS	: NodeJS installed"
 fi
+echo "STATUS	: NodeJS installed"
 if [ ! -e node_modules ]; then
-  echo "INSTALL	: NodeJS dependencies" 
+  echo "INSTALL	: local NodeJS dependencies" 
   npm install
-  if [ $? -ne 0 ]; then echo "ERROR	: installation failred"; exit -1; fi
-else
-  echo "STATUS	: node_modules installed"
+  if [ $? -ne 0 ]; then echo "ERROR	: installation failed"; exit -1; fi
 fi
+echo "STATUS	: local node_modules installed"
 
 if [ $RASPBIAN -ne 1 ]; then
   echo "CONTENT	: FireREST reference implementation. Static content only"
@@ -133,6 +132,7 @@ else
   fi
 fi
 
+rm -f version-$VERSION_MAJOR.$VERSION_MINOR
 date > version-$VERSION_MAJOR.$VERSION_MINOR
 
 echo "------------------------------------------"
