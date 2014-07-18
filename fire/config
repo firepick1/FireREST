@@ -44,7 +44,7 @@ if [ "$1" == "-D" ]; then
 fi
 
 CONFIG_FILE=$1
-if [ "$1" == "-d" || "$1" == "DEFAULT" ]; then CONFIG_FILE=config/default.json; fi
+if [ "$1" == "-d" ] || [ "$1" == "DEFAULT" ]; then CONFIG_FILE=config/default.json; fi
 if [ ! -e "$CONFIG_FILE" ]; then
   echo "ERROR	: $CONFIG_FILE not found"
   exit -1;
