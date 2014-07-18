@@ -3,7 +3,7 @@
     <div class="fr-cell-btn col-md-1">
       <button title="{{cnc.resource_url('gcode.fire')}}" 
 	type="button" class="btn {{cnc.resource_armed_class('move')}} btn-sm fr-post" 
-	  ng-focus="cnc.on_focus('move','button'); cnc.armed=null"
+	  ng-focus="cnc.on_focus('move','button')"
 	  ng-blur="cnc.armed=null"
 	  ng-click="cnc.resource_POST('gcode.fire', 'move')"
 	  ng-dblclick="cnc.armed='move';cnc.resource_POST('gcode.fire', 'move')">
