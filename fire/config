@@ -3,11 +3,11 @@
 echo
 echo "COMMAND	: fire/config $@ # FireREST/FireFUSE configuration utility"
 
-if [ ! -L "config/default.json" ]; then 
-  echo "CONFIG	: setting default to www/config.json"
-  ln -sTf www/config.json config/default.json; 
+if [ ! -L "config-default.json" ]; then 
+  echo "STATUS	: setting default to www/config.json"
+  ln -sTf www/config.json config-default.json; 
 fi
-echo "DEFAULT	: "`ls -l config/default.json | grep -o config.*json`
+echo "DEFAULT	: "`ls -l config-default.json | grep -o config.*json`
 
 function help() {
   echo "SYNOPSIS: fire/config [-d]"
@@ -31,25 +31,25 @@ if [ "$1" == "" ] || [ "$1" == "-h" ]; then help; exit 0; fi
 if [ "$1" == "-e" ]; then EDIT=1; shift; else EDIT=0; fi
 if [ "$1" == "-D" ]; then
   if [ "$2" == "" ]; then
-    ln -sfT www/config.json config/default.json
+    ln -sfT www/config.json config-default.json
   elif [ -e "$2" ]; then 
-    ln -sfT "$2" config/default.json
+    ln -sfT "$2" config-default.json
   else 
     echo "ERROR	: $2 not found"
     exit -1
   fi
   echo "STATUS	: changed default configuration file"
-  echo "SUCCESS	: "`ls -l config/default.json | grep -o config.*json`
+  echo "SUCCESS	: "`ls -l config-default.json | grep -o config.*json`
   exit 0;
 fi
 
 CONFIG_FILE=$1
-if [ "$1" == "-d" ] || [ "$1" == "DEFAULT" ]; then CONFIG_FILE=config/default.json; fi
+if [ "$1" == "-d" ] || [ "$1" == "DEFAULT" ]; then CONFIG_FILE=config-default.json; fi
 if [ ! -e "$CONFIG_FILE" ]; then
   echo "ERROR	: $CONFIG_FILE not found"
   exit -1;
 fi
-echo "CONFIG	: "`ls -l $CONFIG_FILE | grep -o config.*json`
+echo "STATUS	: Applying configuration "`ls -l $CONFIG_FILE | grep -o config.*json`
 
 sudo -k
 ls /dev | grep firefuse > /dev/null
