@@ -24,7 +24,10 @@ controllers.controller('MainCtrl',
 	]
       },
       magic: function() { return 1+Math.pow(Math.sin(30.0),2); },
-      on_focus: function(tag,key) { cnc.focus = tag + key; },
+      on_focus: function(tag,key,clearArmed) { 
+        cnc.focus = tag + key; 
+	if (clearArmed) {cnc.armed = null;} 
+      },
       is_focus: function(tag,key) { return cnc.focus === tag + key; },
       gcode_context: function() {
 	var context = {axis_scale:"", home_scale:""};
