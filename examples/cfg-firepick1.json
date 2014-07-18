@@ -156,8 +156,8 @@
         "units": "mm"
       },
       "gcode": {
-        "move": "G0{{axis_steps}}",
-        "home": "G28.2{{home_steps}}"
+        "move": "G0{{axis_scale}}",
+        "home": "G28.2{{home_scale}}"
       },
       "axes": [
         {
@@ -286,8 +286,8 @@
         "units": "mm"
       },
       "gcode": {
-        "move": "G0{{axis_steps}}",
-        "home": "G28.2{{home_steps}}"
+        "move": "G0{{axis_scale}}",
+        "home": "G28.2{{home_scale}}"
       },
       "axes": [
         {

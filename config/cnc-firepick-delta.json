@@ -2,7 +2,7 @@
   "cnc":{ 
     "marlin":{ 
       "protocol":"marlin",
-      "gcode":{"move":"G0{{axis_steps}}", "home":"G28.2{{home_steps}}"},
+      "gcode":{"move":"G0{{axis_scale}}", "home":"G28.2{{home_scale}}"},
       "axes":[
 	{"id":"X", "value":0, "jog":1, "resolution":0.001, "min":0, "max":300, "home":0, "units":"mm", "scale":1, "enabled":true},
 	{"id":"Y", "value":0, "jog":1, "resolution":0.001, "min":0, "max":300, "home":0, "units":"mm", "scale":1, "enabled":true},

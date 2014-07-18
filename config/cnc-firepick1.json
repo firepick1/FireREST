@@ -4,7 +4,7 @@
       "protocol":"tinyg",
       "motion":{"drive":"cartesian2"},
       "dimensions":{"width":620, "depth":320, "height":390, "units":"mm"},
-      "gcode":{"move":"G0{{axis_steps}}", "home":"G28.2{{home_steps}}"},
+      "gcode":{"move":"G0{{axis_scale}}", "home":"G28.2{{home_scale}}"},
       "axes":[
 	{"id":"X", "value":0, "jog":1, "resolution":0.001, "min":0, "max":300, "home":0, "units":"mm", "scale":1, "enabled":true},
 	{"id":"Y", "value":0, "jog":1, "resolution":0.001, "min":0, "max":300, "home":0, "units":"mm", "scale":1, "enabled":true},
@@ -25,7 +25,7 @@
       "protocol":"tinyg",
       "motion":{"drive":"delta", "e":115, "f":190.526, "re":270, "rf":90, "thetaMin":-80, "thetaMax":80},
       "dimensions":{"width":620, "depth":320, "height":390, "units":"mm"},
-      "gcode":{"move":"G0{{axis_steps}}", "home":"G28.2{{home_steps}}"},
+      "gcode":{"move":"G0{{axis_scale}}", "home":"G28.2{{home_scale}}"},
       "axes":[
 	{"id":"X", "value":0, "jog":1, "resolution":0.001, "min":0, "max":300, "home":0, "units":"mm", "scale":1, "enabled":true},
 	{"id":"Y", "value":0, "jog":1, "resolution":0.001, "min":0, "max":300, "home":0, "units":"mm", "scale":1, "enabled":true},
