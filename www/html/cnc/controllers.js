@@ -62,9 +62,10 @@ controllers.controller('MainCtrl',
 	}
 	return result;
       },
-      jog: function(axis, key, value) {
+      jog: function(axis, key, value, armed) {
 	console.log(key, ':', axis[key] , "+=", value);
         axis[key] = Number(axis[key]) + Number(value);
+	cnc.armed = armed;
 	if (axis.resolution < 1) {
 	  var divisor = Math.round(1/axis.resolution);
 	  axis[key] = Math.round(axis[key]/axis.resolution)*1.0/divisor;
@@ -125,9 +126,11 @@ controllers.controller('MainCtrl',
       resource_POST: function(resource, armed) {
 	if (cnc.armed === armed) {
 	  transmit.start();
-	  var data="(no-data)";
+	  var data="("+armed+"?)";
 	  if (armed === 'move') {
 	    data = cnc.gcode_move();
+	  } else if (armed === 'home') {
+	    data = cnc.gcode_home();
 	  }
 	  console.log("POST:" + data);
 	  $.ajax({
