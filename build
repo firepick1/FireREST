@@ -4,7 +4,8 @@ VERSION_MAJOR=0
 VERSION_MINOR=11
 VERSION_PATCH=0
 
-echo "NAME	: ../FireREST/build -- compile FireREST"
+echo
+echo "COMMAND	: build $@ # build FireREST and its components"
 echo "ETA	: 1-30 minutes"
 echo "HELP	: https://github.com/firepick1/FireREST/wiki/Build-FireREST"
 echo "DATE	: `date`"
@@ -130,10 +131,12 @@ else
     build_git FireSight
     build_git FireFUSE
   fi
+  fire/config -d
 fi
 
 rm -f version-$VERSION_MAJOR.$VERSION_MINOR
 date > version-$VERSION_MAJOR.$VERSION_MINOR
+
 
 echo "------------------------------------------"
 echo "DATE	: `date`"

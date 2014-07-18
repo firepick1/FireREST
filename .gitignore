@@ -10,3 +10,4 @@ node_modules
 opencv
 target
 version*
+config/default.json
