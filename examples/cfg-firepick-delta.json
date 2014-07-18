@@ -160,7 +160,7 @@
           "max": 300,
           "home": 0,
           "units": "mm",
-          "steps": 1,
+          "scale": 1,
           "enabled": true
         },
         {
@@ -172,7 +172,7 @@
           "max": 300,
           "home": 0,
           "units": "mm",
-          "steps": 1,
+          "scale": 1,
           "enabled": true
         },
         {
@@ -184,7 +184,7 @@
           "max": 30,
           "home": 30,
           "units": "mm",
-          "steps": 1,
+          "scale": 1,
           "enabled": true
         },
         {
@@ -193,7 +193,7 @@
           "jog": 1,
           "resolution": 0.001,
           "units": "degrees",
-          "steps": 1,
+          "scale": 1,
           "enabled": true
         }
       ],

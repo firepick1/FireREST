@@ -20,37 +20,37 @@ controllers.controller('MainCtrl',
       dce_list:{},
       dce:{
 	axes:[
-	  {id:'(none)', value:0, jog:1, resolution:0.001, min:0, max:1, steps:1, units:"mm", enabled:false},
+	  {id:'(none)', value:0, jog:1, resolution:0.001, min:0, max:1, scale:1, units:"mm", enabled:false},
 	]
       },
       magic: function() { return 1+Math.pow(Math.sin(30.0),2); },
       on_focus: function(tag,key) { cnc.focus = tag + key; },
       is_focus: function(tag,key) { return cnc.focus === tag + key; },
       gcode_context: function() {
-	var context = {axis_steps:"", home_steps:""};
+	var context = {axis_scale:"", home_scale:""};
 	cnc.dce.axes.forEach(function(axis) { 
 	  var home_type = typeof axis.home;
 	  if (axis.enabled) {
 	    var id = axis.id.toLowerCase();
 	    context.axis = axis;
 	    if (axis.hasOwnProperty('home')) {
-	      context.home_steps += "\u2009";
-	      context.home_steps += id;
-	      context.home_steps += axis.home*axis.steps;
+	      context.home_scale += "\u2009";
+	      context.home_scale += id;
+	      context.home_scale += axis.home*axis.scale;
 	    }
-	    context.axis_steps += " ";
-	    context.axis_steps += id;
-	    context.axis_steps += axis.value*axis.steps;
+	    context.axis_scale += " ";
+	    context.axis_scale += id;
+	    context.axis_scale += axis.value*axis.scale;
 	  }
 	});
 	return context;
       },
       gcode_home: function() { 
-	var home = cnc.dce && cnc.dce.gcode && cnc.dce.gcode.home || "G0{{home_steps}}";
+	var home = cnc.dce && cnc.dce.gcode && cnc.dce.gcode.home || "G0{{home_scale}}";
         return interpolate(home)(cnc.gcode_context()); 
 	},
       gcode_move: function() { 
-	var move = cnc.dce && cnc.dce.gcode && cnc.dce.gcode.move || "G0{{axis_steps}}";
+	var move = cnc.dce && cnc.dce.gcode && cnc.dce.gcode.move || "G0{{axis_scale}}";
         return interpolate(move)(cnc.gcode_context()); 
 	},
       axis_class: function(axis, value) {
