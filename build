@@ -15,8 +15,7 @@ echo "SHELL	: $SHELL"
 
 if [ "$SUDO_USER" != "" ]; then
   echo "ERROR	: This script will call sudo as required and must be run by non-root user"
-  echo "TRY	:   . ./build"
-  echo "NOTE	:   ^extra period is significant"
+  echo "TRY	:   ./build"
   exit -1
 fi
 
