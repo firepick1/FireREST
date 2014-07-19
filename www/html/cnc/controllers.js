@@ -159,7 +159,7 @@ controllers.controller('MainCtrl',
     scope.cnc = cnc;
 
     scope.worker = function(ticks) {
-     if ((ticks % 5) === 0 ) {
+     if ((ticks % 3) === 0 ) {
        cv.image_GET('monitor.jpg');
      }
      return true;
