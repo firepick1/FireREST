@@ -81,7 +81,7 @@ fi
 
 if [ $EDIT -ne 0 ]; then
   echo "CONFIG	: /var/firefuse/config.json + $CONFIG_FILE"
-  grunt cfg-custom:/var/firefuse/config.json:$CONFIG_FILE
+  sudo grunt cfg-custom:/var/firefuse/config.json:$CONFIG_FILE
 else
   echo "CONFIG	: $CONFIG_FILE"
   sudo cp $CONFIG_FILE /var/firefuse/config.json
