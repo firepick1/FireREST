@@ -28,23 +28,25 @@
     </div>
   </div>
 
-  <div ng-repeat="resource in ['gcode.fire']" class="row ">
-    <div class="col-md-1">&nbsp;</div>
-    <div class="col-md-8">
-      <a title="{{cnc.resource_url(resource)}}" href="{{cnc.resource_url(resource)}}" >{{resource}}</a>
-      <a target="_blank" class="fr-help" href="https://github.com/firepick1/FireREST/wiki/{{resource}}">?</a>
+  <div ng-repeat="resource in ['gcode.fire']">
+    <div class="row ">
+      <div class="col-md-1">&nbsp;</div>
+      <div class="col-md-8">
+	<a title="{{cnc.resource_url(resource)}}" href="{{cnc.resource_url(resource)}}" >{{resource}}</a>
+	<a target="_blank" class="fr-help" href="https://github.com/firepick1/FireREST/wiki/{{resource}}">?</a>
+      </div>
     </div>
-  </div>
-  <div class="row">
-    <div class="fr-cell-btn col-md-1">
-      <button title="{{cnc.resource_url(resource)}}" 
-	type="button" class="btn btn-primary btn-sm fr-get" ng-click="cnc.resource_GET(resource)">
-	GET&nbsp;<span class="{{cnc.resource_GET_icon(resource)}}"></span>
-      </button>
-    </div>
-    <div class="fr-cell-data col-md-8">
-      <textarea readonly title="{{cnc.resource_url(resource)}}" 
-	class="form-control fr-json {{cnc.resource_classname[resource]}}" id="{{resource}}">{{cnc.resource_text(resource)}}
-      </textarea>
+    <div class="row">
+      <div class="fr-cell-btn col-md-1">
+	<button title="{{cnc.resource_url(resource)}}" 
+	  type="button" class="btn btn-primary btn-sm fr-get" ng-click="cnc.resource_GET(resource)">
+	  GET&nbsp;<span class="{{cnc.resource_GET_icon(resource)}}"></span>
+	</button>
+      </div>
+      <div class="fr-cell-data col-md-8">
+	<textarea readonly title="{{cnc.resource_url(resource)}}" 
+	  class="form-control fr-json {{cnc.resource_classname[resource]}}" id="{{resource}}">{{cnc.resource_text(resource)}}
+	</textarea>
+      </div>
     </div>
   </div>
