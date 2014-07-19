@@ -161,6 +161,8 @@ controllers.controller('MainCtrl',
     scope.worker = function(ticks) {
      if ((ticks % 3) === 0 ) {
        cv.image_GET('monitor.jpg');
+     } else if ((ticks % 5) === 0) {
+       cnc.resource_GET('gcode.fire');
      }
      return true;
     }
