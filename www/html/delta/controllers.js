@@ -74,7 +74,7 @@ controllers.controller('MainCtrl',
 	return service.service_url() + "/cnc/" + cnc.dce_name + "/" + resource ;
       },
       resource_class: function(resource) {
-	return cnc.resource_classname[resource] || "fr-json-ok";
+	return cnc.resource_classname[resource] || "fr-postdata-ok";
       },
       resource_XHR: function(resource, classname, response, ok) {
 	service.scope.$apply(function(){
@@ -103,10 +103,10 @@ controllers.controller('MainCtrl',
 	      data = JSON.stringify(data);
 	    }
 	    data = ("" + data).trim();
-	    cnc.resource_XHR(resource, "fr-json-ok", data, true);
+	    cnc.resource_XHR(resource, "fr-postdata-ok", data, true);
 	  },
 	  error: function( jqXHR, ex) {
-	    cnc.resource_XHR(resource, "fr-json-err", JSON.stringify(jqXHR), false);
+	    cnc.resource_XHR(resource, "fr-postdata-err", JSON.stringify(jqXHR), false);
 	  }
 	});
       },
@@ -126,10 +126,10 @@ controllers.controller('MainCtrl',
 	    url: cnc.resource_url(resource),
 	    data: data,
 	    success: function() {
-	      cnc.resource_XHR(resource, "fr-json-ok", data, true);
+	      cnc.resource_XHR(resource, "fr-postdata-ok", data, true);
 	    },
 	    error: function( jqXHR, ex) {
-	      cnc.resource_XHR(resource, "fr-json-err", JSON.stringify(jqXHR), false);
+	      cnc.resource_XHR(resource, "fr-postdata-err", JSON.stringify(jqXHR), false);
 	    }
 	  });
 	  cnc.armed = null;

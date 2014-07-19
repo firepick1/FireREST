@@ -16,6 +16,7 @@ controllers.controller('MainCtrl',
     var cnc = {
       resources:['gcode.fire'],
       controls:['move','home','delta'],
+      post_data: {},
       dce_names:["(no DCE's)"],
       dce_list:{},
       dce:{
@@ -84,7 +85,7 @@ controllers.controller('MainCtrl',
 	return service.service_url() + "/cnc/" + cnc.dce_name + "/" + resource ;
       },
       resource_class: function(resource) {
-	return cnc.resource_classname[resource] || "fr-json-ok";
+	return cnc.resource_classname[resource] || "fr-postdata-ok";
       },
       resource_XHR: function(resource, classname, response, ok) {
 	service.scope.$apply(function(){
@@ -116,10 +117,10 @@ controllers.controller('MainCtrl',
 	      data = JSON.stringify(data);
 	    }
 	    data = ("" + data).trim();
-	    cnc.resource_XHR(resource, "fr-json-ok", data, true);
+	    cnc.resource_XHR(resource, "fr-postdata-ok", data, true);
 	  },
 	  error: function( jqXHR, ex) {
-	    cnc.resource_XHR(resource, "fr-json-err", JSON.stringify(jqXHR), false);
+	    cnc.resource_XHR(resource, "fr-postdata-err", JSON.stringify(jqXHR), false);
 	  }
 	});
       },
@@ -134,6 +135,8 @@ controllers.controller('MainCtrl',
 	    data = cnc.gcode_move();
 	  } else if (armed === 'home') {
 	    data = cnc.gcode_home();
+	  } else if (armed === 'gcode') {
+	    data = cnc.post_data[armed];
 	  }
 	  console.log("POST:" + data);
 	  $.ajax({
@@ -141,10 +144,10 @@ controllers.controller('MainCtrl',
 	    url: cnc.resource_url(resource),
 	    data: data,
 	    success: function() {
-	      cnc.resource_XHR(resource, "fr-json-ok", data, true);
+	      cnc.resource_XHR(resource, "fr-postdata-ok", data, true);
 	    },
 	    error: function( jqXHR, ex) {
-	      cnc.resource_XHR(resource, "fr-json-err", JSON.stringify(jqXHR), false);
+	      cnc.resource_XHR(resource, "fr-postdata-err", JSON.stringify(jqXHR), false);
 	    }
 	  });
 	  cnc.armed = null;
