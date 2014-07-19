@@ -58,16 +58,6 @@ if [ $? -ne 0 ]; then
   exit -1;
 fi
 
-ls /dev/firefuse > /dev/null
-if [ $? -ne 0 ]; then
-  echo "WARNING	: FireFUSE may have crashed. Attempting to unmount /dev/firefuse..." 
-  sudo fusermount -u /dev/firefuse
-  if [ $? -ne 0 ]; then
-    echo "ERROR	: /dev/firefuse could not be unmounted"
-    exit -1
-  fi
-fi
-
 if [ -e /dev/firefuse/status ]; then
   echo "FireFUSE: Unmounting running instance: /dev/firefuse..."
   sudo fusermount -u /dev/firefuse
@@ -76,7 +66,17 @@ if [ -e /dev/firefuse/status ]; then
     exit -1
   fi
 else 
-  echo "FireFUSE: No existing instance detected at /dev/firefuse"
+  ls /dev/firefuse > /dev/null
+  if [ $? -ne 0 ]; then
+    echo "WARNING	: FireFUSE may have crashed. Attempting to unmount /dev/firefuse..." 
+    sudo fusermount -u /dev/firefuse
+    if [ $? -ne 0 ]; then
+      echo "ERROR	: /dev/firefuse could not be unmounted"
+      exit -1
+    fi
+  else
+    echo "FireFUSE: No existing instance detected at /dev/firefuse"
+  fi
 fi
 
 if [ $EDIT -ne 0 ]; then
