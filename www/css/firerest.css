@@ -216,12 +216,6 @@ p {
   border-bottom-left-radius: 8px;
   border-bottom-right-radius: 8px;
 }
-.fr-json {
-  min-width:25em;
-  min-height:2em;
-  padding:0px;
-  border: none !important;
-}
 .fr-nav-dismiss {
   background-color: rgba(128,128,128,.5);
   position: fixed;
@@ -250,16 +244,16 @@ p {
   border-bottom-right-radius: 8px;
   border-bottom-left-radius: 8px;
 }
-.fr-json-post {
+.fr-postdata {
   min-width:25em;
   min-height:2.2em;
   margin-top: 0.3em;
   padding:2px;
 }
-.fr-json-ok {
+.fr-postdata-ok {
   color: #888 !important;
 }
-.fr-json-err {
+.fr-postdata-err {
   background: #fee !important;
   color: #800;
 }

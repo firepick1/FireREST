@@ -14,8 +14,9 @@
       </select>
       <div class="control-label fr-control-label">controls</div>
       <select multiple ng-model="cnc.controls" class="form-control">
-	<option value="move" title="Rapid move (G0)">Move</option>
-	<option value="home" title="Seek limit switch home (G28...)">Home</option>
+	<option value="gcode" title="Send arbitrary gcode">GCODE</option>
+	<option value="home" title="Seek home limit switch and recalibrate axis position">Home and reset</option>
+	<option value="move" title="Rapid move (G0)">Move absolute</option>
       </select>
     </div>
     <div class="col-md-10">
@@ -45,7 +46,7 @@
       </div>
       <div class="fr-cell-data col-md-8">
 	<textarea readonly title="{{cnc.resource_url(resource)}}" 
-	  class="form-control fr-json {{cnc.resource_classname[resource]}}" id="{{resource}}">{{cnc.resource_text(resource)}}
+	  class="form-control fr-postdata {{cnc.resource_classname[resource]}}" id="{{resource}}">{{cnc.resource_text(resource)}}
 	</textarea>
       </div>
     </div>

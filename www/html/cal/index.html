@@ -79,7 +79,7 @@
 	  </div>
 	  <div class="fr-cell-data col-md-7">
 	    <textarea readonly title="{{cv.resource_url(resource)}}" 
-	      class="form-control fr-json {{cv.resource_classname[resource]}}" id="{{resource}}">{{cv.resource_text(resource)}}
+	      class="form-control fr-postdata {{cv.resource_classname[resource]}}" id="{{resource}}">{{cv.resource_text(resource)}}
 	    </textarea>
 	  </div>
 	</div>
@@ -91,7 +91,7 @@
 	    </button>
 	  </div>
 	  <div class="fr-cell-data col-md-7">
-	    <textarea class="form-control fr-json-post" ng-model="cv.post_data[resource]"></textarea>
+	    <textarea class="form-control fr-postdata" ng-model="cv.post_data[resource]"></textarea>
 	  </div>
 	</div>
       </div>

@@ -337,7 +337,7 @@ function($http, $interval, transmit, service){
       return cv.camera_url() + cv.profile_name + "/cve/" + cv.cve_name + "/" + resource ;
     },
     resource_class: function(resource) {
-      return cv.resource_classname[resource] || "fr-json-ok";
+      return cv.resource_classname[resource] || "fr-postdata-ok";
     },
     resource_XHR: function(resource, classname, response, ok) {
       service.scope.$apply(function(){
@@ -373,10 +373,10 @@ function($http, $interval, transmit, service){
 	    data = JSON.stringify(data);
 	  }
 	  data = ("" + data).trim();
-	  cv.resource_XHR(resource, "fr-json-ok", data, true);
+	  cv.resource_XHR(resource, "fr-postdata-ok", data, true);
 	},
 	error: function( jqXHR, ex) {
-	  cv.resource_XHR(resource, "fr-json-err", JSON.stringify(jqXHR), false);
+	  cv.resource_XHR(resource, "fr-postdata-err", JSON.stringify(jqXHR), false);
 	}
       });
     },
@@ -388,10 +388,10 @@ function($http, $interval, transmit, service){
 	url: cv.resource_url(resource),
 	data: data,
 	success: function() {
-	  cv.resource_XHR(resource, "fr-json-ok", data, true);
+	  cv.resource_XHR(resource, "fr-postdata-ok", data, true);
 	},
 	error: function( jqXHR, ex) {
-	  cv.resource_XHR(resource, "fr-json-err", JSON.stringify(jqXHR), false);
+	  cv.resource_XHR(resource, "fr-postdata-err", JSON.stringify(jqXHR), false);
 	}
       });
     },
