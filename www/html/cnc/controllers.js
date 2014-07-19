@@ -160,7 +160,7 @@ controllers.controller('MainCtrl',
 
     scope.worker = function(ticks) {
      if ((ticks % 5) === 0 ) {
-       cnc.resources.indexOf('gcode.fire') >= 0 && cnc.resource_GET('gcode.fire');
+       cv.image_GET('monitor.jpg');
      }
      return true;
     }

@@ -6,10 +6,10 @@
       "dimensions":{"width":620, "depth":320, "height":390, "units":"mm"},
       "gcode":{"move":"G0{{axis_scale}}", "home":"G28.2{{home_scale}}"},
       "axes":[
-	{"id":"X", "value":0, "jog":1, "resolution":0.001, "min":0, "max":300, "home":0, "units":"mm", "scale":1, "enabled":true},
+	{"id":"X", "value":0, "jog":1, "resolution":0.001, "min":0, "max":300, "home":0, "units":"mm", "scale":1, "enabled":false},
 	{"id":"Y", "value":0, "jog":1, "resolution":0.001, "min":0, "max":300, "home":0, "units":"mm", "scale":1, "enabled":true},
-	{"id":"Z", "value":0, "jog":1, "resolution":0.001, "min":0, "max":30, "home":30, "units":"mm", "scale":1, "enabled":true},
-	{"id":"A", "value":0, "jog":1, "resolution":0.001, "units":"degrees", "scale":1, "enabled":true}
+	{"id":"Z", "value":0, "jog":1, "resolution":0.001, "min":0, "max":30, "home":30, "units":"mm", "scale":1, "enabled":false},
+	{"id":"A", "value":0, "jog":1, "resolution":0.001, "units":"degrees", "scale":1, "enabled":false}
       ],
       "serial": { "path":"/dev/ttyUSB0", "stty":"cs8 115200" },
       "device-config": [

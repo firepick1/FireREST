@@ -170,7 +170,7 @@
           "home": 0,
           "units": "mm",
           "scale": 1,
-          "enabled": true
+          "enabled": false
         },
         {
           "id": "Y",
@@ -194,7 +194,7 @@
           "home": 30,
           "units": "mm",
           "scale": 1,
-          "enabled": true
+          "enabled": false
         },
         {
           "id": "A",
@@ -203,7 +203,7 @@
           "resolution": 0.001,
           "units": "degrees",
           "scale": 1,
-          "enabled": true
+          "enabled": false
         }
       ],
       "serial": {
