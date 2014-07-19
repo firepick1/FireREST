@@ -37,7 +37,7 @@ controllers.controller('MainCtrl',
 	    var id = axis.id.toLowerCase();
 	    context.axis = axis;
 	    if (axis.hasOwnProperty('home')) {
-	      context.home_scale += "\u2009";
+	      context.home_scale += " ";
 	      context.home_scale += id;
 	      context.home_scale += axis.home*axis.scale;
 	    }
