@@ -178,7 +178,7 @@
           "jog": 1,
           "resolution": 0.001,
           "min": 0,
-          "max": 300,
+          "max": 400,
           "home": 0,
           "units": "mm",
           "scale": 1,
