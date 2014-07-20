@@ -48,6 +48,29 @@
           "threshold": 0.7
         }
       },
+      "estimate-px-per-mm": {
+        "firesight": [
+          {
+            "op": "HoughCircles",
+            "name": "circles",
+            "diamMin": "{{diamMin}}",
+            "diamMax": "{{diamMax}}",
+            "show": "{{show}}"
+          },
+          {
+            "op": "points2resolution_RANSAC",
+            "name": "p2r_RANSAC",
+            "model": "circles",
+            "separation": "{{separation}}"
+          }
+        ],
+        "properties": {
+          "separation": 4,
+          "diamMin": 14,
+          "diamMax": 20,
+          "show": 1
+        }
+      },
       "find-crash-dummy": {
         "firesight": [
           {
@@ -117,6 +140,17 @@
             255,
             32
           ]
+        }
+      },
+      "QRDecode": {
+        "firesight": [
+          {
+            "op": "qrDecode",
+            "show": "{{show}}"
+          }
+        ],
+        "properties": {
+          "show": 1
         }
       }
     },
