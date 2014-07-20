@@ -162,15 +162,19 @@
           "gray": {
             "cve_names": [
               "calc-offset",
+              "estimate-px-per-mm",
               "find-crash-dummy",
-              "locate-part"
+              "locate-part",
+              "QRDecode"
             ]
           },
           "bgr": {
             "cve_names": [
               "calc-offset",
+              "estimate-px-per-mm",
               "find-crash-dummy",
-              "locate-part"
+              "locate-part",
+              "QRDecode"
             ]
           }
         }

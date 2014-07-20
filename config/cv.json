@@ -46,8 +46,8 @@
         "width":800,
 	"height":200,
 	"profile_map":{
-	  "gray":{ "cve_names":[ "calc-offset", "find-crash-dummy", "locate-part" ] },
-	  "bgr":{ "cve_names":[ "calc-offset", "find-crash-dummy", "locate-part" ] }
+	  "gray":{ "cve_names":[ "calc-offset", "estimate-px-per-mm", "find-crash-dummy", "locate-part", "QRDecode" ] },
+	  "bgr":{ "cve_names":[ "calc-offset", "estimate-px-per-mm", "find-crash-dummy", "locate-part", "QRDecode" ] }
 	}
       }
     }
