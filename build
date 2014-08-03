@@ -51,6 +51,8 @@ if [ "$(type -p grunt)" == "" ]; then
   echo "INSTALL	: grunt"
   sudo npm install -g grunt-cli
   if [ $? -ne 0 ]; then echo "ERROR	: installation failed"; exit -1; fi
+  sudo npm install -g grunt@0.4.5
+  if [ $? -ne 0 ]; then echo "ERROR	: installation failed"; exit -1; fi
 fi
 
 echo "GRUNT	: generating FireREST configuration files (see examples)"
