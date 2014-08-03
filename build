@@ -41,6 +41,12 @@ function build_git() {
 
 if [ "$FIREREST_CONFIG" == "" ]; then FIREREST_CONFIG=examples/cfg-firepick1.json; fi
 
+if [ "$(type -p tmux)" == "" ]; then
+  echo "INSTALL	: tmux"
+  sudo apt-get install tmux
+  if [ $? -ne 0 ]; then echo "ERROR	: installation failed"; exit -1; fi
+fi
+
 if [ "$(type -p grunt)" == "" ]; then
   echo "INSTALL	: grunt"
   sudo npm install -g grunt-cli
