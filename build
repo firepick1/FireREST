@@ -41,6 +41,12 @@ function build_git() {
 
 if [ "$FIREREST_CONFIG" == "" ]; then FIREREST_CONFIG=examples/cfg-firepick1.json; fi
 
+if [ "$(type -p grunt)" == "" ]; then
+  echo "INSTALL	: grunt"
+  sudo npm install -g grunt-cli
+  if [ $? -ne 0 ]; then echo "ERROR	: installation failed"; exit -1; fi
+fi
+
 echo "GRUNT	: generating FireREST configuration files (see examples)"
 grunt cfg-version:config/FireREST.json:examples/cfg-firepick1.json:$VERSION_MAJOR:$VERSION_MINOR:$VERSION_PATCH \
   cfg-custom:examples/cfg-firepick1.json:config/cv.json:config/cnc-firepick1.json 
@@ -65,12 +71,6 @@ if [ $? -eq 0 ]; then
   echo "TRY	: Kill the existing FireREST process before proceeding with the build:"
   echo "PID	: `ps -e -o pid,command | grep -E "firerest.js" | grep -v grep`"
   exit -1
-fi
-
-if [ "$(type -p grunt)" == "" ]; then
-  echo "INSTALL	: grunt"
-  sudo npm install -g grunt-cli
-  if [ $? -ne 0 ]; then echo "ERROR	: installation failed"; exit -1; fi
 fi
 
 if [ "$(type -p lsb_release)" == "" ]; then
