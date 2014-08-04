@@ -313,16 +313,19 @@ function($http, $interval, transmit, service){
       }
     },
     image_class: function(image) {
-      return cv.image_style[image];
+      return cv.image_style[image] || "fr-img-sm";
     },
     image_click: function(image) {
       if ( "fr-img-sm" === cv.image_style[image]) {
         cv.image_style[image] = "fr-img-md";
       } else if ( "fr-img-md" === cv.image_style[image]) {
         cv.image_style[image] = "fr-img-lg";
-      } else {
+      } else if ( "fr-img-lg" === cv.image_style[image]) {
         cv.image_style[image] = "fr-img-sm";
+      } else { // initial state
+        cv.image_style[image] = "fr-img-md";
       }
+      console.log(cv.image_style[image]);
     },
     image_GET: function(image) {
       cv.image_instances[image] = Math.floor(Math.random()*1000000) ;

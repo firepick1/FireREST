@@ -189,13 +189,17 @@ p {
   text-align: left;
 }
 .fr-img-sm{
-  height:50px;
+  height:50px !important;
+  width: auto !important;
 }
 .fr-img-md {
-  height:100px;
+  height:100% !important;
+  width:100% !important;
 }
 .fr-img-lg {
-  height:200px;
+  height:200% !important;
+  width: 200% !important;
+  max-width: 200% !important;
 }
 .fr-control-label {
   font-weight: bold;
