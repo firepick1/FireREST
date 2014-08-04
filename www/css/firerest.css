@@ -189,10 +189,13 @@ p {
   text-align: left;
 }
 .fr-img-sm{
-  width:50%;
+  height:50px;
+}
+.fr-img-md {
+  height:100px;
 }
 .fr-img-lg {
-  width:100%;
+  height:200px;
 }
 .fr-control-label {
   font-weight: bold;

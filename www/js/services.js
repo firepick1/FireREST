@@ -275,7 +275,7 @@ function($http, $interval, transmit, service){
     image:[],
     post_data:{},
     image_instances:{},
-    image_large:{},
+    image_style:{},
     on_load_config: function(config) {
       cv.camera_names = ["camera n/a"];
       if (config && typeof config.cv === 'object') {
@@ -313,12 +313,16 @@ function($http, $interval, transmit, service){
       }
     },
     image_class: function(image) {
-      var isLarge = cv.image_large[image] || false;
-      return isLarge ? "fr-img-lg" : "fr-img-sm";
+      return cv.image_style[image];
     },
     image_click: function(image) {
-      var isLarge = cv.image_large[image] || false;
-      cv.image_large[image] = !isLarge;
+      if ( "fr-img-sm" === cv.image_style[image]) {
+        cv.image_style[image] = "fr-img-md";
+      } else if ( "fr-img-md" === cv.image_style[image]) {
+        cv.image_style[image] = "fr-img-lg";
+      } else {
+        cv.image_style[image] = "fr-img-sm";
+      }
     },
     image_GET: function(image) {
       cv.image_instances[image] = Math.floor(Math.random()*1000000) ;
