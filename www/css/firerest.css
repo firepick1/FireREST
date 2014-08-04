@@ -195,8 +195,8 @@ p {
   max-height:75px !important;
 }
 .fr-img-md {
-  height:100% !important;
   max-height:150px; !important;
+  max-width:100% !important;
   width:100% !important;
 }
 .fr-img-lg {
