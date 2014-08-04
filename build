@@ -18,6 +18,9 @@ if [ "$SUDO_USER" != "" ]; then
   echo "TRY	:   ./build"
   exit -1
 fi
+echo "SUDO	: requesting sudo installation permission"
+sudo echo "SUDO	: confirmed"
+if [ $? -ne 0 ]; then echo "ERROR	: cannot build"; exit -1; fi
 
 function pull_git() {
   echo "GIT	: UPDATING $1"
