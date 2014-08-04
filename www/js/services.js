@@ -494,8 +494,8 @@ function($http, service, interpolate, transmit) {
 	console.log('resource_XHR' + resource + response);
 	cnc.resource_response[resource] = response;
 	cnc.resource_classname[resource] = classname;
-	cv && cv.invalidate_image('camera.jpg');
-	cv && cv.invalidate_image('monitor.jpg');
+	cnc.cv && cnc.cv.invalidate_image('camera.jpg');
+	cnc.cv && cnc.cv.invalidate_image('monitor.jpg');
 	transmit.end(true);
       });
     },
