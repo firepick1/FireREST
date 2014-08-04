@@ -346,16 +346,20 @@ function($http, $interval, transmit, service){
     resource_class: function(resource) {
       return cv.resource_classname[resource] || "fr-postdata-ok";
     },
+    invalidate_image: function(image, t) {
+      t = t || Math.floor(Math.random()*1000000) ;
+      cv.image_instances[image] = t;
+      return t;
+    },
     resource_XHR: function(resource, classname, response, ok) {
       service.scope.$apply(function(){
         console.log('resource_XHR' + resource + response);
 	cv.resource_response[resource] = response;
 	cv.resource_classname[resource] = classname;
         if (resource === 'save.fire' || resource === 'process.fire') {
-	  var t = Math.floor(Math.random()*1000000) ;
-	  cv.image_instances['monitor.jpg'] = t;
-	  resource === 'save.fire' && (cv.image_instances['saved.png'] = t);
-	  resource === 'process.fire' && (cv.image_instances['output.jpg'] = t);
+	  var t = invalidate_image('monitor.jpg');
+	  resource === 'save.fire' && invalidate_image('saved.png');
+	  resource === 'process.fire' && invalidate_image('output.jpg');
 	}
 
 	transmit.end(true);
@@ -490,6 +494,8 @@ function($http, service, interpolate, transmit) {
 	console.log('resource_XHR' + resource + response);
 	cnc.resource_response[resource] = response;
 	cnc.resource_classname[resource] = classname;
+	cv && cv.invalidate_image('camera.jpg');
+	cv && cv.invalidate_image('monitor.jpg');
 	transmit.end(true);
       });
     },
