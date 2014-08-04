@@ -12,6 +12,7 @@ controllers.controller('MainCtrl',
     scope.config = {};
     scope.cv = cv;
     scope.cnc = cnc;
+    cnc.cv = cv;
 
     scope.worker = function(ticks) {
      if ((ticks % 3) === 0 ) {
