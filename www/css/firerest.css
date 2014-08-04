@@ -189,10 +189,10 @@ p {
   text-align: left;
 }
 .fr-img-sm{
-  height:25% !important;
+  height:30% !important;
+  width:30% !important;
   min-height:50px !important;
   max-height:75px !important;
-  width: 25% !important;
 }
 .fr-img-md {
   height:100% !important;
