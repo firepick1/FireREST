@@ -3,6 +3,7 @@
 echo "COMMAND	: fire/upgrade - Get and build latest version of FireREST"
 echo "ETA	: 1-30 minutes"
 echo "HELP	: https://github.com/firepick1/FireREST/wiki/Upgrade-FireREST"
+echo "HELP	: fire/upgrade -a   # rebuild everything"
 
 fire/web -k
 
@@ -16,6 +17,10 @@ fi
 echo "SUDO	: verifying sudo privilege for changing machine configuration"
 sudo -K
 sudo echo "SUDO	: confirmed"
+if [ "$1" == "-a" ]; then
+  echo "STATUS	: full buid requested (-a)"
+  rm version-*
+fi
 echo "LOG	: `pwd`/build.log (started)"
 ./build |& tee build.log
 if [ $? -ne 0 ]; then
