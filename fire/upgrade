@@ -13,11 +13,11 @@ if [ $? -ne 0 ]; then
   exit -1;
 fi
 
-echo "SUDO	: require password for changing machine configuration"
-sudo -k
+echo "SUDO	: verify sudo privilege for changing machine configuration"
+sudo -K
 sudo echo "SUDO	: confirmed"
 echo "COMMAND	: sudo -E ./build |& tee build.log"
-sudo -E ./build |& tee build.log
+./build |& tee build.log
 if [ $? -ne 0 ]; then
   echo "----------------------------------"
   echo "ERROR	: Could not build FireREST"
