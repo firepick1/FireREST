@@ -413,7 +413,7 @@ function($http, $interval, transmit, service){
   return cv;
 }]);
 
-services.factory('CncService', ['$http', 'ServiceConfig', '$interpolate','AjaxAdapter',
+services.factory('XCncService', ['$http', 'ServiceConfig', '$interpolate','AjaxAdapter',
 function($http, service, interpolate, transmit) {
   var cnc = {
     resources:['gcode.fire'],
