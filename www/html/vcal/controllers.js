@@ -4,30 +4,32 @@ var bootstrap = angular.module('FireREST.bootstrap', ['ui.bootstrap']);
 var controllers = angular.module('FireREST.controllers', []);
 
 controllers.controller('MainCtrl', 
-  ['$scope','$location', 'BackgroundThread', 'ServiceConfig', 'AjaxAdapter', 'CvService',
-  function(scope, location, bg, service, transmit, cv) {
+  ['$scope','$location', 'BackgroundThread', 'ServiceConfig', 'AjaxAdapter', 'CvService', 'CncService',
+  function(scope, location, bg, service, transmit, cv, cnc) {
     transmit.clear();
     scope.transmit = transmit;
     scope.service = service;
     scope.config = {};
     scope.cv = cv;
+    scope.cnc = cnc;
+    cnc.cv = cv;
 
     scope.worker = function(ticks) {
-     if ((ticks % 5) === 0 ) {
-       cv.resources.indexOf('process.fire') >= 0 && cv.resource_GET('process.fire');
-     } else if ((ticks % 3) === 0 ) {
-       cv.image_GET('monitor.jpg');
-     } else if ((ticks % 3) === 1 ) {
+     if ((ticks % 3) === 0 ) {
        cv.image_GET('camera.jpg');
+     } else if ((ticks % 5) === 0) {
+       cnc.resource_GET('gcode.fire');
      }
      return true;
     }
 
-    cv.clear_results();
+    cnc.clear_results();
+
     service.load_config(scope).then( function(config) {
       console.log("processing config.json" );
       scope.config = config;
-      if (typeof config.cv === 'object') {
+      if (typeof config.cnc === 'object') {
+        cnc.config_loaded(config);
 	bg.worker = scope.worker;
       }
     }, function(ex) {
