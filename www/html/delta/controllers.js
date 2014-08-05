@@ -4,13 +4,12 @@ var bootstrap = angular.module('FireREST.bootstrap', ['ui.bootstrap']);
 var controllers = angular.module('FireREST.controllers', []);
 
 controllers.controller('MainCtrl', 
-  ['$scope','$location', 'BackgroundThread', 'ServiceConfig', 'AjaxAdapter', 'CvService', '$interpolate', 'DeltaCalculator',
-  function(scope, location, bg, service, transmit, cv, interpolate, delta) {
+  ['$scope','$location', 'BackgroundThread', 'ServiceConfig', 'AjaxAdapter', '$interpolate', 'DeltaCalculator',
+  function(scope, location, bg, service, transmit, interpolate, delta) {
     transmit.clear();
     scope.transmit = transmit;
     scope.service = service;
     scope.config = {};
-    scope.cv = cv;
     scope.delta = delta;
 
     var cnc = {
