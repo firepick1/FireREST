@@ -16,7 +16,7 @@ fi
 echo "SUDO	: verifying sudo privilege for changing machine configuration"
 sudo -K
 sudo echo "SUDO	: confirmed"
-echo "COMMAND	: ./build |& tee build.log"
+echo "LOG	: `pwd`/build.log (started)"
 ./build |& tee build.log
 if [ $? -ne 0 ]; then
   echo "----------------------------------"
