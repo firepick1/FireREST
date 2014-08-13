@@ -14,6 +14,10 @@ controllers.controller('MainCtrl',
     scope.cnc = cnc;
     cnc.cv = cv;
 
+console.log("A");
+    firepick.SpiralIteratorTest();
+console.log("B");
+
     scope.worker = function(ticks) {
      if ((ticks % 3) === 0 ) {
        cv.image_GET('camera.jpg');

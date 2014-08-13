@@ -1,6 +1,21 @@
 p {
   max-width: 700px;
 }
+.fr-collapsible {
+  max-width: 800px;
+  padding: 3px;
+  padding-left: 10px;
+  margin-bottom: 5px;
+  border-left: 1pt solid #ddd;
+  border-right: 3pt solid #ddd;
+  border-bottom: 3pt solid #ddd;
+  border-bottom-right-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
+.fr-more {
+  cursor:pointer;
+  color: #428bca;
+}
 .fr-button-valid-false{
   background-color: #f00 !important;
   border-color: #f00  !important;
