@@ -50,6 +50,64 @@ if [ "$(type -p tmux)" == "" ]; then
   if [ $? -ne 0 ]; then echo "ERROR	: installation failed"; exit -1; fi
 fi
 
+if [ "$(type -p lsb_release)" == "" ]; then
+  echo "INSTALL	: lsb_release"
+  sudo apt-get install -y lsb-release
+  if [ $? -ne 0 ]; then echo "ERROR	: installation failed"; exit -1; fi
+fi
+if [ "$(arch)" != "armv6l" ] || [ "$(lsb_release -is)" != "Debian" ] ;then
+  RASPBIAN=0
+  echo "SYSTEM	: other (FireFUSE not supported)"
+else
+  RASPBIAN=1
+  echo "SYSTEM	: Raspberry Pi with Rasbian"
+fi
+
+if [ "$(type -p node)" == "" ]; then
+  echo "INSTALL	: NodeJS"
+  if [ $RASPBIAN -eq 1 ]; then
+    mkdir /opt/node
+    pushd /opt/node > /dev/null
+    NODE_DISTRO=http://nodejs.org/dist/v0.10.22/node-v0.10.22-linux-arm-pi.tar.gz
+    echo "COMMAND	: sudo wget $NODE_DISTRO"
+    sudo wget $NODE_DISTRO
+    sudo tar xvzf node-*-linux-arm-pi.tar.gz
+    sudo rm node-*-linux-arm-pi.tar.gz
+    sudo cd /usr/local/bin
+    sudo ln -s /opt/node/node-*pi/bin/node node
+    sudo ln -s /opt/node/node-*pi/bin/npm npm
+    popd > /dev/null
+  else
+    echo "COMMAND	: sudo apt-get install -y nodejs nodejs-legacy"
+    sudo apt-get install -y nodejs nodejs-legacy 
+    RC=$?; if [ $RC -ne 0 ]; then 
+      echo "ERROR	: $RC"; 
+      echo "TRY	: install NodeJS manually"
+
+      exit -1
+    fi
+  fi
+fi
+echo "STATUS	: NodeJS installed"
+
+if [ "$(type -p npm)" == "" ]; then
+  echo "COMMAND	: sudo apt-get install -y npm"
+  sudo apt-get install -y npm; RC=$?
+  RC=$?; if [ $RC -ne 0 ]; then 
+      echo "ERROR	: $RC"; 
+      echo "TRY	: install npm manually"
+      exit -1
+  fi
+fi
+echo "STATUS	: npm installed"
+
+if [ ! -e node_modules ]; then
+  echo "INSTALL	: local NodeJS dependencies" 
+  npm install
+  if [ $? -ne 0 ]; then echo "ERROR	: installation failed"; exit -1; fi
+fi
+echo "STATUS	: local node_modules installed"
+
 if [ "$(type -p grunt)" == "" ]; then
   echo "INSTALL	: sudo npm install -g grunt-cli"
   sudo npm install -g grunt-cli
@@ -58,7 +116,7 @@ if [ "$(type -p grunt)" == "" ]; then
   npm install grunt@0.4.5 --save-dev
   if [ $? -ne 0 ]; then echo "ERROR	: installation failed"; exit -1; fi
   echo "INSTALL	: npm install -g grunt-contrib-uglify"
-  npm install -g grunt-contrib-uglify
+  sudo npm install -g grunt-contrib-uglify
   if [ $? -ne 0 ]; then echo "ERROR	: installation failed"; exit -1; fi
 fi
 
@@ -88,51 +146,12 @@ if [ $? -eq 0 ]; then
   exit -1
 fi
 
-if [ "$(type -p lsb_release)" == "" ]; then
-  echo "INSTALL	: lsb_release"
-  sudo apt-get install -y lsb-release
-  if [ $? -ne 0 ]; then echo "ERROR	: installation failed"; exit -1; fi
-fi
-if [ "$(arch)" != "armv6l" ] || [ "$(lsb_release -is)" != "Debian" ] ;then
-  RASPBIAN=0
-  echo "SYSTEM	: other (FireFUSE not supported)"
-else
-  RASPBIAN=1
-  echo "SYSTEM	: Raspberry Pi with Rasbian"
-fi
-
 if [ "$(type -p siege)" == "" ]; then
   echo "INSTALL	: siege"
   sudo apt-get install -y siege
   if [ $? -ne 0 ]; then echo "ERROR	: installation failed"; exit -1; fi
 fi
 echo "STATUS	: siege installed"
-
-if [ "$(type -p node)" == "" ]; then
-  echo "INSTALL	: NodeJS"
-  if [ $RASPBIAN -eq 1 ]; then
-    mkdir /opt/node
-    pushd /opt/node
-    sudo wget http://nodejs.org/dist/v0.10.22/node-v0.10.22-linux-arm-pi.tar.gz
-    sudo tar xvzf node-*-linux-arm-pi.tar.gz
-    sudo rm node-*-linux-arm-pi.tar.gz
-    sudo cd /usr/local/bin
-    sudo ln -s /opt/node/node-*pi/bin/node node
-    sudo ln -s /opt/node/node-*pi/bin/npm npm
-    popd
-  else
-   echo "ERROR	: automatic installation of NodeJS failed"
-   echo "TRY	: install NodeJS manually"
-   exit -1
-  fi
-fi
-echo "STATUS	: NodeJS installed"
-if [ ! -e node_modules ]; then
-  echo "INSTALL	: local NodeJS dependencies" 
-  npm install
-  if [ $? -ne 0 ]; then echo "ERROR	: installation failed"; exit -1; fi
-fi
-echo "STATUS	: local node_modules installed"
 
 if [ $RASPBIAN -ne 1 ]; then
   echo "CONTENT	: FireREST reference implementation. Static content only"
