@@ -10,14 +10,24 @@ var firepick; (function (firepick) {
       this.yScale = 1;
       this.xOffset = 0;
       this.yOffset = 0;
-      if (!(ySteps == 0 || ySteps == 1 || xSteps == 1 || ySteps == xSteps)) throw "assert failed";
+      if (!(ySteps==0 || ySteps==1 || xSteps==1 || ySteps==xSteps)) throw "assert failed";
       this.reset();
       return this;
     };
-    SpiralIterator.prototype.getX = function () { return this.x * this.xScale + this.xOffset; };
-    SpiralIterator.prototype.getY = function () { return this.y * this.yScale + this.yOffset; };
-    SpiralIterator.prototype.setScale = function (xScale, yScale) {this.xScale = xScale; this.yScale = yScale; return this;}
-    SpiralIterator.prototype.setOffset = function (xOffset, yOffset) {this.xOffset = xOffset; this.yOffset = yOffset; return this;}
+    SpiralIterator.prototype.getX = function () { 
+      return this.x * this.xScale + this.xOffset; 
+    };
+    SpiralIterator.prototype.getY = function () { 
+      return this.y * this.yScale + this.yOffset; 
+    };
+    SpiralIterator.prototype.setScale = function (xScale, yScale) {
+      this.xScale = xScale; this.yScale = yScale; 
+      return this;
+    }
+    SpiralIterator.prototype.setOffset = function (xOffset, yOffset) {
+      this.xOffset = xOffset; this.yOffset = yOffset; 
+      return this;
+    }
     SpiralIterator.prototype.reset = function () {
       if (this.yMax < 1) {
 	this.x = 0;
@@ -79,64 +89,72 @@ var firepick; (function (firepick) {
 <!-- @ifdef TEST -->
 (function (firepick) {
   firepick.SpiralIteratorTest = function () {
-    console.log("SpiralIteratorTest() BEGIN");
-    var one = Object.create(firepick.SpiralIterator.prototype);
-    var three = new firepick.SpiralIterator(3,3);
-    assert.equal(0, three.getX()); assert.equal(0, three.getY());
-    assert.equal(three, three.setScale(1,10));
-    assert.equal(three, three.setOffset(2,3));
-    assert.equal(2, three.getX()); assert.equal(3, three.getY());
-    assert.equal(true, three.next()); assert.equal(3, three.getX()); assert.equal(3, three.getY());
-    assert.equal(true, three.next()); assert.equal(3, three.getX()); assert.equal(13, three.getY());
-    assert.equal(true, three.next()); assert.equal(2, three.getX()); assert.equal(13, three.getY());
-    assert.equal(true, three.next()); assert.equal(1, three.getX()); assert.equal(13, three.getY());
-    assert.equal(true, three.next()); assert.equal(1, three.getX()); assert.equal(3, three.getY());
-    assert.equal(true, three.next()); assert.equal(1, three.getX()); assert.equal(-7, three.getY());
-    assert.equal(true, three.next()); assert.equal(2, three.getX()); assert.equal(-7, three.getY());
-    assert.equal(true, three.next()); assert.equal(3, three.getX()); assert.equal(-7, three.getY());
-    assert.equal(false, three.next()); 
+    var ok = true;
+    try {
+      console.log("SpiralIteratorTest() BEGIN");
+      var one = Object.create(firepick.SpiralIterator.prototype);
+      var three = new firepick.SpiralIterator(3,3);
+      assert.equal(0, three.getX()); assert.equal(0, three.getY());
+      assert.equal(three, three.setScale(1,10));
+      assert.equal(three, three.setOffset(2,3));
+      assert.equal(2, three.getX()); assert.equal(3, three.getY());
+      assert.equal(true, three.next()); assert.equal(3, three.getX()); assert.equal(3, three.getY());
+      assert.equal(true, three.next()); assert.equal(3, three.getX()); assert.equal(13, three.getY());
+      assert.equal(true, three.next()); assert.equal(2, three.getX()); assert.equal(13, three.getY());
+      assert.equal(true, three.next()); assert.equal(1, three.getX()); assert.equal(13, three.getY());
+      assert.equal(true, three.next()); assert.equal(1, three.getX()); assert.equal(3, three.getY());
+      assert.equal(true, three.next()); assert.equal(1, three.getX()); assert.equal(-7, three.getY());
+      assert.equal(true, three.next()); assert.equal(2, three.getX()); assert.equal(-7, three.getY());
+      assert.equal(true, three.next()); assert.equal(3, three.getX()); assert.equal(-7, three.getY());
+      assert.equal(false, three.next()); 
 
-    var four = new firepick.SpiralIterator(4,4);
-    assert.equal(0, four.getX()); assert.equal(0, four.getY());
-    assert.equal(true, four.next()); assert.equal(1, four.getX()); assert.equal(0, four.getY());
-    assert.equal(true, four.next()); assert.equal(1, four.getX()); assert.equal(1, four.getY());
-    assert.equal(true, four.next()); assert.equal(0, four.getX()); assert.equal(1, four.getY());
-    assert.equal(true, four.next()); assert.equal(-1, four.getX()); assert.equal(1, four.getY());
-    assert.equal(true, four.next()); assert.equal(-1, four.getX()); assert.equal(0, four.getY());
-    assert.equal(true, four.next()); assert.equal(-1, four.getX()); assert.equal(-1, four.getY());
-    assert.equal(true, four.next()); assert.equal(0, four.getX()); assert.equal(-1, four.getY());
-    assert.equal(true, four.next()); assert.equal(1, four.getX()); assert.equal(-1, four.getY());
-    assert.equal(true, four.next()); assert.equal(2, four.getX()); assert.equal(0, four.getY());
-    assert.equal(true, four.next()); assert.equal(2, four.getX()); assert.equal(1, four.getY());
-    assert.equal(true, four.next()); assert.equal(2, four.getX()); assert.equal(2, four.getY());
-    assert.equal(true, four.next()); assert.equal(1, four.getX()); assert.equal(2, four.getY());
-    assert.equal(true, four.next()); assert.equal(0, four.getX()); assert.equal(2, four.getY());
-    assert.equal(true, four.next()); assert.equal(-1, four.getX()); assert.equal(2, four.getY());
-    assert.equal(true, four.next()); assert.equal(-2, four.getX()); assert.equal(2, four.getY());
-    assert.equal(true, four.next()); assert.equal(-2, four.getX()); assert.equal(1, four.getY());
-    assert.equal(true, four.next()); assert.equal(-2, four.getX()); assert.equal(0, four.getY());
-    assert.equal(true, four.next()); assert.equal(-2, four.getX()); assert.equal(-1, four.getY());
-    assert.equal(true, four.next()); assert.equal(-2, four.getX()); assert.equal(-2, four.getY());
-    assert.equal(true, four.next()); assert.equal(-1, four.getX()); assert.equal(-2, four.getY());
-    assert.equal(true, four.next()); assert.equal(0, four.getX()); assert.equal(-2, four.getY());
-    assert.equal(true, four.next()); assert.equal(1, four.getX()); assert.equal(-2, four.getY());
-    assert.equal(true, four.next()); assert.equal(2, four.getX()); assert.equal(-2, four.getY());
-    assert.equal(true, four.next()); assert.equal(2, four.getX()); assert.equal(-1, four.getY());
-    assert.equal(false, four.next()); 
+      var four = new firepick.SpiralIterator(4,4);
+      assert.equal(0, four.getX()); assert.equal(0, four.getY());
+      assert.equal(true, four.next()); assert.equal(1, four.getX()); assert.equal(0, four.getY());
+      assert.equal(true, four.next()); assert.equal(1, four.getX()); assert.equal(1, four.getY());
+      assert.equal(true, four.next()); assert.equal(0, four.getX()); assert.equal(1, four.getY());
+      assert.equal(true, four.next()); assert.equal(-1, four.getX()); assert.equal(1, four.getY());
+      assert.equal(true, four.next()); assert.equal(-1, four.getX()); assert.equal(0, four.getY());
+      assert.equal(true, four.next()); assert.equal(-1, four.getX()); assert.equal(-1, four.getY());
+      assert.equal(true, four.next()); assert.equal(0, four.getX()); assert.equal(-1, four.getY());
+      assert.equal(true, four.next()); assert.equal(1, four.getX()); assert.equal(-1, four.getY());
+      assert.equal(true, four.next()); assert.equal(2, four.getX()); assert.equal(0, four.getY());
+      assert.equal(true, four.next()); assert.equal(2, four.getX()); assert.equal(1, four.getY());
+      assert.equal(true, four.next()); assert.equal(2, four.getX()); assert.equal(2, four.getY());
+      assert.equal(true, four.next()); assert.equal(1, four.getX()); assert.equal(2, four.getY());
+      assert.equal(true, four.next()); assert.equal(0, four.getX()); assert.equal(2, four.getY());
+      assert.equal(true, four.next()); assert.equal(-1, four.getX()); assert.equal(2, four.getY());
+      assert.equal(true, four.next()); assert.equal(-2, four.getX()); assert.equal(2, four.getY());
+      assert.equal(true, four.next()); assert.equal(-2, four.getX()); assert.equal(1, four.getY());
+      assert.equal(true, four.next()); assert.equal(-2, four.getX()); assert.equal(0, four.getY());
+      assert.equal(true, four.next()); assert.equal(-2, four.getX()); assert.equal(-1, four.getY());
+      assert.equal(true, four.next()); assert.equal(-2, four.getX()); assert.equal(-2, four.getY());
+      assert.equal(true, four.next()); assert.equal(-1, four.getX()); assert.equal(-2, four.getY());
+      assert.equal(true, four.next()); assert.equal(0, four.getX()); assert.equal(-2, four.getY());
+      assert.equal(true, four.next()); assert.equal(1, four.getX()); assert.equal(-2, four.getY());
+      assert.equal(true, four.next()); assert.equal(2, four.getX()); assert.equal(-2, four.getY());
+      assert.equal(true, four.next()); assert.equal(2, four.getX()); assert.equal(-1, four.getY());
+      assert.equal(false, four.next()); 
 
-    var threeX = new firepick.SpiralIterator(3,1);
-    assert.equal(0, threeX.getX()); assert.equal(0, threeX.getY());
-    assert.equal(true, threeX.next()); assert.equal(1, threeX.getX()); assert.equal(0, threeX.getY());
-    assert.equal(true, threeX.next()); assert.equal(-1, threeX.getX()); assert.equal(0, threeX.getY());
-    assert.equal(false, threeX.next()); 
+      var threeX = new firepick.SpiralIterator(3,1);
+      assert.equal(0, threeX.getX()); assert.equal(0, threeX.getY());
+      assert.equal(true, threeX.next()); assert.equal(1, threeX.getX()); assert.equal(0, threeX.getY());
+      assert.equal(true, threeX.next()); assert.equal(-1, threeX.getX()); assert.equal(0, threeX.getY());
+      assert.equal(false, threeX.next()); 
 
-    var threeY = new firepick.SpiralIterator(1,3);
-    assert.equal(0, threeY.getX()); assert.equal(0, threeY.getY());
-    assert.equal(true, threeY.next()); assert.equal(0, threeY.getX()); assert.equal(1, threeY.getY());
-    assert.equal(true, threeY.next()); assert.equal(0, threeY.getX()); assert.equal(-1, threeY.getY());
-    assert.equal(false, threeY.next()); 
-    console.log("SpiralIteratorTest() PASS");
+      var threeY = new firepick.SpiralIterator(1,3);
+      assert.equal(0, threeY.getX()); assert.equal(0, threeY.getY());
+      assert.equal(true, threeY.next()); assert.equal(0, threeY.getX()); assert.equal(1, threeY.getY());
+      assert.equal(true, threeY.next()); assert.equal(0, threeY.getX()); assert.equal(-1, threeY.getY());
+      assert.equal(false, threeY.next()); 
+      console.log("SpiralIteratorTest() PASS");
+    } catch(ex) {
+      console.log("ERROR	: " + ex);
+      ok = false;
+    }
+    return {name:"SpiralIteratorTest", pass:ok};
   }
+
 })(firepick || (firepick = {}));
 <!-- @endif -->
 

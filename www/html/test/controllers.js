@@ -1,0 +1,31 @@
+'use strict';
+var bootstrap = angular.module('FireREST.bootstrap', ['ui.bootstrap']);
+
+var controllers = angular.module('FireREST.controllers', []);
+
+controllers.controller('TestCtrl', 
+  ['$scope',
+  function(scope) {
+    scope.tests = [];
+
+    scope.tests.push(firepick.SpiralIteratorTest());
+    scope.tests.push(firepick.DeltaModelTest());
+
+    scope.testIcon = function(test) {
+      if (test.pass) {
+        return "glyphicon-ok fr-test-pass";
+      } else {
+        return "glyphicon-remove fr-test-fail";
+      }
+    }
+
+    scope.testResult = function(test) {
+      if (test.pass) {
+        return "success";
+      } else {
+        return "danger";
+      }
+    }
+
+}]);
+
