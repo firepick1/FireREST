@@ -1,11 +1,13 @@
 #! /bin/bash
 
 function help() {
-  echo "SYNOPSIS: fire/web [-h|-k|-s]"
+  echo "SYNOPSIS: fire/web [-h|-k|-s|-r]"
   echo "EXAMPLES: Launch FireREST web server in background for current user"
   echo "	:   fire/web -s"
   echo "	: Kill FireREST web server if it is running"
   echo "	:   fire/web -k"
+  echo "	: (Re)start FireREST web server"
+  echo "	:   fire/web -r"
   echo "	: Print this documentation:"
   echo "	:   fire/web -h"
 }
@@ -17,8 +19,8 @@ process=`ps -eo pid,args | grep node.*[f]irerest\.js`
 if [ "$process" == "" ]; then process="(none)"; fi
 echo "PROCESS	: $process" 
 
-if [ "$1" == "-k" ]; then
-  echo "ACTION	: Kill FireREST web server (-k)"
+if [ "$1" == "-k" ] || [ "$1" == "-r" ]; then
+  echo "ACTION	: Kill FireREST web server ($1)"
   ps -eo pid,args | grep node.*[f]irerest\.js > /dev/null
   if [ $? == 0 ]; then
     echo "KILL	: kill "`echo $process | grep -Eo "[0-9]+"`
@@ -32,11 +34,11 @@ if [ "$1" == "-k" ]; then
   else
     echo "SUCCESS	: FireREST web server is not running" 
   fi
-  exit 0
+  if [ "$1" == "-k" ]; then exit 0; fi
 fi
 
-if [ "$1" == "-s" ]; then
-  echo "ACTION	: Start FireREST web server in background (-s)"
+if [ "$1" == "-s" ] || [ "$1" == "-r" ]; then
+  echo "ACTION	: Start FireREST web server in background ($1)"
   ps -eo pid,args | grep node.*[f]irerest\.js > /dev/null
   if [ $? == 0 ]; then
     echo "ERROR	: FireREST web server is already running" 
@@ -45,6 +47,7 @@ if [ "$1" == "-s" ]; then
     echo "-----------------------------------"
     node server/firerest.js &
   fi
+  sleep 1 # wait a bit for nodejs
   exit 0
 fi
 

@@ -43,6 +43,7 @@
     },
     "camera_map":{
       "1":{
+        "source":{"type":"raspistill", "camera-config":"-t 0 -q 60 -bm -s -o /dev/firefuse/cv/1/camera.jpg"},
         "width":800,
 	"height":200,
 	"profile_map":{

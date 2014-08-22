@@ -92,7 +92,7 @@ echo "STATUS	: NodeJS installed"
 
 if [ "$(type -p npm)" == "" ]; then
   echo "COMMAND	: sudo apt-get install -y npm"
-  sudo apt-get install -y npm; RC=$?
+  sudo apt-get install -y npm; 
   RC=$?; if [ $RC -ne 0 ]; then 
       echo "ERROR	: $RC"; 
       echo "TRY	: install npm manually"
@@ -101,6 +101,18 @@ if [ "$(type -p npm)" == "" ]; then
 fi
 echo "STATUS	: npm installed"
 
+if [ "$(type -p grunt)" == "" ]; then
+  echo "INSTALL	: sudo npm install -g grunt-cli"
+  sudo npm install -g grunt-cli
+  if [ $? -ne 0 ]; then echo "ERROR	: installation failed"; exit -1; fi
+  echo "INSTALL	: npm install grunt@0.4.5"
+  npm install grunt@0.4.5 --save-dev
+  if [ $? -ne 0 ]; then echo "ERROR	: installation failed"; exit -1; fi
+  echo "INSTALL	: npm install grunt-contrib-uglify"
+  npm install grunt-contrib-uglify
+  if [ $? -ne 0 ]; then echo "ERROR	: installation failed"; exit -1; fi
+fi
+
 if [ ! -e node_modules ]; then
   echo "INSTALL	: local NodeJS dependencies" 
   npm install
@@ -108,17 +120,6 @@ if [ ! -e node_modules ]; then
 fi
 echo "STATUS	: local node_modules installed"
 
-if [ "$(type -p grunt)" == "" ]; then
-  echo "INSTALL	: sudo npm install -g grunt-cli"
-  sudo npm install -g grunt-cli
-  if [ $? -ne 0 ]; then echo "ERROR	: installation failed"; exit -1; fi
-  echo "INSTALL	: npm install -g grunt@0.4.5"
-  npm install grunt@0.4.5 --save-dev
-  if [ $? -ne 0 ]; then echo "ERROR	: installation failed"; exit -1; fi
-  echo "INSTALL	: npm install -g grunt-contrib-uglify"
-  sudo npm install -g grunt-contrib-uglify
-  if [ $? -ne 0 ]; then echo "ERROR	: installation failed"; exit -1; fi
-fi
 
 echo "GRUNT	: generating FireREST configuration files (see examples)"
 grunt cfg-version:config/FireREST.json:examples/cfg-firepick1.json:$VERSION_MAJOR:$VERSION_MINOR:$VERSION_PATCH \
