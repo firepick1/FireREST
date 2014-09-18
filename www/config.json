@@ -186,17 +186,8 @@
     }
   },
   "cnc": {
-    "firepick1": {
-      "protocol": "tinyg",
-      "motion": {
-        "drive": "cartesian2"
-      },
-      "dimensions": {
-        "width": 620,
-        "depth": 320,
-        "height": 390,
-        "units": "mm"
-      },
+    "marlin": {
+      "protocol": "marlin",
       "gcode": {
         "move": "G0{{axis_scale}}",
         "home": "G28.2{{home_scale}}"
@@ -212,7 +203,7 @@
           "home": 0,
           "units": "mm",
           "scale": 1,
-          "enabled": false
+          "enabled": true
         },
         {
           "id": "Y",
@@ -220,7 +211,7 @@
           "jog": 1,
           "resolution": 0.001,
           "min": 0,
-          "max": 400,
+          "max": 300,
           "home": 0,
           "units": "mm",
           "scale": 1,
@@ -236,7 +227,7 @@
           "home": 30,
           "units": "mm",
           "scale": 1,
-          "enabled": false
+          "enabled": true
         },
         {
           "id": "A",
@@ -245,69 +236,17 @@
           "resolution": 0.001,
           "units": "degrees",
           "scale": 1,
-          "enabled": false
+          "enabled": true
         }
       ],
       "serial": {
-        "path": "/dev/ttyUSB0",
+        "path": "/dev/ACM0",
         "stty": "cs8 115200"
       },
       "device-config": [
-        {
-          "jv": 1,
-          "sv": 0,
-          "tv": 0,
-          "ee": 0
-        },
-        {
-          "1ma": 0,
-          "1sa": 1.8,
-          "1tr": 1.25,
-          "1mi": 8,
-          "1po": 0,
-          "1pm": 1
-        },
-        {
-          "2ma": 1,
-          "2sa": 1.8,
-          "2tr": 30,
-          "2mi": 8,
-          "2po": 1,
-          "2pm": 1
-        },
-        {
-          "3ma": 2,
-          "3sa": 1.8,
-          "3tr": 1.25,
-          "3mi": 8,
-          "3po": 0,
-          "3pm": 1
-        },
-        {
-          "4ma": 3,
-          "4sa": 1.8,
-          "4tr": 360,
-          "4mi": 8,
-          "4po": 0,
-          "4pm": 1
-        },
-        {
-          "y": {
-            "am": 1,
-            "vm": 35000,
-            "fr": 40000,
-            "tm": 400,
-            "jm": 20000000000,
-            "jh": 40000000000,
-            "jd": 0.05,
-            "sn": 3,
-            "sx": 0,
-            "sv": 3000,
-            "lv": 1000,
-            "lb": 2,
-            "zb": 1
-          }
-        }
+        "TBD",
+        "TBD",
+        "TBD"
       ]
     }
   }

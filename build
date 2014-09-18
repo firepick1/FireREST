@@ -42,7 +42,7 @@ function build_git() {
   popd &> /dev/null
 }
 
-if [ "$FIREREST_CONFIG" == "" ]; then FIREREST_CONFIG=examples/cfg-firepick1.json; fi
+if [ "$FIREREST_CONFIG" == "" ]; then FIREREST_CONFIG=examples/cfg-firepick-delta.json; fi
 
 if [ "$(type -p tmux)" == "" ]; then
   echo "INSTALL	: tmux"
