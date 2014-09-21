@@ -39,7 +39,7 @@ function imageAt() {
 }
 
 function calcoffset() {
-  firesight -p FireSight/json/calcOffset.json -Dtemplate=$IMAGES/$1 -i $IMAGES/$1
+  firesight -p FireSight/json/calcOffset.json -Dtemplate=$IMAGES/$1 -i $IMAGES/$2
 }
 
 if [ "$1" == "-o" ]; then
