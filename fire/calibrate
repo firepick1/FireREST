@@ -49,6 +49,10 @@ if [ "$1" == "-o" ]; then
   calcoffset X0Y0Z0.jpg X1Y1Z0.jpg
   imageAt X-1Y-1Z0
   calcoffset X0Y0Z0.jpg X-1Y-1Z0.jpg
+  imageAt X1Y-1Z0
+  calcoffset X0Y0Z0.jpg X1Y-1Z0.jpg
+  imageAt X-1Y1Z0
+  calcoffset X0Y0Z0.jpg X-1Y1Z0.jpg
 
   echo "SUCCESS	: calibrated"
   exit 0;
