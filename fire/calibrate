@@ -26,7 +26,7 @@ function gcode() {
   echo "GCODE	: $1"
   echo "$1" > $GCODEFIRE
   RC=$?; if [ $RC -ne 0 ]; then echo "ERROR	: $RC"; exit -1; fi
-  sleep 1
+  sleep 5
   return $RC
 }
 
