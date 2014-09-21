@@ -11,3 +11,4 @@ opencv
 target
 version*
 config-default.json
+gfilter
