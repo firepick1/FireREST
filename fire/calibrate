@@ -26,13 +26,13 @@ function gcode() {
   echo "GCODE	: $1"
   echo "$1" > $GCODEFIRE
   RC=$?; if [ $RC -ne 0 ]; then echo "ERROR	: $RC"; exit -1; fi
+  sleep 1
+  return $RC
 }
 
 function imageAt() {
   echo "IMAGE	: $1"
-  GCODE=G0$1M400
-  echo $GCODE > $GCODEFIRE
-  sleep 1
+  gcode G0$1M400
   RC=$?; if [ $RC -ne 0 ]; then echo "ERROR	: echo $GCODE > $GCODEFIRE => $RC"; exit -1; fi
   cp /dev/firefuse/sync/cv/1/camera.jpg $IMAGES/$1.jpg
   RC=$?; if [ $RC -ne 0 ]; then echo "ERROR	: $RC"; exit -1; fi
@@ -48,7 +48,6 @@ if [ "$1" == "-o" ]; then
   imageAt X1Y1Z0
   calcoffset X0Y0Z0.jpg X1Y1Z0.jpg
 
-  echo "STATUS	: changed default configuration file"
-  echo "SUCCESS	: "`ls -l config-default.json | grep -o config.*json`
+  echo "SUCCESS	: calibrated"
   exit 0;
 fi
