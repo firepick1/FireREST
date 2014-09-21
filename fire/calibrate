@@ -42,17 +42,31 @@ function calcoffset() {
   firesight -ji 0 -p FireSight/json/calcOffset.json -Dtemplate=$IMAGES/$1 -i $IMAGES/$2 
 }
 
+function calcoffsetAt() {
+  imageAt $1
+  firesight -ji 0 -p FireSight/json/calcOffset.json -Dtemplate=$IMAGES/$2.jpg -i $IMAGES/$1.jpg 
+}
+
 if [ "$1" == "-o" ]; then
   gcode G28Z0 "Homing"
+
   imageAt X0Y0Z0
-  imageAt X1Y1Z0
-  calcoffset X0Y0Z0.jpg X1Y1Z0.jpg
-  imageAt X-1Y-1Z0
-  calcoffset X0Y0Z0.jpg X-1Y-1Z0.jpg
-  imageAt X1Y-1Z0
-  calcoffset X0Y0Z0.jpg X1Y-1Z0.jpg
-  imageAt X-1Y1Z0
-  calcoffset X0Y0Z0.jpg X-1Y1Z0.jpg
+  calcoffsetAt X1Y1Z0 X0Y0Z0
+  calcoffsetAt X-1Y1Z0 X0Y0Z0
+  calcoffsetAt X1Y-1Z0 X0Y0Z0
+  calcoffsetAt X-1Y-1Z0 X0Y0Z0
+
+  imageAt X0Y0Z-1
+  calcoffsetAt X1Y1Z-1 X0Y0Z-1
+  calcoffsetAt X-1Y1Z-1 X0Y0Z-1
+  calcoffsetAt X1Y-1Z-1 X0Y0Z-1
+  calcoffsetAt X-1Y-1Z-1 X0Y0Z-1
+
+  imageAt X0Y0Z-2
+  calcoffsetAt X1Y1Z-2 X0Y0Z-2
+  calcoffsetAt X-1Y1Z-2 X0Y0Z-2
+  calcoffsetAt X1Y-1Z-2 X0Y0Z-2
+  calcoffsetAt X-1Y-1Z-2 X0Y0Z-2
 
   echo "SUCCESS	: calibrated"
   exit 0;
