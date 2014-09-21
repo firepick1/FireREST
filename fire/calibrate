@@ -3,12 +3,6 @@
 echo
 echo "COMMAND	: $0 $@ # FireREST/FireFUSE visual calibration utility"
 
-if [ ! -L "config-default.json" ]; then 
-  echo "STATUS	: setting default to www/config.json"
-  ln -sTf www/config.json config-default.json; 
-fi
-echo "DEFAULT	: "`ls -l config-default.json | grep -o config.*json`
-
 function help() {
   echo "SYNOPSIS: fire/calibrate [-h]"
   echo "EXAMPLE	: Generate position offsets"
@@ -19,13 +13,33 @@ function help() {
 
 if [ "$1" == "" ] || [ "$1" == "-h" ]; then help; exit 0; fi
 
-if [ ! -e /dev/firefuse/cnc/marlin/gcode.ff ]; then
+GCODEFIRE=/dev/firefuse/cnc/marlin/gcode.fire
+if [ ! -e $GCODEFIRE ]; then
   echo "ERROR	: FireFUSE serial connection to Marlin is unavailable"
   echo "TRY	: See /var/log/firefuse.log for details"
   exit -1
 fi
 
+function gcode() {
+  if [ "$2" != "" ]; then echo "STATUS	: $2"; fi
+  echo "GCODE	: $1"
+  echo "$1" > $GCODEFIRE
+  RC=$?; if [ $RC -ne 0 ]; then echo "ERROR	: $RC"; exit -1; fi
+}
+
+function camera() {
+  echo "COMMAND	: cp /dev/firefuse/sync/cv/1/camera.jpg > $1"
+  cp /dev/firefuse/sync/cv/1/camera.jpg > /var/firefuse/calibration/$1
+  RC=$?; if [ $RC -ne 0 ]; then echo "ERROR	: $RC"; exit -1; fi
+}
+
 if [ "$1" == "-o" ]; then
+  gcode G28Z0 "Homing"
+  gcode G0X0Y0Z0 "Move to origin"
+  camera camx0y0z0.jpg
+  gcode G0X1Y1Z0 "Move to origin"
+  camera camx1y1z0.jpg
+
   echo "STATUS	: changed default configuration file"
   echo "SUCCESS	: "`ls -l config-default.json | grep -o config.*json`
   exit 0;
