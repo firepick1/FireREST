@@ -26,7 +26,6 @@ function gcode() {
   echo "GCODE	: $1"
   echo "$1" > $GCODEFIRE
   RC=$?; if [ $RC -ne 0 ]; then echo "ERROR	: $RC"; exit -1; fi
-  sleep 5
   return $RC
 }
 
@@ -34,6 +33,7 @@ function imageAt() {
   echo "IMAGE	: $1"
   gcode G0$1M400
   RC=$?; if [ $RC -ne 0 ]; then echo "ERROR	: echo $GCODE > $GCODEFIRE => $RC"; exit -1; fi
+  sleep 1
   cp /dev/firefuse/sync/cv/1/camera.jpg $IMAGES/$1.jpg
   RC=$?; if [ $RC -ne 0 ]; then echo "ERROR	: $RC"; exit -1; fi
 }
@@ -49,6 +49,8 @@ function calcoffsetAt() {
 
 if [ "$1" == "-o" ]; then
   gcode G28Z0 "Homing"
+  gcode G0Z0Y0Z0
+  sleep 10
 
   imageAt X0Y0Z0
   calcoffsetAt X1Y1Z0 X0Y0Z0
