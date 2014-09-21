@@ -13,6 +13,7 @@ function help() {
 
 if [ "$1" == "" ] || [ "$1" == "-h" ]; then help; exit 0; fi
 
+IMAGES=/var/firefuse/calibration
 GCODEFIRE=/dev/firefuse/cnc/marlin/gcode.fire
 if [ ! -e $GCODEFIRE ]; then
   echo "ERROR	: FireFUSE serial connection to Marlin is unavailable"
@@ -27,18 +28,24 @@ function gcode() {
   RC=$?; if [ $RC -ne 0 ]; then echo "ERROR	: $RC"; exit -1; fi
 }
 
-function camera() {
-  echo "COMMAND : cp /dev/firefuse/sync/cv/1/camera.jpg /var/firefuse/calibration/$1"
-  cp /dev/firefuse/sync/cv/1/camera.jpg /var/firefuse/calibration/$1
+function imageAt() {
+  echo "IMAGE	: $1"
+  GCODE=G0$1
+  echo $GCODE > $GCODEFIRE
+  RC=$?; if [ $RC -ne 0 ]; then echo "ERROR	: echo $GCODE > $GCODEFIRE => $RC"; exit -1; fi
+  cp /dev/firefuse/sync/cv/1/camera.jpg $IMAGES/$1.jpg
   RC=$?; if [ $RC -ne 0 ]; then echo "ERROR	: $RC"; exit -1; fi
+}
+
+function calcoffset() {
+  firesight -p FireSight/json/calcOffset.json -Dtemplate=$IMAGES/$1 -i $IMAGES/$1
 }
 
 if [ "$1" == "-o" ]; then
   gcode G28Z0 "Homing"
-  gcode G0X0Y0Z0 "Move to origin"
-  camera camx0y0z0.jpg
-  gcode G0X1Y1Z0 "Move to origin"
-  camera camx1y1z0.jpg
+  imageAt X0Y0Z0
+  imageAt X1Y1Z0
+  calcoffset X0Y0Z0.jpg X1Y1Z0.jpg
 
   echo "STATUS	: changed default configuration file"
   echo "SUCCESS	: "`ls -l config-default.json | grep -o config.*json`
