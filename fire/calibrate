@@ -28,8 +28,8 @@ function gcode() {
 }
 
 function camera() {
-  echo "COMMAND	: cp /dev/firefuse/sync/cv/1/camera.jpg > $1"
-  cp /dev/firefuse/sync/cv/1/camera.jpg > /var/firefuse/calibration/$1
+  echo "COMMAND : cp /dev/firefuse/sync/cv/1/camera.jpg /var/firefuse/calibration/$1"
+  cp /dev/firefuse/sync/cv/1/camera.jpg /var/firefuse/calibration/$1
   RC=$?; if [ $RC -ne 0 ]; then echo "ERROR	: $RC"; exit -1; fi
 }
 
