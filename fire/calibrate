@@ -39,7 +39,7 @@ function imageAt() {
 }
 
 function calcoffset() {
-  echo "OFFSET	: `firesight -ji 0 -p FireSight/json/calcOffset.json -Dtemplate=$IMAGES/$1 -i $IMAGES/$2 | grep -E '(dx|dy):[-0-9.]+'`"
+  firesight -ji 0 -p FireSight/json/calcOffset.json -Dtemplate=$IMAGES/$1 -i $IMAGES/$2 
 }
 
 if [ "$1" == "-o" ]; then
@@ -47,7 +47,7 @@ if [ "$1" == "-o" ]; then
   imageAt X0Y0Z0
   imageAt X1Y1Z0
   calcoffset X0Y0Z0.jpg X1Y1Z0.jpg
-  imageAt Z-1Y-1Z0
+  imageAt X-1Y-1Z0
   calcoffset X0Y0Z0.jpg X-1Y-1Z0.jpg
 
   echo "SUCCESS	: calibrated"
