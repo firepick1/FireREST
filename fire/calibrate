@@ -30,7 +30,7 @@ function gcode() {
 
 function imageAt() {
   echo "IMAGE	: $1"
-  GCODE=G0$1
+  GCODE=G0$1M400
   echo $GCODE > $GCODEFIRE
   RC=$?; if [ $RC -ne 0 ]; then echo "ERROR	: echo $GCODE > $GCODEFIRE => $RC"; exit -1; fi
   cp /dev/firefuse/sync/cv/1/camera.jpg $IMAGES/$1.jpg
