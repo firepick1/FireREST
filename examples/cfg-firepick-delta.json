@@ -240,7 +240,7 @@
         }
       ],
       "serial": {
-        "path": "/dev/ACM0",
+        "path": "/dev/ttyACM0",
         "stty": "cs8 115200"
       },
       "device-config": [
