@@ -52,7 +52,7 @@ function calcoffsetAt() {
   #echo "STATUS	: dx=$DX dy=$DY"
 }
 
-function resolutionAtZ() {
+function resolutionAt() {
   imageAt X0Y0$1
   calcoffsetAt X1Y1$1 X0Y0$1
   DX1=$DX;DY1=$DY
