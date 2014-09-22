@@ -52,15 +52,20 @@ function calcoffsetAt() {
 }
 
 if [ "$1" == "-o" ]; then
-  gcode G28Z0 "Homing"
-  gcode G0Z0Y0Z0
+  gcode G28Z0G0Z0Y0Z0 "Homing"
   #sleep 10
 
   imageAt X0Y0Z0
   calcoffsetAt X1Y1Z0 X0Y0Z0
+  DX1=$DX;DY1=$DY
   calcoffsetAt X-1Y1Z0 X0Y0Z0
+  DX2=$DX;DY2=$DY
   calcoffsetAt X1Y-1Z0 X0Y0Z0
+  DX3=$DX;DY3=$DY
   calcoffsetAt X-1Y-1Z0 X0Y0Z0
+  DX4=$DX;DY4=$DY
+  echo "STATUS	: resolution (1,1):(-1,-1) `bc <<< scale=3;sqrt((DX1-DX4)^2+(DY1-DY4)^2)`"
+  echo "STATUS	: resolution (-1,1):(1,-1) `bc <<< scale=3;sqrt((DX2-DX3)^2+(DY2-DY3)^2)`"
 
   imageAt X0Y0Z-1
   calcoffsetAt X1Y1Z-1 X0Y0Z-1
