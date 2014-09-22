@@ -4,9 +4,9 @@ echo
 echo "COMMAND	: $0 $@ # FireREST/FireFUSE visual calibration utility"
 
 function help() {
-  echo "SYNOPSIS: fire/calibrate [-h]"
-  echo "EXAMPLE	: Generate position offsets"
-  echo "	:   fire/calibrate -o"
+  echo "SYNOPSIS: fire/calibrate [-hr]"
+  echo "EXAMPLE	: Compute pixels per millimeter of travel"
+  echo "	:   fire/calibrate -r"
   echo "EXAMPLE	: Print this documentation:"
   echo "	:   fire/calibrate -h"
 }
@@ -33,7 +33,6 @@ function imageAt() {
   echo "IMAGE	: $1"
   gcode G0$1M400
   RC=$?; if [ $RC -ne 0 ]; then echo "ERROR	: echo $GCODE > $GCODEFIRE => $RC"; exit -1; fi
-  #sleep 1
   cp /dev/firefuse/sync/cv/1/camera.jpg $IMAGES/$1.jpg
   RC=$?; if [ $RC -ne 0 ]; then echo "ERROR	: $RC"; exit -1; fi
 }
@@ -43,7 +42,6 @@ function calcoffset() {
 }
 
 function calcoffsetAt() {
-  imageAt $1
   RESULT=`firesight -ji 0 -p FireSight/json/calcOffset.json -Dtemplate=$IMAGES/$2.jpg -i $IMAGES/$1.jpg`	
   RC=$?; if [ $RC -ne 0 ]; then echo "ERROR	: $RC"; exit -1; fi
   #echo "RESULT	: $RESULT"
@@ -54,31 +52,25 @@ function calcoffsetAt() {
 
 function resolutionAt() {
   imageAt X0Y0$1
-  calcoffsetAt X1Y1$1 X0Y0$1
-  DX1=$DX;DY1=$DY
-  calcoffsetAt X-1Y1$1 X0Y0$1
-  DX2=$DX;DY2=$DY
-  calcoffsetAt X1Y-1$1 X0Y0$1
-  DX3=$DX;DY3=$DY
-  calcoffsetAt X-1Y-1$1 X0Y0$1
-  DX4=$DX;DY4=$DY
-  EQN="scale=3;sqrt((($DX1-($DX4))^2+($DY1-($DY4))^2)/2)/2"
-  #echo "CALC	: $EQN"
-  echo "STATUS	: resolution (1,1,$1):(-1,-1,$1) "`bc <<< $EQN`
-  EQN="scale=3;sqrt((($DX2-($DX3))^2+($DY2-($DY3))^2)/2)/2"
-  #echo "CALC	: $EQN"
-  echo "STATUS	: resolution (-1,1,$1):(1,-1,$1) "`bc <<< $EQN`
+  imageAt X-1Y0$1
+  imageAt X1Y0$1
+  imageAt X0Y-1$1
+  imageAt X0Y1$1
+  calcoffsetAt X-1Y0$1 X1Y0$1
+  EQN="scale=3;sqrt(($DX)^2+($DY)^2)/2"
+  echo "STATUS	: resolution (-1,0,$1):(-1,-1,$1) "`bc <<< $EQN`
+  calcoffsetAt X0Y-1$1 X0Y1$1
+  EQN="scale=3;sqrt(($DX)^2+($DY)^2)/2"
+  echo "STATUS	: resolution (0,-1,$1):(0,1,$1) "`bc <<< $EQN`
 }
 
 if [ "$1" == "-o" ]; then
   gcode G28Z0M400 "Homing"
   sleep 5
-  gcode G0Z0Y0Z0M400 "Homing"
+  gcode G0Z0Y0Z0M400 "Moving to origin"
   sleep 5
 
   resolutionAt Z0
-  resolutionAt Z-1
-  resolutionAt Z-2
 
   echo "SUCCESS	: calibrated"
   exit 0;
