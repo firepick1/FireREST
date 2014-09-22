@@ -65,6 +65,7 @@ if [ "$1" == "-o" ]; then
   calcoffsetAt X-1Y-1Z0 X0Y0Z0
   DX4=$DX;DY4=$DY
   EQN="scale=3;sqrt(($DX1-$DX4)^2+($DY1-$DY4)^2)"
+  echo "CALC	: $EQN"
   echo "STATUS	: resolution (1,1):(-1,-1) "`bc <<< $EQN`
   EQN="scale=3;sqrt(($DX2-$DX3)^2+($DY2-$DY3)^2)"
   echo "STATUS	: resolution (-1,1):(1,-1) "`bc <<< $EQN`
