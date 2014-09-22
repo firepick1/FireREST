@@ -44,11 +44,21 @@ function build_git() {
 
 if [ "$FIREREST_CONFIG" == "" ]; then FIREREST_CONFIG=examples/cfg-firepick-delta.json; fi
 
+if [ "$(type -p bc)" == "" ]; then
+  echo "INSTALL : bc"
+  sudo apt-key update;
+  sudo apt-get update;
+  sudo apt-get install bc;
+  if [ $? -ne 0 ]; then echo "ERROR	: installation failed"; exit -1; fi
+fi
+echo "STATUS	: bc installed"
+
 if [ "$(type -p tmux)" == "" ]; then
   echo "INSTALL	: tmux"
   sudo apt-get install tmux
   if [ $? -ne 0 ]; then echo "ERROR	: installation failed"; exit -1; fi
 fi
+echo "STATUS	: tmux installed"
 
 if [ "$(type -p lsb_release)" == "" ]; then
   echo "INSTALL	: lsb_release"

@@ -44,7 +44,11 @@ function calcoffset() {
 
 function calcoffsetAt() {
   imageAt $1
-  firesight -ji 0 -p FireSight/json/calcOffset.json -Dtemplate=$IMAGES/$2.jpg -i $IMAGES/$1.jpg 
+  RESULT=`firesight -ji 0 -p FireSight/json/calcOffset.json -Dtemplate=$IMAGES/$2.jpg -i $IMAGES/$1.jpg`	
+  RC=$?; if [ $RC -ne 0 ]; then echo "ERROR	: $RC"; exit -1; fi
+  DX=`echo $RESULT | grep -o -E "dx.:[-0-9.+]+" | grep -o -E "[-0-9.+]+"`
+  DY=`echo $RESULT | grep -o -E "dy.:[-0-9.+]+" | grep -o -E "[-0-9.+]+"`
+  echo "STATUS	: dx=$DX dy=$DY"
 }
 
 if [ "$1" == "-o" ]; then
