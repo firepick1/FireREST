@@ -54,7 +54,9 @@ function calcoffsetAt() {
 
 if [ "$1" == "-o" ]; then
   gcode G28Z0M400 "Homing"
+  sleep 5
   gcode G0Z0Y0Z0M400 "Homing"
+  sleep 5
 
   imageAt X0Y0Z0
   calcoffsetAt X1Y1Z0 X0Y0Z0
