@@ -53,8 +53,8 @@ function calcoffsetAt() {
 }
 
 if [ "$1" == "-o" ]; then
-  gcode G28Z0G0Z0Y0Z0M400 "Homing"
-  sleep 10
+  gcode G28Z0M400 "Homing"
+  gcode G0Z0Y0Z0M400 "Homing"
 
   imageAt X0Y0Z0
   calcoffsetAt X1Y1Z0 X0Y0Z0
