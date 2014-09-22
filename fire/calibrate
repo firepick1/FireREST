@@ -14,7 +14,7 @@ function help() {
 if [ "$1" == "" ] || [ "$1" == "-h" ]; then help; exit 0; fi
 
 IMAGES=/var/firefuse/calibration
-GCODEFIRE=/dev/firefuse/cnc/marlin/gcode.fire
+GCODEFIRE=/dev/firefuse/sync/cnc/marlin/gcode.fire
 if [ ! -e $GCODEFIRE ]; then
   echo "ERROR	: FireFUSE serial connection to Marlin is unavailable"
   echo "TRY	: See /var/log/firefuse.log for details"
