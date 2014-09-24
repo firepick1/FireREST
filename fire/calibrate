@@ -78,7 +78,7 @@ if [ "$1" == "-o" ]; then
   exit 0;
 fi
 
-if [ "$1" == "-o" ]; then
+if [ "$1" == "-f" ]; then
   gcode M203X10000Y10000Z10000
   gcode G28Z0 "Homing"
   gcode M400
