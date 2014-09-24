@@ -26,7 +26,7 @@ function($http, service, interpolate, transmit) {
       cnc.dce.axes.forEach(function(axis) { 
 	var home_type = typeof axis.home;
 	if (axis.enabled) {
-	  var id = axis.id.toLowerCase();
+	  var id = axis.id;
 	  context.axis = axis;
 	  if (axis.hasOwnProperty('home')) {
 	    context.home_scale += " ";
