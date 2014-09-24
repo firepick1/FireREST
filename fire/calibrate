@@ -5,6 +5,8 @@ echo "COMMAND	: $0 $@ # FireREST/FireFUSE visual calibration utility"
 
 function help() {
   echo "SYNOPSIS: fire/calibrate [-hr]"
+  echo "EXAMPLE	: Find maximum feed rate"
+  echo "	:   fire/calibrate -f"
   echo "EXAMPLE	: Compute pixels per millimeter of travel"
   echo "	:   fire/calibrate -r"
   echo "EXAMPLE	: Print this documentation:"
@@ -74,4 +76,18 @@ if [ "$1" == "-o" ]; then
 
   echo "SUCCESS	: calibrated"
   exit 0;
+fi
+
+if [ "$1" == "-o" ]; then
+  gcode M203X10000Y10000Z10000
+  gcode G28Z0 "Homing"
+  gcode M400
+  gcode G0Z0Y0Z0M400F9000 "Moving to origin"
+  gcode M400
+  image X0Y0Z0
+  cp /var/firefuse/calibration/X0Y0Z0.jpg /var/firefuse/calibration/X0Y0Z0-a.jpg
+  gcode G0X50
+  gcode M400
+  image X0Y0Z0
+  calcoffset X0Y0Z0 X0Y0Z0-a
 fi
