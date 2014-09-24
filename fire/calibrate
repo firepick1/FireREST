@@ -79,6 +79,7 @@ if [ "$1" == "-o" ]; then
 fi
 
 if [ "$1" == "-f" ]; then
+  echo "STATUS	: calibrating feed rate"
   gcode M203X10000Y10000Z10000
   gcode G28Z0 "Homing"
   gcode M400
