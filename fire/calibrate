@@ -82,8 +82,9 @@ if [ "$1" == "-f" ]; then
   echo "STATUS	: calibrating feed rate"
   gcode M203X10000Y10000Z10000
   gcode G28Z0 "Homing"
-  gcode M400
-  gcode G0Z0Y0Z0M400F9000 "Moving to origin"
+  sleep 5
+
+  gcode G0Z0Y0Z0F9000 "Moving to origin"
   gcode M400
   image X0Y0Z0
   cp /var/firefuse/calibration/X0Y0Z0.jpg /var/firefuse/calibration/X0Y0Z0-a.jpg
