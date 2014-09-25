@@ -83,7 +83,8 @@ fi
 if [ "$1" == "-o" ]; then
   gcode G28Z0M400 "Homing"
   sleep 5
-  gcode M203X10000Y10000Z10000G0Z0Y0Z0F4000M400 "Moving to origin"
+  #gcode M203X10000Y10000Z10000G0Z0Y0Z0F4000M400 "Moving to origin"
+  gcode G0Z0Y0Z0M400 "Moving to origin"
   sleep 5
 
   imageAt X-20Y-20Z0
