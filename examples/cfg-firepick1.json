@@ -88,7 +88,7 @@
         ],
         "properties": {
           "corr": 0.95,
-          "threshold": 0.8,
+          "threshold": 0.7,
           "rectColor": [
             32,
             255,
