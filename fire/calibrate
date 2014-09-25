@@ -7,6 +7,8 @@ function help() {
   echo "SYNOPSIS: fire/calibrate [-hr]"
   echo "EXAMPLE	: Find maximum feed rate"
   echo "	:   fire/calibrate -f"
+  echo "EXAMPLE	: Compute x,y error offsets"
+  echo "	:   fire/calibrate -o"
   echo "EXAMPLE	: Compute pixels per millimeter of travel"
   echo "	:   fire/calibrate -r"
   echo "EXAMPLE	: Print this documentation:"
@@ -66,13 +68,113 @@ function resolutionAt() {
   echo "STATUS	: resolution (0,-1,$1):(0,1,$1) "`bc <<< $EQN`
 }
 
-if [ "$1" == "-o" ]; then
+if [ "$1" == "-r" ]; then
   gcode G28Z0M400 "Homing"
   sleep 5
   gcode G0Z0Y0Z0M400 "Moving to origin"
   sleep 5
 
   resolutionAt Z0
+
+  echo "SUCCESS	: calibrated"
+  exit 0;
+fi
+
+if [ "$1" == "-o" ]; then
+  gcode G28Z0M400 "Homing"
+  sleep 5
+  gcode G0Z0Y0Z0M400 "Moving to origin"
+  sleep 5
+
+  image X-20Y-20Z0
+  image X-15Y-20Z0
+  image X-10Y-20Z0
+  image X-05Y-20Z0
+  image X0Y-20Z0
+  image X5Y-20Z0
+  image X10Y-20Z0
+  image X15Y-20Z0
+  image X20Y-20Z0
+
+  image X-20Y-15Z0
+  image X-15Y-15Z0
+  image X-10Y-15Z0
+  image X-05Y-15Z0
+  image X0Y-15Z0
+  image X5Y-15Z0
+  image X10Y-15Z0
+  image X15Y-15Z0
+  image X20Y-15Z0
+
+  image X-20Y-10Z0
+  image X-15Y-10Z0
+  image X-10Y-10Z0
+  image X-05Y-10Z0
+  image X0Y-10Z0
+  image X5Y-10Z0
+  image X10Y-10Z0
+  image X15Y-10Z0
+  image X20Y-10Z0
+
+  image X-20Y-5Z0
+  image X-15Y-5Z0
+  image X-10Y-5Z0
+  image X-05Y-5Z0
+  image X0Y-5Z0
+  image X5Y-5Z0
+  image X10Y-5Z0
+  image X15Y-5Z0
+  image X20Y-5Z0
+
+  image X-20Y0Z0
+  image X-15Y0Z0
+  image X-10Y0Z0
+  image X-05Y0Z0
+  image X0Y0Z0
+  image X5Y0Z0
+  image X10Y0Z0
+  image X15Y0Z0
+  image X20Y0Z0
+
+  image X-20Y5Z0
+  image X-15Y5Z0
+  image X-10Y5Z0
+  image X-05Y5Z0
+  image X0Y5Z0
+  image X5Y5Z0
+  image X10Y5Z0
+  image X15Y5Z0
+  image X20Y5Z0
+
+  image X-20Y10Z0
+  image X-15Y10Z0
+  image X-10Y10Z0
+  image X-05Y10Z0
+  image X0Y10Z0
+  image X5Y10Z0
+  image X10Y10Z0
+  image X15Y10Z0
+  image X20Y10Z0
+
+  image X-20Y15Z0
+  image X-15Y15Z0
+  image X-10Y15Z0
+  image X-05Y15Z0
+  image X0Y15Z0
+  image X5Y15Z0
+  image X10Y15Z0
+  image X15Y15Z0
+  image X20Y15Z0
+
+  image X-20Y20Z0
+  image X-15Y20Z0
+  image X-10Y20Z0
+  image X-05Y20Z0
+  image X0Y20Z0
+  image X5Y20Z0
+  image X10Y20Z0
+  image X15Y20Z0
+  image X20Y20Z0
 
   echo "SUCCESS	: calibrated"
   exit 0;
