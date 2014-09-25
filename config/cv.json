@@ -44,8 +44,8 @@
     "camera_map":{
       "1":{
         "source":{"name":"raspistill", "config":"-t 0 -q 60 -bm -s -o /dev/firefuse/cv/1/camera.jpg"},
-        "width":800,
-	"height":200,
+        "width":400,
+	"height":400,
 	"profile_map":{
 	  "gray":{ "cve_names":[ "calc-offset", "estimate-px-per-mm", "find-crash-dummy", "locate-part", "QRDecode" ] },
 	  "bgr":{ "cve_names":[ "calc-offset", "estimate-px-per-mm", "find-crash-dummy", "locate-part", "QRDecode" ] }

@@ -160,8 +160,8 @@
           "name": "raspistill",
           "config": "-t 0 -q 60 -bm -s -o /dev/firefuse/cv/1/camera.jpg"
         },
-        "width": 800,
-        "height": 200,
+        "width": 400,
+        "height": 400,
         "profile_map": {
           "gray": {
             "cve_names": [
