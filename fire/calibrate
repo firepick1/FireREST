@@ -81,10 +81,11 @@ if [ "$1" == "-r" ]; then
 fi
 
 if [ "$1" == "-o" ]; then
-  gcode G28Z0M400 "Homing"
+  gcode G28Z0 "Homing"
   sleep 5
-  gcode G0Z0Y0Z0M400 "Moving to origin"
-  sleep 5
+  gcode M203X10000Y10000Z10000
+  gcode G0Z0Y0Z0F4000 "Moving to origin"
+  gcode M400
 
   imageAt X-20Y-20Z0
   imageAt X-15Y-20Z0
