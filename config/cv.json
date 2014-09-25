@@ -7,7 +7,7 @@
 	    "xtol":"{{xtol}}", "ytol":"{{ytol}}", "channels":[], "template":"{{saved}}" },
 	  {"op":"drawRects", "model":"model", "color":"{{rectColor}}"}
 	],
-	"properties": { "roi":[350,50,100,100], "rectColor":[32,255,32], "xtol":32, "ytol":32, "threshold":0.7 }
+	"properties": { "roi":[-1,-1,100,100], "rectColor":[32,255,32], "xtol":32, "ytol":32, "threshold":0.7 }
       },
       "estimate-px-per-mm":{
         "firesight": [
