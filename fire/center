@@ -1,21 +1,45 @@
+
 #! /bin/bash
 
 echo
-echo "COMMAND	: $0 $@ # FireREST/FireFUSE visual calibration utility"
+echo "COMMAND	: $0 $@ # FireREST/FireFUSE visual centering"
 
 function help() {
-  echo "SYNOPSIS: fire/calibrate [-hr]"
-  echo "EXAMPLE	: Find maximum feed rate"
-  echo "	:   fire/calibrate -f"
-  echo "EXAMPLE	: Compute x,y error offsets"
-  echo "	:   fire/calibrate -o"
-  echo "EXAMPLE	: Compute pixels per millimeter of travel"
-  echo "	:   fire/calibrate -r"
+  echo "SYNOPSIS: fire/$0 [-h]"
   echo "EXAMPLE	: Print this documentation:"
-  echo "	:   fire/calibrate -h"
+  echo "	:   fire/$0 -h"
 }
 
 if [ "$1" == "" ] || [ "$1" == "-h" ]; then help; exit 0; fi
+
+# 0,0		157 121 -43, -79
+# 0,1		162 119	-38, -81
+# 0,-1		162 119	-38, -81
+
+# 0,0		157 122 -43, -78
+# 0,1		162 120 
+# 1,0		161 128 
+# 2,0		164 133
+# 3,0		168 138
+# 4,0		171 144
+# 5,0		174 150
+# 13,0		203 196
+# 12.5,0	201 193
+# 12.5,-1	196 196
+# 13,-1		197 198
+# 13.5,-1	199 202
+# 14,-.5	203 202
+# 13.8,-.6	202 202
+# 13.7,-.6	202 202
+# 13.6,-.6	202 200
+# 13.4,-.6	202 200
+
+# 1,1	165 122
+# 2,1	169 130
+# 3,1	173 136
+# 4,1	176 141
+
+exit 0
 
 IMAGES=/var/firefuse/calibration
 GCODEFIRE=/dev/firefuse/sync/cnc/marlin/gcode.fire
@@ -87,14 +111,95 @@ if [ "$1" == "-o" ]; then
   gcode G0Z0Y0Z0M400 "Moving to origin"
   sleep 5
 
-  Z=0
-  for X in `seq -20 5 20`
-  do
-  	for Y in `seq -20 5 20`
-	do
-		imageAt X${X}Y${Y}Z${Z}
-	done
-  done
+  imageAt X-20Y-20Z0
+  imageAt X-15Y-20Z0
+  imageAt X-10Y-20Z0
+  imageAt X-05Y-20Z0
+  imageAt X0Y-20Z0
+  imageAt X5Y-20Z0
+  imageAt X10Y-20Z0
+  imageAt X15Y-20Z0
+  imageAt X20Y-20Z0
+
+  imageAt X-20Y-15Z0
+  imageAt X-15Y-15Z0
+  imageAt X-10Y-15Z0
+  imageAt X-05Y-15Z0
+  imageAt X0Y-15Z0
+  imageAt X5Y-15Z0
+  imageAt X10Y-15Z0
+  imageAt X15Y-15Z0
+  imageAt X20Y-15Z0
+
+  imageAt X-20Y-10Z0
+  imageAt X-15Y-10Z0
+  imageAt X-10Y-10Z0
+  imageAt X-05Y-10Z0
+  imageAt X0Y-10Z0
+  imageAt X5Y-10Z0
+  imageAt X10Y-10Z0
+  imageAt X15Y-10Z0
+  imageAt X20Y-10Z0
+
+  imageAt X-20Y-5Z0
+  imageAt X-15Y-5Z0
+  imageAt X-10Y-5Z0
+  imageAt X-05Y-5Z0
+  imageAt X0Y-5Z0
+  imageAt X5Y-5Z0
+  imageAt X10Y-5Z0
+  imageAt X15Y-5Z0
+  imageAt X20Y-5Z0
+
+  imageAt X-20Y0Z0
+  imageAt X-15Y0Z0
+  imageAt X-10Y0Z0
+  imageAt X-05Y0Z0
+  imageAt X0Y0Z0
+  imageAt X5Y0Z0
+  imageAt X10Y0Z0
+  imageAt X15Y0Z0
+  imageAt X20Y0Z0
+
+  imageAt X-20Y5Z0
+  imageAt X-15Y5Z0
+  imageAt X-10Y5Z0
+  imageAt X-05Y5Z0
+  imageAt X0Y5Z0
+  imageAt X5Y5Z0
+  imageAt X10Y5Z0
+  imageAt X15Y5Z0
+  imageAt X20Y5Z0
+
+  imageAt X-20Y10Z0
+  imageAt X-15Y10Z0
+  imageAt X-10Y10Z0
+  imageAt X-05Y10Z0
+  imageAt X0Y10Z0
+  imageAt X5Y10Z0
+  imageAt X10Y10Z0
+  imageAt X15Y10Z0
+  imageAt X20Y10Z0
+
+  imageAt X-20Y15Z0
+  imageAt X-15Y15Z0
+  imageAt X-10Y15Z0
+  imageAt X-05Y15Z0
+  imageAt X0Y15Z0
+  imageAt X5Y15Z0
+  imageAt X10Y15Z0
+  imageAt X15Y15Z0
+  imageAt X20Y15Z0
+
+  imageAt X-20Y20Z0
+  imageAt X-15Y20Z0
+  imageAt X-10Y20Z0
+  imageAt X-05Y20Z0
+  imageAt X0Y20Z0
+  imageAt X5Y20Z0
+  imageAt X10Y20Z0
+  imageAt X15Y20Z0
+  imageAt X20Y20Z0
 
   echo "SUCCESS	: calibrated"
   exit 0;
