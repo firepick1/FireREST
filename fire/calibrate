@@ -87,10 +87,19 @@ if [ "$1" == "-o" ]; then
   gcode G0Z0Y0Z0M400 "Moving to origin"
   sleep 5
 
-  Z=0
-  for X in `seq -20 5 20`
+  Z=1
+  for X in `seq -17.5 5 17.5`
   do
-  	for Y in `seq -20 5 20`
+  	for Y in `seq -17.5 5 17.5`
+	do
+		imageAt X${X}Y${Y}Z${Z}
+	done
+  done
+
+  Z=-1
+  for X in `seq -17.5 5 17.5`
+  do
+  	for Y in `seq -17.5 5 17.5`
 	do
 		imageAt X${X}Y${Y}Z${Z}
 	done
