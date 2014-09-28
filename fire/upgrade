@@ -24,7 +24,7 @@ fi
 echo "LOG	: `pwd`/build.log (started)"
 ./build |& tee build.log
 grep ERROR build.log
-if [ $? -ne 0 ]; then
+if [ $? -eq 0 ]; then
   echo "----------------------------------"
   echo "ERROR	: Could not build FireREST"
   echo "ERROR	: See build.log"
