@@ -76,7 +76,7 @@ fi
 if [ "$(type -p node)" == "" ]; then
   echo "INSTALL	: NodeJS"
   if [ $RASPBIAN -eq 1 ]; then
-    mkdir /opt/node
+    sudo mkdir /opt/node
     pushd /opt/node > /dev/null
     NODE_DISTRO=http://nodejs.org/dist/v0.10.22/node-v0.10.22-linux-arm-pi.tar.gz
     echo "COMMAND	: sudo wget $NODE_DISTRO"
