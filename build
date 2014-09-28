@@ -2,7 +2,7 @@
 
 VERSION_MAJOR=0
 VERSION_MINOR=13
-VERSION_PATCH=1
+VERSION_PATCH=2
 
 echo
 echo "COMMAND	: build $@ # build FireREST and its components"
