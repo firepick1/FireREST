@@ -140,6 +140,12 @@ if [ ! -e node_modules ]; then
 fi
 echo "STATUS	: local node_modules installed"
 
+if [ "$(type -p express)" == "" ]; then
+  echo "INSTALL	: express " 
+  npm install express
+  if [ $? -ne 0 ]; then echo "ERROR	: installation failed"; exit -1; fi
+fi
+echo "STATUS	: express installed"
 
 echo "GRUNT	: generating FireREST configuration files (see examples)"
 grunt cfg-version:config/FireREST.json:examples/cfg-firepick1.json:$VERSION_MAJOR:$VERSION_MINOR:$VERSION_PATCH \
