@@ -87,8 +87,8 @@ if [ "$(type -p node)" == "" ]; then
     echo sudo rm node-*-linux-arm-pi.tar.gz
     sudo rm node-*-linux-arm-pi.tar.gz
 	RC=$?; if [ $RC -ne 0 ]; then echo "ERROR	: $RC"; exit -1; fi
-    echo sudo cd /usr/local/bin
-    sudo cd /usr/local/bin
+	echo cd /usr/local/bin
+    cd /usr/local/bin
 	RC=$?; if [ $RC -ne 0 ]; then echo "ERROR	: $RC"; exit -1; fi
     echo sudo ln -s /opt/node/node-*pi/bin/node node
     sudo ln -s /opt/node/node-*pi/bin/node node
