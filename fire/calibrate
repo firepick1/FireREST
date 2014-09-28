@@ -7,6 +7,8 @@ function help() {
   echo "SYNOPSIS: fire/calibrate [-hr]"
   echo "EXAMPLE	: Find maximum feed rate"
   echo "	:   fire/calibrate -f"
+  echo "EXAMPLE	: Compute pixels/mm"
+  echo "	:   fire/calibrate -p"
   echo "EXAMPLE	: Compute x,y error offsets"
   echo "	:   fire/calibrate -o"
   echo "EXAMPLE	: Compute pixels per millimeter of travel"
@@ -108,6 +110,27 @@ if [ "$1" == "-o" ]; then
   echo "SUCCESS	: calibrated"
   exit 0;
 fi
+
+if [ "$1" == "-p" ]; then
+  echo "STATUS	: taking images for calibrating pixels per mm"
+  gcode G28Z0M400 "Homing"
+  sleep 3
+  gcode G0Z0Y0Z0M400 "Moving to origin"
+  sleep 5
+
+  for i in `seq 1 1 3`
+  do
+	imageAt X10Y10Z0
+    cp /var/firefuse/calibration/X0Y0Z0.jpg /var/firefuse/calibration/X0Y0Z0-$i.jpg
+	gcode G0Z0Y0Z0M400 "Moving to origin"
+	imageAt X10Y10Z0.1
+    cp /var/firefuse/calibration/X0Y0Z0.1.jpg /var/firefuse/calibration/X0Y0Z0.1-$i.jpg
+  done
+
+  echo "SUCCESS	: completed"
+  exit 0;
+fi
+
 
 if [ "$1" == "-f" ]; then
   echo "STATUS	: calibrating feed rate"
