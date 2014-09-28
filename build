@@ -136,6 +136,8 @@ grunt cfg-version:config/FireREST.json:examples/cfg-firepick1.json:$VERSION_MAJO
   cfg-custom:examples/cfg-firepick1.json:config/cv.json:config/cnc-firepick1.json 
 grunt cfg-version:config/FireREST.json:examples/cfg-firepick-delta.json:$VERSION_MAJOR:$VERSION_MINOR:$VERSION_PATCH \
   cfg-custom:examples/cfg-firepick-delta.json:config/cv.json:config/cnc-firepick-delta.json 
+grunt cfg-version:config/FireREST.json:examples/cfg-cnc-none.json:$VERSION_MAJOR:$VERSION_MINOR:$VERSION_PATCH \
+  cfg-custom:examples/cfg-cnc-none.json:config/cv.json:config/cnc-none.json 
 
 cp $FIREREST_CONFIG www/config.json
 
