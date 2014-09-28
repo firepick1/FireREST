@@ -81,11 +81,21 @@ if [ "$(type -p node)" == "" ]; then
     NODE_DISTRO=http://nodejs.org/dist/v0.10.22/node-v0.10.22-linux-arm-pi.tar.gz
     echo "COMMAND	: sudo wget $NODE_DISTRO"
     sudo wget $NODE_DISTRO
+    echo sudo tar xvzf node-*-linux-arm-pi.tar.gz
     sudo tar xvzf node-*-linux-arm-pi.tar.gz
+	RC=$?; if [ $RC -ne 0 ]; then echo "ERROR	: $RC"; exit -1; fi
+    echo sudo rm node-*-linux-arm-pi.tar.gz
     sudo rm node-*-linux-arm-pi.tar.gz
+	RC=$?; if [ $RC -ne 0 ]; then echo "ERROR	: $RC"; exit -1; fi
+    echo sudo cd /usr/local/bin
     sudo cd /usr/local/bin
+	RC=$?; if [ $RC -ne 0 ]; then echo "ERROR	: $RC"; exit -1; fi
+    echo sudo ln -s /opt/node/node-*pi/bin/node node
     sudo ln -s /opt/node/node-*pi/bin/node node
+	RC=$?; if [ $RC -ne 0 ]; then echo "ERROR	: $RC"; exit -1; fi
+    echo sudo ln -s /opt/node/node-*pi/bin/npm npm
     sudo ln -s /opt/node/node-*pi/bin/npm npm
+	RC=$?; if [ $RC -ne 0 ]; then echo "ERROR	: $RC"; exit -1; fi
     popd > /dev/null
   else
     echo "COMMAND	: sudo apt-get install -y nodejs nodejs-legacy"
