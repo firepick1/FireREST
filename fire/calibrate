@@ -121,10 +121,10 @@ if [ "$1" == "-p" ]; then
   for i in `seq 1 1 3`
   do
 	imageAt X10Y10Z0
-    cp /var/firefuse/calibration/X10Y10Z0.jpg /var/firefuse/calibration/X10Y10Z0-$i.jpg
+    mv /var/firefuse/calibration/X10Y10Z0.jpg /var/firefuse/calibration/X10Y10Z0-$i.jpg
 	gcode G0Z0Y0Z0M400 "Moving to origin"
 	imageAt X10Y10Z0.1
-    cp /var/firefuse/calibration/X10Y10Z0.1.jpg /var/firefuse/calibration/X10Y10Z0.1-$i.jpg
+    mv /var/firefuse/calibration/X10Y10Z0.1.jpg /var/firefuse/calibration/X10Y10Z0.1-$i.jpg
   done
 
   echo "SUCCESS	: completed"
