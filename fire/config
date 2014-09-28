@@ -91,9 +91,19 @@ if [ $? -ne 0 ]; then
   exit -1
 fi
 pushd ~/FireREST/FireFUSE > /dev/null
-  sudo target/firefuse -o allow_other /dev/firefuse
-  if [ $? -ne 0 ]; then
-    echo "ERROR	: /dev/firefuse could not be restarted"
+  if [ -e target/firefuse ]; then
+	echo "STATUS	: will use locally built firefuse"
+  	echo "COMMAND	: sudo target/firefuse -o allow_other /dev/firefuse"
+	sudo target/firefuse -o allow_other /dev/firefuse
+	RC=$?
+  else 
+  	echo "COMMAND	: sudo firefuse -o allow_other /dev/firefuse"
+	sudo firefuse -o allow_other /dev/firefuse
+	RC=$?
+  fi
+  if [ $RC -ne 0 ]; then
+    echo "ERROR	: /dev/firefuse could not be mounted"
+	echo "TRY	: rebooting Raspberry Pi."
     exit -1
   fi
 popd > /dev/null
