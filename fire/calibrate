@@ -122,9 +122,11 @@ if [ "$1" == "-p" ]; then
   do
 	sleep 1
 	imageAt X10Y10Z0
+	imageAt X10Y10Z0
     mv /var/firefuse/calibration/X10Y10Z0.jpg /var/firefuse/calibration/X10Y10Z0-$i.jpg
 	gcode G0Z0Y0Z0M400 "Moving to origin"
 	sleep 1
+	imageAt X10Y10Z0.1
 	imageAt X10Y10Z0.1
     mv /var/firefuse/calibration/X10Y10Z0.1.jpg /var/firefuse/calibration/X10Y10Z0.1-$i.jpg
   done
