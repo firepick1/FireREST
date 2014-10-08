@@ -47,7 +47,7 @@ if [ "$1" == "-k" ]; then
 		if [ $rc -ne 0 ]; then echo "ERROR	: FAILED rc=${rc}"; exit -1; fi
 	fi
 	echo "SUCCESS	: FireFUSE and raspistill stopped"
-else if [ "$1" == "-s" ]; then
+elif [ "$1" == "-s" ]; then
 	if [ -e /dev/firefuse/status ]; then
 	  echo "STATUS	: FireFUSE is already running"
 	  exit 0
@@ -60,7 +60,7 @@ else if [ "$1" == "-s" ]; then
 	sudo target/firefuse -o allow_other /dev/firefuse
 	rc=$?
 	if [ $rc -ne 0 ]; then 
-	  echo "ERROR	: FAILED rc=${rc}" 
+	  echo "ERROR	: FAILED rc=${rc}"
 	  echo "TRY	: build FireFUSE and try again after rebooting"
 	  exit -1; 
 	fi
