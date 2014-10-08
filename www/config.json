@@ -12,6 +12,7 @@
     "idle-period": 900
   },
   "cv": {
+    "maxfps": 1.4,
     "cve_map": {
       "calc-offset": {
         "firesight": [
