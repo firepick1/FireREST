@@ -2,19 +2,18 @@
   "cnc":{ 
     "marlin":{ 
       "protocol":"marlin",
-      "gcode":{"move":"G0{{axis_scale}}", "home":"G28.2{{home_scale}}"},
+      "gcode":{"move":"G0{{axis_scale}}", "home":"G28Z0", "finish":"G4P0"},
       "axes":[
-	{"id":"X", "value":0, "jog":1, "resolution":0.001, "min":-150, "max":150, "home":0, "units":"mm", "scale":1, "enabled":true},
-	{"id":"Y", "value":0, "jog":1, "resolution":0.001, "min":-150, "max":150, "home":0, "units":"mm", "scale":1, "enabled":true},
-	{"id":"Z", "value":0, "jog":1, "resolution":0.001, "min":-150, "max":30, "home":30, "units":"mm", "scale":1, "enabled":true},
-	{"id":"A", "value":0, "jog":1, "resolution":0.001, "units":"degrees", "scale":1, "enabled":true}
+		{"id":"X", "value":0, "jog":1, "resolution":0.001, "min":-150, "max":150, 
+			"home":0, "units":"mm", "scale":1, "enabled":true},
+		{"id":"Y", "value":0, "jog":1, "resolution":0.001, "min":-150, "max":150, 
+			"home":0, "units":"mm", "scale":1, "enabled":true},
+		{"id":"Z", "value":0, "jog":1, "resolution":0.001, "min":-150, "max":30, 
+			"home":30, "units":"mm", "scale":1, "enabled":true},
+		{"id":"A", "value":0, "jog":1, "resolution":0.001, "units":"degrees", "scale":1, "enabled":true}
       ],
-      "serial": { "path":"/dev/ttyACM0", "stty":"cs8 115200" },
-      "device-config": [
-        "TBD",
-        "TBD",
-	"TBD"
-      ]
+      "serial": { "path":"/dev/ttyACM0", "stty":"cs8 115200", "ack":"ok" },
+      "device-config": ["G4P0","M114"]
     }
   }
 }
