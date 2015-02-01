@@ -148,6 +148,9 @@ p {
 .fr-content_source {
   color: #fa0;
 }
+.fr-tab-icon {
+	font-size:10pt;
+}
 .fr-title-major{
   padding-top: .2em;
   cursor: pointer;
@@ -296,4 +299,12 @@ p {
 }
 .fr-form {
   padding-bottom: 1em;
+}
+.fr-viewport {
+}
+
+@media all and (max-width: 580px) {
+  .fr-tab-label {
+    display: none;
+  }
 }

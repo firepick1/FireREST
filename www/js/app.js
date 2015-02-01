@@ -3,17 +3,32 @@
 // Declare app level module which depends on filters, and services
 angular.module('FireREST', [
   'ngRoute',
-  'FireREST.bootstrap',
+  //'FireREST.bootstrap',
 //  'FireREST.filters',
   'FireREST.services',
 //  'FireREST.directives',
   'FireREST.controllers'
 ]).
 config(['$routeProvider', function($routeProvider) {
-//  $routeProvider.when('/cvtest', {templateUrl: '../../partials/cvtest.html', controller: 'ServiceCtrl'});
-//  $routeProvider.when('/spindle', {templateUrl: 'partials/spindle.html', controller: 'SpindleCtrl'});
-//  $routeProvider.when('/camera', {templateUrl: 'partials/camera.html', controller: 'CameraCtrl'});
-//  $routeProvider.when('/move', {templateUrl: 'partials/move.html', controller: 'MoveCtrl'});
-//  $routeProvider.when('/configure', {templateUrl: 'partials/configure.html', controller: 'ConfigureCtrl'});
-//  $routeProvider.otherwise({redirectTo: '/main'});
+	$routeProvider.when('/home', {
+		templateUrl: 'partials/view-home.html', 
+		controller: 'HomeCtrl'
+		});
+	$routeProvider.when('/cnc', {
+		templateUrl: 'partials/view-cnc.html', 
+		controller: 'CncCtrl'
+		});
+	$routeProvider.when('/cve', {
+		templateUrl: 'partials/view-cve.html', 
+		controller: 'CveCtrl'
+		});
+	$routeProvider.when('/vcal', {
+		templateUrl: 'partials/view-vcal.html', 
+		controller: 'VcalCtrl'
+		});
+	$routeProvider.when('/delta', {
+		templateUrl: 'partials/view-delta.html', 
+		controller: 'DeltaCtrl'
+		});
+	$routeProvider.otherwise({redirectTo: '/home'});
 }]);

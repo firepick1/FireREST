@@ -1,69 +1,58 @@
 <!doctype html>
-<html lang="en" ng-app="FireREST">
-<head>
-  <meta http-equiv="cache-control" content="max-age=0" />
-  <meta http-equiv="cache-control" content="no-cache" />
-  <meta http-equiv="expires" content="0" />
-  <meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT" />
-  <meta http-equiv="pragma" content="no-cache" />
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FireREST&trade;</title>
-  <link rel="stylesheet" href="css/firerest.css"/>
-  <link rel="stylesheet" href="bootstrap/css/bootstrap.css"/>
+<html lang="en" ng-app="FireREST"> <head>
+<link rel="shortcut icon" type="image/x-icon" href="img/FireREST.ico" />
+<meta http-equiv="cache-control" content="max-age=0" />
+<meta http-equiv="cache-control" content="no-cache" />
+<meta http-equiv="expires" content="0" />
+<meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT" />
+<meta http-equiv="pragma" content="no-cache" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FireREST&trade;</title>
+<link rel="stylesheet" href="bootstrap/css/bootstrap.3.3.2.min.css">
+<link rel="stylesheet" href="css/firerest.css"/>
+<script src="lib/angular/angular.js"></script>
+<script src="lib/angular/angular-route.js"></script>
+<script src="lib/jquery/jquery-2.1.1.min.js"></script>
+<script src="js/assert.js"></script>
+<script src="js/app.js"></script>
+<script src="js/services.js"></script>
+<script src="js/cv-service.js"></script>
+<script src="js/cnc-service.js"></script>
+<script src="js/delta-service.js"></script>
+<script src="js/controllers.js"></script>
+<script src="lib/threejs/three.min.js"></script>
 
-  <!-- In production use:
-  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.min.js"></script>
-  -->
-  <script src="lib/angular/angular.js"></script>
-  <script src="lib/angular/angular-route.js"></script>
-  <script src="lib/jquery/jquery-2.1.1.min.js"></script>
-  <script src="js/app.js"></script>
-  <script src="js/services.js"></script>
-  <script src="js/controllers.js"></script>
-  <script src="bootstrap/js/ui-bootstrap-0.6.0.min.js"></script>
-  <script src="bootstrap/js/ui-bootstrap-tpls-0.6.0.min.js"></script>
-</head>
-<body ng-controller="MainCtrl">
-  <a href="index.html">
-    <img class="fr-banner-logo" src="img/FireREST-alpha.png">
-  </a>
+</head> <body> <div class="container-fluid" ng-controller="FireRESTCtrl">
+<ul class="nav nav-tabs" >
+<li ng-class="viewTabClass('view-home')">
+	<a href="#/home" title="Home">
+		<span class="fr-tab-icon glyphicon glyphicon-home"></span>
+		<span class="fr-tab-label">&#8239;Home</span></a>
+	</li>
+<li ng-class="viewTabClass('view-cnc')">
+	<a href="#/cnc" title="Manual movement control">
+		<span class="fr-tab-icon glyphicon glyphicon-play-circle"></span>
+		<span class="fr-tab-label">&#8239;Move</span></a>
+	</li>
+<li ng-class="viewTabClass('view-camera')">
+	<a href="#/cve" title="Camera and computer vision controls">
+		<span class="fr-tab-icon glyphicon glyphicon-camera"></span>
+		<span class="fr-tab-label">&#8239;Vision</span></a>
+	</li>
+<li ng-class="viewTabClass('view-adjust')">
+	<a href="#/vcal" title="Calibration controls">
+		<span class="fr-tab-icon glyphicon glyphicon-adjust"></span>
+		<span class="fr-tab-label">&#8239;Adjust</span></a>
+	</li>
+<li ng-class="viewTabClass('view-delta')">
+	<a href="#/delta" title="Delta simulator">
+		<span class="fr-tab-icon glyphicon glyphicon-eye-open"></span>
+		<span class="fr-tab-label">&#8239;Delta</span></a>
+	</li>
+</ul>
+<div class="row-fluid tab-content"> <div ng-view></div> </div>
 
-  <div class="fr-banner"> 
-    <div class="fr-banner-left">
-      <img class="fr-banner-logo" src="img/FireREST-alpha.png">
-      <h4 class="fr-banner-title">
-	Reference Server
-      </h4>
-    </div>
-    <div class="fr-banner-right">
-      <a title="FireREST computer aided manufacturing REST services" 
-	href="https://github.com/firepick1/FireREST/wiki/Home" target="_blank">
-      </a>
-    </div>
-  </div>
-  <div class="container" >
-    <div class="fr-banner-space">&nbsp;</div>
-    <h4>Overview</h4>
-    <p>This web server provides the reference implementation of the <i>FireREST&trade;</i> service protocols.
-    Content provided by this server may be static or dynamic. 
-    Use the FireREST test pages described below to see if this server provides dynamic (i.e., "real world") content.
-    </p>
-
-    <h4>Protocols</h4>
-    Choose a <i>FireREST&trade;</i> service protocol for testing your <i>FirePick&trade;</i> micro-factory:
-    <ol>
-    <li><a href="html/cnc">Computer Numerical Control (FireREST&trade;/CNC)</a>
-    <li><a href="html/cv">Computer Vision (FireREST&trade;/CV)
-    <li><a href="html/vcal">Visual Calibration (FireRST&trade;/VCAL)</a>
-    </ol>
-
-    <h4>Other Stuff</h4>
-	<ul>
-    <li><a href="html/vcal/grid-mm-5.html">Print FirePick Delta Calibration Grid</a>
-    <li><a href="html/delta">Delta Machine Simulator</a>
-    </ul>
-
-  </div>
-</body>
-</html>
+<div ng-include src="'partials/footer.html'"></div></body></html>
+<script>console.log("index.html (END)");</script>
+</div> </body> </html>
