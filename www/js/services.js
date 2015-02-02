@@ -64,7 +64,7 @@ function($http, transmit, location, $q) {
       }
       return true;
     },
-    load_config: function(scope) {
+    load_config: function(scope,bg) {
       service.scope = scope;
       service.cv = scope.cv;
       var deferred = $q.defer();
@@ -80,6 +80,8 @@ function($http, transmit, location, $q) {
 	  console.log("config_load() => " + JSON.stringify(data.FireREST));
 	  service.config = data;
 	  service.cv && service.cv.on_load_config(data);
+	  scope.config = service.config;
+	  bg && (bg.worker = scope.worker); 
 	  deferred.resolve(service.config);
 	},
 	error: function( jqXHR, ex) {

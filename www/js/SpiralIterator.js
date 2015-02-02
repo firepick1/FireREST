@@ -149,7 +149,7 @@ var firepick; (function (firepick) {
       assert.equal(false, threeY.next()); 
       console.log("SpiralIteratorTest() PASS");
     } catch(ex) {
-      console.log("ERROR	: " + ex);
+      console.log("ERROR	: " + JSON.stringify(ex));
       ok = false;
     }
     return {name:"SpiralIteratorTest", pass:ok};

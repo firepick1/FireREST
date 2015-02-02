@@ -3,7 +3,6 @@
 // Declare app level module which depends on filters, and services
 angular.module('FireREST', [
   'ngRoute',
-  //'FireREST.bootstrap',
 //  'FireREST.filters',
   'FireREST.services',
 //  'FireREST.directives',
@@ -29,6 +28,10 @@ config(['$routeProvider', function($routeProvider) {
 	$routeProvider.when('/delta', {
 		templateUrl: 'partials/view-delta.html', 
 		controller: 'DeltaCtrl'
+		});
+	$routeProvider.when('/test', {
+		templateUrl: 'partials/view-test.html', 
+		controller: 'TestCtrl'
 		});
 	$routeProvider.otherwise({redirectTo: '/home'});
 }]);

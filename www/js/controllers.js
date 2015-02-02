@@ -4,8 +4,8 @@ var controllers = angular.module('FireREST.controllers', []);
 
 controllers.controller('HomeCtrl', 
 ['$scope','$http', '$interval', 
-function($scope, $http, $interval) {
-  $scope.view.mainTab = "view-home";
+function(scope, $http, $interval) {
+  scope.view.mainTab = "view-home";
 }]);
 
 controllers.controller('CncCtrl', 
@@ -48,7 +48,7 @@ function(scope, location, bg, service, transmit, cv, cnc) {
 controllers.controller('CveCtrl', 
   ['$scope','$location', 'BackgroundThread', 'ServiceConfig', 'AjaxAdapter', 'CvService',
   function(scope, location, bg, service, transmit, cv) {
-	scope.view.mainTab = "view-cve";
+    scope.view.mainTab = "view-camera";
     transmit.clear();
     scope.transmit = transmit;
     scope.service = service;
@@ -82,9 +82,28 @@ controllers.controller('CveCtrl',
 }]);
 
 controllers.controller('VcalCtrl', 
-['$scope','$http', '$interval', 
-function($scope, $http, $interval) {
-	$scope.view.mainTab = "view-vcal";
+['$scope','$location', 'BackgroundThread', 'ServiceConfig', 'AjaxAdapter', 'CvService',
+function(scope, location, bg, service, transmit, cv) {
+    scope.view.mainTab = "view-adjust";
+    transmit.clear();
+    scope.transmit = transmit;
+    scope.service = service;
+    scope.config = {};
+    scope.cv = cv;
+
+    scope.worker = function(ticks) {
+     if ((ticks % 5) === 0 ) {
+       cv.resources.indexOf('process.fire') >= 0 && cv.resource_GET('process.fire');
+     } else if ((ticks % 3) === 0 ) {
+       cv.image_GET('monitor.jpg');
+     } else if ((ticks % 3) === 1 ) {
+       cv.image_GET('camera.jpg');
+     }
+     return true;
+    }
+
+    cv.clear_results();
+    service.load_config(scope, bg);
 }]);
 
 controllers.controller('DeltaCtrl', 
@@ -266,11 +285,41 @@ function(scope, location, bg, service, transmit, interpolate, delta, render) {
 
 }]);
 
-controllers.controller('FireRESTCtrl', 
-['$scope','$http', '$interval', 
-function($scope, $http, $interval) {
-	$scope.view = {mainTab:"view-main"};
-	$scope.viewTabClass = function(tab) {
-		return tab===$scope.view.mainTab ? "active" : "";
-	}
+controllers.controller('TestCtrl', 
+['$scope',
+function(scope) {
+  scope.view.mainTab = "view-test";
+  scope.tests = [];
+
+  scope.tests.push(firepick.SpiralIteratorTest());
+  scope.tests.push(firepick.DeltaModelTest());
+
+  scope.testIcon = function(test) {
+    if (test.pass) {
+      return "glyphicon-ok fr-test-pass";
+    } else {
+      return "glyphicon-remove fr-test-fail";
+    }
+  }
+  scope.testResult = function(test) {
+    if (test.pass) {
+      return "success";
+    } else {
+      return "danger";
+    }
+  }
 }]);
+
+controllers.controller('FireRESTCtrl', 
+['$scope','$location', 'BackgroundThread', 'ServiceConfig', 'AjaxAdapter', 'CvService',
+function(scope, location, bg, service, transmit, cv) {
+    scope.view = {mainTab:"view-main"};
+    scope.viewTabClass = function(tab) {
+      return tab===scope.view.mainTab ? "active" : "";
+    }
+    scope.viewTabContentClass = function(tab) {
+      return tab===scope.view.mainTab ? "fr-navbar-active" : "";
+    }
+    service.load_config(scope);
+}]);
+

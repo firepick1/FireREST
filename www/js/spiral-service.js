@@ -1,4 +1,5 @@
 var firepick;
+
 (function (firepick) {
     var SpiralIterator = (function () {
         function SpiralIterator(xSteps, ySteps) {
@@ -23,8 +24,9 @@ var firepick;
     firepick.SpiralIterator = SpiralIterator;
 })(firepick || (firepick = {}));
 
-exports.SpiralIterator = firepick.SpiralIterator;
+//exports.SpiralIterator = firepick.SpiralIterator;
 
+/*
 
 --------------
 SpiralIterator::SpiralIterator(int xSteps, int ySteps) {
@@ -86,4 +88,4 @@ bool SpiralIterator::next() {
   return x <= xMax && y <= yMax ? TRUE : FALSE;
 }
 
-/////////////////////////////////////////////////////////////////////////
+*/
