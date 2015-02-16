@@ -5,11 +5,28 @@ canvas {
 p {
   max-width: 700px;
 }
+.alert {
+  padding-top: 0.1em;
+  padding-bottom: 0.1em;
+  margin:0.1em;
+}
+.alerts-container {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  padding: 0.2em;
+  background-color: #222;
+  border-top-left-radius: 5px;
+}
 .fr-test-pass {
   color: #080;
 }
 .fr-test-fail {
   color: #a00;
+}
+.fr-test-tbd {
+  color: #fff;
+  background-color: #000;
 }
 .fr-collapsible {
   max-width: 800px;
@@ -274,7 +291,7 @@ p {
   border-right: 2px solid #888;
   border-bottom: 2px solid #888;
   padding: 5px;
-  background: #eee;
+  background: #ccc;
   min-width: 25em;
   border-bottom-right-radius: 8px;
   border-bottom-left-radius: 8px;
@@ -286,6 +303,7 @@ p {
   padding-left: 10px;
   padding-right: 10px;
   background:#ccc;
+  border:0;
 }
 .fr-navbar-active {
   background:#fff;
@@ -316,6 +334,13 @@ p {
   padding-bottom: 1em;
 }
 .fr-viewport {
+}
+.progress {
+	margin-top:0.9em;
+	margin-bottom:0;
+	border-radius:0;
+	border-top: 1pt solid #aaa;
+	border-bottom: 1pt solid #aaa;
 }
 
 @media all and (max-width: 800px) {

@@ -2,11 +2,12 @@
 
 // Declare app level module which depends on filters, and services
 angular.module('FireREST', [
-  'ngRoute',
+	'ui.bootstrap',
+	'ngRoute',
 //  'FireREST.filters',
-  'FireREST.services',
+	'FireREST.services',
 //  'FireREST.directives',
-  'FireREST.controllers'
+	'FireREST.controllers'
 ]).
 config(['$routeProvider', function($routeProvider) {
 	$routeProvider.when('/home', {

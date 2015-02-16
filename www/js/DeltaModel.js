@@ -185,7 +185,7 @@ var firepick; (function (firepick) {
       console.log(ex.stack);
       ok = false;
     }
-    return {name:"DeltaModelTest", pass:ok};
+    return {name:"DeltaModelTest", outcome:ok, description:"Delta model forward/inverse kinematics"};
   }
 
 })(firepick || (firepick = {}));

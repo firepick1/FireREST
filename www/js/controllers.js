@@ -9,8 +9,9 @@ function(scope, $http, $interval) {
 }]);
 
 controllers.controller('CncCtrl', 
-['$scope','$location', 'BackgroundThread', 'ServiceConfig', 'AjaxAdapter', 'CvService', 'CncService',
-function(scope, location, bg, service, transmit, cv, cnc) {
+['$scope','$location', 'AlertService', 'BackgroundThread', 
+	'ServiceConfig', 'AjaxAdapter', 'CvService', 'CncService',
+function(scope, location, alerts, bg, service, transmit, cv, cnc) {
     scope.view.mainTab = "view-cnc";
     transmit.clear();
     scope.transmit = transmit;
@@ -19,6 +20,7 @@ function(scope, location, bg, service, transmit, cv, cnc) {
     scope.cv = cv;
     scope.cnc = cnc;
     cnc.cv = cv;
+	alerts.info("hello");
 
     scope.worker = function(ticks) {
      if ((ticks % 3) === 0 ) {
@@ -286,24 +288,25 @@ function(scope, location, bg, service, transmit, interpolate, delta, render) {
 }]);
 
 controllers.controller('TestCtrl', 
-['$scope',
-function(scope) {
+['$scope','TestService',
+function(scope, testSvc) {
   scope.view.mainTab = "view-test";
-  scope.tests = [];
-
-  scope.tests.push(firepick.SpiralIteratorTest());
-  scope.tests.push(firepick.DeltaModelTest());
+  scope.tests = testSvc.testAll(scope);
 
   scope.testIcon = function(test) {
-    if (test.pass) {
+    if (test.outcome === true) {
       return "glyphicon-ok fr-test-pass";
+    } else if (test.outcome === null) {
+      return "glyphicon-transfer fr-test-tbd";
     } else {
       return "glyphicon-remove fr-test-fail";
     }
   }
   scope.testResult = function(test) {
-    if (test.pass) {
+    if (test.outcome === true) {
       return "success";
+    } else if (test.outcome === null) {
+      return "warning";
     } else {
       return "danger";
     }
@@ -311,9 +314,10 @@ function(scope) {
 }]);
 
 controllers.controller('FireRESTCtrl', 
-['$scope','$location', 'BackgroundThread', 'ServiceConfig', 'AjaxAdapter', 'CvService',
-function(scope, location, bg, service, transmit, cv) {
+['$scope','$location', 'AlertService', 'BackgroundThread', 'ServiceConfig', 'AjaxAdapter', 'CvService',
+function(scope, location, alerts, bg, service, transmit, cv) {
     scope.view = {mainTab:"view-main"};
+	scope.alerts = alerts;
     scope.viewTabClass = function(tab) {
       return tab===scope.view.mainTab ? "active" : "";
     }
@@ -321,5 +325,6 @@ function(scope, location, bg, service, transmit, cv) {
       return tab===scope.view.mainTab ? "fr-navbar-active" : "";
     }
     service.load_config(scope);
+	alerts.info("Ready");
 }]);
 

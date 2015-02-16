@@ -12,7 +12,7 @@ controllers.controller('TestCtrl',
     scope.tests.push(firepick.DeltaModelTest());
 
     scope.testIcon = function(test) {
-      if (test.pass) {
+      if (test.outcome) {
         return "glyphicon-ok fr-test-pass";
       } else {
         return "glyphicon-remove fr-test-fail";
@@ -20,8 +20,10 @@ controllers.controller('TestCtrl',
     }
 
     scope.testResult = function(test) {
-      if (test.pass) {
+      if (test.outcome === true) {
         return "success";
+      } else if (test.outcome === null) {
+        return "warning";
       } else {
         return "danger";
       }

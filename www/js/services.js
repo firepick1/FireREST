@@ -1,6 +1,6 @@
 'use strict';
 
-var services = angular.module('FireREST.services', []);
+var services = services || angular.module('FireREST.services', []);
 
 services.value('version', '0.1');
 

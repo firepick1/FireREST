@@ -152,7 +152,7 @@ var firepick; (function (firepick) {
       console.log("ERROR	: " + JSON.stringify(ex));
       ok = false;
     }
-    return {name:"SpiralIteratorTest", pass:ok};
+    return {name:"SpiralIteratorTest", outcome:ok, description:"Spiral movement generator"};
   }
 
 })(firepick || (firepick = {}));
