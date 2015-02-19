@@ -50,7 +50,7 @@ var firepick; (function (firepick) {
 		var variantMap = {};
 		for (var iv1=0; iv1 < generation1.length; iv1++) {
 			var v = generation1[iv1];
-			var iv2 = Math.round(Math.random() * 7919) % generation.length;
+			var iv2 = Math.round(Math.random() * 7919) % Math.min(generation.length,this.nSurvivors);
 			var parent1 = generation[Math.min(iv1,iv2)];
 			var parent2 = generation[Math.max(iv1,iv2)];
 			var candidates = this.generate(parent1, parent2, mutateDefault);
