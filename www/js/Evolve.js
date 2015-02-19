@@ -105,7 +105,9 @@ var firepick; (function (firepick) {
 			kids.push(mutate(parent1, 1, N2)); 
 		} else {	// deep search
 			var spread = Math.abs(parent1-parent2);
-			kids.push(mutate(parent1, Math.max(1, parent1-spread), Math.min(N2,parent1+spread)));
+			var low = Math.max(1, parent1-spread);
+			var high = Math.min(N2, parent1+spread);
+			kids.push(mutate(parent1, low, high));
 		}
 
 		return kids;
@@ -129,6 +131,16 @@ var firepick; (function (firepick) {
 				assert.equal(true, evolve.status);
 				assert.ok(Math.abs(N - solution*solution) < N/1000);
 			}
+
+			console.log("guess1:" + guess1);
+			var solutions = evolve.solve([(1+N2)/2], isDone);
+			if (evolve.status === true) {
+				var solution = solutions[0];
+				console.log("The square root of " + N + " is " + solutions[0]);
+			} else {
+				console.log("No acceptable solution found after " + evolve.iGeneration + " generations");
+			};
+			console.log("Last generation:" + JSON.stringify(solutions));
 
 			result.outcome = true;
 		}
