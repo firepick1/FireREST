@@ -38,6 +38,15 @@ if [ "$1" == "-k" ] || [ "$1" == "-r" ]; then
 fi
 
 if [ "$1" == "-s" ] || [ "$1" == "-r" ]; then
+  echo "ACTION	: Checking for redis"
+  ps -ef | grep -v grep | grep redis-server 
+  if [ $? == 0 ]; then
+	  echo "STATUS	: redis-server is available"
+  else
+	  echo "STATUS	: starting redis-server"
+	  redis-server&
+	  if [ $? != 0 ]; then echo "ERROR	: could not launch redis-server"; exit; fi
+  fi
   echo "ACTION	: Start FireREST web server in background ($1)"
   ps -eo pid,args | grep node.*[f]irerest\.js > /dev/null
   if [ $? == 0 ]; then

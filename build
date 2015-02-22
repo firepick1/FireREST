@@ -121,6 +121,31 @@ if [ "$(type -p npm)" == "" ]; then
 fi
 echo "STATUS	: npm installed"
 
+if [ "$(type -p redis-cli)" == "" ]; then
+	echo "COMMAND	: sudo apt-get install -y build-essential"
+	sudo apt-get install -y build-essential
+	if [ $? -ne 0 ]; then echo "ERROR	: installation failed"; exit -1; fi
+	if [ ! -e redis-2.8.19 ]; then 
+		echo "COMMAND	: wget http://download.redis.io/releases/redis-2.8.19.tar.gz"
+		wget http://download.redis.io/releases/redis-2.8.19.tar.gz
+		if [ $? -ne 0 ]; then echo "ERROR	: installation failed"; exit -1; fi
+		tar -xzf redis-2.8.19.tar.gz
+	fi
+	pushd redis-2.8.19
+	make 
+	sudo make install
+	popd
+fi
+echo "INSTALL	: redis installed"
+
+npm list kue
+if [ $? -ne 0 ]; then
+  echo "INSTALL	: sudo npm install kue"
+  npm install kue
+  if [ $? -ne 0 ]; then echo "ERROR	: installation failed"; exit -1; fi
+fi
+echo "INSTALL	: kue installed"
+
 if [ "$(type -p grunt)" == "" ]; then
   echo "INSTALL	: sudo npm install -g grunt-cli"
   sudo npm install -g grunt-cli
@@ -140,7 +165,8 @@ if [ ! -e node_modules ]; then
 fi
 echo "STATUS	: local node_modules installed"
 
-if [ "$(type -p express)" == "" ]; then
+npm list express
+if [ $? -ne 0 ]; then
   echo "INSTALL	: express " 
   npm install express
   if [ $? -ne 0 ]; then echo "ERROR	: installation failed"; exit -1; fi

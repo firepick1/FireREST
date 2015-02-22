@@ -1,3 +1,5 @@
+dump.rdb
+redis*
 core
 FireFUSE
 FireMote

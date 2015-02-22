@@ -5,6 +5,9 @@ var app = express();
 var post_enabled = false;
 var firerest={};
 
+var kue = require('kue');
+var jobs = kue.createQueue();
+
 express.static.mime.define({'application/json': ['fire']});
 
 app.all('*', function(req, res, next) {
