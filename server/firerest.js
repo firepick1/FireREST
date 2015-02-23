@@ -7,6 +7,19 @@ var firerest={};
 
 var kue = require('kue');
 var jobs = kue.createQueue();
+var firepick = require('./firepick/firepick.js');
+
+var calib1 = new firepick.Calibrate();
+var calib2 = new firepick.Calibrate();
+console.log("id:" + calib1.id);
+console.log("getId:" + calib1.getId());
+console.log("id:" + calib2.id);
+console.log("getId:" + calib2.getId());
+
+var gcode = new firepick.GCodeDriver();
+var cal = new firepick.Calibrate();
+
+cal.measureFeedRate();
 
 express.static.mime.define({'application/json': ['fire']});
 
