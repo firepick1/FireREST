@@ -121,6 +121,13 @@ if [ "$(type -p npm)" == "" ]; then
 fi
 echo "STATUS	: npm installed"
 
+if [ "$(type -p mocha)" == "" ]; then
+	echo "COMMAND	: sudo npm install -g mocha"
+	sudo npm install -g mocha
+	RC=$?; if [ $RC -ne 0 ]; then echo "ERROR	: $RC"; exit -1; fi
+fi
+echo "STATUS	: mocha installed"
+
 if [ "$(type -p redis-cli)" == "" ]; then
 	echo "COMMAND	: sudo apt-get install -y build-essential"
 	sudo apt-get install -y build-essential
@@ -140,14 +147,14 @@ echo "INSTALL	: redis installed"
 
 npm list kue
 if [ $? -ne 0 ]; then
-  echo "INSTALL	: sudo npm install kue"
+  echo "INSTALL	: npm install kue"
   npm install kue
   if [ $? -ne 0 ]; then echo "ERROR	: installation failed"; exit -1; fi
 fi
 echo "INSTALL	: kue installed"
 
 if [ "$(type -p grunt)" == "" ]; then
-  echo "INSTALL	: sudo npm install -g grunt-cli"
+  echo "INSTALL	: npm install -g grunt-cli"
   sudo npm install -g grunt-cli
   if [ $? -ne 0 ]; then echo "ERROR	: installation failed"; exit -1; fi
   echo "INSTALL	: npm install grunt@0.4.5"
@@ -229,6 +236,7 @@ date > version-$VERSION_MAJOR.$VERSION_MINOR
 echo "------------------------------------------"
 echo "DATE	: `date`"
 echo "SUCCESS	: ../FireREST/build complete"
-echo "TEST	: Launch FireREST web service:"
-echo "TEST	;   fire/web -s"
-echo "TEST	; Verify FireREST web service at http://localhost:8080"
+echo "TEST	: Launch and test FireREST web service (http://localhost:8080):"
+echo "TEST	:   fire/web -s"
+echo "TEST	: Run Javascript unit tests:"
+echo "TEST	:   make test"

@@ -1,0 +1,6 @@
+[submodule "spec/vendor/mocha"]
+	path = spec/vendor/mocha
+	url = https://github.com/visionmedia/mocha.git
+[submodule "spec/vendor/chai"]
+	path = spec/vendor/chai
+	url = https://github.com/chaijs/chai.git
