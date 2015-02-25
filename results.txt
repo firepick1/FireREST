@@ -15,38 +15,38 @@ INFO	: Looking for FireFUSE...
 INFO	: FireFUSE is not available. FireREST is demo mode only
 SUCCESS	: FireREST listening on port 8080
 
+[90m    firepick.Camera test should have camera path: [0m[2K[0G[32m  ․[0m[90m firepick.Camera test should have camera path: [0m[90m5ms[0m
+[90m    firepick.Camera test should call firesight shell command: [0m[2K[0G[32m  ․[0m[90m firepick.Camera test should call firesight shell command: [0m[33m51ms[0m
 [90m    firepick.Camera test should have camera path: [0m[2K[0G[32m  ․[0m[90m firepick.Camera test should have camera path: [0m[90m1ms[0m
-[90m    firepick.Camera test should call firesight shell command: [0m[2K[0G[32m  ․[0m[90m firepick.Camera test should call firesight shell command: [0m[90m25ms[0m
-[90m    firepick.Camera test should have camera path: [0m[2K[0G[32m  ․[0m[90m firepick.Camera test should have camera path: [0m[90m0ms[0m
-[90m    firepick.Camera test should call firesight shell command: [0m[2K[0G[32m  ․[0m[90m firepick.Camera test should call firesight shell command: [0m[90m24ms[0m
-[90m    firepick.Camera test should have working directory: [0m[2K[0G[32m  ․[0m[90m firepick.Camera test should have working directory: [0m[90m9ms[0m
+[90m    firepick.Camera test should call firesight shell command: [0m[2K[0G[32m  ․[0m[90m firepick.Camera test should call firesight shell command: [0m[33m41ms[0m
+[90m    firepick.Camera test should have working directory: [0m[2K[0G[32m  ․[0m[90m firepick.Camera test should have working directory: [0m[90m14ms[0m
 [90m    firepick.GCodeDriver test should home: [0m[2K[0G[32m  ․[0m[90m firepick.GCodeDriver test should home: [0m[90m1ms[0m
-[90m    firepick.GCodeDriver test should origin: [0m[2K[0G[32m  ․[0m[90m firepick.GCodeDriver test should origin: [0m[90m0ms[0m
-[90m    firepick.GCodeDriver test should withFeedRate: [0m[2K[0G[32m  ․[0m[90m firepick.GCodeDriver test should withFeedRate: [0m[90m0ms[0m
+[90m    firepick.GCodeDriver test should origin: [0m[2K[0G[32m  ․[0m[90m firepick.GCodeDriver test should origin: [0m[90m2ms[0m
+[90m    firepick.GCodeDriver test should withFeedRate: [0m[2K[0G[32m  ․[0m[90m firepick.GCodeDriver test should withFeedRate: [0m[90m1ms[0m
 [90m    firepick.GCodeDriver test should withWriter: [0m[2K[0G[32m  ․[0m[90m firepick.GCodeDriver test should withWriter: [0m[90m0ms[0m
 [90m    firepick.GCodeDriver test should withSync: [0m[2K[0G[32m  ․[0m[90m firepick.GCodeDriver test should withSync: [0m[90m0ms[0m
 [90m    firepick.GCodeDriver test should moveTo: [0m[2K[0G[32m  ․[0m[90m firepick.GCodeDriver test should moveTo: [0m[90m1ms[0m
 [90m    firepick.Calibrate test should measureFeedRate: [0m[2K[0G[32m  ․[0m[90m firepick.Calibrate test should measureFeedRate: [0m[90m0ms[0m
 [90m    firepick.FireFUSECamera test should be creatable: [0m[2K[0G[32m  ․[0m[90m firepick.FireFUSECamera test should be creatable: [0m[90m1ms[0m
 [90m    firepick.FireFUSECamera test should have camera path: [0m[2K[0G[32m  ․[0m[90m firepick.FireFUSECamera test should have camera path: [0m[90m0ms[0m
-[90m    firepick.FireFUSECamera test should throw error when capture without camera: [0m[2K[0G[32m  ․[0m[90m firepick.FireFUSECamera test should throw error when capture without camera: [0m[90m0ms[0m
-[90m    firepick.FireFUSECamera test should be able to access Raspberry Pi camera via FireFUSE: [0m[2K[0G[31m  1) firepick.FireFUSECamera test should be able to access Raspberry Pi camera via FireFUSE[0m
-[90m    firepick.FireFUSECamera test should capture images: [0m[2K[0G[32m  ․[0m[90m firepick.FireFUSECamera test should capture images: [0m[90m0ms[0m
-[90m    firepick.MockCamera test should have camera path: [0m[2K[0G[32m  ․[0m[90m firepick.MockCamera test should have camera path: [0m[90m2ms[0m
-[90m    firepick.MockCamera test should capture images: [0mcp test/camX0Y0Z0a.jpg /tmp/MockCamera115124-3659-n1sm71.jpg
-cp test/camX0Y0Z0a.jpg /tmp/MockCamera115124-3659-n1sm71.jpg
-cp test/camX0Y0Z0b.jpg /tmp/MockCamera115124-3659-n1sm71.jpg
-cp test/camX1Y0Z0.jpg /tmp/MockCamera115124-3659-n1sm71.jpg
-[2K[0G[32m  ․[0m[90m firepick.MockCamera test should capture images: [0m[33m39ms[0m
+[90m    firepick.FireFUSECamera test should throw error when capture without camera: [0m[2K[0G[32m  ․[0m[90m firepick.FireFUSECamera test should throw error when capture without camera: [0m[90m1ms[0m
+[90m    firepick.FireFUSECamera test should be able to access Raspberry Pi camera via FireFUSE: [0m[2K[0G[32m  ․[0m[90m firepick.FireFUSECamera test should be able to access Raspberry Pi camera via FireFUSE: [0m[90m0ms[0m
+[90m    firepick.FireFUSECamera test should capture images: [0mcp target/camera.jpg /dev/null
+cp target/camera.jpg /dev/null
+[2K[0G[31m  1) firepick.FireFUSECamera test should capture images[0m
+[90m    firepick.MockCamera test should have camera path: [0m[2K[0G[32m  ․[0m[90m firepick.MockCamera test should have camera path: [0m[90m4ms[0m
+[90m    firepick.MockCamera test should capture images: [0mcp test/camX0Y0Z0a.jpg /tmp/MockCamera115124-12747-1vd421q.jpg
+cp test/camX0Y0Z0a.jpg /tmp/MockCamera115124-12747-1vd421q.jpg
+cp test/camX0Y0Z0b.jpg /tmp/MockCamera115124-12747-1vd421q.jpg
+cp test/camX1Y0Z0.jpg /tmp/MockCamera115124-12747-1vd421q.jpg
+[2K[0G[32m  ․[0m[90m firepick.MockCamera test should capture images: [0m[33m68ms[0m
 
-[92m [0m[32m 18 passing[0m[90m (151ms)[0m
+[92m [0m[32m 18 passing[0m[90m (270ms)[0m
 [31m  1 failing[0m
 
-[0m  1) firepick.FireFUSECamera test should be able to access Raspberry Pi camera via FireFUSE:
-[0m[31m     AssertionError: expected false to be true[0m[90m
-      at Assertion.fail (/var/host/media/removable/seagate/FireREST/node_modules/should/lib/assertion.js:196:17)
-      at Assertion.prop.(anonymous function) (/var/host/media/removable/seagate/FireREST/node_modules/should/lib/assertion.js:81:17)
-      at Context.<anonymous> (/var/host/media/removable/seagate/FireREST/server/firepick/FireFUSECamera.js:60:34)
+[0m  1) firepick.FireFUSECamera test should capture images:
+[0m[31m     AssertionError: successive captures should be different size[0m[90m
+      at Context.<anonymous> (/var/host/media/removable/seagate/FireREST/server/firepick/FireFUSECamera.js:72:11)
       at callFn (/var/host/media/removable/seagate/FireREST/node_modules/mocha/lib/runnable.js:251:21)
       at Test.Runnable.run (/var/host/media/removable/seagate/FireREST/node_modules/mocha/lib/runnable.js:244:7)
       at Runner.runTest (/var/host/media/removable/seagate/FireREST/node_modules/mocha/lib/runner.js:374:10)
@@ -54,6 +54,8 @@ cp test/camX1Y0Z0.jpg /tmp/MockCamera115124-3659-n1sm71.jpg
       at next (/var/host/media/removable/seagate/FireREST/node_modules/mocha/lib/runner.js:299:14)
       at /var/host/media/removable/seagate/FireREST/node_modules/mocha/lib/runner.js:309:7
       at next (/var/host/media/removable/seagate/FireREST/node_modules/mocha/lib/runner.js:248:23)
+      at Immediate._onImmediate (/var/host/media/removable/seagate/FireREST/node_modules/mocha/lib/runner.js:276:5)
+      at processImmediate [as _immediateCallback] (timers.js:358:17)
 [0m
 
 

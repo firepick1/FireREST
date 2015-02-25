@@ -5,10 +5,14 @@ var child_process = require('child_process');
 var fs = require('fs');
 var temp = require('temp');
 temp.track();
+	
+//var firefuse_path = "/dev/firefuse/cv/1/camera.jpg";
+var firefuse_path = "target/camera.jpg";
 
 (function(firepick) {
+
     function FireFUSECamera(path) {
-		this.path = path || "/dev/firefuse/cv/1/camera.jpg";
+		this.path = path || firefuse_path;
 		try { 
 			this.stat = fs.statSync(this.path);
 		} catch (err) {
@@ -48,7 +52,7 @@ temp.track();
 		}), "no/such/path");
 	});
     it("should have camera path", function() {
-        should(camera.path).equal("/dev/firefuse/cv/1/camera.jpg",  'camera path');
+        should(camera.path).equal(firefuse_path,  'camera path');
         should(cam_bad.path).equal("no/such/path",  'camera path');
     });
 	it("should throw error when capture without camera", function() {
@@ -57,7 +61,7 @@ temp.track();
 		}));
     });
 	it("should be able to access Raspberry Pi camera via FireFUSE", function() {
-		should(camera.isAvailable()).be.true("Raspberry Pi camera available as /dev/firefuse");
+		should.equal(camera.isAvailable(), true, "Raspberry Pi camera available as /dev/firefuse");
     });
 	it("should capture images", function() {
 		if (camera.isAvailable()) {
@@ -65,7 +69,7 @@ temp.track();
 			camera.capture();
 			var stats2 = fs.statSync(camera.path);
 			camera.capture();
-			should(stats1.size).notEqual(stats2.size);
+			should.notEqual(stats1.size, stats2.size, "successive captures should be different size");
 		}
 	});
 
