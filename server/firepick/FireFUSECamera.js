@@ -28,9 +28,9 @@ var firefuse_path = "/dev/firefuse/cv/1/camera.jpg";
 			throw {error:"capture failed", cause:this.err};
 		}
 
-		var cmd = "cp " + this.path + " /dev/null";
+		var cmd = "truncate -s0 " + this.path;
 		console.log(cmd);
-		//var out = child_process.execSync(cmd);
+		var out = child_process.execSync(cmd);
     };
 
     console.log("firepick.FireFUSECamera");
@@ -69,7 +69,9 @@ var firefuse_path = "/dev/firefuse/cv/1/camera.jpg";
 			camera.capture();
 			var stats2 = fs.statSync(camera.path);
 			camera.capture();
-			should.notEqual(stats1.size, stats2.size, "successive captures should be different size");
+			var stats3 = fs.statSync(camera.path);
+			camera.capture();
+			should.notEqual(stats2.size, stats3.size, "successive captures should be different size");
 		}
 	});
 
