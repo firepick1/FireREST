@@ -29,7 +29,7 @@ var firefuse_path = "/dev/firefuse/cv/1/camera.jpg";
 		}
 
 		var cmd = "truncate -s0 " + this.path;
-		console.log(cmd);
+		// console.log(cmd);
 		var out = child_process.execSync(cmd);
     };
 

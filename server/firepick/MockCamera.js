@@ -21,7 +21,7 @@ temp.track();
 		var image = this.images[0];
 		this.images = this.images.slice(1);
 		var cmd = "cp " + image + " " + this.path;
-		console.log(cmd);
+		//console.log(cmd);
 		var out = child_process.execSync(cmd);
     }
     MockCamera.prototype.push = function(imagePath) {
