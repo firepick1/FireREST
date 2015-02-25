@@ -145,14 +145,6 @@ if [ "$(type -p redis-cli)" == "" ]; then
 fi
 echo "INSTALL	: redis installed"
 
-npm list should
-if [ $? -ne 0 ]; then
-  echo "INSTALL	: npm install should"
-  npm install should
-  if [ $? -ne 0 ]; then echo "ERROR	: installation failed"; exit -1; fi
-fi
-echo "INSTALL	: should installed"
-
 npm list kue
 if [ $? -ne 0 ]; then
   echo "INSTALL	: npm install kue"

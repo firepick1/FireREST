@@ -7,14 +7,6 @@ echo "HELP	: fire/upgrade -a   # rebuild everything"
 
 fire/web -k
 
-if [ "$(arch)" != "armv6l" ] || [ "$(lsb_release -is)" != "Debian" ] ;then
-  RASPBIAN=0
-  echo "SYSTEM	: other (FireFUSE not supported)"
-else
-  RASPBIAN=1
-  echo "SYSTEM	: Raspberry Pi with Rasbian"
-fi
-
 echo "GIT	: `git config remote.origin.url`"
 git pull
 if [ $? -ne 0 ]; then
@@ -22,65 +14,9 @@ if [ $? -ne 0 ]; then
   exit -1;
 fi
 
-if [ "$(type -p jshint)" == "" ]; then
-	echo "COMMAND	: sudo npm install -g jshint"
-	sudo npm install -g jshint
-	RC=$?; if [ $RC -ne 0 ]; then echo "ERROR	: $RC"; exit $RC; fi
-fi
-echo "STATUS	: jshint installed"
-
-NODE_VERSION=`node --version`
-echo "NODE	: $NODE_VERSION"
-if [[ $NODE_VERSION < v0.12.* ]]; then
-	if [ $RASPBIAN -eq 1 ]; then
-		pushd ..
-		echo "NODE	: installing node-v0.12.0-linux-arm-pi.tar.gz"
-		wget https://s3-eu-west-1.amazonaws.com/conoroneill.net/wp-content/uploads/2015/02/node-v0.12.0-linux-arm-pi.tar.gz
-		RC=$?; if [ $RC -ne 0 ]; then echo "ERROR	: $RC"; exit $RC; fi
-		echo "NODE	: tar -zxvf node-v0.12.0-linux-arm-pi.tar.gz"
-		tar -zxvf node-v0.12.0-linux-arm-pi.tar.gz
-		RC=$?; if [ $RC -ne 0 ]; then echo "ERROR	: $RC"; exit $RC; fi
-		echo "NODE	: cd node-v0.12.0-linux-arm-pi"
-		cd node-v0.12.0-linux-arm-pi
-		RC=$?; if [ $RC -ne 0 ]; then echo "ERROR	: $RC"; exit $RC; fi
-		echo "NODE	: sudo cp -R * /usr/local/"
-		sudo cp -R * /usr/local/
-		RC=$?; if [ $RC -ne 0 ]; then echo "ERROR	: $RC"; exit $RC; fi
-		popd
-	else
-		echo "STATUS	: upgrading node"
-		echo "COMMAND	: sudo npm cache clean -f"
-		sudo npm cache clean -f
-		RC=$?; if [ $RC -ne 0 ]; then echo "ERROR	: $RC"; exit $RC; fi
-		echo "COMMAND	: sudo npm install -g n"
-		sudo npm install -g n
-		RC=$?; if [ $RC -ne 0 ]; then echo "ERROR	: $RC"; exit $RC; fi
-		echo "COMMAND	: sudo n stable"
-		sudo n stable
-		RC=$?; if [ $RC -ne 0 ]; then echo "ERROR	: $RC"; exit $RC; fi
-	fi
+if [ ! -e fire/upgrade ]; then
+	echo "ERROR	: fire/upgrade must be run from the FireREST directory"
+	exit -1
 fi
 
-echo "COMMAND	: npm install"
-npm install
-RC=$?; if [ $RC -ne 0 ]; then echo "ERROR	: $RC"; exit $RC; fi
-
-echo "SUDO	: verifying sudo privilege for changing machine configuration"
-sudo -K
-sudo echo "SUDO	: confirmed"
-if [ "$1" == "-a" ]; then
-  echo "STATUS	: full build requested (-a)"
-  rm version-*
-fi
-echo "LOG	: `pwd`/build.log (started)"
-./build |& tee build.log
-grep ERROR build.log
-if [ $? -eq 0 ]; then
-  echo "----------------------------------"
-  echo "ERROR	: Could not build FireREST"
-  echo "ERROR	: See build.log"
-  exit -1
-fi
-echo "LOG	: `pwd`/build.log"
-echo "SUCCESS	: fire/upgrade - FireREST upgrade complete"
-
+fire/upgrade-main
