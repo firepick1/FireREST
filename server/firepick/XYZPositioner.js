@@ -19,10 +19,15 @@ function isNumeric(obj) {
 	XYZPositioner.validate = function(xyzPositioner) {
 		describe("XYZPositioner validation test", function() {
 			should.exist(xyzPositioner);
+			it("should home ", function() {
+				should.exist(xyzPositioner.home, "home not implemented");
+			});
 			it("should move to origin", function() {
+				should.exist(xyzPositioner.origin, "origin not implemented");
 				should.deepEqual({x:0,y:0,z:0}, xyzPositioner.origin().position);
 			});
 			it("should move to (1,2,3)", function() {
+				should.exist(xyzPositioner.move, "move not implemented");
 				should.deepEqual({x:1,y:2,z:3}, xyzPositioner.move({x:1,y:2,z:3}).position);
 			});
 			it("should move to origin", function() {

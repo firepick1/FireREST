@@ -22,6 +22,15 @@ var firefuse_path = "/dev/firefuse/sync/cnc/marlin/gcode.fire";
     FireFUSEMarlin.prototype.isAvailable = function() {
 		return typeof this.err === 'undefined';
 	};
+	FireFUSEMarlin.prototype.home = function() {
+		return this.xyz.home();
+	};
+	FireFUSEMarlin.prototype.origin = function() {
+		return this.xyz.origin();
+	};
+	FireFUSEMarlin.prototype.move = function(path) {
+		return this.xyz.move(path);
+	};
     FireFUSEMarlin.prototype.write = function(data) {
         if (this.err) {
 			throw {error:"open failed", cause:this.err};
