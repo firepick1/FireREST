@@ -10,7 +10,7 @@ function isNumeric(obj) {
     function XYZPositioner(writer) {
         this.feedRate = 6000;
         this.sync = "M400";
-		this.position = {};
+		this.$position = {};
         this.write = writer || function(cmd) {
             console.log("XYZPositioner:" + cmd);
         }
@@ -24,17 +24,17 @@ function isNumeric(obj) {
 			});
 			it("should move to origin", function() {
 				should.exist(xyzPositioner.origin, "origin not implemented");
-				should.deepEqual({x:0,y:0,z:0}, xyzPositioner.origin().position);
+				should.deepEqual({x:0,y:0,z:0}, xyzPositioner.origin().position());
 			});
 			it("should move to (1,2,3)", function() {
 				should.exist(xyzPositioner.move, "move not implemented");
-				should.deepEqual({x:1,y:2,z:3}, xyzPositioner.move({x:1,y:2,z:3}).position);
+				should.deepEqual({x:1,y:2,z:3}, xyzPositioner.move({x:1,y:2,z:3}).position());
 			});
 			it("should move to origin", function() {
-				should.deepEqual({x:0,y:0,z:0}, xyzPositioner.origin().position);
+				should.deepEqual({x:0,y:0,z:0}, xyzPositioner.origin().position());
 			});
 			it("should move to (1,2,3)", function() {
-				should.deepEqual({x:1,y:2,z:3}, xyzPositioner.move([{x:1},{y:2},{z:3}]).position); 
+				should.deepEqual({x:1,y:2,z:3}, xyzPositioner.move([{x:1},{y:2},{z:3}]).position()); 
 			});
 		});
 		return true;
@@ -63,9 +63,12 @@ function isNumeric(obj) {
         this.home();
 		this.withFeedRate(this.feedRate);
 		this.move({x:0,y:0,z:0});
-		this.position = {x:0,y:0,z:0};
+		this.$position = {x:0,y:0,z:0};
         return this;
     }
+	XYZPositioner.prototype.position = function() {
+		return this.$position;
+	}
     XYZPositioner.prototype.move = function(path) {
 		if (!Array.isArray(path) && typeof(path) === 'object') {
 			path = [path];
@@ -86,10 +89,10 @@ function isNumeric(obj) {
     XYZPositioner.prototype.moveTo = function(x, y, z) {
         var coord = (isNumeric(x) ? ("X" + x) : "") + (isNumeric(y) ? ("Y" + y) : "") + (isNumeric(z) ? ("Z" + z) : "");
         this.write("G0" + coord);
-		this.position = {
-			x: (isNumeric(x) ? x : this.position.x),
-			y: (isNumeric(y) ? y : this.position.y),
-			z: (isNumeric(z) ? z : this.position.z),
+		this.$position = {
+			x: (isNumeric(x) ? x : this.$position.x),
+			y: (isNumeric(y) ? y : this.$position.y),
+			z: (isNumeric(z) ? z : this.$position.z),
 		};
         return this;
     }
@@ -137,27 +140,27 @@ function isNumeric(obj) {
 		should.not.exist(output2);
         assertCommand(xyz.withWriter(testWriter2).origin(), "G28;G0F6000;G0X0Y0Z0;M400");
 		should.equal("G28;G0F6000;G0X0Y0Z0;M400", output2);
-		should.deepEqual({x:0,y:0,z:0}, xyz.position);
+		should.deepEqual({x:0,y:0,z:0}, xyz.position());
     });
     it("should withSync(sync)", function() {
         assertCommand(xyz.withSync("m400").origin(), "G28;G0F6000;G0X0Y0Z0;m400");
         assertCommand(xyz.withSync("M400").origin(), "G28;G0F6000;G0X0Y0Z0;M400");
-		should.deepEqual({x:0,y:0,z:0}, xyz.position);
+		should.deepEqual({x:0,y:0,z:0}, xyz.position());
     });
     it("should moveToSync(x,y,z)", function() {
         assertCommand(xyz.withWriter(testWriter2).origin(), "G28;G0F6000;G0X0Y0Z0;M400");
         assertCommand(xyz.moveToSync(), "G0;M400");
         assertCommand(xyz.moveToSync(1), "G0X1;M400");
-		should.deepEqual({x:1,y:0,z:0}, xyz.position);
+		should.deepEqual({x:1,y:0,z:0}, xyz.position());
         assertCommand(xyz.withWriter(testWriter2).origin(), "G28;G0F6000;G0X0Y0Z0;M400");
         assertCommand(xyz.moveToSync(null, 2), "G0Y2;M400");
-		should.deepEqual({x:0,y:2,z:0}, xyz.position);
+		should.deepEqual({x:0,y:2,z:0}, xyz.position());
         assertCommand(xyz.withWriter(testWriter2).origin(), "G28;G0F6000;G0X0Y0Z0;M400");
         assertCommand(xyz.moveToSync(null, null, 3), "G0Z3;M400");
-		should.deepEqual({x:0,y:0,z:3}, xyz.position);
+		should.deepEqual({x:0,y:0,z:3}, xyz.position());
         assertCommand(xyz.withWriter(testWriter2).origin(), "G28;G0F6000;G0X0Y0Z0;M400");
         assertCommand(xyz.moveToSync(1, 2, 3), "G0X1Y2Z3;M400");
-		should.deepEqual({x:1,y:2,z:3}, xyz.position);
+		should.deepEqual({x:1,y:2,z:3}, xyz.position());
     });
 	it("should move(path)", function() {
         assertCommand(xyz.origin(), "G28;G0F6000;G0X0Y0Z0;M400");

@@ -7,7 +7,6 @@ var temp = require('temp');
 temp.track();
 	
 var firefuse_path = "/dev/firefuse/cv/1/camera.jpg";
-//var firefuse_path = "target/camera.jpg";
 
 (function(firepick) {
 

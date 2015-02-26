@@ -5,7 +5,6 @@ firepick.XYZPositioner = require("./XYZPositioner");
 var fs = require('fs');
 	
 var firefuse_path = "/dev/firefuse/sync/cnc/marlin/gcode.fire";
-//var firefuse_path = "/tmp/Marlin";
 
 (function(firepick) {
     function FireFUSEMarlin(path) {
