@@ -2,11 +2,11 @@ var should = require("should"),
     module = module || {},
     firepick;
 
-var GCodeDriver = require("./GCodeDriver.js");
+var XYZPositioner = require("./XYZPositioner.js");
 
 (function(firepick) {
     function Calibrate(gcode) {
-        this.gcode = gcode || new GCodeDriver();
+        this.gcode = gcode || new XYZPositioner();
         return this;
     }
     Calibrate.prototype.measureFeedRate = function() {
@@ -14,7 +14,7 @@ var GCodeDriver = require("./GCodeDriver.js");
         return this;
     }
 
-    console.log("firepick.Calibrate");
+    console.log("LOADED	: firepick.Calibrate");
     module.exports = firepick.Calibrate = Calibrate;
 })(firepick || (firepick = {}));
 
@@ -24,7 +24,7 @@ var GCodeDriver = require("./GCodeDriver.js");
     function testWriter(cmd) {
         output = output ? (output + ";" + cmd) : cmd;
     }
-    var gcode = new GCodeDriver().withWriter(testWriter);
+    var gcode = new XYZPositioner().withWriter(testWriter);
     var cal = new firepick.Calibrate(gcode);
 
     function assertCommand(result, expected) {

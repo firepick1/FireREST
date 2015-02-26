@@ -33,7 +33,7 @@ var firefuse_path = "/dev/firefuse/cv/1/camera.jpg";
 		var out = child_process.execSync(cmd);
     };
 
-    console.log("firepick.FireFUSECamera");
+    console.log("LOADED	: firepick.FireFUSECamera");
     module.exports = firepick.FireFUSECamera = FireFUSECamera;
 })(firepick || (firepick = {}));
 
@@ -60,11 +60,11 @@ var firefuse_path = "/dev/firefuse/cv/1/camera.jpg";
 			cam_bad.capture();
 		}));
     });
-	it("should be able to access Raspberry Pi camera via FireFUSE", function() {
-		should.equal(camera.isAvailable(), true, "Raspberry Pi camera available as /dev/firefuse");
-    });
-	it("should capture images", function() {
-		if (camera.isAvailable()) {
+	if (new firepick.FireFUSECamera().isAvailable()) {
+		it("should be able to access Raspberry Pi camera via FireFUSE", function() {
+			should.equal(camera.isAvailable(), true, "Raspberry Pi camera available as /dev/firefuse");
+		});
+		it("should capture images", function() {
 			var stats1 = fs.statSync(camera.path);
 			camera.capture();
 			var stats2 = fs.statSync(camera.path);
@@ -72,7 +72,9 @@ var firefuse_path = "/dev/firefuse/cv/1/camera.jpg";
 			var stats3 = fs.statSync(camera.path);
 			camera.capture();
 			should.notEqual(stats2.size, stats3.size, "successive captures should be different size");
-		}
-	});
+		});
+	} else {
+		console.log("WARNING	: FireFUSE Raspberry Pi Camera is unavailable (test skipped)");
+	}
 
 });

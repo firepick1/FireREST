@@ -14,7 +14,7 @@ module.exports = function(grunt) {
         },
         watch: {
             scripts: {
-                files: ['server/**/*.js'],
+                files: ['server/firepick/*.js'],
                 tasks: ['mochaTest'],
                 options: {
                     spawn: true,
@@ -29,7 +29,7 @@ module.exports = function(grunt) {
                     quiet: true, // Optionally suppress output to standard out (defaults to false)
                     clearRequireCache: false // Optionally clear the require cache before running tests (defaults to false)
                 },
-                src: ['server/**/*.js']
+                src: ['server/firepick/*.js']
             }
         },
         jshint: {

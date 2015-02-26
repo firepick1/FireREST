@@ -28,7 +28,7 @@ temp.track();
         this.images.push(imagePath);
     }
 
-    console.log("firepick.MockCamera");
+    console.log("LOADED	: firepick.MockCamera");
     module.exports = firepick.MockCamera = MockCamera;
 })(firepick || (firepick = {}));
 
