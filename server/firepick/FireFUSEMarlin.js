@@ -5,15 +5,17 @@ firepick.XYZPositioner = require("./XYZPositioner");
 var fs = require('fs');
 	
 var firefuse_path = "/dev/firefuse/sync/cnc/marlin/gcode.fire";
+//var firefuse_path = "/tmp/Marlin";
 
 (function(firepick) {
     function FireFUSEMarlin(path) {
 		this.path = path || firefuse_path;
 		try { 
 			this.stat = fs.statSync(this.path);
-			this.fd = fs.openSync(this.path, 'w');
+			var fd = fs.openSync(this.path, 'w');
+			this.fd = fd;
 			this.xyz = new firepick.XYZPositioner(function(data) {
-				this.write(data);
+				return fs.write(fd, data);
 			});
 		} catch (err) {
 			console.log(err);
