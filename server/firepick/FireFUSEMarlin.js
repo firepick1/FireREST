@@ -1,6 +1,7 @@
 var should = require("should"),
     module = module || {},
-    firepick;
+    firepick = firepick || {};
+firepick.XYZPositioner = require("./XYZPositioner");
 var fs = require('fs');
 	
 var firefuse_path = "/dev/firefuse/sync/cnc/marlin/gcode.fire";
@@ -8,6 +9,7 @@ var firefuse_path = "/dev/firefuse/sync/cnc/marlin/gcode.fire";
 (function(firepick) {
     function FireFUSEMarlin(path) {
 		this.path = path || firefuse_path;
+		this.xyz = new firepick.XYZPositioner(this);
 		try { 
 			this.stat = fs.statSync(this.path);
 			this.fd = fs.openSync(this.path, 'w');
@@ -24,7 +26,7 @@ var firefuse_path = "/dev/firefuse/sync/cnc/marlin/gcode.fire";
         if (this.err) {
 			throw {error:"open failed", cause:this.err};
 		}
-		fs.write(this.fd, data);
+		return fs.write(this.fd, data);
     };
 
     console.log("LOADED	: firepick.FireFUSEMarlin");
@@ -60,6 +62,9 @@ var firefuse_path = "/dev/firefuse/sync/cnc/marlin/gcode.fire";
 		});
 		it("should home ", function() {
 			should.ok(ffm.write("G28"));
+		});
+		it("should be an XYZPositioner", function() {
+			should.ok(firepick.XYZPositioner.validate(ffm));
 		});
 	} else {
 		console.log("WARNING	: FireFUSE Marlin is unavailable (test skipped)");
