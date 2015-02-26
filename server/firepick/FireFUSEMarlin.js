@@ -9,7 +9,7 @@ var firefuse_path = "/dev/firefuse/sync/cnc/marlin/gcode.fire";
 (function(firepick) {
     function FireFUSEMarlin(path) {
 		this.path = path || firefuse_path;
-		this.xyz = new firepick.XYZPositioner(this);
+		this.xyz = new firepick.XYZPositioner(this.write);
 		try { 
 			this.stat = fs.statSync(this.path);
 			this.fd = fs.openSync(this.path, 'w');
