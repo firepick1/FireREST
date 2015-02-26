@@ -69,9 +69,7 @@ var firefuse_path = "/dev/firefuse/cv/1/camera.jpg";
 			camera.capture();
 			var stats2 = fs.statSync(camera.path);
 			camera.capture();
-			var stats3 = fs.statSync(camera.path);
-			camera.capture();
-			should.notEqual(stats2.size, stats3.size, "successive captures should be different size");
+			should.notEqual(stats1.size, stats2.size, "successive captures should be different size");
 		});
 	} else {
 		console.log("WARNING	: FireFUSE Raspberry Pi Camera is unavailable (test skipped)");
