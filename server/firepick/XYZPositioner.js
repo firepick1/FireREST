@@ -40,6 +40,7 @@ function isNumeric(obj) {
 		return true;
 	}
     XYZPositioner.prototype.withWriter = function(writer) {
+		should.exist(writer);
         this.write = writer;
         return this;
     }
