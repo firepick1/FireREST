@@ -9,10 +9,12 @@ var firefuse_path = "/dev/firefuse/sync/cnc/marlin/gcode.fire";
 (function(firepick) {
     function FireFUSEMarlin(path) {
 		this.path = path || firefuse_path;
-		this.xyz = new firepick.XYZPositioner(this.write);
 		try { 
 			this.stat = fs.statSync(this.path);
 			this.fd = fs.openSync(this.path, 'w');
+			this.xyz = new firepick.XYZPositioner(function(data) {
+				this.write(data);
+			});
 		} catch (err) {
 			console.log(err);
 			this.err = err;
@@ -23,12 +25,15 @@ var firefuse_path = "/dev/firefuse/sync/cnc/marlin/gcode.fire";
 		return typeof this.err === 'undefined';
 	};
 	FireFUSEMarlin.prototype.home = function() {
+		should.exist(this.xyz);
 		return this.xyz.home();
 	};
 	FireFUSEMarlin.prototype.origin = function() {
+		should.exist(this.xyz);
 		return this.xyz.origin();
 	};
 	FireFUSEMarlin.prototype.move = function(path) {
+		should.exist(this.xyz);
 		return this.xyz.move(path);
 	};
     FireFUSEMarlin.prototype.write = function(data) {
