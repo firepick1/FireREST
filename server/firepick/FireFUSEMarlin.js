@@ -24,7 +24,7 @@ var firefuse_path = "/dev/firefuse/sync/cnc/marlin/gcode.fire";
         if (this.err) {
 			throw {error:"open failed", cause:this.err};
 		}
-		fs.write(fd, data);
+		fs.write(this.fd, data);
     };
 
     console.log("LOADED	: firepick.FireFUSEMarlin");
