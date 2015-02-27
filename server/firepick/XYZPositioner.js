@@ -25,14 +25,17 @@ function isNumeric(obj) {
 			});
 			if (xyzPositioner.isAvailable && xyzPositioner.isAvailable()) {
 				it("should move to origin", function() {
+					this.timeout(5000);
 					should.equal(xyzPositioner, xyzPositioner.origin());
 					should.deepEqual({x:0,y:0,z:0}, xyzPositioner.position());
 				});
 				it("should move to a single position {x:1,y:2,z:3}", function() {
+					this.timeout(5000);
 					should.equal(xyzPositioner, xyzPositioner.move({x:1,y:2,z:3}));
 					should.deepEqual({x:1,y:2,z:3}, xyzPositioner.position());
 				});
 				it("should move along a path [{x:1},{y:2},{z:3}]", function() {
+					this.timeout(5000);
 					should.deepEqual({x:0,y:0,z:0}, xyzPositioner.origin().position());
 					should.equal(xyzPositioner, xyzPositioner.move([{x:1},{y:2},{z:3}])); 
 					should.deepEqual({x:1,y:2,z:3}, xyzPositioner.position()); 
