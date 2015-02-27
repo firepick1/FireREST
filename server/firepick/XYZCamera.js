@@ -14,6 +14,12 @@ function isNumeric(obj) {
 }
 
 (function(firepick) {
+	function firesight(fname1, pipeline, args) {
+		var cmd = "firesight -i " + fname1 + " -p server/json/" + pipeline + " " + args;
+		//console.log(cmd);
+		var out = child_process.execSync(cmd);
+		return JSON.parse(out.toString());
+	}
     function XYZCamera(xyzPositioner, camera) {
         this.xyz = xyzPositioner || new firepick.XYZPositioner();
 		should.ok(firepick.XYZPositioner.validate(this.xyz, "XYZCamera(xyzPositioner)"));
@@ -73,19 +79,10 @@ function isNumeric(obj) {
 	};
 	XYZCamera.prototype.calcOffset = function(imgRef1, imgRef2) {
 		should.exist(imgRef1);
-		var fname1 = this.camera.path;
-		var fname2 = this.pathOf(imgRef1);
-		if (typeof imgRef2 !== 'undefined') {
-			fname1 = fname2;
-			fname2 = this.pathOf(imgRef2);
-		}
-		var cmd = "firesight" +
-			" -i " + fname1 + 
-			" -p server/json/calcOffset.json" +
-			" -Dtemplate=" + fname2;
-		//console.log(cmd);
-		var out = child_process.execSync(cmd);
-		var jout = JSON.parse(out.toString());
+		var nArgs = typeof imgRef2 === 'undefined' ? 1 : 2;
+		var fname1 = nArgs === 1 ? this.camera.path : this.pathOf(imgRef1);
+		var fname2 = nArgs === 1 ? this.pathOf(imgRef1) : this.pathOf(imgRef2);
+		var jout = firesight(fname1, "calcOffset.json", "-Dtemplate=" + fname2);
 		return jout.result.channels;
 	};
 
