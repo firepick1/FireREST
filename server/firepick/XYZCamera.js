@@ -76,6 +76,7 @@ function isNumeric(obj) {
 		var x0y0z0_1 = fs.readFileSync(xyzCam.xyzPath(0,0,0));
 		console.log("C");
 		should.deepEqual(camX0Y0Z0a, x0y0z0_1);
+		console.log("D");
 	});
 	it("should take a different picture at (0,0,0)", function() {
 		camera.push("test/camX0Y0Z0b.jpg");
