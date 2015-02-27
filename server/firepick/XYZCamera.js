@@ -71,31 +71,31 @@ function isNumeric(obj) {
 		should.equal(xyzCam, xyzCam.captureXYZ());
 		should.deepEqual({x:0,y:0,z:0},xyzCam.position());
 		console.log("A");
-		var camX0Y0Z0a = fs.readFileSync("test/camX0Y0Z0a.jpg");
+		var camX0Y0Z0a = fs.statSync("test/camX0Y0Z0a.jpg");
 		console.log("B");
-		var x0y0z0_1 = fs.readFileSync(xyzCam.xyzPath(0,0,0));
+		var x0y0z0_1 = fs.statSync(xyzCam.xyzPath(0,0,0));
 		console.log("C");
-		should.deepEqual(camX0Y0Z0a, x0y0z0_1);
+		should.equal(camX0Y0Z0a.size, x0y0z0_1.size);
 		console.log("D");
 	});
 	it("should take a different picture at (0,0,0)", function() {
 		camera.push("test/camX0Y0Z0b.jpg");
 		should.deepEqual({x:0,y:0,z:0}, xyzCam.origin().position());
 		should.equal(xyzCam, xyzCam.captureXYZ());
-		var camX0Y0Z0b = fs.readFileSync("test/camX0Y0Z0b.jpg");
-		var x0y0z0_2 = fs.readFileSync(path.join(os.tmpDir(),"XYZCamera_0_0_0.jpg"));
-		should.deepEqual(camX0Y0Z0b, x0y0z0_2);
+		var camX0Y0Z0b = fs.statSync("test/camX0Y0Z0b.jpg");
+		var x0y0z0_2 = fs.statSync(xyzCam.xyzPath(0,0,0));
+		should.deepEqual(camX0Y0Z0b.size, x0y0z0_2.size);
 	});
 	it("should take a picture at (1,0,0)", function() {
 		camera.push("test/camX1Y0Z0.jpg");
-		var camX1Y0Z0 = fs.readFileSync("test/camX1Y0Z0.jpg");
-		var fx1y0z0 = path.join(os.tmpDir(),"XYZCamera_1_0_0.jpg");
+		var camX1Y0Z0 = fs.statSync("test/camX1Y0Z0.jpg");
+		var fx1y0z0 = xyzCam.xyzPath(1,0,0);
 		fs.writeFileSync(fx1y0z0, "");
 		should.deepEqual({x:1,y:0,z:0}, xyzCam.move({x:1,y:0,z:0}).position());
 		should.equal(xyzCam, xyzCam.captureXYZ(1,0,0));
 		should.deepEqual({x:1,y:0,z:0},xyzCam.position());
-		x1y0z0 = fs.readFileSync(path.join(os.tmpDir(),"XYZCamera_1_0_0.jpg"));
-		should.deepEqual(camX1Y0Z0, x1y0z0);
+		x1y0z0 = fs.statSync(fx1y0z0);
+		should.equal(camX1Y0Z0.size, x1y0z0.size);
 	});
 	it("should calculate the image offset with respect to another XYZ", function() {
 		camera.push("test/camX0Y0Z0a.jpg");
