@@ -37,6 +37,12 @@ function isNumeric(obj) {
 					should.equal(xyzPositioner, xyzPositioner.move([{x:1},{y:2},{z:3}])); 
 					should.deepEqual({x:1,y:2,z:3}, xyzPositioner.position()); 
 				});
+			} else {
+				it("should throw errors when not available", function() {
+					should.throws(function(){xyzPositioner.home();});
+					should.throws(function(){xyzPositioner.origin();});
+					should.throws(function(){xyzPositioner.move();});
+				});
 			}
 		});
 		return true;
