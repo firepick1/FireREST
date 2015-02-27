@@ -1,0 +1,12 @@
+[
+  {"op":"calcOffset", 
+    "name":"result", 
+    "minval":"{{minval}}",
+    "roi":"{{roi}}",
+    "xtol":"{{xtol}}",
+    "ytol":"{{ytol}}",
+    "channels":"{{channels}}", 
+    "offsetColor":"{{offsetColor}}", 
+    "template":"{{template}}"
+  }
+]
