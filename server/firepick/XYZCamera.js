@@ -65,6 +65,7 @@ function isNumeric(obj) {
 		should.ok(firepick.XYZPositioner.validate(xyzCam, "XYZCamera"));
 	});
 	it("should take a picture at (0,0,0)", function() {
+		this.timeout(5000);
 		camera.push("test/camX0Y0Z0a.jpg");
 		should.deepEqual({x:0,y:0,z:0}, xyzCam.origin().position());
 		should.equal(xyzCam, xyzCam.captureXYZ());
