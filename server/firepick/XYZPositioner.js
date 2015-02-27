@@ -1,7 +1,6 @@
 var should = require("should"),
     module = module || {},
     firepick;
-
 function isNumeric(obj) {
     return (obj - parseFloat(obj) + 1) >= 0;
 }
@@ -11,31 +10,34 @@ function isNumeric(obj) {
         this.feedRate = 6000;
         this.sync = "M400";
 		this.$position = {};
-        this.write = writer || function(cmd) {
-            console.log("XYZPositioner:" + cmd);
-        }
+        this.write = writer || function(cmd) { /* default discards data */ }
         return this;
     }
-	XYZPositioner.validate = function(xyzPositioner) {
-		describe("XYZPositioner validation test", function() {
+	XYZPositioner.validate = function(xyzPositioner, name) {
+		describe("XYZPositioner validate(" + name + ")", function() {
 			should.exist(xyzPositioner);
-			it("should home ", function() {
-				should.exist(xyzPositioner.home, "home not implemented");
+			it("should define XYZPositioner methods", function() {
+				should.ok(xyzPositioner.home instanceof Function, "home not implemented");
+				should.ok(xyzPositioner.position instanceof Function, "position not implemented");
+				should.ok(xyzPositioner.origin instanceof Function, "origin not implemented");
+				should.ok(xyzPositioner.move instanceof Function, "move not implemented");
+				should.ok(xyzPositioner.isAvailable instanceof Function, "isAvailable not implemented");
 			});
-			it("should move to origin", function() {
-				should.exist(xyzPositioner.origin, "origin not implemented");
-				should.deepEqual({x:0,y:0,z:0}, xyzPositioner.origin().position());
-			});
-			it("should move to (1,2,3)", function() {
-				should.exist(xyzPositioner.move, "move not implemented");
-				should.deepEqual({x:1,y:2,z:3}, xyzPositioner.move({x:1,y:2,z:3}).position());
-			});
-			it("should move to origin", function() {
-				should.deepEqual({x:0,y:0,z:0}, xyzPositioner.origin().position());
-			});
-			it("should move to (1,2,3)", function() {
-				should.deepEqual({x:1,y:2,z:3}, xyzPositioner.move([{x:1},{y:2},{z:3}]).position()); 
-			});
+			if (xyzPositioner.isAvailable && xyzPositioner.isAvailable()) {
+				it("should move to origin", function() {
+					should.equal(xyzPositioner, xyzPositioner.origin());
+					should.deepEqual({x:0,y:0,z:0}, xyzPositioner.position());
+				});
+				it("should move to a single position {x:1,y:2,z:3}", function() {
+					should.equal(xyzPositioner, xyzPositioner.move({x:1,y:2,z:3}));
+					should.deepEqual({x:1,y:2,z:3}, xyzPositioner.position());
+				});
+				it("should move along a path [{x:1},{y:2},{z:3}]", function() {
+					should.deepEqual({x:0,y:0,z:0}, xyzPositioner.origin().position());
+					should.equal(xyzPositioner, xyzPositioner.move([{x:1},{y:2},{z:3}])); 
+					should.deepEqual({x:1,y:2,z:3}, xyzPositioner.position()); 
+				});
+			}
 		});
 		return true;
 	}
@@ -101,6 +103,9 @@ function isNumeric(obj) {
         this.write(this.sync);
         return this;
     }
+	XYZPositioner.prototype.isAvailable = function() { 
+		return true;
+	}
 
     console.log("LOADED	: firepick.XYZPositioner");
     module.exports = firepick.XYZPositioner = XYZPositioner;
@@ -173,6 +178,6 @@ function isNumeric(obj) {
 			"G0X-1.1Y-2.2Z-3.3;G0F4000;G0Y-20.2;M400");
 	});
 	it("should validate as XYZPositioner", function() {
-		should.ok(firepick.XYZPositioner.validate(xyz));
+		should.ok(firepick.XYZPositioner.validate(xyz, "XYZPositioner"));
 	});
 })

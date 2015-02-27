@@ -5,44 +5,35 @@ firepick.XYZPositioner = require("./XYZPositioner");
 var fs = require('fs');
 	
 var firefuse_path = "/dev/firefuse/sync/cnc/marlin/gcode.fire";
+//var firefuse_path = "/tmp/Marlin";
 
 (function(firepick) {
+	function check(err) {
+		if (err) throw { message: "FireFUSEMarlin is unavailable", cause: err };
+	}
     function FireFUSEMarlin(path) {
 		this.path = path || firefuse_path;
+		var writer = function(data) { throw "FireFUSEMarlin is unavailable"; }
 		try { 
 			this.stat = fs.statSync(this.path);
 			var fd = fs.openSync(this.path, 'w');
 			this.fd = fd;
-			this.xyz = new firepick.XYZPositioner(function(data) {
-				return fs.write(fd, data);
-			});
+			writer = function(data) { return fs.write(fd, data); };
 		} catch (err) {
-			console.log(err);
+			if (err.code != "ENOENT") { console.log(err); }
 			this.err = err;
 		}
+		this.xyz = new firepick.XYZPositioner(writer);
         return this;
     };
     FireFUSEMarlin.prototype.isAvailable = function() {
 		return typeof this.err === 'undefined';
 	};
-	FireFUSEMarlin.prototype.home = function() {
-		should.exist(this.xyz);
-		return this.xyz.home();
-	};
-	FireFUSEMarlin.prototype.origin = function() {
-		should.exist(this.xyz);
-		return this.xyz.origin();
-	};
-	FireFUSEMarlin.prototype.move = function(path) {
-		should.exist(this.xyz);
-		return this.xyz.move(path);
-	};
-    FireFUSEMarlin.prototype.write = function(data) {
-        if (this.err) {
-			throw {error:"open failed", cause:this.err};
-		}
-		return fs.write(this.fd, data);
-    };
+	FireFUSEMarlin.prototype.home = function() { this.xyz.home(); return this;};
+	FireFUSEMarlin.prototype.origin = function() { this.xyz.origin(); return this;};
+	FireFUSEMarlin.prototype.move = function(path) { this.xyz.move(path); return this;};
+    FireFUSEMarlin.prototype.write = function(data) { fs.write(this.fd, data); return this;};
+    FireFUSEMarlin.prototype.position = function() { return this.xyz.position(); };
 
     console.log("LOADED	: firepick.FireFUSEMarlin");
     module.exports = firepick.FireFUSEMarlin = FireFUSEMarlin;
@@ -71,15 +62,12 @@ var firefuse_path = "/dev/firefuse/sync/cnc/marlin/gcode.fire";
 			ffm_bad.write("G28");
 		}));
     });
+	it("should be an XYZPositioner", function() {
+		should.ok(firepick.XYZPositioner.validate(ffm, "FireFUSEMarlin"));
+	});
 	if (new firepick.FireFUSEMarlin().isAvailable()) {
 		it("should be able to access Marlin via FireFUSE", function() {
 			should.equal(ffm.isAvailable(), true, "Marlin unavailable:" + ffm.path);
-		});
-		it("should home ", function() {
-			should.ok(ffm.write("G28"));
-		});
-		it("should be an XYZPositioner", function() {
-			should.ok(firepick.XYZPositioner.validate(ffm));
 		});
 	} else {
 		console.log("WARNING	: FireFUSE Marlin is unavailable (test skipped)");
