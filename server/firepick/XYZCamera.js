@@ -70,8 +70,11 @@ function isNumeric(obj) {
 		should.deepEqual({x:0,y:0,z:0}, xyzCam.origin().position());
 		should.equal(xyzCam, xyzCam.captureXYZ());
 		should.deepEqual({x:0,y:0,z:0},xyzCam.position());
+		console.log("A");
 		var camX0Y0Z0a = fs.readFileSync("test/camX0Y0Z0a.jpg");
-		var x0y0z0_1 = fs.readFileSync(path.join(os.tmpDir(),"XYZCamera_0_0_0.jpg"));
+		console.log("B");
+		var x0y0z0_1 = fs.readFileSync(xyzCam.xyzPath(0,0,0));
+		console.log("C");
 		should.deepEqual(camX0Y0Z0a, x0y0z0_1);
 	});
 	it("should take a different picture at (0,0,0)", function() {
