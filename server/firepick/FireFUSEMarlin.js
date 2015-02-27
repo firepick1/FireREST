@@ -15,7 +15,9 @@ var firefuse_path = "/dev/firefuse/sync/cnc/marlin/gcode.fire";
 			this.stat = fs.statSync(this.path);
 			var fd = fs.openSync(this.path, 'w');
 			this.fd = fd;
-			writer = function(data) { return fs.write(fd, data); };
+			writer = function(data) { 
+				return fs.writeSync(fd, data); 
+			};
 		} catch (err) {
 			if (err.code != "ENOENT") { console.log(err); }
 			this.err = err;
