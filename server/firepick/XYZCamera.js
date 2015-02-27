@@ -5,6 +5,8 @@ var os = require("os"),
 	fs = require("fs"),
 	child_process = require("child_process"),
 	path = require("path");
+firepick.FireFUSECamera = require("./FireFUSECamera");
+firepick.FireFUSEMarlin = require("./FireFUSEMarlin");
 firepick.XYZPositioner = require("./XYZPositioner");
 firepick.MockCamera = require("./MockCamera");
 firepick.ImageRef = require("./ImageRef");
@@ -19,13 +21,67 @@ function isNumeric(obj) {
 		//console.log(cmd);
 		var out = child_process.execSync(cmd);
 		return JSON.parse(out.toString());
-	}
+	};
     function XYZCamera(xyzPositioner, camera) {
         this.xyz = xyzPositioner || new firepick.XYZPositioner();
 		should.ok(firepick.XYZPositioner.validate(this.xyz, "XYZCamera(xyzPositioner)"));
 		this.camera = camera || new firepick.MockCamera();
         return this;
-    }
+    };
+	XYZCamera.validate = function(xyzPositioner, camera) {
+		var xyzCam = new firepick.XYZCamera(xyzPositioner, camera);
+
+		it("should be an XYZPositioner", function() {
+			should.ok(firepick.XYZPositioner.validate(xyzCam, "XYZCamera"));
+		});
+		it("should take a picture at (0,0,0)", function() {
+			this.timeout(5000);
+			camera.push("test/camX0Y0Z0a.jpg");
+			should.deepEqual({x:0,y:0,z:0}, xyzCam.origin().position());
+			var ref000 = xyzCam.captureSave();
+			should.equal(0, firepick.ImageRef.compare({x:0,y:0,z:0}, ref000));
+			should.deepEqual({x:0,y:0,z:0},xyzCam.position());
+			var camX0Y0Z0a = fs.statSync("test/camX0Y0Z0a.jpg");
+			var x0y0z0_1 = fs.statSync(xyzCam.xyzPath(0,0,0));
+			should.equal(camX0Y0Z0a.size, x0y0z0_1.size);
+		});
+		it("should take a different picture at (0,0,0)", function() {
+			camera.push("test/camX0Y0Z0b.jpg");
+			should.deepEqual({x:0,y:0,z:0}, xyzCam.origin().position());
+			var ref000 = xyzCam.captureSave();
+			should.equal(0, firepick.ImageRef.compare({x:0,y:0,z:0}, ref000));
+			var camX0Y0Z0b = fs.statSync("test/camX0Y0Z0b.jpg");
+			var x0y0z0_2 = fs.statSync(xyzCam.xyzPath(0,0,0));
+			should.deepEqual(camX0Y0Z0b.size, x0y0z0_2.size);
+		});
+		it("should take a picture at (1,0,0)", function() {
+			camera.push("test/camX1Y0Z0.jpg");
+			var camX1Y0Z0 = fs.statSync("test/camX1Y0Z0.jpg");
+			var fx1y0z0 = xyzCam.xyzPath(1,0,0);
+			fs.writeFileSync(fx1y0z0, "");
+			should.deepEqual({x:1,y:0,z:0}, xyzCam.move({x:1,y:0,z:0}).position());
+			var ref100 = xyzCam.captureSave();
+			should.equal(0, firepick.ImageRef.compare({x:1,y:0,z:0}, ref100));
+			should.deepEqual({x:1,y:0,z:0},xyzCam.position());
+			x1y0z0 = fs.statSync(fx1y0z0);
+			should.equal(camX1Y0Z0.size, x1y0z0.size);
+		});
+		it("should calculate the current image offset with respect to another XYZ", function() {
+			camera.push("test/camX0Y0Z0a.jpg");
+			xyzCam.captureSave();
+			var channels = xyzCam.origin().calcOffset({x:0,y:0,z:0});
+			should.deepEqual({dx:0, dy:0, match:"0.995454"}, channels["0"]);
+		});
+		it("should calculate the image offset of two saved images", function() {
+			camera.push("test/camX0Y0Z0b.jpg");
+			camera.push("test/camX1Y0Z0.jpg");
+			var ref000_test1 = xyzCam.captureSave("eagle",1);
+			xyzCam.move({x:1});
+			var ref100_test1 = xyzCam.captureSave("hawk",1);
+			var channels = xyzCam.origin().calcOffset(ref000_test1, ref100_test1);
+			should.deepEqual({dx:-5, dy:1, match:"0.916843"}, channels["0"]);
+		});
+	};
 	XYZCamera.prototype.home = function() { this.xyz.home(); return this; };
 	XYZCamera.prototype.origin = function() { 
 		this.xyz.origin(); 
@@ -91,58 +147,9 @@ function isNumeric(obj) {
 })(firepick || (firepick = {}));
 
 (typeof describe === 'function') && describe("firepick.XYZCamera test", function() {
-	var camera = new firepick.MockCamera();
-	var xyz = new firepick.XYZPositioner();
-	var xyzCam = new firepick.XYZCamera(xyz, camera);
-
-	it("should be an XYZPositioner", function() {
-		should.ok(firepick.XYZPositioner.validate(xyzCam, "XYZCamera"));
-	});
-	it("should take a picture at (0,0,0)", function() {
-		this.timeout(5000);
-		camera.push("test/camX0Y0Z0a.jpg");
-		should.deepEqual({x:0,y:0,z:0}, xyzCam.origin().position());
-		var ref000 = xyzCam.captureSave();
-		should.equal(0, firepick.ImageRef.compare({x:0,y:0,z:0}, ref000));
-		should.deepEqual({x:0,y:0,z:0},xyzCam.position());
-		var camX0Y0Z0a = fs.statSync("test/camX0Y0Z0a.jpg");
-		var x0y0z0_1 = fs.statSync(xyzCam.xyzPath(0,0,0));
-		should.equal(camX0Y0Z0a.size, x0y0z0_1.size);
-	});
-	it("should take a different picture at (0,0,0)", function() {
-		camera.push("test/camX0Y0Z0b.jpg");
-		should.deepEqual({x:0,y:0,z:0}, xyzCam.origin().position());
-		var ref000 = xyzCam.captureSave();
-		should.equal(0, firepick.ImageRef.compare({x:0,y:0,z:0}, ref000));
-		var camX0Y0Z0b = fs.statSync("test/camX0Y0Z0b.jpg");
-		var x0y0z0_2 = fs.statSync(xyzCam.xyzPath(0,0,0));
-		should.deepEqual(camX0Y0Z0b.size, x0y0z0_2.size);
-	});
-	it("should take a picture at (1,0,0)", function() {
-		camera.push("test/camX1Y0Z0.jpg");
-		var camX1Y0Z0 = fs.statSync("test/camX1Y0Z0.jpg");
-		var fx1y0z0 = xyzCam.xyzPath(1,0,0);
-		fs.writeFileSync(fx1y0z0, "");
-		should.deepEqual({x:1,y:0,z:0}, xyzCam.move({x:1,y:0,z:0}).position());
-		var ref100 = xyzCam.captureSave();
-		should.equal(0, firepick.ImageRef.compare({x:1,y:0,z:0}, ref100));
-		should.deepEqual({x:1,y:0,z:0},xyzCam.position());
-		x1y0z0 = fs.statSync(fx1y0z0);
-		should.equal(camX1Y0Z0.size, x1y0z0.size);
-	});
-	it("should calculate the current image offset with respect to another XYZ", function() {
-		camera.push("test/camX0Y0Z0a.jpg");
-		xyzCam.captureSave();
-		var channels = xyzCam.origin().calcOffset({x:0,y:0,z:0});
-		should.deepEqual({dx:0, dy:0, match:"0.995454"}, channels["0"]);
-	});
-	it("should calculate the image offset of two saved images", function() {
-		camera.push("test/camX0Y0Z0b.jpg");
-		camera.push("test/camX1Y0Z0.jpg");
-		var ref000_test1 = xyzCam.captureSave("eagle",1);
-		xyzCam.move({x:1});
-		var ref100_test1 = xyzCam.captureSave("hawk",1);
-		var channels = xyzCam.origin().calcOffset(ref000_test1, ref100_test1);
-		should.deepEqual({dx:-5, dy:1, match:"0.916843"}, channels["0"]);
-	});
+	var marlin = new firepick.FireFUSEMarlin();
+	var fuseCam = new firepick.FireFUSECamera();
+	var camera = fuseCam.isAvailable() ? fuseCam : new firepick.MockCamera();
+	var xyz = marlin.isAvailable() ? marlin : new firepick.XYZPositioner();
+	firepick.XYZCamera.validate(xyz, camera);
 })
