@@ -15,20 +15,11 @@ temp.track();
 		if (version) { this.version = version }
         return this;
     }
+
+	//////////////// CLASS //////////////////////
 	ImageRef.copy = function(refSrc) {
 		return new ImageRef(refSrc.x, refSrc.y, refSrc.z, refSrc.state, refSrc.version);
 	}
-	ImageRef.prototype.copy = function() {
-		return ImageRef.copy(this);
-	}
-    ImageRef.prototype.setVersion = function(version) {
-		this.version = version || 0;
-		return this;
-    }
-    ImageRef.prototype.setState = function(state) {
-		this.state = state;
-		return this;
-    }
 	ImageRef.nameOf = function(imgRef, prefix, suffix) {
 		var fname = (prefix || "") + "_" + imgRef.x + "_" + imgRef.y + "_" + imgRef.z;
 
@@ -39,12 +30,6 @@ temp.track();
 			fname += "_" + imgRef.version;
 		}
 		return fname + (suffix || "");
-	}
-	ImageRef.prototype.name = function(prefix, suffix) {
-		return ImageRef.nameOf(this, prefix, suffix);
-	}
-	ImageRef.prototype.compare = function(that) {
-		return ImageRef.compare(this, that);
 	}
 	ImageRef.compare = function(img1,img2) {
 		var cmp = 
@@ -58,6 +43,25 @@ temp.track();
 		}
 		cmp = cmp || ((img1.version || 0) - (img2.version || 0));
 		return cmp;
+	}
+
+	//////////////// INSTANCE /////////////////////
+	ImageRef.prototype.copy = function() {
+		return ImageRef.copy(this);
+	}
+    ImageRef.prototype.setVersion = function(version) {
+		this.version = version || 0;
+		return this;
+    }
+    ImageRef.prototype.setState = function(state) {
+		this.state = state;
+		return this;
+    }
+	ImageRef.prototype.name = function(prefix, suffix) {
+		return ImageRef.nameOf(this, prefix, suffix);
+	}
+	ImageRef.prototype.compare = function(that) {
+		return ImageRef.compare(this, that);
 	}
 
     console.log("LOADED	: firepick.ImageRef");

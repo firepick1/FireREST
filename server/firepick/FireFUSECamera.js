@@ -1,77 +1,46 @@
 var should = require("should"),
     module = module || {},
-    firepick;
+    firepick = firepick || {};
 var child_process = require('child_process');
 var fs = require('fs');
 var temp = require('temp');
 temp.track();
+firepick.Camera = require('./Camera');
 	
 var firefuse_path = "/dev/firefuse/cv/1/camera.jpg";
 
 (function(firepick) {
-
     function FireFUSECamera(path) {
 		this.path = path || firefuse_path;
 		try { 
-			this.stat = fs.statSync(this.path);
+			fs.statSync(this.path);
+			this.available = true;
 		} catch (err) {
-			this.err = err;
+			this.available = false;
 		}
         return this;
     };
     FireFUSECamera.prototype.isAvailable = function() {
-		return typeof this.err === 'undefined';
+		return this.available;
 	};
     FireFUSECamera.prototype.capture = function() {
-        if (this.err) {
-			throw {error:"capture failed", cause:this.err};
-		}
-
+		should.ok(this.available);
 		var cmd = "truncate -s0 " + this.path;
-		// console.log(cmd);
-		var out = child_process.execSync(cmd);
+		child_process.execSync(cmd);
     };
 
-    console.log("LOADED	: firepick.FireFUSECamera");
+	try { 
+		fs.statSync(firefuse_path);
+		console.log("LOADED	: firepick.FireFUSECamera is available");
+	} catch (err) {
+		console.log("ERROR	: firepick.FireFUSECamera is not available");
+	}
     module.exports = firepick.FireFUSECamera = FireFUSECamera;
 })(firepick || (firepick = {}));
 
 (typeof describe === 'function') && describe("firepick.FireFUSECamera test", function() {
-    var camera;
-	var cam_bad;
-	it("should be creatable", function() {
-		should.exist(firepick, "firepick exists");
-		should.exist(firepick.FireFUSECamera, "firepick.FireFUSECamera exists");
-		should.doesNotThrow((function(){
-			camera = new firepick.FireFUSECamera();
-		}));
-		should.exist(camera, "camera");
-		should.doesNotThrow((function(){
-			cam_bad = new firepick.FireFUSECamera("no/such/path")
-		}), "no/such/path");
-	});
-    it("should have camera path", function() {
-        should(camera.path).equal(firefuse_path,  'camera path');
-        should(cam_bad.path).equal("no/such/path",  'camera path');
-    });
-	it("should throw error when capture without camera", function() {
-		should.throws((function(){
-			cam_bad.capture();
-		}));
-    });
-	if (new firepick.FireFUSECamera().isAvailable()) {
-		it("should be able to access Raspberry Pi camera via FireFUSE", function() {
-			should.equal(camera.isAvailable(), true, "Raspberry Pi camera available as /dev/firefuse");
-		});
-		it("should capture images", function() {
-			var stats1 = fs.statSync(camera.path);
-			camera.capture();
-			var stats2 = fs.statSync(camera.path);
-			camera.capture();
-			should.notEqual(stats1.size, stats2.size, "successive captures should be different size");
-		});
-	} else {
-		console.log("WARNING	: FireFUSE Raspberry Pi Camera is unavailable (test skipped)");
-	}
-
+    var camera = new firepick.FireFUSECamera();
+	var cam_bad = new firepick.FireFUSECamera("no/such/path");
+	firepick.Camera.validate(camera);
+	firepick.Camera.validate(cam_bad);
 });

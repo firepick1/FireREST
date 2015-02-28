@@ -9,7 +9,7 @@ firepick.FireFUSECamera = require("./FireFUSECamera");
 firepick.FireFUSEMarlin = require("./FireFUSEMarlin");
 firepick.XYZPositioner = require("./XYZPositioner");
 firepick.XYZCamera = require("./XYZCamera");
-firepick.MockCamera = require("./MockCamera");
+firepick.Camera = require("./Camera");
 firepick.ImageRef = require("./ImageRef");
 
 function isNumeric(obj) {
@@ -26,7 +26,7 @@ function isNumeric(obj) {
     function XYZCameraFactory(xyzPositioner, camera) {
         this.xyz = xyzPositioner || new firepick.XYZPositioner();
 		should.ok(firepick.XYZPositioner.validate(this.xyz, "XYZCameraFactory(xyzPositioner)"));
-		this.camera = camera || new firepick.MockCamera();
+		this.camera = camera || new firepick.Camera();
         return this;
     };
 	XYZCameraFactory.create = function() {
@@ -36,7 +36,7 @@ function isNumeric(obj) {
 		}
 		var camera = new firepick.FireFUSECamera();
 		if (!camera.isAvailable()) {
-			camera = new firepick.MockCamera([
+			camera = new firepick.Camera([
 				"test/camX0Y0Z0a.jpg",
 				"test/camX1Y0Z0.jpg",
 			]);

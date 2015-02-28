@@ -6,7 +6,7 @@ var os = require("os"),
 	child_process = require("child_process"),
 	path = require("path");
 firepick.XYZPositioner = require("./XYZPositioner");
-firepick.MockCamera = require("./MockCamera");
+firepick.Camera = require("./Camera");
 firepick.ImageRef = require("./ImageRef");
 
 function isNumeric(obj) {
@@ -22,7 +22,7 @@ function isNumeric(obj) {
 	};
     function XYZCamera(xyzPositioner, camera) {
         this.xyz = xyzPositioner || new firepick.XYZPositioner();
-		this.camera = camera || new firepick.MockCamera();
+		this.camera = camera || new firepick.Camera();
         return this;
     };
 	XYZCamera.prototype.home = function() { this.xyz.home(); return this; };
@@ -83,7 +83,7 @@ function isNumeric(obj) {
 })(firepick || (firepick = {}));
 
 (typeof describe === 'function') && describe("firepick.XYZCamera test", function() {
-	var camera = new firepick.MockCamera([
+	var camera = new firepick.Camera([
 		"test/camX0Y0Z0a.jpg",
 		"test/camX0Y0Z0b.jpg",
 		"test/camX1Y0Z0.jpg",
