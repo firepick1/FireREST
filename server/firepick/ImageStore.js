@@ -23,10 +23,17 @@ function isNumeric(obj) {
 	/////////////// GLOBAL /////////////
 	ImageStore.validate = function(imgStore) {
 		describe("ImageStore.validate(" + imgStore.constructor.name + ")", function() {
-			var ref123 = new firepick.ImageRef(1,2,3,"ImageStore_test");
+			var ref123 = new firepick.ImageRef(1,2,3,"ImageStoreTest");
 			it("should implement pathOf", function() {
 				var path123 = imgStore.pathOf(ref123);
 				should(path123.indexOf("_1_2_3")).above(-1);
+			});
+			it("should parse an ImageREf from a path", function() {
+				var path123 = imgStore.pathOf(ref123);
+				var parse123 = imgStore.parseImageRef(path123);
+				console.log(JSON.stringify(parse123));
+				console.log(JSON.stringify(ref123));
+				should.equal(0, firepick.ImageRef.compare(parse123, ref123));
 			});
 			var stat1;
 			var img123;
@@ -74,20 +81,13 @@ function isNumeric(obj) {
 		var name = firepick.ImageRef.nameOf(imgRef, this.prefix, this.suffix);
 		return path.join(os.tmpDir(),name);
 	};
-	ImageStore.prototype.imageRefOf = function(path) {
-		var $tokens = path.split('#');
-		var _tokens = $tokens[0].split('_');
-		if ($tokens.length > 1) {
-			var _tokens1 = $tokens[1].split('_');
-			_tokens.push(_tokens1[0],_tokens1[1]);
-		}
-		return new firepick.ImageRef(
-			_tokens[1]+0, /* x */
-			_tokens[2]+0, /* y */
-			_tokens[3]+0, /* z */
-			_tokens[4], /* state */
-			_tokens[5]); /* version */
-	};
+	ImageStore.prototype.parseImageRef = function(path) {
+		var suffixPos = path.lastIndexOf(this.suffix);
+		path = suffixPos < 0 ? path : path.slice(0, suffixPos);
+		var prefixPos = path.indexOf(this.prefix);
+		path = prefixPos < 0 ? path: path.slice(prefixPos+this.prefix.length);
+		return firepick.ImageRef.parse(path);
+	}
 	ImageStore.prototype.clear = function() {
 		this.images = {};
 		return this;

@@ -37,8 +37,10 @@ temp.track();
 		if ($tokens.length > 1) {
 			var _tokens1 = $tokens[1].split('_');
 			_tokens.push(_tokens1[0]);
-			var suffixTokens = _tokens1[1].split('.');
-			_tokens.push(suffixTokens[0]);
+			if (_tokens1.length > 1) {
+				var suffixTokens = _tokens1[1].split('.');
+				_tokens.push(suffixTokens[0]);
+			}
 		}
 		return new firepick.ImageRef(
 			Number(_tokens[1]), /* x */
