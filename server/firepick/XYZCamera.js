@@ -22,7 +22,6 @@ function isNumeric(obj) {
 	};
     function XYZCamera(xyzPositioner, camera) {
         this.xyz = xyzPositioner || new firepick.XYZPositioner();
-		should.ok(firepick.XYZPositioner.validate(this.xyz, "XYZCamera(xyzPositioner)"));
 		this.camera = camera || new firepick.MockCamera();
         return this;
     };
