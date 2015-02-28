@@ -28,8 +28,8 @@ var firefuse_path = "/dev/firefuse/sync/cnc/marlin/gcode.fire";
 		this.xyz = new firepick.XYZPositioner(writer);
         return this;
     };
-    FireFUSEMarlin.prototype.isAvailable = function() {
-		return typeof this.err === 'undefined';
+    FireFUSEMarlin.prototype.health = function() {
+		return typeof this.err === 'undefined' ? 1 : 0;
 	};
 	FireFUSEMarlin.prototype.home = function() { this.xyz.home(); return this;};
 	FireFUSEMarlin.prototype.origin = function() { this.xyz.origin(); return this;};
@@ -56,7 +56,7 @@ var firefuse_path = "/dev/firefuse/sync/cnc/marlin/gcode.fire";
         should(ffm_bad.path).equal("no/such/path");
     });
 	it("should be an XYZPositioner", function() {
-		if (!ffm.isAvailable()) {
+		if (ffm.health() === 0) {
 			console.log("WARNING	: FireFUSE Marlin is unavailable (test skipped)");
 		}
 		should.ok(firepick.XYZPositioner.validate(ffm, "FireFUSEMarlin"));

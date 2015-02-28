@@ -13,7 +13,6 @@ function isNumeric(obj) {
 
 (function(firepick) {
     function ImageStore(camera, options) {
-		should.ok(camera.isAvailable());
 		this.camera = camera;
 		this.images = {};
 		this.path = options && options.path || os.tmpDir();
@@ -67,10 +66,27 @@ function isNumeric(obj) {
 	};
 	
 	/////////////// INSTANCE ////////////
+	ImageStore.prototype.health = function() {
+		return this.camera.health();
+	};
 	ImageStore.prototype.pathOf = function(imgRef) {
 		should.exist(imgRef);
 		var name = firepick.ImageRef.nameOf(imgRef, this.prefix, this.suffix);
 		return path.join(os.tmpDir(),name);
+	};
+	ImageStore.prototype.imageRefOf = function(path) {
+		var $tokens = path.split('#');
+		var _tokens = $tokens[0].split('_');
+		if ($tokens.length > 1) {
+			var _tokens1 = $tokens[1].split('_');
+			_tokens.push(_tokens1[0],_tokens1[1]);
+		}
+		return new firepick.ImageRef(
+			_tokens[1]+0, /* x */
+			_tokens[2]+0, /* y */
+			_tokens[3]+0, /* z */
+			_tokens[4], /* state */
+			_tokens[5]); /* version */
 	};
 	ImageStore.prototype.clear = function() {
 		this.images = {};

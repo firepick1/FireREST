@@ -19,7 +19,13 @@ temp.track();
 			it("should exist", function() {
 				should.exist(camera);
 			});
-			if (camera.isAvailable()) {
+			if (camera.health() === 0) {
+				it("should throw an Error if unavailable", function() {
+					should.throws((function(){
+						camera.capture();
+					}));
+				});
+			} else {
 				var stat1;
 				it("should take a picture if available", function() {
 					should(camera.capture()).equal(camera);
@@ -40,20 +46,14 @@ temp.track();
 					should(stat2.size).above(0);
 					should(stat2.size).not.equal(stat1.size);
 				});
-			} else {
-				it("should throw an Error if unavailable", function() {
-					should.throws((function(){
-						camera.capture();
-					}));
-				});
 			}
 			return true;
 		});
 	};
 
 	////////// INSTANCE ////////////
-	Camera.prototype.isAvailable = function() {
-		return this.mockImages.length > 0;
+	Camera.prototype.health = function() {
+		return this.mockImages.length > 0 ? 1 : 0;
 	}
     Camera.prototype.capture = function() {
         if (this.mockImages.length === 0) {

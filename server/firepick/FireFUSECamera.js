@@ -20,8 +20,8 @@ var firefuse_path = "/dev/firefuse/cv/1/camera.jpg";
 		}
         return this;
     };
-    FireFUSECamera.prototype.isAvailable = function() {
-		return this.available;
+    FireFUSECamera.prototype.health = function() {
+		return this.available ? 1 : 0;
 	};
     FireFUSECamera.prototype.capture = function() {
 		should.ok(this.available);

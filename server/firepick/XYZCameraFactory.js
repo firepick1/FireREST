@@ -30,11 +30,11 @@ function isNumeric(obj) {
     };
 	XYZCameraFactory.create = function(xyzPositioner, camera) {
 		var xyz = xyzPositioner || new firepick.FireFUSEMarlin();
-		if (!xyz.isAvailable()) {
+		if (xyz.health() < 1) {
 			xyz = new firepick.XYZPositioner();
 		}
 		camera = camera || new firepick.FireFUSECamera();
-		if (!camera.isAvailable()) {
+		if (camera.health() < 1) {
 			camera = new firepick.Camera([
 				"test/camX0Y0Z0a.jpg",
 				"test/camX1Y0Z0.jpg",

@@ -13,17 +13,23 @@ function isNumeric(obj) {
         this.write = writer || function(cmd) { /* default discards data */ }
         return this;
     }
-	XYZPositioner.validate = function(xyzPositioner, name) {
-		describe("XYZPositioner validate(" + name + ")", function() {
+	XYZPositioner.validate = function(xyzPositioner) {
+		describe("XYZPositioner validate(" + xyzPositioner.constructor.name + ")", function() {
 			should.exist(xyzPositioner);
 			it("should define XYZPositioner methods", function() {
 				should.ok(xyzPositioner.home instanceof Function, "home not implemented");
 				should.ok(xyzPositioner.position instanceof Function, "position not implemented");
 				should.ok(xyzPositioner.origin instanceof Function, "origin not implemented");
 				should.ok(xyzPositioner.move instanceof Function, "move not implemented");
-				should.ok(xyzPositioner.isAvailable instanceof Function, "isAvailable not implemented");
+				should.ok(xyzPositioner.health instanceof Function, "health not implemented");
 			});
-			if (xyzPositioner.isAvailable && xyzPositioner.isAvailable()) {
+			if (xyzPositioner.health() === 0) {
+				it("should throw errors when not available", function() {
+					should.throws(function(){xyzPositioner.home();});
+					should.throws(function(){xyzPositioner.origin();});
+					should.throws(function(){xyzPositioner.move();});
+				});
+			} else {
 				it("should move to origin", function() {
 					this.timeout(5000);
 					should.equal(xyzPositioner, xyzPositioner.origin());
@@ -39,12 +45,6 @@ function isNumeric(obj) {
 					xyzPositioner.move({x:0,y:0,z:0});
 					should.equal(xyzPositioner, xyzPositioner.move([{x:1},{y:2},{z:3}])); 
 					should.deepEqual({x:1,y:2,z:3}, xyzPositioner.position()); 
-				});
-			} else {
-				it("should throw errors when not available", function() {
-					should.throws(function(){xyzPositioner.home();});
-					should.throws(function(){xyzPositioner.origin();});
-					should.throws(function(){xyzPositioner.move();});
 				});
 			}
 		});
@@ -112,8 +112,8 @@ function isNumeric(obj) {
         this.write(this.sync);
         return this;
     }
-	XYZPositioner.prototype.isAvailable = function() { 
-		return true;
+	XYZPositioner.prototype.health = function() { 
+		return 1;
 	}
 
     console.log("LOADED	: firepick.XYZPositioner");

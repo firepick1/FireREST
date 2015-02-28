@@ -41,24 +41,10 @@ function isNumeric(obj) {
 		return this; 
 	};
 	XYZCamera.prototype.position = function(path) { return this.xyz.position(); };
-	XYZCamera.prototype.isAvailable = function() { 
-		return this.xyz.isAvailable && this.xyz.isAvailable(); 
+	XYZCamera.prototype.health = function() { 
+		return (this.imgStore.health() + this.xyz.health())/2;
 	};
 	XYZCamera.prototype.pathOf = function(imgRef) { return this.imgStore.pathOf(imgRef); };
-	XYZCamera.prototype.imageRefOf = function(path) {
-		var $tokens = path.split('#');
-		var _tokens = $tokens[0].split('_');
-		if ($tokens.length > 1) {
-			var _tokens1 = $tokens[1].split('_');
-			_tokens.push(_tokens1[0],_tokens1[1]);
-		}
-		return new firepick.ImageRef(
-			_tokens[1]+0, /* x */
-			_tokens[2]+0, /* y */
-			_tokens[3]+0, /* z */
-			_tokens[4], /* state */
-			_tokens[5]); /* version */
-	};
 	XYZCamera.prototype.captureSave = function(state, version) {
 		var imgRef = this.imgRef.copy().setState(state).setVersion(version);
 		return this.imgStore.image(imgRef);
@@ -91,7 +77,7 @@ function isNumeric(obj) {
 	var xyzCam = new firepick.XYZCamera(xyz, imgStore);
 	var ref = [];
 	it("should be an XYZPositioner", function() {
-		should.ok(firepick.XYZPositioner.validate(xyzCam, "XYZCamera"));
+		should.ok(firepick.XYZPositioner.validate(xyzCam));
 	});
 	it("should take a picture at (0,0,0)", function() {
 		this.timeout(5000);

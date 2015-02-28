@@ -31,6 +31,22 @@ temp.track();
 		}
 		return fname + (suffix || "");
 	}
+	ImageRef.parse = function(path) {
+		var $tokens = path.split('#');
+		var _tokens = $tokens[0].split('_');
+		if ($tokens.length > 1) {
+			var _tokens1 = $tokens[1].split('_');
+			_tokens.push(_tokens1[0]);
+			var suffixTokens = _tokens1[1].split('.');
+			_tokens.push(suffixTokens[0]);
+		}
+		return new firepick.ImageRef(
+			Number(_tokens[1]), /* x */
+			Number(_tokens[2]), /* y */
+			Number(_tokens[3]), /* z */
+			_tokens[4], /* state */
+			_tokens[5]); /* version */
+	};
 	ImageRef.compare = function(img1,img2) {
 		var cmp = 
 			((img1.x||0) - (img2.x||0)) ||
@@ -106,5 +122,13 @@ temp.track();
 		should.equal("prefix_1_2_3#a_4.jpg", ref123a4.name("prefix",".jpg"));
 		should.equal("_1_2_3#_4.jpg", ref123_4.name("",".jpg"));
 		should.equal("prefix_1_2_3#b", ref123b.name("prefix"));
+	});
+	it("should have a parseable name", function() {
+		var ref123a5 = new firepick.ImageRef(1,2,3,"a",5);
+		var name123a5 = ref123a5.name("/a/b/c",".jpg");
+		var refParse = firepick.ImageRef.parse(name123a5);
+		console.log(JSON.stringify(ref123a5));
+		console.log(JSON.stringify(refParse));
+		should.equal(0, firepick.ImageRef.compare(refParse, ref123a5));
 	});
 });
