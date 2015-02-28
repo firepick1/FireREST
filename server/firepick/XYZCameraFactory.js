@@ -9,6 +9,7 @@ firepick.FireFUSECamera = require("./FireFUSECamera");
 firepick.FireFUSEMarlin = require("./FireFUSEMarlin");
 firepick.XYZPositioner = require("./XYZPositioner");
 firepick.XYZCamera = require("./XYZCamera");
+firepick.ImageStore = require("./ImageStore");
 firepick.Camera = require("./Camera");
 firepick.ImageRef = require("./ImageRef");
 
@@ -23,25 +24,24 @@ function isNumeric(obj) {
 		var out = child_process.execSync(cmd);
 		return JSON.parse(out.toString());
 	};
-    function XYZCameraFactory(xyzPositioner, camera) {
-        this.xyz = xyzPositioner || new firepick.XYZPositioner();
-		should.ok(firepick.XYZPositioner.validate(this.xyz, "XYZCameraFactory(xyzPositioner)"));
-		this.camera = camera || new firepick.Camera();
+    function XYZCameraFactory() {
+		throw new Error("use create()");
         return this;
     };
-	XYZCameraFactory.create = function() {
-		var xyz = new firepick.FireFUSEMarlin();
+	XYZCameraFactory.create = function(xyzPositioner, camera) {
+		var xyz = xyzPositioner || new firepick.FireFUSEMarlin();
 		if (!xyz.isAvailable()) {
 			xyz = new firepick.XYZPositioner();
 		}
-		var camera = new firepick.FireFUSECamera();
+		camera = camera || new firepick.FireFUSECamera();
 		if (!camera.isAvailable()) {
 			camera = new firepick.Camera([
 				"test/camX0Y0Z0a.jpg",
 				"test/camX1Y0Z0.jpg",
 			]);
 		}
-		return new firepick.XYZCamera(xyz, camera);
+		var imgStore = new firepick.ImageStore(camera);
+		return new firepick.XYZCamera(xyz, imgStore);
 	}
     console.log("LOADED	: firepick.XYZCameraFactory");
     module.exports = firepick.XYZCameraFactory = XYZCameraFactory;

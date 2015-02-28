@@ -8,6 +8,7 @@ var os = require("os"),
 firepick.XYZPositioner = require("./XYZPositioner");
 firepick.Camera = require("./Camera");
 firepick.ImageRef = require("./ImageRef");
+firepick.ImageStore = require("./ImageStore");
 
 function isNumeric(obj) {
     return (obj - parseFloat(obj) + 1) >= 0;
@@ -20,9 +21,12 @@ function isNumeric(obj) {
 		var out = child_process.execSync(cmd);
 		return JSON.parse(out.toString());
 	};
-    function XYZCamera(xyzPositioner, camera) {
+    function XYZCamera(xyzPositioner, imgStore) {
         this.xyz = xyzPositioner || new firepick.XYZPositioner();
-		this.camera = camera || new firepick.Camera();
+		this.imgStore = imgStore || new firepick.ImageStore(
+			new firepick.Camera(), 
+			{ prefix:"XYZCamera", suffix:".jpg" }
+		);
         return this;
     };
 	XYZCamera.prototype.home = function() { this.xyz.home(); return this; };
@@ -40,9 +44,7 @@ function isNumeric(obj) {
 	XYZCamera.prototype.isAvailable = function() { 
 		return this.xyz.isAvailable && this.xyz.isAvailable(); 
 	};
-	XYZCamera.prototype.pathOf = function(imgRef) {
-		return path.join(os.tmpDir(),imgRef.name("XYZCamera", ".jpg"));
-	};
+	XYZCamera.prototype.pathOf = function(imgRef) { return this.imgStore.pathOf(imgRef); };
 	XYZCamera.prototype.imageRefOf = function(path) {
 		var $tokens = path.split('#');
 		var _tokens = $tokens[0].split('_');
@@ -57,22 +59,14 @@ function isNumeric(obj) {
 			_tokens[4], /* state */
 			_tokens[5]); /* version */
 	};
-	XYZCamera.prototype.pathOf = function(imgRef) {
-		should.exist(imgRef);
-		var fname = firepick.ImageRef.nameOf(imgRef, "XYZCamera", ".jpg");
-		return path.join(os.tmpDir(),fname);
-	}
 	XYZCamera.prototype.captureSave = function(state, version) {
 		var imgRef = this.imgRef.copy().setState(state).setVersion(version);
-		var fpath = this.pathOf(imgRef);
-		this.camera.capture();
-		fs.writeFileSync(fpath, fs.readFileSync(this.camera.path));
-		return imgRef;
+		return this.imgStore.image(imgRef);
 	};
 	XYZCamera.prototype.calcOffset = function(imgRef1, imgRef2) {
 		should.exist(imgRef1);
 		var nArgs = typeof imgRef2 === 'undefined' ? 1 : 2;
-		var fname1 = nArgs === 1 ? this.camera.path : this.pathOf(imgRef1);
+		var fname1 = nArgs === 1 ? this.imgStore.camera.path : this.pathOf(imgRef1);
 		var fname2 = nArgs === 1 ? this.pathOf(imgRef1) : this.pathOf(imgRef2);
 		var jout = firesight(fname1, "calcOffset.json", "-Dtemplate=" + fname2);
 		return jout.result.channels;
@@ -91,10 +85,10 @@ function isNumeric(obj) {
 		"test/camX0Y0Z0b.jpg",
 		"test/camX1Y0Z0.jpg",
 	]);
+	var imgStore = new firepick.ImageStore(camera, "ImageStore", ".jpg");
 	var xyz = new firepick.XYZPositioner(); 
 
-	var xyzCam = new firepick.XYZCamera(xyz, camera);
-	//var ref = firepick.XYZCamera.validate(xyzCam);
+	var xyzCam = new firepick.XYZCamera(xyz, imgStore);
 	var ref = [];
 	it("should be an XYZPositioner", function() {
 		should.ok(firepick.XYZPositioner.validate(xyzCam, "XYZCamera"));
