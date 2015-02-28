@@ -41,17 +41,20 @@ function isNumeric(obj) {
 			should.deepEqual({x:0,y:0,z:0},xyzCam.position());
 		});
 		it("should take a different picture at (0,0,0)", function() {
+			this.timeout(10000);
 			should.deepEqual({x:0,y:0,z:0}, xyzCam.origin().position());
 			ref.push(xyzCam.captureSave("test", 2));
 			should.equal(0, firepick.ImageRef.compare({x:0,y:0,z:0,state:"test", version:2}, ref[1]));
 		});
 		it("should take a picture at (1,0,0)", function() {
+			this.timeout(5000);
 			should.deepEqual({x:1,y:0,z:0}, xyzCam.move({x:1,y:0,z:0}).position());
 			ref.push(xyzCam.captureSave("test",3));
 			should.equal(0, firepick.ImageRef.compare({x:1,y:0,z:0,state:"test",version:3}, ref[2]));
 			should.deepEqual({x:1,y:0,z:0},xyzCam.position());
 		});
 		it("should calculate the current image offset with respect to another XYZ", function() {
+			this.timeout(5000);
 			xyzCam.captureSave("test", 4);
 			var channels = xyzCam.origin().calcOffset(ref[1]);
 			should.exist(channels[0]);
@@ -59,6 +62,7 @@ function isNumeric(obj) {
 			should(channels[0].dy).within(-1,1);
 		});
 		it("should calculate the image offset of two saved images", function() {
+			this.timeout(5000);
 			ref.push(xyzCam.captureSave("eagle",4));
 			xyzCam.move({x:1});
 			ref.push(xyzCam.captureSave("hawk",5));
