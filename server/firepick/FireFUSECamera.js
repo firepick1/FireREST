@@ -27,6 +27,7 @@ var firefuse_path = "/dev/firefuse/cv/1/camera.jpg";
 		should.ok(this.available);
 		var cmd = "truncate -s0 " + this.path;
 		child_process.execSync(cmd);
+		return this;
     };
 
 	try { 
