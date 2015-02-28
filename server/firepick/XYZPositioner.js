@@ -36,7 +36,7 @@ function isNumeric(obj) {
 				});
 				it("should move along a path [{x:1},{y:2},{z:3}]", function() {
 					this.timeout(5000);
-					should.deepEqual({x:0,y:0,z:0}, xyzPositioner.origin().position());
+					xyzPositioner.move({x:0,y:0,z:0});
 					should.equal(xyzPositioner, xyzPositioner.move([{x:1},{y:2},{z:3}])); 
 					should.deepEqual({x:1,y:2,z:3}, xyzPositioner.position()); 
 				});
