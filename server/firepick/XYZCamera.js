@@ -28,53 +28,46 @@ function isNumeric(obj) {
 		this.camera = camera || new firepick.MockCamera();
         return this;
     };
-	XYZCamera.validate = function(xyzPositioner, camera) {
-		var xyzCam = new firepick.XYZCamera(xyzPositioner, camera);
-
+	XYZCamera.validate = function(xyzCam) {
+		var ref = [];
 		it("should be an XYZPositioner", function() {
 			should.ok(firepick.XYZPositioner.validate(xyzCam, "XYZCamera"));
 		});
 		it("should take a picture at (0,0,0)", function() {
 			this.timeout(5000);
 			should.deepEqual({x:0,y:0,z:0}, xyzCam.origin().position());
-			var ref000 = xyzCam.captureSave();
-			should.equal(0, firepick.ImageRef.compare({x:0,y:0,z:0}, ref000));
+			ref.push(xyzCam.captureSave("test", 1));
+			should.equal(0, firepick.ImageRef.compare({x:0,y:0,z:0,state:"test",version:1}, ref[0]));
 			should.deepEqual({x:0,y:0,z:0},xyzCam.position());
-			var camX0Y0Z0a = fs.statSync("test/camX0Y0Z0a.jpg");
-			var x0y0z0_1 = fs.statSync(xyzCam.xyzPath(0,0,0));
-			should.equal(camX0Y0Z0a.size, x0y0z0_1.size);
 		});
 		it("should take a different picture at (0,0,0)", function() {
 			should.deepEqual({x:0,y:0,z:0}, xyzCam.origin().position());
-			var ref000 = xyzCam.captureSave();
-			should.equal(0, firepick.ImageRef.compare({x:0,y:0,z:0}, ref000));
-			var camX0Y0Z0b = fs.statSync("test/camX0Y0Z0b.jpg");
-			var x0y0z0_2 = fs.statSync(xyzCam.xyzPath(0,0,0));
-			should.deepEqual(camX0Y0Z0b.size, x0y0z0_2.size);
+			ref.push(xyzCam.captureSave("test", 2));
+			should.equal(0, firepick.ImageRef.compare({x:0,y:0,z:0,state:"test", version:2}, ref[1]));
 		});
 		it("should take a picture at (1,0,0)", function() {
-			var camX1Y0Z0 = fs.statSync("test/camX1Y0Z0.jpg");
-			var fx1y0z0 = xyzCam.xyzPath(1,0,0);
-			fs.writeFileSync(fx1y0z0, "");
 			should.deepEqual({x:1,y:0,z:0}, xyzCam.move({x:1,y:0,z:0}).position());
-			var ref100 = xyzCam.captureSave();
-			should.equal(0, firepick.ImageRef.compare({x:1,y:0,z:0}, ref100));
+			ref.push(xyzCam.captureSave("test",3));
+			should.equal(0, firepick.ImageRef.compare({x:1,y:0,z:0,state:"test",version:3}, ref[2]));
 			should.deepEqual({x:1,y:0,z:0},xyzCam.position());
-			x1y0z0 = fs.statSync(fx1y0z0);
-			should.equal(camX1Y0Z0.size, x1y0z0.size);
 		});
 		it("should calculate the current image offset with respect to another XYZ", function() {
-			xyzCam.captureSave();
-			var channels = xyzCam.origin().calcOffset({x:0,y:0,z:0});
-			should.deepEqual({dx:0, dy:0, match:"0.995454"}, channels["0"]);
+			xyzCam.captureSave("test", 4);
+			var channels = xyzCam.origin().calcOffset(ref[1]);
+			should.exist(channels[0]);
+			should(channels[0].dx).within(-1,1);
+			should(channels[0].dy).within(-1,1);
 		});
 		it("should calculate the image offset of two saved images", function() {
-			var ref000_test1 = xyzCam.captureSave("eagle",1);
+			ref.push(xyzCam.captureSave("eagle",4));
 			xyzCam.move({x:1});
-			var ref100_test1 = xyzCam.captureSave("hawk",1);
-			var channels = xyzCam.origin().calcOffset(ref000_test1, ref100_test1);
-			should.deepEqual({dx:-5, dy:1, match:"0.916843"}, channels["0"]);
+			ref.push(xyzCam.captureSave("hawk",5));
+			var channels = xyzCam.origin().calcOffset(ref[3],ref[4]);
+			should.exist(channels[0]);
+			should(channels[0].dx).within(-6,-4);
+			should(channels[0].dy).within(-1,1);
 		});
+		return ref;
 	};
 	XYZCamera.prototype.home = function() { this.xyz.home(); return this; };
 	XYZCamera.prototype.origin = function() { 
@@ -109,17 +102,10 @@ function isNumeric(obj) {
 			_tokens[5]); /* version */
 	};
 	XYZCamera.prototype.pathOf = function(imgRef) {
+		should.exist(imgRef);
 		var fname = firepick.ImageRef.nameOf(imgRef, "XYZCamera", ".jpg");
 		return path.join(os.tmpDir(),fname);
 	}
-
-	XYZCamera.prototype.xyzPath = function(x,y,z,state,version) {
-		x = (typeof x === 'undefined' || x === null) ? this.imgRef.x : x;
-		y = (typeof y === 'undefined' || y === null) ? this.imgRef.y : y;
-		z = (typeof z === 'undefined' || z === null) ? this.imgRef.z : z;
-		var imgRef = new firepick.ImageRef(x,y,z,state,version);
-		return path.join(os.tmpDir(),imgRef.name("XYZCamera", ".jpg"));
-	};
 	XYZCamera.prototype.captureSave = function(state, version) {
 		var imgRef = this.imgRef.copy().setState(state).setVersion(version);
 		var fpath = this.pathOf(imgRef);
@@ -144,10 +130,10 @@ function isNumeric(obj) {
 	var camera = new firepick.FireFUSECamera();
 	if (!camera.isAvailable()) {
 		camera = new firepick.MockCamera();
-		camera.push("test/camX0Y0Z0a.jpg");
-		camera.push("test/camX0Y0Z0b.jpg");
-		camera.push("test/camX1Y0Z0.jpg");
-		camera.push("test/camX0Y0Z0a.jpg");
+		camera.push("test/camX0Y0Z0a.jpg");	// ref000_1
+		camera.push("test/camX0Y0Z0b.jpg"); // ref000_2
+		camera.push("test/camX1Y0Z0.jpg");	// ref100_3
+		camera.push("test/camX0Y0Z0a.jpg");	
 		camera.push("test/camX0Y0Z0b.jpg");
 		camera.push("test/camX1Y0Z0.jpg");
 	}
@@ -155,5 +141,20 @@ function isNumeric(obj) {
 	if (!xyz.isAvailable()) { 
 		xyz = new firepick.XYZPositioner(); 
 	}
-	firepick.XYZCamera.validate(xyz, camera);
+
+	var xyzCam = new firepick.XYZCamera(xyz, camera);
+	var ref = firepick.XYZCamera.validate(xyzCam);
+	it("should have taken the right pictures", function() {
+		should.exist(ref);
+		should(ref.length).equal(5);
+		var fs0 = fs.statSync(xyzCam.pathOf(ref[0]));
+		var camX0Y0Z0a = fs.statSync("test/camX0Y0Z0a.jpg");
+		should.equal(camX0Y0Z0a.size, fs0.size);
+		var camX0Y0Z0b = fs.statSync("test/camX0Y0Z0b.jpg");
+		var fs000_2 = fs.statSync(xyzCam.pathOf(ref[1]));
+		should.deepEqual(camX0Y0Z0b.size, fs000_2.size);
+		var fs100_3 = fs.statSync(xyzCam.pathOf(ref[2]));
+		var camX1Y0Z0 = fs.statSync("test/camX1Y0Z0.jpg");
+		should.equal(camX1Y0Z0.size, fs100_3.size);
+	});
 })
