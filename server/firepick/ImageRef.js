@@ -152,8 +152,6 @@ temp.track();
 		var ref123a5 = new firepick.ImageRef(1,2,3,{state:"a",version:5});
 		var name123a5 = ref123a5.name("/a/b/c",".jpg");
 		var refParse = firepick.ImageRef.parse(name123a5);
-		console.log(JSON.stringify(name123a5));
-		console.log(JSON.stringify(refParse));
 		should.equal(0, firepick.ImageRef.compare(refParse, ref123a5));
 	});
 	it("should round", function() {
