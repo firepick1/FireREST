@@ -15,6 +15,32 @@ firepick.ImageStore = require("./ImageStore");
         return this;
     };
 
+
+	/////////////////// INTERNAL ////////////////////////
+	function firesight_cmd(fname1, pipeline, args) {
+		var cmd = "firesight -i " + fname1 + " -p server/json/" + pipeline;
+		if (args) {
+			cmd += " " + args;
+		}
+		//console.log(cmd);
+		var out = child_process.execSync(cmd);
+		var jout = JSON.parse(out.toString());
+		console.log(JSON.stringify(jout));
+		return jout;
+	};
+	FireSight.prototype.calcOffset = function(fname1, fname2) {
+		var jout = firesight_cmd(fname1, "calcOffset.json", "-Dtemplate=" + fname2);
+		return jout.result.channels['0'];
+	};
+	FireSight.prototype.meanStdDev = function(fname1) {
+		var jout = firesight_cmd(fname1, "meanStdDev.json");
+		return jout.result;
+	};
+	FireSight.prototype.sharpness = function(fname1) {
+		var jout = firesight_cmd(fname1, "sharpness.json");
+		return jout.result;
+	};
+	//
 	//////////// CLASS //////////////
 	FireSight.validate = function(firesight) {
 		describe("validating calcOffset", function() {
@@ -24,7 +50,7 @@ firepick.ImageStore = require("./ImageStore");
 				should.equal(0, diff.dy);
 				should(diff.match).above(0.99);
 			});
-			it("should calculate the offset between two images at the different locations", function() {
+			it("should calculate the offset between two images at different locations", function() {
 				var diff = firesight.calcOffset("test/camX0Y0Z0a.jpg","test/camX1Y0Z0.jpg");
 				should.equal(-5, diff.dx);
 				should.equal(1, diff.dy);
@@ -52,29 +78,6 @@ firepick.ImageStore = require("./ImageStore");
 				});
 			});
 		});
-	};
-
-	/////////////////// INTERNAL ////////////////////////
-	function firesight_cmd(fname1, pipeline, args) {
-		var cmd = "firesight -i " + fname1 + " -p server/json/" + pipeline;
-		if (args) {
-			cmd += " " + args;
-		}
-		//console.log(cmd);
-		var out = child_process.execSync(cmd);
-		return JSON.parse(out.toString());
-	};
-	FireSight.prototype.calcOffset = function(fname1, fname2) {
-		var jout = firesight_cmd(fname1, "calcOffset.json", "-Dtemplate=" + fname2);
-		return jout.result.channels['0'];
-	};
-	FireSight.prototype.meanStdDev = function(fname1) {
-		var jout = firesight_cmd(fname1, "meanStdDev.json");
-		return jout.result;
-	};
-	FireSight.prototype.sharpness = function(fname1) {
-		var jout = firesight_cmd(fname1, "sharpness.json");
-		return jout.result;
 	};
 
     console.log("LOADED	: firepick.FireSight");
