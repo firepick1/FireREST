@@ -40,15 +40,12 @@ temp.track();
 	ImageRef.parse = function(path) {
 		var $tokens = path.split('#');
 		var _tokens = $tokens[0].split('_');
-		console.log("_tokens:"+JSON.stringify(_tokens));
 		if ($tokens.length > 1) {
 			var _tokens1 = $tokens[1].split('_');
 			_tokens.push(_tokens1[0]);
-		console.log("_tokens:"+JSON.stringify(_tokens));
 			if (_tokens1.length > 1) {
 				var suffixTokens = _tokens1[1].split('.');
 				_tokens.push(suffixTokens[0]);
-		console.log("_tokens:"+JSON.stringify(_tokens));
 			}
 		}
 		return new firepick.ImageRef(
