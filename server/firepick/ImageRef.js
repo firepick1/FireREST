@@ -7,18 +7,24 @@ var temp = require('temp');
 temp.track();
 
 (function(firepick) {
-    function ImageRef(x,y,z,state,version) {
+    function ImageRef(x,y,z,properties) {
         this.x = x || 0;
 		this.y = y || 0;
 		this.z = z || 0;
-		if (typeof state === 'string') { this.state = state; }
-		if (version) { this.version = version }
+		if (properties) {
+			should.ok(typeof properties === 'object');
+			for (var prop in properties) {
+				if (properties.hasOwnProperty(prop)) {
+					this[prop] = properties[prop];
+				}
+			}
+		}
         return this;
     }
 
 	//////////////// CLASS //////////////////////
 	ImageRef.copy = function(refSrc) {
-		return new ImageRef(refSrc.x, refSrc.y, refSrc.z, refSrc.state, refSrc.version);
+		return new ImageRef(refSrc.x, refSrc.y, refSrc.z, refSrc);
 	}
 	ImageRef.nameOf = function(imgRef, prefix, suffix) {
 		var fname = (prefix || "") + "_" + imgRef.x + "_" + imgRef.y + "_" + imgRef.z;
@@ -34,20 +40,22 @@ temp.track();
 	ImageRef.parse = function(path) {
 		var $tokens = path.split('#');
 		var _tokens = $tokens[0].split('_');
+		console.log("_tokens:"+JSON.stringify(_tokens));
 		if ($tokens.length > 1) {
 			var _tokens1 = $tokens[1].split('_');
 			_tokens.push(_tokens1[0]);
+		console.log("_tokens:"+JSON.stringify(_tokens));
 			if (_tokens1.length > 1) {
 				var suffixTokens = _tokens1[1].split('.');
 				_tokens.push(suffixTokens[0]);
+		console.log("_tokens:"+JSON.stringify(_tokens));
 			}
 		}
 		return new firepick.ImageRef(
 			Number(_tokens[1]), /* x */
 			Number(_tokens[2]), /* y */
 			Number(_tokens[3]), /* z */
-			_tokens[4], /* state */
-			_tokens[5]); /* version */
+			{state: _tokens[4], version: _tokens[5]});
 	};
 	ImageRef.compare = function(img1,img2) {
 		var cmp = 
@@ -81,6 +89,15 @@ temp.track();
 	ImageRef.prototype.compare = function(that) {
 		return ImageRef.compare(this, that);
 	}
+	ImageRef.prototype.round = function(xplaces, yplaces, zplaces) {
+		xplaces = xplaces == null ? 0 : xplaces;
+		yplaces = yplaces == null ? xplaces : yplaces;
+		zplaces = zplaces == null ? yplaces : zplaces;
+	    this.x = +(Math.round(this.x + "e+" + xplaces)  + "e-" + xplaces);
+	    this.y = +(Math.round(this.y + "e+" + yplaces)  + "e-" + yplaces);
+	    this.z = +(Math.round(this.z + "e+" + zplaces)  + "e-" + zplaces);
+		return this;
+	}
 
     console.log("LOADED	: firepick.ImageRef");
     module.exports = firepick.ImageRef = ImageRef;
@@ -90,6 +107,13 @@ temp.track();
     var ref000 = new firepick.ImageRef();
 	var ref123 = new firepick.ImageRef(1,2,3);
 
+	it("should undefined be tested as == null", function() {
+		var undef;
+		should.equal(true, undef == null);
+		should.equal(true, null == null);
+		should.equal(false, "a" == null);
+		should.equal(false, function(){return null;} == null);
+	});
     it("should be created", function() {
         should.equal(0, ref000.x);
         should.equal(0, ref000.y);
@@ -104,10 +128,12 @@ temp.track();
         should(firepick.ImageRef.compare(ref000,ref123)).be.below(0);
         should(firepick.ImageRef.compare(ref123,ref000)).be.above(0);
         should(firepick.ImageRef.compare({x:0,y:0,z:0},{x:0,y:0,z:3})).be.below(0);
+        should(firepick.ImageRef.compare({x:0,y:0,z:0},{x:0,y:0,z:0,state:"test"})).be.below(0);
+        should(firepick.ImageRef.compare({x:0,y:0,z:0,state:"test",version:1},{x:0,y:0,z:0,state:"test"})).be.above(0);
 		should(ref000.compare(ref123)).be.below(0);
     });
 	it("should copy", function() {
-		var ref123a4 = new firepick.ImageRef(1,2,3,"a",4);
+		var ref123a4 = new firepick.ImageRef(1,2,3,{state:"a",version:4});
 		var ref123a4_copy1 = ref123a4.copy();
 		var ref123a4_copy2 = firepick.ImageRef.copy(ref123a4);
 		should.equal(0, ref123a4.compare(ref123a4_copy1));
@@ -116,7 +142,7 @@ temp.track();
 		should.equal(0, ref123a4_copy1.compare({version:4,state:"a",z:3,y:2,x:1}));
 	});
 	it("should have a name", function() {
-		var ref123a4 = new firepick.ImageRef(1,2,3,"a",4);
+		var ref123a4 = new firepick.ImageRef(1,2,3,{state:"a",version:4});
 		var ref123_4 = ref123.copy().setVersion(4);
 		var ref123b = ref123.copy().setState('b');
 		should.equal("_1_2_3", ref123.name());
@@ -126,9 +152,26 @@ temp.track();
 		should.equal("prefix_1_2_3#b", ref123b.name("prefix"));
 	});
 	it("should have a parseable name", function() {
-		var ref123a5 = new firepick.ImageRef(1,2,3,"a",5);
+		var ref123a5 = new firepick.ImageRef(1,2,3,{state:"a",version:5});
 		var name123a5 = ref123a5.name("/a/b/c",".jpg");
 		var refParse = firepick.ImageRef.parse(name123a5);
+		console.log(JSON.stringify(name123a5));
+		console.log(JSON.stringify(refParse));
 		should.equal(0, firepick.ImageRef.compare(refParse, ref123a5));
+	});
+	it("should round", function() {
+		var ref123 = new firepick.ImageRef(1,2,3);
+		var x = 1.09871;
+		var y = 2.2463;
+		var z = 3.3192;
+		var ref = new firepick.ImageRef(x,y,z);
+		should.notDeepEqual(ref, ref123);	
+		should.deepEqual(ref.round(), ref123); // rounds actual ImageRef
+		should.deepEqual(ref, ref123);	
+		should.deepEqual(new firepick.ImageRef(x,y,z).round(), ref123);
+		should.deepEqual(new firepick.ImageRef(x,y,z).round(1), new firepick.ImageRef(1.1,2.2,3.3));
+		should.deepEqual(new firepick.ImageRef(x,y,z).round(0,1), new firepick.ImageRef(1,2.2,3.3));
+		should.deepEqual(new firepick.ImageRef(x,y,z).round(0,0,1), new firepick.ImageRef(1,2,3.3));
+		should.deepEqual(new firepick.ImageRef(x,y,z).round(3), new firepick.ImageRef(1.099,2.246,3.319));
 	});
 });

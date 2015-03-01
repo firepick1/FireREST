@@ -9,26 +9,23 @@ firepick.XYZPositioner = require("./XYZPositioner");
 firepick.Camera = require("./Camera");
 firepick.ImageRef = require("./ImageRef");
 firepick.ImageStore = require("./ImageStore");
-
-function isNumeric(obj) {
-    return (obj - parseFloat(obj) + 1) >= 0;
-}
+firepick.FireSight = require("./FireSight");
 
 (function(firepick) {
-	function firesight(fname1, pipeline, args) {
-		var cmd = "firesight -i " + fname1 + " -p server/json/" + pipeline + " " + args;
-		//console.log(cmd);
-		var out = child_process.execSync(cmd);
-		return JSON.parse(out.toString());
-	};
-    function XYZCamera(xyzPositioner, imgStore) {
+    function XYZCamera(xyzPositioner, imgStore, firesight) {
         this.xyz = xyzPositioner || new firepick.XYZPositioner();
 		this.imgStore = imgStore || new firepick.ImageStore(
 			new firepick.Camera(), 
 			{ prefix:"XYZCamera", suffix:".jpg" }
 		);
+		this.firesight = firesight || new firepick.FireSight();
         return this;
     };
+
+	///////////////// INSTANCE //////////////////////
+	XYZCamera.prototype.imagePath = function(imgRef) {
+		return imgRef == null ?  this.imgStore.camera.path : this.pathOf(imgRef);
+	};
 	XYZCamera.prototype.home = function() { this.xyz.home(); return this; };
 	XYZCamera.prototype.origin = function() { 
 		this.xyz.origin(); 
@@ -55,11 +52,15 @@ function isNumeric(obj) {
 	};
 	XYZCamera.prototype.calcOffset = function(imgRef1, imgRef2) {
 		should.exist(imgRef1);
-		var nArgs = typeof imgRef2 === 'undefined' ? 1 : 2;
-		var fname1 = nArgs === 1 ? this.imgStore.camera.path : this.pathOf(imgRef1);
-		var fname2 = nArgs === 1 ? this.pathOf(imgRef1) : this.pathOf(imgRef2);
-		var jout = firesight(fname1, "calcOffset.json", "-Dtemplate=" + fname2);
-		return jout.result.channels;
+		var fname1 = imgRef2 == null ? this.imgStore.camera.path : this.pathOf(imgRef1);
+		var fname2 = imgRef2 == null ? this.pathOf(imgRef1) : this.pathOf(imgRef2);
+		return this.firesight.calcOffset(fname1, fname2);
+	};
+	XYZCamera.prototype.meanStdDev = function(imgRef) {
+		return this.firesight.meanStdDev(this.imagePath(imgRef));
+	};
+	XYZCamera.prototype.sharpness = function(imgRef) {
+		return this.firesight.sharpness(this.imagePath(imgRef));
 	};
 
     console.log("LOADED	: firepick.XYZCamera");
@@ -84,19 +85,19 @@ function isNumeric(obj) {
 		should.ok(firepick.XYZPositioner.validate(xyzCam));
 	});
 	it("should take a picture at (0,0,0)", function() {
-		var ref000_test_1 = new firepick.ImageRef(0,0,0,"test",1);
+		var ref000_test_1 = new firepick.ImageRef(0,0,0,{state:"test",version:1});
 		this.timeout(5000);
 		ref.push(xyzCam.moveTo(0,0,0).captureSave("test", 1));
 		should.equal(0, ref000_test_1.compare(ref[0]));
 	});
 	it("should take a different picture at (0,0,0)", function() {
-		var ref000_test_2 = new firepick.ImageRef(0,0,0,"test",2);
+		var ref000_test_2 = new firepick.ImageRef(0,0,0,{state:"test",version:2});
 		this.timeout(10000);
 		ref.push(xyzCam.moveTo(0,0,0).captureSave("test", 2));
 		should.equal(0, ref000_test_2.compare(ref[1]));
 	});
 	it("should take a picture at (1,0,0)", function() {
-		var ref100_test_3 = new firepick.ImageRef(1,0,0,"test",3);
+		var ref100_test_3 = new firepick.ImageRef(1,0,0,{state:"test",version:3});
 		this.timeout(5000);
 		ref.push(xyzCam.moveTo(1,0,0).captureSave("test",3));
 		should.equal(0, ref100_test_3.compare(ref[2]));
@@ -104,20 +105,18 @@ function isNumeric(obj) {
 	it("should calculate the current image offset with respect to another XYZ", function() {
 		this.timeout(5000);
 		xyzCam.captureSave("test", 4);
-		var channels = xyzCam.origin().calcOffset(ref[1]);
-		should.exist(channels[0]);
-		should(channels[0].dx).within(-1,1);
-		should(channels[0].dy).within(-1,1);
+		var diff = xyzCam.origin().calcOffset(ref[1]);
+		should(diff.dx).within(-1,1);
+		should(diff.dy).within(-1,1);
 	});
 	it("should calculate the image offset of two saved images", function() {
 		this.timeout(5000);
 		ref.push(xyzCam.captureSave("eagle",4));
 		xyzCam.move({x:1});
 		ref.push(xyzCam.captureSave("hawk",5));
-		var channels = xyzCam.origin().calcOffset(ref[3],ref[4]);
-		should.exist(channels[0]);
-		should(channels[0].dx).within(-6,-4);
-		should(channels[0].dy).within(-1,1);
+		var diff = xyzCam.origin().calcOffset(ref[3],ref[4]);
+		should(diff.dx).within(-6,-4);
+		should(diff.dy).within(-1,1);
 	});
 	it("should have taken the right pictures", function() {
 		should.exist(ref);
@@ -131,5 +130,18 @@ function isNumeric(obj) {
 		var fs100_3 = fs.statSync(xyzCam.pathOf(ref[2]));
 		var camX1Y0Z0 = fs.statSync("test/camX1Y0Z0.jpg");
 		should.equal(camX1Y0Z0.size, fs100_3.size);
+	});
+	it("should calculate sharpness", function() {
+		var result = xyzCam.sharpness(ref[0]);
+		should(result.sharpness).within(3.04,3.06);
+	});
+	it("should calculate meanStdDev", function() {
+		var result = xyzCam.meanStdDev(ref[0]);
+		should(result.mean[0]).within(252.6,252.7); // B
+		should(result.mean[1]).within(254.5,254.7); // G
+		should(result.mean[2]).within(251.6,251.7); // R
+		should(result.stdDev[0]).within(2.1,2.2); // B
+		should(result.stdDev[1]).within(1.9,2.0); // G
+		should(result.stdDev[2]).within(9.6,9.7); // R
 	});
 })

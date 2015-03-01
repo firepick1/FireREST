@@ -47,6 +47,7 @@ function isNumeric(obj) {
     module.exports = firepick.XYZCameraFactory = XYZCameraFactory;
 })(firepick || (firepick = {}));
 
+/*
 (typeof describe === 'function') && describe("firepick.XYZCameraFactory test", function() {
 	var xyzCam = firepick.XYZCameraFactory.create();
 	var ref000 = new firepick.ImageRef(0,0,0);
@@ -76,3 +77,4 @@ function isNumeric(obj) {
 		should(d2).within(16, 64);
 	});
 })
+*/

@@ -29,7 +29,7 @@ var firefuse_path = "/dev/firefuse/sync/cnc/marlin/gcode.fire";
         return this;
     };
     FireFUSEMarlin.prototype.health = function() {
-		return typeof this.err === 'undefined' ? 1 : 0;
+		return this.err == null ? 1 : 0;
 	};
 	FireFUSEMarlin.prototype.home = function() { this.xyz.home(); return this;};
 	FireFUSEMarlin.prototype.origin = function() { this.xyz.origin(); return this;};
