@@ -79,8 +79,6 @@ function isNumeric(obj) {
 			it("should parse an ImageREf from a path", function() {
 				var path123 = imgStore.pathOf(ref123);
 				var parse123 = imgStore.parseImageRef(path123);
-				console.log(JSON.stringify(parse123));
-				console.log(JSON.stringify(ref123));
 				should.equal(0, firepick.ImageRef.compare(parse123, ref123));
 			});
 			var stat1;
