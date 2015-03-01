@@ -40,6 +40,10 @@ function isNumeric(obj) {
 		this.imgRef = firepick.ImageRef.copy(this.xyz.position());
 		return this; 
 	};
+	XYZCamera.prototype.moveTo = function(x,y,z) {
+		this.move({x:x,y:y,z:z});
+		return this;
+	}
 	XYZCamera.prototype.position = function(path) { return this.xyz.position(); };
 	XYZCamera.prototype.health = function() { 
 		return (this.imgStore.health() + this.xyz.health())/2;
@@ -80,24 +84,22 @@ function isNumeric(obj) {
 		should.ok(firepick.XYZPositioner.validate(xyzCam));
 	});
 	it("should take a picture at (0,0,0)", function() {
+		var ref000_test_1 = new firepick.ImageRef(0,0,0,"test",1);
 		this.timeout(5000);
-		should.deepEqual({x:0,y:0,z:0}, xyzCam.origin().position());
-		ref.push(xyzCam.captureSave("test", 1));
-		should.equal(0, firepick.ImageRef.compare({x:0,y:0,z:0,state:"test",version:1}, ref[0]));
-		should.deepEqual({x:0,y:0,z:0},xyzCam.position());
+		ref.push(xyzCam.moveTo(0,0,0).captureSave("test", 1));
+		should.equal(0, ref000_test_1.compare(ref[0]));
 	});
 	it("should take a different picture at (0,0,0)", function() {
+		var ref000_test_2 = new firepick.ImageRef(0,0,0,"test",2);
 		this.timeout(10000);
-		should.deepEqual({x:0,y:0,z:0}, xyzCam.origin().position());
-		ref.push(xyzCam.captureSave("test", 2));
-		should.equal(0, firepick.ImageRef.compare({x:0,y:0,z:0,state:"test", version:2}, ref[1]));
+		ref.push(xyzCam.moveTo(0,0,0).captureSave("test", 2));
+		should.equal(0, ref000_test_2.compare(ref[1]));
 	});
 	it("should take a picture at (1,0,0)", function() {
+		var ref100_test_3 = new firepick.ImageRef(1,0,0,"test",3);
 		this.timeout(5000);
-		should.deepEqual({x:1,y:0,z:0}, xyzCam.move({x:1,y:0,z:0}).position());
-		ref.push(xyzCam.captureSave("test",3));
-		should.equal(0, firepick.ImageRef.compare({x:1,y:0,z:0,state:"test",version:3}, ref[2]));
-		should.deepEqual({x:1,y:0,z:0},xyzCam.position());
+		ref.push(xyzCam.moveTo(1,0,0).captureSave("test",3));
+		should.equal(0, ref100_test_3.compare(ref[2]));
 	});
 	it("should calculate the current image offset with respect to another XYZ", function() {
 		this.timeout(5000);

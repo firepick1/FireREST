@@ -70,6 +70,7 @@ function isNumeric(obj) {
 				should.equal(stat123_2.size,stat100.size);
 			});
 		});
+		return true;
 	};
 	
 	/////////////// INSTANCE ////////////
