@@ -9,16 +9,14 @@ firepick.XYZPositioner = require("./XYZPositioner");
 firepick.Camera = require("./Camera");
 firepick.ImageRef = require("./ImageRef");
 firepick.ImageStore = require("./ImageStore");
-firepick.FireSight = require("./FireSight");
 
 (function(firepick) {
-    function XYZCamera(xyzPositioner, imgStore, firesight) {
+    function XYZCamera(xyzPositioner, imgStore) {
         this.xyz = xyzPositioner || new firepick.XYZPositioner();
 		this.imgStore = imgStore || new firepick.ImageStore(
 			new firepick.Camera(), 
 			{ prefix:"XYZCamera", suffix:".jpg" }
 		);
-		this.firesight = firesight || new firepick.FireSight();
         return this;
     };
 
@@ -49,18 +47,6 @@ firepick.FireSight = require("./FireSight");
 	XYZCamera.prototype.captureSave = function(state, version) {
 		var imgRef = this.imgRef.copy().setState(state).setVersion(version);
 		return this.imgStore.image(imgRef);
-	};
-	XYZCamera.prototype.calcOffset = function(imgRef1, imgRef2) {
-		should.exist(imgRef1);
-		var fname1 = imgRef2 == null ? this.imgStore.camera.path : this.pathOf(imgRef1);
-		var fname2 = imgRef2 == null ? this.pathOf(imgRef1) : this.pathOf(imgRef2);
-		return this.firesight.calcOffset(fname1, fname2);
-	};
-	XYZCamera.prototype.meanStdDev = function(imgRef) {
-		return this.firesight.meanStdDev(this.imagePath(imgRef));
-	};
-	XYZCamera.prototype.sharpness = function(imgRef) {
-		return this.firesight.sharpness(this.imagePath(imgRef));
 	};
 
     console.log("LOADED	: firepick.XYZCamera");
@@ -102,25 +88,9 @@ firepick.FireSight = require("./FireSight");
 		ref.push(xyzCam.moveTo(1,0,0).captureSave("test",3));
 		should.equal(0, ref100_test_3.compare(ref[2]));
 	});
-	it("should calculate the current image offset with respect to another XYZ", function() {
-		this.timeout(5000);
-		xyzCam.captureSave("test", 4);
-		var diff = xyzCam.origin().calcOffset(ref[1]);
-		should(diff.dx).within(-1,1);
-		should(diff.dy).within(-1,1);
-	});
-	it("should calculate the image offset of two saved images", function() {
-		this.timeout(5000);
-		ref.push(xyzCam.captureSave("eagle",4));
-		xyzCam.move({x:1});
-		ref.push(xyzCam.captureSave("hawk",5));
-		var diff = xyzCam.origin().calcOffset(ref[3],ref[4]);
-		should(diff.dx).within(-6,-4);
-		should(diff.dy).within(-1,1);
-	});
 	it("should have taken the right pictures", function() {
 		should.exist(ref);
-		should(ref.length).equal(5);
+		should(ref.length).equal(3);
 		var fs0 = fs.statSync(xyzCam.pathOf(ref[0]));
 		var camX0Y0Z0a = fs.statSync("test/camX0Y0Z0a.jpg");
 		should.equal(camX0Y0Z0a.size, fs0.size);
@@ -130,18 +100,5 @@ firepick.FireSight = require("./FireSight");
 		var fs100_3 = fs.statSync(xyzCam.pathOf(ref[2]));
 		var camX1Y0Z0 = fs.statSync("test/camX1Y0Z0.jpg");
 		should.equal(camX1Y0Z0.size, fs100_3.size);
-	});
-	it("should calculate sharpness", function() {
-		var result = xyzCam.sharpness(ref[0]);
-		should(result.sharpness).within(3.04,3.06);
-	});
-	it("should calculate meanStdDev", function() {
-		var result = xyzCam.meanStdDev(ref[0]);
-		should(result.mean[0]).within(252.6,252.7); // B
-		should(result.mean[1]).within(254.5,254.7); // G
-		should(result.mean[2]).within(251.6,251.7); // R
-		should(result.stdDev[0]).within(2.1,2.2); // B
-		should(result.stdDev[1]).within(1.9,2.0); // G
-		should(result.stdDev[2]).within(9.6,9.7); // R
 	});
 })

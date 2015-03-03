@@ -52,9 +52,10 @@ firepick.FPD = require("./FPD");
 	];
 	var is = new firepick.ImageStore(null, { images:images });
 	var fpd = new firepick.FPD({imgStore:is});
+	var ip = fpd.imageProcessor();
 	for (var i=0; i < images.length; i++) {
 		is.load(images[i]);
-		images[i].sharpness = fpd.imgSharpness(images[i]).sharpness;
+		images[i].sharpness = ip.sharpness(images[i]).sharpness;
 		console.log(JSON.stringify(images[i]));
 	}
 });

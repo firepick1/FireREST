@@ -61,14 +61,9 @@ function isNumeric(obj) {
 	}
 	ImageStore.prototype.capture = function(imgRef, camera2) { 
 		should.exist(imgRef);
-		var name = firepick.ImageRef.nameOf(imgRef, this.prefix, this.suffix);
 		var camera = camera2 || this.camera;
 		camera.capture();
 		return this.load(imgRef, camera.path);
-		this.images[name] = firepick.ImageRef.copy(imgRef); 
-		var fpath = this.pathOf(imgRef);
-		fs.writeFileSync(fpath, fs.readFileSync(camera.path));
-		return this.images[name];
 	}
 	ImageStore.prototype.image = function(imgRef, camera2) { 
 		should.exist(imgRef);
