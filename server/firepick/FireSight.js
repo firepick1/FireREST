@@ -25,7 +25,7 @@ firepick.ImageStore = require("./ImageStore");
 		//console.log(cmd);
 		var out = child_process.execSync(cmd);
 		var jout = JSON.parse(out.toString());
-		console.log(JSON.stringify(jout));
+		//console.log(JSON.stringify(jout));
 		return jout;
 	};
 	FireSight.prototype.calcOffset = function(fname1, fname2) {
@@ -38,6 +38,10 @@ firepick.ImageStore = require("./ImageStore");
 	};
 	FireSight.prototype.sharpness = function(fname1) {
 		var jout = firesight_cmd(fname1, "sharpness.json");
+		return jout.result;
+	};
+	FireSight.prototype.PSNR = function(fname1, fname2) {
+		var jout = firesight_cmd(fname1, "PSNR.json", "-Dpath="+fname2);
 		return jout.result;
 	};
 	//
