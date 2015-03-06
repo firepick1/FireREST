@@ -8,12 +8,10 @@ var os = require("os");
 firepick.Camera = require("./Camera");
 firepick.ImageRef = require("./ImageRef");
 firepick.ImageStore = require("./ImageStore");
-firepick.FireSight = require("./FireSight");
 
 (function(firepick) {
     function ImageProcessor(imgStore) {
 		this.imgStore = imgStore || new firepick.ImageStore();
-		this.firesight = new firepick.FireSight();
         return this;
     }
 
