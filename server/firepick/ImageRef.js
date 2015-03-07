@@ -113,6 +113,14 @@ temp.track();
     ImageRef.prototype.compare = function(that) {
         return ImageRef.compare(this, that);
     };
+	ImageRef.prototype.exists = function() {
+		try {
+			fs.statSync(this.path);
+			return true;
+		} catch(err) {
+			return false; // silly nodejs is deprecating fs.exists()
+		}
+	};
     ImageRef.prototype.round = function(xplaces, yplaces, zplaces) {
         xplaces = xplaces == null ? 0 : xplaces;
         yplaces = yplaces == null ? xplaces : yplaces;
@@ -258,4 +266,9 @@ temp.track();
         should.deepEqual(new firepick.ImageRef(x, y, z).round(0, 0, 1), new firepick.ImageRef(1, 2, 3.3));
         should.deepEqual(new firepick.ImageRef(x, y, z).round(3), new firepick.ImageRef(1.099, 2.246, 3.319));
     });
+	it("exists() should return true iff image reference path exists", function() {
+		new firepick.ImageRef(0,0,0,{path:"no/such/file"}).exists().should.equal(false);
+		new firepick.ImageRef(0,0,0).exists().should.equal(false);
+		new firepick.ImageRef(0,0,0,{path:"test/camX0Y0Z0a.jpg"}).exists().should.equal(true);
+	});
 });

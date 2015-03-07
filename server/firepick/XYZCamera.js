@@ -165,6 +165,15 @@ firepick.ImageStore = require("./ImageStore");
 			var ref = xyzCam.moveTo(1,2,3).imageRef();
 			should(ref).instanceof(firepick.ImageRef);
 			should(ref).properties({x:1,y:2,z:3});
+			should(ref.path).be.a.String;
+			should(ref.path.length).be.above(0);
+		});
+		it("imageRef({x:3,y:2,z:1}) should resolve an incomplete image reference", function() {
+			var ref = xyzCam.imageRef({x:3,y:2,z:1});
+			should(ref).instanceof(firepick.ImageRef);
+			should(ref).properties({x:3,y:2,z:1});
+			should(ref.path).be.a.String;
+			should(ref.path.length).be.above(0);
 		});
         return true;
     };
