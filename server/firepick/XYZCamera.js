@@ -1,104 +1,89 @@
 var should = require("should"),
     module = module || {},
     firepick = firepick || {};
-var os = require("os"),
-	fs = require("fs"),
-	child_process = require("child_process"),
-	path = require("path");
-firepick.XYZPositioner = require("./XYZPositioner");
-firepick.Camera = require("./Camera");
+var fs = require("fs");
+firepick.FPD = require("./FPD");
 firepick.ImageRef = require("./ImageRef");
-firepick.ImageStore = require("./ImageStore");
 
 (function(firepick) {
-    function XYZCamera(xyzPositioner, imgStore) {
-        this.xyz = xyzPositioner || new firepick.XYZPositioner();
-		this.imgStore = imgStore || new firepick.ImageStore(
-			new firepick.Camera(), 
-			{ prefix:"XYZCamera", suffix:".jpg" }
-		);
+    function XYZCamera(options) {
+		this.xyz = {x:0,y:0,z:0};
         return this;
     };
 
-	///////////////// INSTANCE //////////////////////
-	XYZCamera.prototype.imagePath = function(imgRef) {
-		return imgRef == null ?  this.imgStore.camera.path : this.pathOf(imgRef);
-	};
-	XYZCamera.prototype.home = function() { this.xyz.home(); return this; };
-	XYZCamera.prototype.origin = function() { 
-		this.xyz.origin(); 
-		this.imgRef = firepick.ImageRef.copy(this.xyz.position());
-		return this; 
-	};
-	XYZCamera.prototype.move = function(path) { 
-		this.xyz.move(path); 
-		this.imgRef = firepick.ImageRef.copy(this.xyz.position());
-		return this; 
+    /////////////// INSTANCE ////////////////
+	XYZCamera.prototype.origin = function() {
+		return this.moveTo(0,0,0);
 	};
 	XYZCamera.prototype.moveTo = function(x,y,z) {
-		this.move({x:x,y:y,z:z});
+		this.xyz = {x:x,y:y,z:z};
 		return this;
-	}
-	XYZCamera.prototype.position = function(path) { return this.xyz.position(); };
-	XYZCamera.prototype.health = function() { 
-		return (this.imgStore.health() + this.xyz.health())/2;
 	};
-	XYZCamera.prototype.pathOf = function(imgRef) { return this.imgStore.pathOf(imgRef); };
-	XYZCamera.prototype.captureSave = function(state, version) {
-		var imgRef = this.imgRef.copy().setState(state).setVersion(version);
-		return this.imgStore.image(imgRef);
+	XYZCamera.prototype.getXYZ = function() {
+		return this.xyz;
 	};
+	XYZCamera.prototype.capture = function() {
+		var imgRef = firepick.ImageRef.copy(this.xyz);
+		if (this.xyz.x === 0 && this.xyz.y === 0 && this.xyz.z === 0) {
+			imgRef.path = "test/camX0Y0Z0a.jpg";
+		} else {
+			imgRef.path = "test/XP005_Z-005X0Y0@1#1.jpg";
+		}
+		return imgRef;
+	};
+    /////////////// CLASS ////////////////
+    XYZCamera.validate = function(xyzCam) {
+        var ref = [];
+        var ip;
+        it("should home and move to the XYZ origin", function() {
+            this.timeout(5000);
+            xyzCam.origin().should.equal(xyzCam);
+			var xyz = xyzCam.getXYZ();
+			xyz.should.exist;
+			xyz.x.should.equal(0);
+			xyz.y.should.equal(0);
+			xyz.z.should.equal(0);
+        });
+		it("should move to a different XYZ", function() {
+			xyzCam.moveTo(1,2,3).should.equal(xyzCam);
+			var xyz = xyzCam.getXYZ();
+			xyz.should.exist;
+			xyz.x.should.equal(1);
+			xyz.y.should.equal(2);
+			xyz.z.should.equal(3);
+		});
+		var img000;
+		var stat000;
+        it("should take and save an image at (0,0,0)", function() {
+            img000 = xyzCam.moveTo(0, 0, 0).capture();
+			img000.x.should.equal(0);
+			img000.y.should.equal(0);
+			img000.z.should.equal(0);
+			img000.path.should.be.a.String;
+			stat000 = fs.statSync(img000.path);
+			stat000.size.should.be.above(0);
+        });
+		var img00m5;
+		var stat00m5;
+        it("should take and save a different image at (0,0,-5)", function() {
+            img00m5 = xyzCam.moveTo(0, 0, -5).capture();
+			img00m5.x.should.equal(0);
+			img00m5.y.should.equal(0);
+			img00m5.z.should.equal(-5);
+			img00m5.path.should.be.a.String;
+			img00m5.path.should.not.equal(img000.path);
+			stat00m5 = fs.statSync(img00m5.path);
+			stat00m5.size.should.be.above(0);
+			stat00m5.size.should.not.equal(stat000.size);
+		});
+        return true;
+    };
 
     console.log("LOADED	: firepick.XYZCamera");
     module.exports = firepick.XYZCamera = XYZCamera;
 })(firepick || (firepick = {}));
 
 (typeof describe === 'function') && describe("firepick.XYZCamera test", function() {
-	var camera = new firepick.Camera([
-		"test/camX0Y0Z0a.jpg",
-		"test/camX0Y0Z0b.jpg",
-		"test/camX1Y0Z0.jpg",
-		"test/camX0Y0Z0a.jpg",
-		"test/camX0Y0Z0b.jpg",
-		"test/camX1Y0Z0.jpg",
-	]);
-	var imgStore = new firepick.ImageStore(camera, "ImageStore", ".jpg");
-	var xyz = new firepick.XYZPositioner(); 
-
-	var xyzCam = new firepick.XYZCamera(xyz, imgStore);
-	var ref = [];
-	it("should be an XYZPositioner", function() {
-		should.ok(firepick.XYZPositioner.validate(xyzCam));
-	});
-	it("should take a picture at (0,0,0)", function() {
-		var ref000_test_1 = new firepick.ImageRef(0,0,0,{state:"test",version:1});
-		this.timeout(5000);
-		ref.push(xyzCam.moveTo(0,0,0).captureSave("test", 1));
-		should.equal(0, ref000_test_1.compare(ref[0]));
-	});
-	it("should take a different picture at (0,0,0)", function() {
-		var ref000_test_2 = new firepick.ImageRef(0,0,0,{state:"test",version:2});
-		this.timeout(10000);
-		ref.push(xyzCam.moveTo(0,0,0).captureSave("test", 2));
-		should.equal(0, ref000_test_2.compare(ref[1]));
-	});
-	it("should take a picture at (1,0,0)", function() {
-		var ref100_test_3 = new firepick.ImageRef(1,0,0,{state:"test",version:3});
-		this.timeout(5000);
-		ref.push(xyzCam.moveTo(1,0,0).captureSave("test",3));
-		should.equal(0, ref100_test_3.compare(ref[2]));
-	});
-	it("should have taken the right pictures", function() {
-		should.exist(ref);
-		should(ref.length).equal(3);
-		var fs0 = fs.statSync(xyzCam.pathOf(ref[0]));
-		var camX0Y0Z0a = fs.statSync("test/camX0Y0Z0a.jpg");
-		should.equal(camX0Y0Z0a.size, fs0.size);
-		var camX0Y0Z0b = fs.statSync("test/camX0Y0Z0b.jpg");
-		var fs000_2 = fs.statSync(xyzCam.pathOf(ref[1]));
-		should.deepEqual(camX0Y0Z0b.size, fs000_2.size);
-		var fs100_3 = fs.statSync(xyzCam.pathOf(ref[2]));
-		var camX1Y0Z0 = fs.statSync("test/camX1Y0Z0.jpg");
-		should.equal(camX1Y0Z0.size, fs100_3.size);
-	});
+    var xyzCam = new firepick.XYZCamera();
+    firepick.XYZCamera.validate(xyzCam);
 })

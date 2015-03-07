@@ -37,7 +37,10 @@ module.exports = function(grunt) {
         },
         jsbeautifier: {
             files: ["Gruntfile.js", "server/**/*.js"],
-            options: {}
+            options: {
+                wrap_line_length: 50,
+                keep_array_indentation: true
+            }
         }
     });
 
