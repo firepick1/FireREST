@@ -55,18 +55,18 @@ firepick.ImageStore = require("./ImageStore");
     ImageProcessor.validate = function(ip) {
         describe("ImageProcessor.validate(" + ip.constructor.name + ")", function() {
             var ref000a = new firepick.ImageRef(0, 0, 0, {
-                state: "a",
+                tag: "a",
                 path: "test/camX0Y0Z0a.jpg"
             });
             var ref000b = new firepick.ImageRef(0, 0, 0, {
-                state: "b",
+                tag: "b",
                 path: "test/camX0Y0Z0b.jpg"
             });
             var ref100 = new firepick.ImageRef(1, 0, 0, {
                 path: "test/camX1Y0Z0.jpg"
             });
             var refDuck = new firepick.ImageRef(0, 0, 0, {
-                state: "duck",
+                tag: "duck",
                 path: "test/duck.jpg"
             });
             ip.imgStore.load(ref000a);

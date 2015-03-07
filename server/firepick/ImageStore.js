@@ -54,10 +54,12 @@ function isNumeric(obj) {
         srcPath = srcPath || imgRef.path;
         should.exist(srcPath);
         var name = firepick.ImageRef.nameOf(imgRef, this.prefix, this.suffix);
-        this.images[name] = firepick.ImageRef.copy(imgRef);
         var dstPath = this.pathOf(imgRef);
         fs.writeFileSync(dstPath, fs.readFileSync(srcPath));
-        return this.images[name] = imgRef;
+        var newRef = firepick.ImageRef.copy(imgRef);
+        newRef.path = dstPath;
+        this.images[name] = newRef;
+        return newRef;
     }
     ImageStore.prototype.capture = function(imgRef, camera2) {
         should.exist(imgRef);
@@ -79,7 +81,7 @@ function isNumeric(obj) {
         var storeClass = imgStore.constructor.name;
         describe("ImageStore.validate(" + storeClass + ")", function() {
             var ref123 = new firepick.ImageRef(1, 2, 3, {
-                state: "test",
+                tag: "test",
                 version: 1
             });
             it("should implement pathOf", function() {
@@ -124,13 +126,13 @@ function isNumeric(obj) {
     firepick.ImageStore.validate(imgStoreTest);
 
     describe("Test ImageStore extensions", function() {
-		var ref123 = new firepick.ImageRef(1, 2, 3, {
-			state: "test",
-			version: 1
-		});
+        var ref123 = new firepick.ImageRef(1, 2, 3, {
+            tag: "test",
+            version: 1
+        });
         it("should implement peek", function() {
             var refNotThere = new firepick.ImageRef(9, 1, 1, {
-                state: "not_there"
+                tag: "not_there"
             });
             var peekNotThere = imgStore.peek(refNotThere);
             should.not.exist(peekNotThere);
@@ -157,7 +159,7 @@ function isNumeric(obj) {
                 x: 1,
                 y: 2,
                 z: 3,
-                state: "test",
+                tag: "test",
                 version: 6
             };
             var ref123_6 = firepick.ImageRef.copy(raw123_6);
@@ -165,17 +167,25 @@ function isNumeric(obj) {
             should.not.exist(peek123_6);
             imgStore.load(raw123_6, "test/camX0Y0Z0a.jpg");
             peek123_6 = imgStore.peek(raw123_6);
-            should.deepEqual(peek123_6, ref123_6);
+            peek123_6.x.should.equal(ref123_6.x);
+            peek123_6.y.should.equal(ref123_6.y);
+            peek123_6.z.should.equal(ref123_6.z);
+            peek123_6.tag.should.equal(ref123_6.tag);
+            peek123_6.version.should.equal(ref123_6.version);
             should.notStrictEqual(peek123_6, ref123_6);
             var ref123_7 = new firepick.ImageRef(1, 2, 3, {
-                state: "test",
+                tag: "test",
                 version: 7,
                 path: "test/camX0Y0Z0a.jpg"
             });
             var peek123_7 = imgStore.peek(ref123_7);
             should.not.exist(peek123_7);
             peek123_7 = imgStore.load(ref123_7);
-            should.deepEqual(peek123_7, ref123_7);
+            peek123_7.x.should.equal(ref123_7.x);
+            peek123_7.y.should.equal(ref123_7.y);
+            peek123_7.z.should.equal(ref123_7.z);
+            peek123_7.tag.should.equal(ref123_7.tag);
+            peek123_7.version.should.equal(ref123_7.version);
         });
     });
 })

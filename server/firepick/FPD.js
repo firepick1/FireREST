@@ -80,7 +80,7 @@ firepick.XYZCamera = require("./XYZCamera");
         });
         return this;
     }
-    FPD.prototype.position = function(path) {
+    FPD.prototype.getXYZ = function(path) {
         return this.$xyz.position();
     };
     FPD.prototype.health = function() {
@@ -91,8 +91,8 @@ firepick.XYZCamera = require("./XYZCamera");
             this.$xyz.health()
         ) / 4;
     };
-    FPD.prototype.captureSave = function(state, version) {
-        var imgRef = this.$imgRef.copy().setState(state).setVersion(version);
+    FPD.prototype.capture = function(tag, version) {
+        var imgRef = this.$imgRef.copy().setTag(tag).setVersion(version);
         return this.$imgStore.capture(imgRef);
     };
 
@@ -109,31 +109,6 @@ firepick.XYZCamera = require("./XYZCamera");
         it("should return a camera", function() {
             should(fpd.camera()).equal(fpd.$camera);
         });
-        it("should home and move to the origin", function() {
-            this.timeout(5000);
-            fpd.origin();
-            should.deepEqual(fpd.position(), {
-                x: 0,
-                y: 0,
-                z: 0
-            });
-        });
-        it("should take two different pictures at (0,0,0)", function() {
-            this.timeout(5000);
-            ref.push(fpd.moveTo(0, 0, 0).captureSave("test", 1));
-            ref.push(fpd.captureSave("test", 2));
-            var result = ip.PSNR(ref[0], ref[1]);
-            should.notEqual(result.PSNR, "SAME");
-        });
-        it("should take an offset picture at (1,0,0)", function() {
-            this.timeout(5000);
-            ref.push(fpd.moveTo(1, 0, 0).captureSave("test", 3));
-            var diff = ip.calcOffset(ref[1], ref[2]);
-            should.exist(diff.dx);
-            should.exist(diff.dy);
-            should(diff.dx * diff.dx).above(10);
-            should(diff.dy * diff.dy).below(5);
-        });
         return true;
     };
 
@@ -143,6 +118,6 @@ firepick.XYZCamera = require("./XYZCamera");
 
 (typeof describe === 'function') && describe("firepick.FPD test", function() {
     var fpd = new firepick.FPD();
+    firepick.XYZCamera.validate(fpd);
     firepick.FPD.validate(fpd);
-	//firepick.XYZCamera.validate(fpd);
 })

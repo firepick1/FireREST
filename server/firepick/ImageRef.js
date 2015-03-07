@@ -29,8 +29,8 @@ temp.track();
     ImageRef.nameOf = function(imgRef, prefix, suffix) {
         var fname = (prefix || "") + "_" + imgRef.x + "_" + imgRef.y + "_" + imgRef.z;
 
-        if (imgRef.state || imgRef.version) {
-            fname += "#" + (imgRef.state || "");
+        if (imgRef.tag || imgRef.version) {
+            fname += "#" + (imgRef.tag || "");
         }
         if (imgRef.version) {
             fname += "_" + imgRef.version;
@@ -52,7 +52,7 @@ temp.track();
             Number(_tokens[1]), /* x */
             Number(_tokens[2]), /* y */
             Number(_tokens[3]), /* z */ {
-                state: _tokens[4],
+                tag: _tokens[4],
                 version: _tokens[5]
             });
     };
@@ -62,8 +62,8 @@ temp.track();
             ((img1.y || 0) - (img2.y || 0)) ||
             ((img1.z || 0) - (img2.z || 0));
         if (cmp === 0) {
-            var s1 = img1.state || "";
-            var s2 = img2.state || "";
+            var s1 = img1.tag || "";
+            var s2 = img2.tag || "";
             cmp = (s1 === s2 ? 0 : (s1 < s2 ? -1 : 1));
         }
         cmp = cmp || ((img1.version || 0) - (img2.version || 0));
@@ -78,8 +78,8 @@ temp.track();
         this.version = version || 0;
         return this;
     }
-    ImageRef.prototype.setState = function(state) {
-        this.state = state;
+    ImageRef.prototype.setTag = function(tag) {
+        this.tag = tag;
         return this;
     }
     ImageRef.prototype.name = function(prefix, suffix) {
@@ -153,25 +153,25 @@ temp.track();
             x: 0,
             y: 0,
             z: 0,
-            state: "test"
+            tag: "test"
         })).be.below(0);
         should(firepick.ImageRef.compare({
             x: 0,
             y: 0,
             z: 0,
-            state: "test",
+            tag: "test",
             version: 1
         }, {
             x: 0,
             y: 0,
             z: 0,
-            state: "test"
+            tag: "test"
         })).be.above(0);
         should(ref000.compare(ref123)).be.below(0);
     });
     it("should copy", function() {
         var ref123a4 = new firepick.ImageRef(1, 2, 3, {
-            state: "a",
+            tag: "a",
             version: 4
         });
         var ref123a4_copy1 = ref123a4.copy();
@@ -181,7 +181,7 @@ temp.track();
         should.equal(0, ref123a4_copy1.compare(ref123a4_copy2));
         should.equal(0, ref123a4_copy1.compare({
             version: 4,
-            state: "a",
+            tag: "a",
             z: 3,
             y: 2,
             x: 1
@@ -189,11 +189,11 @@ temp.track();
     });
     it("should have a name", function() {
         var ref123a4 = new firepick.ImageRef(1, 2, 3, {
-            state: "a",
+            tag: "a",
             version: 4
         });
         var ref123_4 = ref123.copy().setVersion(4);
-        var ref123b = ref123.copy().setState('b');
+        var ref123b = ref123.copy().setTag('b');
         should.equal("_1_2_3", ref123.name());
         should.equal("prefix_1_2_3.jpg", ref123.name("prefix", ".jpg"));
         should.equal("prefix_1_2_3#a_4.jpg", ref123a4.name("prefix", ".jpg"));
@@ -202,7 +202,7 @@ temp.track();
     });
     it("should have a parseable name", function() {
         var ref123a5 = new firepick.ImageRef(1, 2, 3, {
-            state: "a",
+            tag: "a",
             version: 5
         });
         var name123a5 = ref123a5.name("/a/b/c", ".jpg");
