@@ -47,8 +47,8 @@ var firefuse_path = "/dev/firefuse/sync/cnc/marlin/gcode.fire";
         this.xyz.move(path);
         return this;
     };
-    FireFUSEMarlin.prototype.position = function() {
-        return this.xyz.position();
+    FireFUSEMarlin.prototype.getXYZ = function() {
+        return this.xyz.getXYZ();
     };
 
     console.log("LOADED	: firepick.FireFUSEMarlin");

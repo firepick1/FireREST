@@ -10,7 +10,7 @@ function isNumeric(obj) {
     function XYZPositioner(writer) {
         this.feedRate = 6000;
         this.sync = "M400";
-        this.$position = {};
+        this.xyz = {};
         this.write = writer || function(cmd) { /* default discards data */ }
         return this;
     }
@@ -18,11 +18,12 @@ function isNumeric(obj) {
         describe("XYZPositioner validate(" + xyzPositioner.constructor.name + ")", function() {
             should.exist(xyzPositioner);
             it("should define XYZPositioner methods", function() {
-                should.ok(xyzPositioner.home instanceof Function, "home not implemented");
-                should.ok(xyzPositioner.position instanceof Function, "position not implemented");
-                should.ok(xyzPositioner.origin instanceof Function, "origin not implemented");
-                should.ok(xyzPositioner.move instanceof Function, "move not implemented");
-                should.ok(xyzPositioner.health instanceof Function, "health not implemented");
+				should(xyzPositioner).have.properties(["home","getXYZ", "origin", "move","health"]);
+				should(xyzPositioner.home).be.Function;
+				should(xyzPositioner.getXYZ).be.Function;
+				should(xyzPositioner.origin).be.Function;
+				should(xyzPositioner.move).be.Function;
+				should(xyzPositioner.health).be.Function;
             });
             if (xyzPositioner.health() === 0) {
                 it("should throw errors when not available", function() {
@@ -44,7 +45,7 @@ function isNumeric(obj) {
                         x: 0,
                         y: 0,
                         z: 0
-                    }, xyzPositioner.position());
+                    }, xyzPositioner.getXYZ());
                 });
                 it("should move to a single position {x:1,y:2,z:3}", function() {
                     this.timeout(5000);
@@ -57,7 +58,7 @@ function isNumeric(obj) {
                         x: 1,
                         y: 2,
                         z: 3
-                    }, xyzPositioner.position());
+                    }, xyzPositioner.getXYZ());
                 });
                 it("should move along a path [{x:1},{y:2},{z:3}]", function() {
                     this.timeout(5000);
@@ -77,7 +78,7 @@ function isNumeric(obj) {
                         x: 1,
                         y: 2,
                         z: 3
-                    }, xyzPositioner.position());
+                    }, xyzPositioner.getXYZ());
                 });
             }
         });
@@ -111,15 +112,15 @@ function isNumeric(obj) {
             y: 0,
             z: 0
         });
-        this.$position = {
+        this.xyz = {
             x: 0,
             y: 0,
             z: 0
         };
         return this;
     }
-    XYZPositioner.prototype.position = function() {
-        return this.$position;
+    XYZPositioner.prototype.getXYZ = function() {
+        return this.xyz;
     }
     XYZPositioner.prototype.move = function(path) {
         if (!Array.isArray(path) && typeof(path) === 'object') {
@@ -141,10 +142,10 @@ function isNumeric(obj) {
     XYZPositioner.prototype.moveTo = function(x, y, z) {
         var coord = (isNumeric(x) ? ("X" + x) : "") + (isNumeric(y) ? ("Y" + y) : "") + (isNumeric(z) ? ("Z" + z) : "");
         this.write("G0" + coord);
-        this.$position = {
-            x: (isNumeric(x) ? x : this.$position.x),
-            y: (isNumeric(y) ? y : this.$position.y),
-            z: (isNumeric(z) ? z : this.$position.z),
+        this.xyz = {
+            x: (isNumeric(x) ? x : this.xyz.x),
+            y: (isNumeric(y) ? y : this.xyz.y),
+            z: (isNumeric(z) ? z : this.xyz.z),
         };
         return this;
     }
@@ -161,7 +162,7 @@ function isNumeric(obj) {
     module.exports = firepick.XYZPositioner = XYZPositioner;
 })(firepick || (firepick = {}));
 
-(typeof describe === 'function') && describe("firepick.XYZPositioner test", function() {
+(typeof describe === 'function') && describe("firepick.XYZPositioner", function() {
     var output1 = undefined;
     var output2 = undefined;
 
@@ -199,7 +200,7 @@ function isNumeric(obj) {
             x: 0,
             y: 0,
             z: 0
-        }, xyz.position());
+        }, xyz.getXYZ());
     });
     it("should withSync(sync)", function() {
         assertCommand(xyz.withSync("m400").origin(), "G28;G0F6000;G0X0Y0Z0;m400");
@@ -208,7 +209,7 @@ function isNumeric(obj) {
             x: 0,
             y: 0,
             z: 0
-        }, xyz.position());
+        }, xyz.getXYZ());
     });
     it("should moveToSync(x,y,z)", function() {
         assertCommand(xyz.withWriter(testWriter2).origin(), "G28;G0F6000;G0X0Y0Z0;M400");
@@ -218,28 +219,28 @@ function isNumeric(obj) {
             x: 1,
             y: 0,
             z: 0
-        }, xyz.position());
+        }, xyz.getXYZ());
         assertCommand(xyz.withWriter(testWriter2).origin(), "G28;G0F6000;G0X0Y0Z0;M400");
         assertCommand(xyz.moveToSync(null, 2), "G0Y2;M400");
         should.deepEqual({
             x: 0,
             y: 2,
             z: 0
-        }, xyz.position());
+        }, xyz.getXYZ());
         assertCommand(xyz.withWriter(testWriter2).origin(), "G28;G0F6000;G0X0Y0Z0;M400");
         assertCommand(xyz.moveToSync(null, null, 3), "G0Z3;M400");
         should.deepEqual({
             x: 0,
             y: 0,
             z: 3
-        }, xyz.position());
+        }, xyz.getXYZ());
         assertCommand(xyz.withWriter(testWriter2).origin(), "G28;G0F6000;G0X0Y0Z0;M400");
         assertCommand(xyz.moveToSync(1, 2, 3), "G0X1Y2Z3;M400");
         should.deepEqual({
             x: 1,
             y: 2,
             z: 3
-        }, xyz.position());
+        }, xyz.getXYZ());
     });
     it("should move(path)", function() {
         assertCommand(xyz.origin(), "G28;G0F6000;G0X0Y0Z0;M400");

@@ -64,12 +64,12 @@ firepick.XYZCamera = require("./XYZCamera");
     }
     FPD.prototype.origin = function() {
         this.$xyz.origin();
-        this.$imgRef = firepick.ImageRef.copy(this.$xyz.position());
+        this.$imgRef = firepick.ImageRef.copy(this.$xyz.getXYZ());
         return this;
     };
     FPD.prototype.move = function(path) {
         this.$xyz.move(path);
-        this.$imgRef = firepick.ImageRef.copy(this.$xyz.position());
+        this.$imgRef = firepick.ImageRef.copy(this.$xyz.getXYZ());
         return this;
     };
     FPD.prototype.moveTo = function(x, y, z) {
@@ -81,7 +81,7 @@ firepick.XYZCamera = require("./XYZCamera");
         return this;
     }
     FPD.prototype.getXYZ = function(path) {
-        return this.$xyz.position();
+        return this.$xyz.getXYZ();
     };
     FPD.prototype.health = function() {
         return (
