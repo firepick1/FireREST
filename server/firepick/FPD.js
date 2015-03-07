@@ -95,6 +95,9 @@ firepick.XYZCamera = require("./XYZCamera");
         var imgRef = this.$imgRef.copy().setTag(tag).setVersion(version);
         return this.$imgStore.capture(imgRef);
     };
+	FPD.prototype.image = function(imgRef) {
+		return this.$imgStore.image(imgRef);
+	};
 
     /////////////// CLASS ////////////////
     FPD.validate = function(fpd) {
@@ -116,7 +119,7 @@ firepick.XYZCamera = require("./XYZCamera");
     module.exports = firepick.FPD = FPD;
 })(firepick || (firepick = {}));
 
-(typeof describe === 'function') && describe("firepick.FPD test", function() {
+(typeof describe === 'function') && describe("firepick.FPD", function() {
     var fpd = new firepick.FPD();
     firepick.XYZCamera.validate(fpd);
     firepick.FPD.validate(fpd);
