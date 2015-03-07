@@ -14,6 +14,7 @@ module.exports = function(grunt) {
         },
         watch: {
             scripts: {
+                xfiles: ['server/firepick/Focus.js'],
                 files: ['server/firepick/*.js'],
                 tasks: ['mochaTest'],
                 options: {

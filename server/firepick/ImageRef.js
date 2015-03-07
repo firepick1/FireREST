@@ -68,26 +68,46 @@ temp.track();
         }
         cmp = cmp || ((img1.version || 0) - (img2.version || 0));
         return cmp;
-    }
+    };
 
     //////////////// INSTANCE /////////////////////
     ImageRef.prototype.copy = function() {
         return ImageRef.copy(this);
-    }
+    };
     ImageRef.prototype.setVersion = function(version) {
-        this.version = version || 0;
+		if (version == null) {
+			delete this.version;
+		} else {
+			this.version = version;
+		}
         return this;
-    }
+    };
     ImageRef.prototype.setTag = function(tag) {
-        this.tag = tag;
+		if (tag == null) {
+			delete this.tag;
+		} else {
+			this.tag = tag;
+		}
         return this;
-    }
+	};
+	ImageRef.prototype.setX = function(x) {
+		this.x = x;
+		return this;
+	};
+	ImageRef.prototype.setY = function(y) {
+		this.y = y;
+		return this;
+	};
+	ImageRef.prototype.setZ = function(z) {
+		this.z = z;
+		return this;
+	};
     ImageRef.prototype.name = function(prefix, suffix) {
         return ImageRef.nameOf(this, prefix, suffix);
-    }
+    };
     ImageRef.prototype.compare = function(that) {
         return ImageRef.compare(this, that);
-    }
+    };
     ImageRef.prototype.round = function(xplaces, yplaces, zplaces) {
         xplaces = xplaces == null ? 0 : xplaces;
         yplaces = yplaces == null ? xplaces : yplaces;
@@ -96,7 +116,7 @@ temp.track();
         this.y = +(Math.round(this.y + "e+" + yplaces) + "e-" + yplaces);
         this.z = +(Math.round(this.z + "e+" + zplaces) + "e-" + zplaces);
         return this;
-    }
+    };
 
     console.log("LOADED	: firepick.ImageRef");
     module.exports = firepick.ImageRef = ImageRef;
@@ -209,6 +229,15 @@ temp.track();
         var refParse = firepick.ImageRef.parse(name123a5);
         should.equal(0, firepick.ImageRef.compare(refParse, ref123a5));
     });
+	it("should have chained setters", function() {
+		var ref = new firepick.ImageRef(0,0,0);
+		ref = ref.setX(1);
+		ref = ref.setY(2);
+		ref = ref.setZ(3);
+		ref = ref.setTag("A");
+		ref = ref.setVersion(4);
+		should(ref).have.properties({x:1,y:2,z:3,tag:"A",version:4});
+	});
     it("should round", function() {
         var ref123 = new firepick.ImageRef(1, 2, 3);
         var x = 1.09871;

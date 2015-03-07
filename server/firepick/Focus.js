@@ -40,6 +40,7 @@ firepick.Evolve = require("./Evolve");
     };
 
 	Focus.prototype.sharpness = function(z) {
+		var imgRef = this.xyzCam.image({x:0,y:0,z:z});
 	};
 
     Focus.prototype.compare = function(z1, z2) {

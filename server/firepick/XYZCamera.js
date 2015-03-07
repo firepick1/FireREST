@@ -22,6 +22,8 @@ firepick.ImageStore = require("./ImageStore");
         return this;
     };
 
+	var ref000 = new firepick.ImageRef(0,0,0);
+
     /////////////// INSTANCE ////////////////
     XYZCamera.prototype.health = function() {
         return 1;
@@ -48,28 +50,21 @@ firepick.ImageStore = require("./ImageStore");
         if (version != null) {
             imgRef.version = version;
         }
-        return this.image(imgRef);
+        return this.resolve(imgRef);
     }
-    XYZCamera.prototype.image = function(imgRef) {
-        should.exist(imgRef);
+    XYZCamera.prototype.resolve = function(imgRef) {
+		imgRef = imgRef || this.xyz || this.ref000;
         var name = firepick.ImageRef.nameOf(imgRef);
         var foundRef = this.mockImages[name];
         if (foundRef == null) {
             var newImgPath = this.defaultRef.path;
-            if (imgRef.x === 0 && imgRef.y === 0) {
+            if (imgRef.x === 0 && imgRef.y === 0) { // mock with next greater available z
                 if (imgRef.z < this.zMax) {
-                    newImgPath = this.image({
-                        x: 0,
-                        y: 0,
-                        z: Math.floor(imgRef.z) + 1
-                    }).path;
+                    var z = Math.floor(imgRef.z) + 1;
+                    newImgPath = this.resolve(new firepick.ImageRef().setZ(z)).path;
                 }
-            } else {
-                newImgPath = this.image({
-                    x: 0,
-                    y: 0,
-                    z: imgRef.z
-                }).path;
+            } else { // mock all images from z-axis 
+				newImgPath = this.resolve(new firepick.ImageRef().setZ(imgRef.z)).path;
             }
             foundRef = new firepick.ImageRef(imgRef.x, imgRef.y, imgRef.z, {
                 path: newImgPath
@@ -106,7 +101,7 @@ firepick.ImageStore = require("./ImageStore");
 		xyzCam.moveTo.should.be.a.Function;
 		xyzCam.getXYZ.should.be.a.Function ;
 		xyzCam.capture.should.be.a.Function;
-		xyzCam.image.should.be.a.Function;
+		xyzCam.resolve.should.be.a.Function;
 	};
     XYZCamera.validate = function(xyzCam) {
         var ref = [];
@@ -163,15 +158,14 @@ firepick.ImageStore = require("./ImageStore");
         it("should tag captured image with {tag:'attempt',version:7} using capture('attempt',7)", function() {
             imgTest = xyzCam.capture('attempt', 7);
             should.exist(imgTest);
-            imgTest.x.should.equal(0);
-            imgTest.y.should.equal(0);
-            imgTest.z.should.equal(-5);
-            imgTest.should.have.ownProperty("tag");
-            imgTest.tag.should.equal('attempt');
-            imgTest.should.have.ownProperty("version");
-            imgTest.version.should.equal(7);
+			should(imgTest).properties({x:0,y:0,z:-5,tag:"attempt",version:7});
             imgTest.path.should.be.a.String;
         });
+		it("resolve() should return an image reference to current location", function() {
+			var ref = xyzCam.moveTo(1,2,3).resolve();
+			should(ref.constructor).properties({name:"ImageRef"});
+			should(ref).properties({x:1,y:2,z:3});
+		});
         return true;
     };
     XYZCamera.mockPaths = [
