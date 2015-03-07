@@ -21,7 +21,7 @@ firepick.Evolve = require("./Evolve");
     };
 
     /////////////// INSTANCE ////////////
-    Focus.prototype.isDone = function(z, generation) {
+    Focus.prototype.isDone = function(index, generation) {
         var zFirst = generation[0];
         var zLast = generation[generation.length - 1];
         return Math.abs(zLast - zFirst) <= 1;

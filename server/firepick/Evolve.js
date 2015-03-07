@@ -33,17 +33,17 @@ var should = require("should"),
     }
 
     ///////////////// INSTANCE ///////////////
-    Evolve.prototype.withMutate = function(mutate) {
+    Evolve.prototype.setMutate = function(mutate) {
         should(mutate).be.a.Function;
         this.mutate = mutate;
         return this;
     };
-    Evolve.prototype.withElite = function(nElite) {
+    Evolve.prototype.setElite = function(nElite) {
         should(nElite).not.below(1);
         this.nElite = nElite;
         return this;
     };
-    Evolve.prototype.withSurvivors = function(nSurvivors) {
+    Evolve.prototype.setSurvivors = function(nSurvivors) {
         should(nSurvivors).not.below(1);
         this.nSurvivors = nSurvivors;
         return this;
@@ -95,13 +95,13 @@ var should = require("should"),
     var N = 200;
     var N2 = N == 2 ? 2 : N / 2
 
-    function isDone(n, generation) {
+    function isDone(index, generation) {
         if (Math.abs(N - generation[0] * generation[0]) < N / 1000) {
-            //console.log("Solved in " + n + " generations: " + generation[0]);
+            //console.log("Solved in " + index + " generations: " + generation[0]);
             return true;
         }
-        if (n >= 100) {
-            //console.log("Giving up after " + n + " generations");
+        if (index >= 100) {
+            //console.log("Giving up after " + index + " generations");
             return true;
         }
         return false;
@@ -125,13 +125,13 @@ var should = require("should"),
         return Math.abs(N - a * a) - Math.abs(N - b * b);
     };
 
-    describe("compute the sqaure root of " + N, function() {
+    describe("compute the square root of " + N, function() {
         var evolve = new firepick.Evolve(generate, compare);
         var guess1 = (1 + N2) / 2;
         var epsilon = 0.01;
         var sqrtN = Math.sqrt(N);
         it("should compute the square root of " + N, function() {
-            var vSolve = evolve.withElite(1).withSurvivors(10).solve([guess1], isDone);
+            var vSolve = evolve.setElite(1).setSurvivors(10).solve([guess1], isDone);
             should(vSolve).be.Array;
             should(vSolve.length).equal(10);
             should(vSolve[0]).within(sqrtN - epsilon, sqrtN + epsilon);
@@ -139,7 +139,7 @@ var should = require("should"),
         });
         it("should repeatedly compute the square root of " + N, function() {
             for (var i = 0; i < 10; i++) {
-                var vSolve = evolve.withElite(1).withSurvivors(10).solve([guess1], isDone);
+                var vSolve = evolve.setElite(1).setSurvivors(10).solve([guess1], isDone);
                 //console.log("Last generation:" + JSON.stringify(vSolve));
                 var solution = vSolve[0];
                 should(evolve.status).equal(true);
