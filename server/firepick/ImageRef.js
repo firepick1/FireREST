@@ -74,6 +74,11 @@ temp.track();
     ImageRef.prototype.copy = function() {
         return ImageRef.copy(this);
     };
+    ImageRef.prototype.setPath = function(path) {
+		path.should.be.a.String;
+		this.path = path;
+		return this;
+	};
     ImageRef.prototype.setVersion = function(version) {
 		if (version == null) {
 			delete this.version;

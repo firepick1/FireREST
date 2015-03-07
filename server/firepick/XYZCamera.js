@@ -50,9 +50,9 @@ firepick.ImageStore = require("./ImageStore");
         if (version != null) {
             imgRef.version = version;
         }
-        return this.resolve(imgRef);
+        return this.imageRef(imgRef);
     }
-    XYZCamera.prototype.resolve = function(imgRef) {
+    XYZCamera.prototype.imageRef = function(imgRef) {
 		imgRef = imgRef || this.xyz || this.ref000;
         var name = firepick.ImageRef.nameOf(imgRef);
         var foundRef = this.mockImages[name];
@@ -61,10 +61,10 @@ firepick.ImageStore = require("./ImageStore");
             if (imgRef.x === 0 && imgRef.y === 0) { // mock with next greater available z
                 if (imgRef.z < this.zMax) {
                     var z = Math.floor(imgRef.z) + 1;
-                    newImgPath = this.resolve(new firepick.ImageRef().setZ(z)).path;
+                    newImgPath = this.imageRef(new firepick.ImageRef().setZ(z)).path;
                 }
             } else { // mock all images from z-axis 
-				newImgPath = this.resolve(new firepick.ImageRef().setZ(imgRef.z)).path;
+				newImgPath = this.imageRef(new firepick.ImageRef().setZ(imgRef.z)).path;
             }
             foundRef = new firepick.ImageRef(imgRef.x, imgRef.y, imgRef.z, {
                 path: newImgPath
@@ -101,7 +101,7 @@ firepick.ImageStore = require("./ImageStore");
 		xyzCam.moveTo.should.be.a.Function;
 		xyzCam.getXYZ.should.be.a.Function ;
 		xyzCam.capture.should.be.a.Function;
-		xyzCam.resolve.should.be.a.Function;
+		xyzCam.imageRef.should.be.a.Function;
 	};
     XYZCamera.validate = function(xyzCam) {
         var ref = [];
@@ -161,9 +161,9 @@ firepick.ImageStore = require("./ImageStore");
 			should(imgTest).properties({x:0,y:0,z:-5,tag:"attempt",version:7});
             imgTest.path.should.be.a.String;
         });
-		it("resolve() should return an image reference to current location", function() {
-			var ref = xyzCam.moveTo(1,2,3).resolve();
-			should(ref.constructor).properties({name:"ImageRef"});
+		it("imageRef() should return an image reference to current location", function() {
+			var ref = xyzCam.moveTo(1,2,3).imageRef();
+			should(ref).instanceof(firepick.ImageRef);
 			should(ref).properties({x:1,y:2,z:3});
 		});
         return true;

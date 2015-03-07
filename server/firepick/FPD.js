@@ -59,12 +59,9 @@ firepick.XYZCamera = require("./XYZCamera");
 	FPD.prototype.pathOf = function(imgRef) {
 		return this.$imgStore.pathOf(imgRef);
 	};
-	FPD.prototype.resolve = function(imgRef) {
+	FPD.prototype.imageRef = function(imgRef) {
 		imgRef = imgRef || this.getXYZ() || {x:0,y:0,z:0};
-		var resolvedRef = new firepick.ImageRef(imgRef.x, imgRef.y, imgRef.z, {
-			path: this.pathOf(imgRef)
-		});
-		return resolvedRef;
+		return firepick.ImageRef.copy(imgRef).setPath(this.pathOf(imgRef));
 	};
     FPD.prototype.camera = function() {
         return this.$camera;
