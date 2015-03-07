@@ -17,6 +17,7 @@ firepick.ImageStore = require("./ImageStore");
             var name = firepick.ImageRef.nameOf(imgRef);
             this.mockImages[name] = imgRef;
             this.defaultRef = this.defaultRef || imgRef;
+			this.zMax = Math.max(this.zMax || imgRef.z, imgRef.z);
         }
         return this;
     };
@@ -52,22 +53,32 @@ firepick.ImageStore = require("./ImageStore");
     XYZCamera.prototype.image = function(imgRef) {
         should.exist(imgRef);
         var name = firepick.ImageRef.nameOf(imgRef);
-        if (this.mockImages[name] == null) {
+		var foundRef = this.mockImages[name];
+        if (foundRef == null) {
             var newImgPath = this.defaultRef.path;
-            if (imgRef.x !== 0 || imgRef.y !== 0) {
-                var img00z = this.image({
+            if (imgRef.x === 0 && imgRef.y === 0) {
+				if (imgRef.z < this.zMax) {
+                	newImgPath = this.image({
+						x: 0,
+						y: 0,
+						z: Math.floor(imgRef.z)+1
+					}).path;
+				}
+			} else {
+                newImgPath = this.image({
                     x: 0,
                     y: 0,
                     z: imgRef.z
-                });
+                }).path;
             }
-            this.mockImages[name] = new firepick.ImageRef(imgRef.x, imgRef.y, imgRef.z, {
-                path: newImgPath,
-                tag: imgRef.tag,
-                version: imgRef.version
+			foundRef = new firepick.ImageRef(imgRef.x, imgRef.y, imgRef.z, {
+                path: newImgPath
             });
+			if (imgRef.tag != null) { foundRef.tag = imgRef.tag; }
+			if (imgRef.version != null) { foundRef.version = imgRef.version; }
+            this.mockImages[name] = foundRef;
         }
-        return this.mockImages[name];
+        return foundRef;
     };
 
     /////////////// CLASS ////////////////
@@ -202,6 +213,26 @@ firepick.ImageStore = require("./ImageStore");
         should(ref000).not.have.ownProperty("tag");
         should(ref000).not.have.ownProperty("version");
         should(ref000.path).equal("test/XP005_Z0X0Y0@1#1.jpg");
+    });
+    it("should use test/XP005_Z5X0Y0@1#1.jpg as path for (0,0,1)", function() {
+        var ref001 = xyzCam.moveTo(0,0,1).capture();
+        should.exist(ref001);
+        ref001.x.should.equal(0);
+        ref001.y.should.equal(0);
+        ref001.z.should.equal(1);
+        should(ref001).not.have.ownProperty("tag");
+        should(ref001).not.have.ownProperty("version");
+        should(ref001.path).equal("test/XP005_Z5X0Y0@1#1.jpg");
+    });
+    it("should use test/XP005_Z5X0Y0@1#1.jpg as path for (1,2,4)", function() {
+        var ref124 = xyzCam.moveTo(1,2,4).capture();
+        should.exist(ref124);
+        ref124.x.should.equal(1);
+        ref124.y.should.equal(2);
+        ref124.z.should.equal(4);
+        should(ref124).not.have.ownProperty("tag");
+        should(ref124).not.have.ownProperty("version");
+        should(ref124.path).equal("test/XP005_Z5X0Y0@1#1.jpg");
     });
     firepick.XYZCamera.validate(xyzCam);
 })
