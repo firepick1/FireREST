@@ -81,7 +81,7 @@ firepick.ImageStore = require("./ImageStore");
                 });
                 it("should show non-zero offset for two images at different location", function() {
                     var result = ip.calcOffset(ref000a, ref100);
-                    console.log(JSON.stringify(result));
+                    //console.log(JSON.stringify(result));
                     should(result.dx * result.dx).above(10);
                     should(result.dy * result.dy).below(5);
                 });
@@ -93,7 +93,7 @@ firepick.ImageStore = require("./ImageStore");
             describe("validating meanStdDev", function() {
                 it("should calculate the mean and standard deviation of an image", function() {
                     var result = ip.meanStdDev(ref000a);
-                    console.log(JSON.stringify(result));
+                    //console.log(JSON.stringify(result));
                     should.deepEqual(result, {
                         "mean": [252.6633875, 254.64116250000001, 251.63050625000002, 0.0],
                         "stdDev": [2.1166523155330208, 1.9238660682581448, 9.6636286206944533, 0.0]

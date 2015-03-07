@@ -18,12 +18,12 @@ function isNumeric(obj) {
         describe("XYZPositioner validate(" + xyzPositioner.constructor.name + ")", function() {
             should.exist(xyzPositioner);
             it("should define XYZPositioner methods", function() {
-				should(xyzPositioner).have.properties(["home","getXYZ", "origin", "move","health"]);
-				should(xyzPositioner.home).be.Function;
-				should(xyzPositioner.getXYZ).be.Function;
-				should(xyzPositioner.origin).be.Function;
-				should(xyzPositioner.move).be.Function;
-				should(xyzPositioner.health).be.Function;
+                should(xyzPositioner).have.properties(["home", "getXYZ", "origin", "move", "health"]);
+                should(xyzPositioner.home).be.Function;
+                should(xyzPositioner.getXYZ).be.Function;
+                should(xyzPositioner.origin).be.Function;
+                should(xyzPositioner.move).be.Function;
+                should(xyzPositioner.health).be.Function;
             });
             if (xyzPositioner.health() === 0) {
                 it("should throw errors when not available", function() {

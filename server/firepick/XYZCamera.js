@@ -69,7 +69,7 @@ firepick.ImageStore = require("./ImageStore");
         }
         return this.mockImages[name];
     };
-	
+
     /////////////// CLASS ////////////////
     XYZCamera.parseMockPath = function(path) {
         var prefix_tokens = path.split('Z');
@@ -190,7 +190,7 @@ firepick.ImageStore = require("./ImageStore");
         ref102.x.should.equal(1);
         ref102.y.should.equal(0);
         ref102.z.should.equal(2);
-		ref102.should.have.ownProperty("path");
+        ref102.should.have.ownProperty("path");
         ref102.path.should.equal(path102);
     });
     it("should use test/XP005_Z0X0Y0@1#1.jpg as path for (0,0,0)", function() {
@@ -205,4 +205,3 @@ firepick.ImageStore = require("./ImageStore");
     });
     firepick.XYZCamera.validate(xyzCam);
 })
-
