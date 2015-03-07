@@ -33,7 +33,7 @@ firepick.ImageStore = require("./ImageStore");
         return this.imgStore.health();
     };
     ImageProcessor.prototype.pathOf = function(imgRef) {
-        return this.imgStore.pathOf(imgRef);
+        return imgRef.path || this.imgStore.pathOf(imgRef);
     }
     ImageProcessor.prototype.calcOffset = function(imgRef1, imgRef2) {
         var jout = firesight_cmd(this.pathOf(imgRef1), "calcOffset.json",

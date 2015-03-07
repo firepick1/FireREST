@@ -8,13 +8,15 @@ firepick.Evolve = require("./Evolve");
 
 (function(firepick) {
     function Focus(xyzCam, zMin, zMax, options) {
-		should.ok(firepick.XYZCamera.instance(xyzCam));
+		firepick.XYZCamera.isInterfaceOf(xyzCam);
         should(zMin).be.a.Number;
         should(zMax).be.a.Number;
 		should(zMin).be.below(zMax);
 		this.xyzCam = xyzCam;
         this.zMin = zMin;
         this.zMax = zMax;
+		this.captureCount = 0;
+		this.ip = new firepick.ImageProcessor();
         return this;
     };
 
@@ -38,17 +40,18 @@ firepick.Evolve = require("./Evolve");
 
         return kids;
     };
-
-	Focus.prototype.sharpness = function(z) {
-		var imgRef = this.xyzCam.imageRef({x:0,y:0,z:z});
-		if (!imgRef.exists()) {
-			//TBD
-		}
-	};
-
     Focus.prototype.compare = function(z1, z2) {
         return this.sharpness(z1) - this.sharpness(z2);
     };
+	Focus.prototype.sharpness = function(z) {
+		var imgRef = this.xyzCam.imageRef({x:0,y:0,z:z});
+		if (!imgRef.exists() || imgRef.sharpness == null) {
+			this.captureCount++;
+			imgRef = this.xyzCam.moveTo(imgRef).capture();
+		}
+		should.ok(imgRef.exists());
+        return imgRef.sharpness = this.ip.sharpness(imgRef).sharpness;
+	};
 
     console.log("LOADED	: firepick.Focus");
     module.exports = firepick.Focus = Focus;
@@ -56,6 +59,14 @@ firepick.Evolve = require("./Evolve");
 
 (typeof describe === 'function') && describe("firepick.Focus", function() {
     var ip = new firepick.ImageProcessor();
-    //images[i].sharpness = ip.sharpness(images[i]).sharpness;
-    //        console.log(JSON.stringify(images[i]));
+	var xyzCam = new firepick.XYZCamera(); // mock images
+	var focus = new firepick.Focus(xyzCam, -110, 20);
+	it("compute the sharpness at {x:0,y:0,z:0}", function() {
+		var sharpness = focus.sharpness(0);
+		should(sharpness).within(278.8,278.9);
+	});
+	it("compute the sharpness at {x:0,y:0,z:-5}", function() {
+		var sharpness = focus.sharpness(-5);
+		should(sharpness).within(313.4,313.5);
+	});
 });

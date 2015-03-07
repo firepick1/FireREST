@@ -50,6 +50,10 @@ firepick.XYZCamera = require("./XYZCamera");
         this.$xyz.home();
         return this;
     };
+	FPD.prototype.capture = function(tag, version) {
+		var imgRef = firepick.ImageRef.copy(this.getXYZ()).setTag(tag).setVersion(version);
+		return this.$imgStore.capture(imgRef);
+	};
     FPD.prototype.imageStore = function() {
         return this.$imgStore;
     };
@@ -90,10 +94,6 @@ firepick.XYZCamera = require("./XYZCamera");
             this.$imgProc.health() +
             this.$xyz.health()
         ) / 4;
-    };
-    FPD.prototype.capture = function(tag, version) {
-        var imgRef = firepick.ImageRef.copy(this.getXYZ()).setTag(tag).setVersion(version);
-        return this.$imgStore.capture(imgRef);
     };
 	FPD.prototype.image = function(imgRef) {
 		return this.$imgStore.image(imgRef);

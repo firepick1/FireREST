@@ -13,7 +13,7 @@ firepick.ImageStore = require("./ImageStore");
         this.mockImages = {};
         var mockPaths = options.mockPaths || firepick.XYZCamera.mockPaths;
         for (var i in mockPaths) {
-            var imgRef = firepick.XYZCamera.parseMockPath(mockPaths[i]);
+            var imgRef = firepick.XYZCamera.mockImageRef(mockPaths[i]);
             var name = firepick.ImageRef.nameOf(imgRef);
             this.mockImages[name] = imgRef;
             this.defaultRef = this.defaultRef || imgRef;
@@ -85,19 +85,15 @@ firepick.ImageStore = require("./ImageStore");
     };
 
     /////////////// CLASS ////////////////
-    XYZCamera.parseMockPath = function(path) {
+    XYZCamera.mockImageRef = function(path) {
         var prefix_tokens = path.split('Z');
         var xyz = prefix_tokens[1];
         var suffix_tokens = xyz.split('@');
         xyz = suffix_tokens[0];
         var z_tokens = xyz.split("X");
         var xy_tokens = z_tokens[1].split("Y");
-        return {
-            x: Number(xy_tokens[0]),
-            y: Number(xy_tokens[1]),
-            z: Number(z_tokens[0]),
-            path: path,
-        };
+        return new firepick.ImageRef(Number(xy_tokens[0]),Number(xy_tokens[1]), Number(z_tokens[0]),
+			{ path: path });
     };
 	XYZCamera.isInterfaceOf = function(xyzCam) {
 		should.exist(xyzCam);
@@ -106,6 +102,7 @@ firepick.ImageStore = require("./ImageStore");
 		xyzCam.getXYZ.should.be.a.Function ;
 		xyzCam.capture.should.be.a.Function;
 		xyzCam.imageRef.should.be.a.Function;
+		return true;
 	};
     XYZCamera.validate = function(xyzCam) {
         var ref = [];
@@ -159,6 +156,15 @@ firepick.ImageStore = require("./ImageStore");
 			should(imgTest).properties({x:0,y:0,z:-5,tag:"attempt",version:7});
             imgTest.path.should.be.a.String;
         });
+		it("origin().imageRef() should return an image reference to origin", function() {
+			var ref = xyzCam.origin().imageRef();
+			should(xyzCam.getXYZ()).properties({x:0,y:0,z:0});
+			should(ref.constructor.name).equal("ImageRef");
+			should(ref).instanceof(firepick.ImageRef);
+			should(ref).properties({x:0,y:0,z:0});
+			should(ref.path).be.a.String;
+			should(ref.path.length).be.above(0);
+		});
 		it("imageRef() should return an image reference to current location", function() {
 			var ref = xyzCam.moveTo({x:1,y:2,z:3}).imageRef();
 			should(ref).instanceof(firepick.ImageRef);
@@ -214,7 +220,7 @@ firepick.ImageStore = require("./ImageStore");
     firepick.XYZCamera.validate(xyzCam);
     it("should parse a mock image reference", function() {
         var path102 = "test/XP005_Z2X1Y0@1#1.jpg";
-        var ref102 = firepick.XYZCamera.parseMockPath(path102);
+        var ref102 = firepick.XYZCamera.mockImageRef(path102);
 		should(ref102).have.properties({x:1,y:0,z:2});
         ref102.should.have.ownProperty("path");
         ref102.path.should.equal(path102);
