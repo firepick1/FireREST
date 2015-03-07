@@ -29,14 +29,18 @@ firepick.ImageStore = require("./ImageStore");
         return 1;
     };
     XYZCamera.prototype.origin = function() {
-        return this.moveTo(0, 0, 0);
+        return this.moveTo(ref000);
     };
-    XYZCamera.prototype.moveTo = function(x, y, z) {
-        this.xyz = {
-            x: x,
-            y: y,
-            z: z
-        };
+    XYZCamera.prototype.moveTo = function(xyz) {
+		should.exist(xyz);
+		if (this.xyz == null) {
+			should(xyz).have.properties(["x","y","z"]);
+			this.xyz = {x:xyz.x,y:xyz.y,z:xyz.z};
+		} else {
+			this.xyz.x = xyz.x == null ? this.xyz.x : xyz.x;
+			this.xyz.y = xyz.y == null ? this.xyz.y : xyz.y;
+			this.xyz.z = xyz.z == null ? this.xyz.z : xyz.z;
+		}
         return this;
     };
     XYZCamera.prototype.getXYZ = function() {
@@ -114,39 +118,33 @@ firepick.ImageStore = require("./ImageStore");
             xyzCam.origin().should.equal(xyzCam);
         });
         it("should, at the origin, have getXYZ() == (0,0,0)", function() {
-            var xyz = xyzCam.getXYZ();
-            xyz.should.exist;
-            xyz.x.should.equal(0);
-            xyz.y.should.equal(0);
-            xyz.z.should.equal(0);
+            var xyz = xyzCam.origin().getXYZ();
+			should(xyz).have.properties({x:0,y:0,z:0});
         });
-        it("should moveTo(1,2,3)", function() {
-            xyzCam.moveTo(1, 2, 3).should.equal(xyzCam);
+        it("should moveTo({x:1,y:2,z:3})", function() {
+            xyzCam.moveTo({x:1,y:2,z:3}).should.equal(xyzCam);
             var xyz = xyzCam.getXYZ();
-            xyz.should.exist;
-            xyz.x.should.equal(1);
-            xyz.y.should.equal(2);
-            xyz.z.should.equal(3);
+			should(xyz).have.properties({x:1,y:2,z:3});
+        });
+        it("should moveTo({z:5})", function() {
+            xyzCam.moveTo({z:5}).should.equal(xyzCam);
+            var xyz = xyzCam.getXYZ();
+			should(xyz).have.properties({x:1,y:2,z:5});
         });
         var img000;
         var stat000;
-        it("should capture an image and return its path with moveTo(0,0,0).capture()", function() {
-            img000 = xyzCam.moveTo(0, 0, 0).capture();
-            should.exist(img000);
-            img000.x.should.equal(0);
-            img000.y.should.equal(0);
-            img000.z.should.equal(0);
+        it("should capture an image and return its path with moveTo({x:0,y:0,z:0}).capture()", function() {
+            img000 = xyzCam.moveTo({x:0,y:0,z:0}).capture();
+			should(img000).have.properties({x:0,y:0,z:0});
             img000.path.should.be.a.String;
             stat000 = fs.statSync(img000.path);
             stat000.size.should.be.above(0);
         });
         var img00m5;
         var stat00m5;
-        it("should take and save a different image at (0,0,-5)", function() {
-            img00m5 = xyzCam.moveTo(0, 0, -5).capture();
-            img00m5.x.should.equal(0);
-            img00m5.y.should.equal(0);
-            img00m5.z.should.equal(-5);
+        it("should take and save a different image at {x:0,y:0,z:-5}", function() {
+            img00m5 = xyzCam.moveTo({x:0,y:0,z:-5}).capture();
+			should(img00m5).have.properties({x:0,y:0,z:-5});
             img00m5.path.should.be.a.String;
             img00m5.path.should.not.equal(img000.path);
             should(img00m5.tag).be.undefined;
@@ -162,7 +160,7 @@ firepick.ImageStore = require("./ImageStore");
             imgTest.path.should.be.a.String;
         });
 		it("imageRef() should return an image reference to current location", function() {
-			var ref = xyzCam.moveTo(1,2,3).imageRef();
+			var ref = xyzCam.moveTo({x:1,y:2,z:3}).imageRef();
 			should(ref).instanceof(firepick.ImageRef);
 			should(ref).properties({x:1,y:2,z:3});
 			should(ref.path).be.a.String;
@@ -213,44 +211,33 @@ firepick.ImageStore = require("./ImageStore");
 
 (typeof describe === 'function') && describe("firepick.XYZCamera", function() {
     var xyzCam = new firepick.XYZCamera();
+    firepick.XYZCamera.validate(xyzCam);
     it("should parse a mock image reference", function() {
         var path102 = "test/XP005_Z2X1Y0@1#1.jpg";
         var ref102 = firepick.XYZCamera.parseMockPath(path102);
-        ref102.x.should.equal(1);
-        ref102.y.should.equal(0);
-        ref102.z.should.equal(2);
+		should(ref102).have.properties({x:1,y:0,z:2});
         ref102.should.have.ownProperty("path");
         ref102.path.should.equal(path102);
     });
     it("should use test/XP005_Z0X0Y0@1#1.jpg as path for (0,0,0)", function() {
         var ref000 = xyzCam.origin().capture();
-        should.exist(ref000);
-        ref000.x.should.equal(0);
-        ref000.y.should.equal(0);
-        ref000.z.should.equal(0);
+		should(ref000).have.properties({x:0,y:0,z:0});
         should(ref000).not.have.ownProperty("tag");
         should(ref000).not.have.ownProperty("version");
         should(ref000.path).equal("test/XP005_Z0X0Y0@1#1.jpg");
     });
     it("should use test/XP005_Z5X0Y0@1#1.jpg as path for (0,0,1)", function() {
-        var ref001 = xyzCam.moveTo(0, 0, 1).capture();
-        should.exist(ref001);
-        ref001.x.should.equal(0);
-        ref001.y.should.equal(0);
-        ref001.z.should.equal(1);
+        var ref001 = xyzCam.moveTo({x:0,y:0,z:1}).capture();
+		should(ref001).have.properties({x:0,y:0,z:1});
         should(ref001).not.have.ownProperty("tag");
         should(ref001).not.have.ownProperty("version");
         should(ref001.path).equal("test/XP005_Z5X0Y0@1#1.jpg");
     });
-    it("should use test/XP005_Z5X0Y0@1#1.jpg as path for (1,2,4)", function() {
-        var ref124 = xyzCam.moveTo(1, 2, 4).capture();
-        should.exist(ref124);
-        ref124.x.should.equal(1);
-        ref124.y.should.equal(2);
-        ref124.z.should.equal(4);
+    it("should use test/XP005_Z5X0Y0@1#1.jpg as path for {x:1,y:2,z:4}", function() {
+        var ref124 = xyzCam.moveTo({x:1,y:2,z:4}).capture();
+		should(ref124).have.properties({x:1,y:2,z:4});
         should(ref124).not.have.ownProperty("tag");
         should(ref124).not.have.ownProperty("version");
         should(ref124.path).equal("test/XP005_Z5X0Y0@1#1.jpg");
     });
-    firepick.XYZCamera.validate(xyzCam);
 })

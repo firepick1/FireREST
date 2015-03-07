@@ -77,12 +77,8 @@ firepick.XYZCamera = require("./XYZCamera");
         this.$xyz.move(path);
         return this;
     };
-    FPD.prototype.moveTo = function(x, y, z) {
-        return this.move({
-            x: x,
-            y: y,
-            z: z
-        });
+    FPD.prototype.moveTo = function(xyz) {
+        return this.move(xyz);
     }
     FPD.prototype.getXYZ = function(path) {
         return this.$xyz.getXYZ();
