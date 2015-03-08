@@ -3,28 +3,76 @@ var should = require("should"),
     firepick = firepick || {};
 
 (function(firepick) {
+	var that;
     function Evolve(solver, options) {
+		that = this;
 		options = options || {};
 		should.exist(solver);
 		should(solver).have.properties(["generate", "compare", "isDone"]);
 		solver.generate.should.be.a.Function;
 		solver.compare.should.be.a.Function;
 		solver.isDone.should.be.a.Function;
-		this.solver = solver;
-        this.mutate = options.mutate || mutateDefault;
-        should(this.mutate).be.a.Function;
-        this.nElite = options.nElite || 1;
-        should(this.nElite).not.below(1);
-        this.nSurvivors = options.nSurvivors || 10;
-        should(this.nSurvivors).not.below(1);
-		this.verbose = options.verbose == null ? true : options.verbose;
+		that.solver = solver;
+        that.nElite = options.nElite || 1;
+        should(that.nElite).not.below(1);
+        that.nSurvivors = options.nSurvivors || 10;
+        should(that.nSurvivors).not.below(1);
+		that.verbose = options.verbose == null ? false : options.verbose;
 
-        this.generation = [];
-        return this;
+        that.generation = [];
+        return that;
     };
 
-    ////////////// PRIVATE ////////////////
-    function mutateDefault(value, minValue, maxValue) {
+
+    ///////////////// INSTANCE ///////////////
+    Evolve.prototype.evolve1 = function(generation) {
+        var generation1 = generation ? generation : that.generation;
+        var generation2 = [];
+        var variantMap = {};
+        for (var i = 0; i < Math.min(generation.length, that.nElite); i++) {
+			var c = generation1[i];
+			var key = JSON.stringify(c);
+			if (!variantMap[key]) {
+				variantMap[key] = c;
+				generation2.push(c);
+			}
+        }
+        for (var iv1 = 0; iv1 < generation1.length; iv1++) {
+            var v = generation1[iv1];
+            var iv2 = Math.round(Math.random() * 7919) % Math.min(generation.length, that.nSurvivors);
+            var parent1 = generation[Math.min(iv1, iv2)];
+            var parent2 = generation[Math.max(iv1, iv2)];
+            var candidates = that.solver.generate(parent1, parent2);
+            for (var ic = 0; ic < candidates.length; ic++) {
+                var c = candidates[ic];
+                var key = JSON.stringify(c);
+                if (!variantMap[key]) {
+                    variantMap[key] = c;
+                    generation2.push(c);
+                }
+            }
+        }
+		generation2.sort(that.solver.compare);
+        return generation2;
+    };
+    Evolve.prototype.solve = function(generation) {
+        that.generation = generation;
+        for (that.iGeneration = 0;
+            (that.status = that.solver.isDone(that.iGeneration, that.generation)) === false; 
+			that.iGeneration++) {
+            that.generation = that.evolve1(that.generation);
+			if (that.verbose) {
+				//console.log("generation " + that.iGeneration + ": " + JSON.stringify(that.generation));
+			}
+            if (that.nSurvivors && that.generation.length > that.nSurvivors) {
+                that.generation.splice(that.nSurvivors, that.generation.length);
+            }
+        }
+        return that.generation;
+    };
+
+	////////////// CLASS ///////////////
+    Evolve.mutate = function(value, minValue, maxValue) {
         // generate new value in given range with median==value 
         // using approximately Gaussian distribution
         should(value).be.within(minValue, maxValue);
@@ -37,66 +85,26 @@ var should = require("should"),
             result = value + (maxValue - value) * (2 * r - 1);
         }
         should(result).be.within(minValue, maxValue);
-		if (this.verbose) {
-			console.log("mutateDefault(" + value + "," + minValue + "," + maxValue + " => " + result);
+		if (that.verbose) {
+			//console.log("mutateDefault(" + value + "," + minValue + "," + maxValue + " => " + result);
 		}
         return result;
     }
-
-    ///////////////// INSTANCE ///////////////
-    Evolve.prototype.evolve1 = function(generation) {
-        var generation1 = generation ? generation : this.generation;
-        var generation2 = [];
-        for (var i = 0; i < Math.min(generation.length, this.nElite); i++) {
-            generation2.push(generation1[i]);
-        }
-        var variantMap = {};
-        for (var iv1 = 0; iv1 < generation1.length; iv1++) {
-            var v = generation1[iv1];
-            var iv2 = Math.round(Math.random() * 7919) % Math.min(generation.length, this.nSurvivors);
-            var parent1 = generation[Math.min(iv1, iv2)];
-            var parent2 = generation[Math.max(iv1, iv2)];
-            var candidates = this.solver.generate(parent1, parent2, mutateDefault);
-            for (var ic = 0; ic < candidates.length; ic++) {
-                var c = candidates[ic];
-                var key = JSON.stringify(c);
-                if (!variantMap[key]) {
-                    variantMap[key] = c;
-                    generation2.push(c);
-                }
-            }
-        }
-		generation2.sort(this.solver.compare);
-        return generation2;
-    };
-    Evolve.prototype.solve = function(generation) {
-        this.generation = generation;
-        for (this.iGeneration = 0;
-            (this.status = this.solver.isDone(this.iGeneration, this.generation)) === false; 
-			this.iGeneration++) {
-            this.generation = this.evolve1(this.generation);
-			if (this.verbose) {
-				console.log("generation " + this.iGeneration + ": " + JSON.stringify(this.generation));
-			}
-            if (this.nSurvivors && this.generation.length > this.nSurvivors) {
-                this.generation.splice(this.nSurvivors, this.generation.length);
-            }
-        }
-        return this.generation;
-    };
     console.log("LOADED	: firepick.Evolve");
     module.exports = firepick.Evolve = Evolve;
 })(firepick || (firepick = {}));
 
-(typeof describe === 'function') && describe("firepick.Evolve genetic solver", function() {
-    var N = 200;
-    var N2 = N == 2 ? 2 : N / 2
-
-	function Solver() {
-		return this;
+var demo = demo || {};
+(function (demo) {
+	var that;
+	function SqrtSolver(N) {
+		that = this;
+		that.N = N;
+		that.N2 = N/2;
+		return that;
 	}
-	Solver.prototype.isDone = function(index, generation) {
-        if (Math.abs(N - generation[0] * generation[0]) < N / 1000) {
+	SqrtSolver.prototype.isDone = function(index, generation) {
+        if (Math.abs(that.N - generation[0] * generation[0]) < that.N / 1000) {
             //console.log("Solved in " + index + " generations: " + generation[0]);
             return true;
         }
@@ -106,31 +114,37 @@ var should = require("should"),
         }
         return false;
     };
-	Solver.prototype.generate = function(parent1, parent2, mutate) {
-        var kids = [mutate(parent1, 1, N2)]; // broad search
+	SqrtSolver.prototype.generate = function(parent1, parent2) {
+        var kids = [firepick.Evolve.mutate(parent1, 1, that.N2)]; // broad search
         if (parent1 === parent2) {
-            kids.push(mutate(parent1, 1, N2));
+            kids.push(firepick.Evolve.mutate(parent1, 1, that.N2));
         } else { // deep search
             var spread = Math.abs(parent1 - parent2);
             var low = Math.max(1, parent1 - spread);
-            var high = Math.min(N2, parent1 + spread);
-            kids.push(mutate(parent1, low, high));
+            var high = Math.min(that.N2, parent1 + spread);
+            kids.push(firepick.Evolve.mutate(parent1, low, high));
         }
 
         return kids;
     };
-	Solver.prototype.compare = function(a,b) {
-        return Math.abs(N - a * a) - Math.abs(N - b * b);
+	SqrtSolver.prototype.compare = function(a,b) {	// smaller is "better"
+        return Math.abs(that.N - a * a) - Math.abs(that.N - b * b);
     };
+	demo.SqrtSolver = SqrtSolver;
+})(demo);
+
+(typeof describe === 'function') && describe("firepick.Evolve genetic solver", function() {
+    var N = 200;
+    var N2 = N == 2 ? 2 : N / 2;
 
     describe("compute the square root of " + N, function() {
-		var solver = new Solver();
+		var solver = new demo.SqrtSolver(N);
         var evolve;
 		
 		it("should create a new genetic solver with default options", function() {
 			var options = {};
 			evolve	= new firepick.Evolve(solver, options);
-			should(evolve).have.properties({verbose:true, nElite:1, nSurvivors:10});
+			should(evolve).have.properties({verbose:false, nElite:1, nSurvivors:10});
 		});
         var guess1 = (1 + N2) / 2;
         var epsilon = 0.01;

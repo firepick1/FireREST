@@ -18,12 +18,8 @@ firepick.XYZCamera = require("./XYZCamera");
 (function(firepick) {
     function FPD(options) {
         options = options || {};
-        this.$xyz = options.xyz || new firepick.XYZPositioner();
-        this.$camera = options.camera || new firepick.Camera([
-            "test/camX0Y0Z0a.jpg",
-            "test/camX0Y0Z0b.jpg",
-            "test/camX1Y0Z0.jpg",
-        ]);
+        this.$xyz = options.xyz || new firepick.FireFUSEMarlin();
+        this.$camera = options.camera || new firepick.FireFUSECamera();
         this.$imgStore = options.imgStore || new firepick.ImageStore(
             this.$camera, {
                 prefix: "FPD",
@@ -103,13 +99,16 @@ firepick.XYZCamera = require("./XYZCamera");
     FPD.validate = function(fpd) {
         var ref = [];
         var ip;
-        it("should return an image processor", function() {
+        it("should return an XYZPositioner", function() {
+            should(ip = fpd.xyzPositioner()).equal(fpd.$xyz);
+        });
+        it("should return an ImageProcessor", function() {
             should(ip = fpd.imageProcessor()).equal(fpd.$imgProc);
         });
-        it("should return an image store", function() {
+        it("should return an ImageStore", function() {
             should(fpd.imageStore()).equal(fpd.$imgStore);
         });
-        it("should return a camera", function() {
+        it("should return a Camera", function() {
             should(fpd.camera()).equal(fpd.$camera);
         });
         return true;
@@ -120,7 +119,27 @@ firepick.XYZCamera = require("./XYZCamera");
 })(firepick || (firepick = {}));
 
 (typeof describe === 'function') && describe("firepick.FPD", function() {
-    var fpd = new firepick.FPD();
+	var fpd = new firepick.FPD();
+    var fpdMock = new firepick.FPD({
+        xyz: new firepick.XYZPositioner(),
+        camera: new firepick.Camera([
+            "test/camX0Y0Z0a.jpg",
+            "test/camX0Y0Z0b.jpg",
+            "test/camX1Y0Z0.jpg",
+        ])
+	});
+	if (fpd.health() < 1) {
+		fpd = fpdMock;
+		console.log("STATUS	: FirePick Delta is unavailable. Using mock data");
+	}
+	it("health() should be 1", function() {
+		fpd.xyzPositioner().health().should.equal(1);
+		fpd.camera().health().should.equal(1);
+		fpd.imageStore().health().should.equal(1);
+		fpd.imageProcessor().health().should.equal(1);
+		should(fpd.health()).equal(1);
+	});
     firepick.XYZCamera.validate(fpd);
     firepick.FPD.validate(fpd);
+
 })
