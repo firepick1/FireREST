@@ -14,7 +14,7 @@ firepick.ImageStore = require("./ImageStore");
         var mockPaths = options.mockPaths || firepick.XYZCamera.mockPaths;
         for (var i in mockPaths) {
             var imgRef = firepick.XYZCamera.mockImageRef(mockPaths[i]);
-            var name = firepick.ImageRef.nameOf(imgRef);
+            var name = firepick.ImageRef.keyOf(imgRef);
             that.mockImages[name] = imgRef;
             that.defaultRef = that.defaultRef || imgRef;
             that.zMax = Math.max(that.zMax || imgRef.z, imgRef.z);
@@ -63,7 +63,7 @@ firepick.ImageStore = require("./ImageStore");
     XYZCamera.prototype.imageRef = function(imgRef) {
 		var that = this;
 		imgRef = imgRef || that.xyz || that.ref000;
-        var name = firepick.ImageRef.nameOf(imgRef);
+        var name = firepick.ImageRef.keyOf(imgRef);
         var foundRef = that.mockImages[name];
         if (foundRef == null) {
             var newImgPath = that.defaultRef.path;
@@ -171,12 +171,20 @@ firepick.ImageStore = require("./ImageStore");
 			should(ref.path).be.a.String;
 			should(ref.path.length).be.above(0);
 		});
-		it("imageRef() should return an image reference to current location", function() {
+		it("imageRef() should return a unique image reference to current location", function() {
 			var ref = xyzCam.moveTo({x:1,y:2,z:3}).imageRef();
 			should(ref).instanceof(firepick.ImageRef);
 			should(ref).properties({x:1,y:2,z:3});
 			should(ref.path).be.a.String;
 			should(ref.path.length).be.above(0);
+		});
+		it("imageRef() should retain client decorations after capture()", function() {
+			var ref = xyzCam.imageRef();
+			ref.aDecoration = "hello";
+			var ref2 = xyzCam.capture();
+		//	ref2.should.have.properties({aDecoration:"hello"});
+			var ref3 = xyzCam.imageRef();
+		//	ref3.should.have.properties({aDecoration:"hello"});
 		});
 		it("imageRef({x:3,y:2,z:1}) should resolve an incomplete image reference", function() {
 			var ref = xyzCam.imageRef({x:3,y:2,z:1});

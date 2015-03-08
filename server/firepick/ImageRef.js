@@ -14,7 +14,7 @@ temp.track();
         if (properties) {
             should.ok(typeof properties === 'object');
             for (var prop in properties) {
-                if (properties.hasOwnProperty(prop)) {
+                if (properties.hasOwnProperty(prop) && properties[prop] != null) {
                     this[prop] = properties[prop];
                 }
             }
@@ -26,8 +26,8 @@ temp.track();
     ImageRef.copy = function(refSrc) {
         return new ImageRef(refSrc.x, refSrc.y, refSrc.z, refSrc);
     }
-    ImageRef.nameOf = function(imgRef, prefix, suffix) {
-        var fname = (prefix || "") + "_" + imgRef.x + "_" + imgRef.y + "_" + imgRef.z;
+    ImageRef.keyOf = function(imgRef) {
+        var fname =  "_" + imgRef.x + "_" + imgRef.y + "_" + imgRef.z;
 
         if (imgRef.tag || imgRef.version) {
             fname += "#" + (imgRef.tag || "");
@@ -35,7 +35,7 @@ temp.track();
         if (imgRef.version) {
             fname += "_" + imgRef.version;
         }
-        return fname + (suffix || "");
+        return fname;
     }
     ImageRef.parse = function(path) {
         var $tokens = path.split('#');
@@ -108,7 +108,7 @@ temp.track();
 		return this;
 	};
     ImageRef.prototype.name = function(prefix, suffix) {
-        return ImageRef.nameOf(this, prefix, suffix);
+        return (prefix||"")+ImageRef.keyOf(this)+(suffix||"");
     };
     ImageRef.prototype.compare = function(that) {
         return ImageRef.compare(this, that);

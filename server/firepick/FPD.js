@@ -17,17 +17,18 @@ firepick.XYZCamera = require("./XYZCamera");
 
 (function(firepick) {
     function FPD(options) {
+		var that = this;
         options = options || {};
-        this.$xyz = options.xyz || new firepick.FireFUSEMarlin();
-        this.$camera = options.camera || new firepick.FireFUSECamera();
-        this.$imgStore = options.imgStore || new firepick.ImageStore(
-            this.$camera, {
+        that.$xyz = options.xyz || new firepick.FireFUSEMarlin();
+        that.$camera = options.camera || new firepick.FireFUSECamera();
+        that.$imgStore = options.imgStore || new firepick.ImageStore(
+            that.$camera, {
                 prefix: "FPD",
                 suffix: ".jpg"
             }
         );
-        this.$imgProc = options.imgProc || new firepick.ImageProcessor(this.$imgStore);
-        return this;
+        that.$imgProc = options.imgProc || new firepick.ImageProcessor(that.$imgStore);
+        return that;
     };
     //////////// PRIVATE ////////////////
     function imageFileNames(fpd, imgRef1, imgRef2) {
@@ -40,59 +41,82 @@ firepick.XYZCamera = require("./XYZCamera");
 
     ///////////////// INSTANCE //////////////////////
     FPD.prototype.imgPath = function(imgRef) {
-        return imgRef == null ? this.camera().path : this.pathOf(imgRef);
+		var that = this;
+        return imgRef == null ? that.camera().path : that.pathOf(imgRef);
     };
     FPD.prototype.home = function() {
-        this.$xyz.home();
-        return this;
+		var that = this;
+        that.$xyz.home();
+        return that;
     };
 	FPD.prototype.capture = function(tag, version) {
-		var imgRef = firepick.ImageRef.copy(this.getXYZ()).setTag(tag).setVersion(version);
-		return this.$imgStore.capture(imgRef);
+		var that = this;
+		var xyz = that.getXYZ();
+		var imgRef = that.imageRef({
+			x:xyz.x,
+			y:xyz.y,
+			z:xyz.z,
+			tag:tag,
+			version:version,
+		});
+		imgRef = imgRef || firepick.ImageRef.copy(that.getXYZ()).setTag(tag).setVersion(version);
+		return that.$imgStore.capture(imgRef);
 	};
     FPD.prototype.imageStore = function() {
-        return this.$imgStore;
+		var that = this;
+        return that.$imgStore;
     };
     FPD.prototype.imageProcessor = function() {
-        return this.$imgProc;
+		var that = this;
+        return that.$imgProc;
     };
 	FPD.prototype.pathOf = function(imgRef) {
-		return this.$imgStore.pathOf(imgRef);
+		var that = this;
+		return that.$imgStore.pathOf(imgRef);
 	};
 	FPD.prototype.imageRef = function(imgRef) {
-		imgRef = imgRef || this.getXYZ() || {x:0,y:0,z:0};
-		return firepick.ImageRef.copy(imgRef).setPath(this.pathOf(imgRef));
+		var that = this;
+		imgRef = imgRef || that.getXYZ() || {x:0,y:0,z:0};
+		return firepick.ImageRef.copy(imgRef).setPath(that.pathOf(imgRef));
 	};
     FPD.prototype.camera = function() {
-        return this.$camera;
+		var that = this;
+        return that.$camera;
     }
     FPD.prototype.xyzPositioner= function() {
-        return this.$xyz;
+		var that = this;
+        return that.$xyz;
     }
     FPD.prototype.origin = function() {
-        this.$xyz.origin();
-        return this;
+		var that = this;
+        that.$xyz.origin();
+        return that;
     };
     FPD.prototype.move = function(path) {
-        this.$xyz.move(path);
-        return this;
+		var that = this;
+        that.$xyz.move(path);
+        return that;
     };
     FPD.prototype.moveTo = function(xyz) {
-        return this.move(xyz);
+		var that = this;
+        return that.move(xyz);
     }
     FPD.prototype.getXYZ = function(path) {
-        return this.$xyz.getXYZ();
+		var that = this;
+        return that.$xyz.getXYZ();
     };
     FPD.prototype.health = function() {
+		var that = this;
         return (
-            this.$camera.health() +
-            this.$imgStore.health() +
-            this.$imgProc.health() +
-            this.$xyz.health()
+            that.$camera.health() +
+            that.$imgStore.health() +
+            that.$imgProc.health() +
+            that.$xyz.health()
         ) / 4;
     };
 	FPD.prototype.image = function(imgRef) {
-		return this.$imgStore.image(imgRef);
+		var that = this;
+		return that.$imgStore.image(imgRef);
 	};
 
     /////////////// CLASS ////////////////
@@ -125,6 +149,8 @@ firepick.XYZCamera = require("./XYZCamera");
         camera: new firepick.Camera([
             "test/camX0Y0Z0a.jpg",
             "test/camX0Y0Z0b.jpg",
+            "test/camX1Y0Z0.jpg",
+            "test/camX1Y0Z0.jpg",
             "test/camX1Y0Z0.jpg",
         ])
 	});
