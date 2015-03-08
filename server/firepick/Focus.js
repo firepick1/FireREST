@@ -15,6 +15,7 @@ firepick.Evolve = require("./Evolve");
 		this.xyzCam = xyzCam;
         this.zMin = zMin;
         this.zMax = zMax;
+		this.epsilon = 0.01;
 		this.captureCount = 0;
 		this.ip = new firepick.ImageProcessor();
         return this;
@@ -24,7 +25,9 @@ firepick.Evolve = require("./Evolve");
     Focus.prototype.isDone = function(index, generation) {
         var zFirst = generation[0];
         var zLast = generation[generation.length - 1];
-        return Math.abs(zLast - zFirst) <= 1;
+        var done = index > 1 && Math.abs(zLast - zFirst) <= 1;
+		console.log("isDone: " + done + " " +JSON.stringify(generation));
+		return done;
     };
 
     Focus.prototype.generate = function(z1, z2, mutate) {
@@ -37,6 +40,7 @@ firepick.Evolve = require("./Evolve");
             var high = Math.min(this.zMax, z1 + spread);
             kids.push(mutate(z1, low, high));
         }
+		console.log("generate => " + JSON.stringify(kids));
 
         return kids;
     };
@@ -51,6 +55,19 @@ firepick.Evolve = require("./Evolve");
 		}
 		should.ok(imgRef.exists());
         return imgRef.sharpness = this.ip.sharpness(imgRef).sharpness;
+	};
+	Focus.prototype.calcSharpestZ = function() {
+        var evolve = new firepick.Evolve(function(parent1,parent2, mutate){
+			return this.generate(parent1,parent2,mutate);
+		}, function(a,b){
+			return this.compare(a,b);
+		},{
+			verbose:true
+		});
+        var guess1 = (this.zMin + this.zMax)/2;
+        var epsilon = 0.01;
+		var vSolve = evolve.solve([guess1], this.isDone);
+		return vSolve[0];
 	};
 
     console.log("LOADED	: firepick.Focus");
@@ -68,5 +85,9 @@ firepick.Evolve = require("./Evolve");
 	it("compute the sharpness at {x:0,y:0,z:-5}", function() {
 		var sharpness = focus.sharpness(-5);
 		should(sharpness).within(313.4,313.5);
+	});
+	it("should calculate the Z-axis coordinate with the sharpest images", function() {
+	//	var z = focus.calcSharpestZ();
+		//should(z).equal(-45);
 	});
 });
