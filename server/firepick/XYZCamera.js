@@ -2,24 +2,24 @@ var should = require("should"),
     module = module || {},
     firepick = firepick || {};
 var fs = require("fs");
-firepick.FPD = require("./FPD");
 firepick.ImageRef = require("./ImageRef");
 firepick.ImageRef = require("./ImageRef");
 firepick.ImageStore = require("./ImageStore");
 
 (function(firepick) {
     function XYZCamera(options) {
+		var that = this;
         options = options || {};
-        this.mockImages = {};
+        that.mockImages = {};
         var mockPaths = options.mockPaths || firepick.XYZCamera.mockPaths;
         for (var i in mockPaths) {
             var imgRef = firepick.XYZCamera.mockImageRef(mockPaths[i]);
             var name = firepick.ImageRef.nameOf(imgRef);
-            this.mockImages[name] = imgRef;
-            this.defaultRef = this.defaultRef || imgRef;
-            this.zMax = Math.max(this.zMax || imgRef.z, imgRef.z);
+            that.mockImages[name] = imgRef;
+            that.defaultRef = that.defaultRef || imgRef;
+            that.zMax = Math.max(that.zMax || imgRef.z, imgRef.z);
         }
-        return this;
+        return that;
     };
 
 	var ref000 = new firepick.ImageRef(0,0,0);
@@ -29,46 +29,51 @@ firepick.ImageStore = require("./ImageStore");
         return 1;
     };
     XYZCamera.prototype.origin = function() {
-        return this.moveTo(ref000);
+		var that = this;
+        return that.moveTo(ref000);
     };
     XYZCamera.prototype.moveTo = function(xyz) {
+		var that = this;
 		should.exist(xyz);
-		if (this.xyz == null) {
+		if (that.xyz == null) {
 			should(xyz).have.properties(["x","y","z"]);
-			this.xyz = {x:xyz.x,y:xyz.y,z:xyz.z};
+			that.xyz = {x:xyz.x,y:xyz.y,z:xyz.z};
 		} else {
-			this.xyz.x = xyz.x == null ? this.xyz.x : xyz.x;
-			this.xyz.y = xyz.y == null ? this.xyz.y : xyz.y;
-			this.xyz.z = xyz.z == null ? this.xyz.z : xyz.z;
+			that.xyz.x = xyz.x == null ? that.xyz.x : xyz.x;
+			that.xyz.y = xyz.y == null ? that.xyz.y : xyz.y;
+			that.xyz.z = xyz.z == null ? that.xyz.z : xyz.z;
 		}
-        return this;
+        return that;
     };
     XYZCamera.prototype.getXYZ = function() {
-        return this.xyz;
+		var that = this;
+        return that.xyz;
     };
     XYZCamera.prototype.capture = function(tag, version) {
-        var imgRef = firepick.ImageRef.copy(this.xyz);
+		var that = this;
+        var imgRef = firepick.ImageRef.copy(that.xyz);
         if (tag != null) {
             imgRef.tag = tag;
         }
         if (version != null) {
             imgRef.version = version;
         }
-        return this.imageRef(imgRef);
+        return that.imageRef(imgRef);
     }
     XYZCamera.prototype.imageRef = function(imgRef) {
-		imgRef = imgRef || this.xyz || this.ref000;
+		var that = this;
+		imgRef = imgRef || that.xyz || that.ref000;
         var name = firepick.ImageRef.nameOf(imgRef);
-        var foundRef = this.mockImages[name];
+        var foundRef = that.mockImages[name];
         if (foundRef == null) {
-            var newImgPath = this.defaultRef.path;
+            var newImgPath = that.defaultRef.path;
             if (imgRef.x === 0 && imgRef.y === 0) { // mock with next greater available z
-                if (imgRef.z < this.zMax) {
+                if (imgRef.z < that.zMax) {
                     var z = Math.floor(imgRef.z) + 1;
-                    newImgPath = this.imageRef(new firepick.ImageRef().setZ(z)).path;
+                    newImgPath = that.imageRef(new firepick.ImageRef().setZ(z)).path;
                 }
             } else { // mock all images from z-axis 
-				newImgPath = this.imageRef(new firepick.ImageRef().setZ(imgRef.z)).path;
+				newImgPath = that.imageRef(new firepick.ImageRef().setZ(imgRef.z)).path;
             }
             foundRef = new firepick.ImageRef(imgRef.x, imgRef.y, imgRef.z, {
                 path: newImgPath
@@ -79,7 +84,7 @@ firepick.ImageStore = require("./ImageStore");
             if (imgRef.version != null) {
                 foundRef.version = imgRef.version;
             }
-            this.mockImages[name] = foundRef;
+            that.mockImages[name] = foundRef;
         }
         return foundRef;
     };

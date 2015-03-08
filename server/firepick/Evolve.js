@@ -3,9 +3,8 @@ var should = require("should"),
     firepick = firepick || {};
 
 (function(firepick) {
-	var that;
     function Evolve(solver, options) {
-		that = this;
+		var that = this;
 		options = options || {};
 		should.exist(solver);
 		should(solver).have.properties(["generate", "compare", "isDone"]);
@@ -18,7 +17,6 @@ var should = require("should"),
         that.nSurvivors = options.nSurvivors || 10;
         should(that.nSurvivors).not.below(1);
 		that.verbose = options.verbose == null ? false : options.verbose;
-
         that.generation = [];
         return that;
     };
@@ -26,6 +24,7 @@ var should = require("should"),
 
     ///////////////// INSTANCE ///////////////
     Evolve.prototype.evolve1 = function(generation) {
+		var that = this;
         var generation1 = generation ? generation : that.generation;
         var generation2 = [];
         var variantMap = {};
@@ -52,10 +51,13 @@ var should = require("should"),
                 }
             }
         }
-		generation2.sort(that.solver.compare);
+		generation2.sort(function(a,b) {
+			return that.solver.compare.call(that.solver, a, b);
+		});
         return generation2;
     };
     Evolve.prototype.solve = function(generation) {
+		var that = this;
         that.generation = generation;
         for (that.iGeneration = 0;
             (that.status = that.solver.isDone(that.iGeneration, that.generation)) === false; 
@@ -85,9 +87,6 @@ var should = require("should"),
             result = value + (maxValue - value) * (2 * r - 1);
         }
         should(result).be.within(minValue, maxValue);
-		if (that.verbose) {
-			//console.log("mutateDefault(" + value + "," + minValue + "," + maxValue + " => " + result);
-		}
         return result;
     }
     console.log("LOADED	: firepick.Evolve");
@@ -96,25 +95,30 @@ var should = require("should"),
 
 var demo = demo || {};
 (function (demo) {
-	var that;
 	function SqrtSolver(N) {
-		that = this;
+		var that = this;
 		that.N = N;
 		that.N2 = N/2;
 		return that;
 	}
 	SqrtSolver.prototype.isDone = function(index, generation) {
+		var that = this;
+		that.N.should.equal(200);
+		that.N2.should.equal(100);
+		done = false;
         if (Math.abs(that.N - generation[0] * generation[0]) < that.N / 1000) {
             //console.log("Solved in " + index + " generations: " + generation[0]);
-            return true;
+            done = true;
         }
         if (index >= 100) {
             //console.log("Giving up after " + index + " generations");
-            return true;
+            done = true;
         }
-        return false;
+		//console.log(index + ". " + JSON.stringify(generation));
+        return done;
     };
 	SqrtSolver.prototype.generate = function(parent1, parent2) {
+		var that = this;
         var kids = [firepick.Evolve.mutate(parent1, 1, that.N2)]; // broad search
         if (parent1 === parent2) {
             kids.push(firepick.Evolve.mutate(parent1, 1, that.N2));
@@ -128,7 +132,9 @@ var demo = demo || {};
         return kids;
     };
 	SqrtSolver.prototype.compare = function(a,b) {	// smaller is "better"
-        return Math.abs(that.N - a * a) - Math.abs(that.N - b * b);
+		var that = this;
+		var goal = that.N;
+        return Math.abs(goal - a * a) - Math.abs(goal - b * b);
     };
 	demo.SqrtSolver = SqrtSolver;
 })(demo);

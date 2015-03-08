@@ -139,6 +139,7 @@ firepick.XYZCamera = require("./XYZCamera");
 		fpd.imageProcessor().health().should.equal(1);
 		should(fpd.health()).equal(1);
 	});
+	should.exist(firepick.XYZCamera.validate);
     firepick.XYZCamera.validate(fpd);
     firepick.FPD.validate(fpd);
 

@@ -9,9 +9,8 @@ firepick.FPD = require("./FPD");
 Util = require("./Util");
 
 (function(firepick) {
-	var that;
     function Focus(xyzCam, zMin, zMax, options) {
-		that = this;
+		var that = this;
 		options = options || {};
 		firepick.XYZCamera.isInterfaceOf(xyzCam);
 		that.xyzCam = xyzCam;
@@ -31,6 +30,7 @@ Util = require("./Util");
 
     /////////////// INSTANCE ////////////
     Focus.prototype.isDone = function(index, generation) {
+		var that = this;
         var zFirst = generation[0];
         var zLast = generation[generation.length - 1];
         var done = index >= that.maxGenerations;	// non-convergence cap
@@ -45,6 +45,7 @@ Util = require("./Util");
     };
 
     Focus.prototype.generate = function(z1, z2) {
+		var that = this;
         var kids = [Util.roundN(firepick.Evolve.mutate(z1, that.zMin, that.zMax),that.nPlaces)]; // broad search
         if (z1 === z2) {
 			kids.push(Util.roundN(firepick.Evolve.mutate(z1, that.zMin, that.zMax),that.nPlaces)); // broad search
@@ -58,6 +59,7 @@ Util = require("./Util");
         return kids;
     };
     Focus.prototype.compare = function(z1, z2) {
+		var that = this;
         var cmp = that.sharpness(z2) - that.sharpness(z1);
 		if (cmp === 0) {
 			return z1 - z2;
@@ -65,6 +67,7 @@ Util = require("./Util");
 		return cmp;
     };
 	Focus.prototype.sharpness = function(z) {
+		var that = this;
 		var imgRef = that.xyzCam.imageRef({x:0,y:0,z:z});
 		if (!imgRef.exists() || imgRef.sharpness == null) {
 			that.captureCount++;
@@ -77,6 +80,7 @@ Util = require("./Util");
         return imgRef.sharpness;
 	};
 	Focus.prototype.calcSharpestZ = function() {
+		var that = this;
         var evolve = new firepick.Evolve(that, {nSurvivors:5});
         var guess1 = (that.zMin + that.zMax)/2;
         var epsilon = 0.01;
