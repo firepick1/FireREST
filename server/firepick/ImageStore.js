@@ -55,18 +55,17 @@ function isNumeric(obj) {
         return that.images[key];
     }
     ImageStore.prototype.load = function(imgRef, srcPath) {
+		should(srcPath).be.a.String;
         var that = this;
-        imgRef = imgRef instanceof firepick.ImageRef ?
-            imgRef : firepick.ImageRef.copy(imgRef);
-        srcPath = srcPath || imgRef.path;
-        should.exist(srcPath);
         var key = firepick.ImageRef.keyOf(imgRef);
-        var dstPath = that.pathOf(imgRef);
-        fs.writeFileSync(dstPath, fs.readFileSync(srcPath));
-        var newRef = firepick.ImageRef.copy(imgRef);
-        newRef.path = dstPath;
-        that.images[key] = newRef;
-        return newRef;
+		var theRef = that.images[key];
+		if (theRef == null) {
+			theRef = firepick.ImageRef.copy(imgRef);
+			that.images[key] = theRef;
+			theRef.path = that.prefix + key + that.suffix;
+		}
+        fs.writeFileSync(theRef.path, fs.readFileSync(srcPath));
+		return theRef;
     }
     ImageStore.prototype.capture = function(imgRef) {
         var that = this;

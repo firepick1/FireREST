@@ -56,23 +56,23 @@ firepick.ImageStore = require("./ImageStore");
         describe("ImageProcessor.validate(" + ip.constructor.name + ")", function() {
             var ref000a = new firepick.ImageRef(0, 0, 0, {
                 tag: "a",
-                path: "test/camX0Y0Z0a.jpg"
+                src: "test/camX0Y0Z0a.jpg"
             });
             var ref000b = new firepick.ImageRef(0, 0, 0, {
                 tag: "b",
-                path: "test/camX0Y0Z0b.jpg"
+                src: "test/camX0Y0Z0b.jpg"
             });
             var ref100 = new firepick.ImageRef(1, 0, 0, {
-                path: "test/camX1Y0Z0.jpg"
+                src: "test/camX1Y0Z0.jpg"
             });
             var refDuck = new firepick.ImageRef(0, 0, 0, {
                 tag: "duck",
-                path: "test/duck.jpg"
+                src: "test/duck.jpg"
             });
-            ip.imgStore.load(ref000a);
-            ip.imgStore.load(ref000b);
-            ip.imgStore.load(ref100);
-            ip.imgStore.load(refDuck);
+            ip.imgStore.load(ref000a, ref000a.src);
+            ip.imgStore.load(ref000b, ref000b.src);
+            ip.imgStore.load(ref100, ref100.src);
+            ip.imgStore.load(refDuck, refDuck.src);
             describe("validating calcOffset", function() {
                 it("should show zero offset for two images at same location", function() {
                     var result = ip.calcOffset(ref000a, ref000b);
