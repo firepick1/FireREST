@@ -115,7 +115,7 @@ firepick.ImageStore = require("./ImageStore");
             xyzCam.origin().should.equal(xyzCam);
         });
         it("should, at the origin, have getXYZ() == (0,0,0)", function() {
-            var xyz = xyzCam.origin().getXYZ();
+            var xyz = xyzCam.getXYZ();
 			should(xyz).have.properties({x:0,y:0,z:0});
         });
         it("should moveTo({x:1,y:2,z:3})", function() {
@@ -157,6 +157,7 @@ firepick.ImageStore = require("./ImageStore");
             imgTest.path.should.be.a.String;
         });
 		it("origin().imageRef() should return an image reference to origin", function() {
+			this.timeout(5000);
 			var ref = xyzCam.origin().imageRef();
 			should(xyzCam.getXYZ()).properties({x:0,y:0,z:0});
 			should(ref.constructor.name).equal("ImageRef");
