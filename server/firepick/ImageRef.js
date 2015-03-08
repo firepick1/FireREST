@@ -27,15 +27,15 @@ temp.track();
         return new ImageRef(refSrc.x, refSrc.y, refSrc.z, refSrc);
     }
     ImageRef.keyOf = function(imgRef) {
-        var fname = "_" + imgRef.x + "_" + imgRef.y + "_" + imgRef.z;
+        var key = "_" + imgRef.x + "_" + imgRef.y + "_" + imgRef.z;
 
         if (imgRef.tag || imgRef.version) {
-            fname += "#" + (imgRef.tag || "");
+            key += "#" + (imgRef.tag || "");
         }
         if (imgRef.version) {
-            fname += "_" + imgRef.version;
+            key += "_" + imgRef.version;
         }
-        return fname;
+        return key;
     }
     ImageRef.parse = function(path) {
         var $tokens = path.split('#');
