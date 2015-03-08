@@ -27,7 +27,7 @@ temp.track();
         return new ImageRef(refSrc.x, refSrc.y, refSrc.z, refSrc);
     }
     ImageRef.keyOf = function(imgRef) {
-        var fname =  "_" + imgRef.x + "_" + imgRef.y + "_" + imgRef.z;
+        var fname = "_" + imgRef.x + "_" + imgRef.y + "_" + imgRef.z;
 
         if (imgRef.tag || imgRef.version) {
             fname += "#" + (imgRef.tag || "");
@@ -75,52 +75,52 @@ temp.track();
         return ImageRef.copy(this);
     };
     ImageRef.prototype.setPath = function(path) {
-		path.should.be.a.String;
-		this.path = path;
-		return this;
-	};
+        path.should.be.a.String;
+        this.path = path;
+        return this;
+    };
     ImageRef.prototype.setVersion = function(version) {
-		if (version == null) {
-			delete this.version;
-		} else {
-			this.version = version;
-		}
+        if (version == null) {
+            delete this.version;
+        } else {
+            this.version = version;
+        }
         return this;
     };
     ImageRef.prototype.setTag = function(tag) {
-		if (tag == null) {
-			delete this.tag;
-		} else {
-			this.tag = tag;
-		}
+        if (tag == null) {
+            delete this.tag;
+        } else {
+            this.tag = tag;
+        }
         return this;
-	};
-	ImageRef.prototype.setX = function(x) {
-		this.x = x;
-		return this;
-	};
-	ImageRef.prototype.setY = function(y) {
-		this.y = y;
-		return this;
-	};
-	ImageRef.prototype.setZ = function(z) {
-		this.z = z;
-		return this;
-	};
+    };
+    ImageRef.prototype.setX = function(x) {
+        this.x = x;
+        return this;
+    };
+    ImageRef.prototype.setY = function(y) {
+        this.y = y;
+        return this;
+    };
+    ImageRef.prototype.setZ = function(z) {
+        this.z = z;
+        return this;
+    };
     ImageRef.prototype.name = function(prefix, suffix) {
-        return (prefix||"")+ImageRef.keyOf(this)+(suffix||"");
+        return (prefix || "") + ImageRef.keyOf(this) + (suffix || "");
     };
     ImageRef.prototype.compare = function(that) {
         return ImageRef.compare(this, that);
     };
-	ImageRef.prototype.exists = function() {
-		try {
-			fs.statSync(this.path);
-			return true;
-		} catch(err) {
-			return false; // silly nodejs is deprecating fs.exists()
-		}
-	};
+    ImageRef.prototype.exists = function() {
+        try {
+            fs.statSync(this.path);
+            return true;
+        } catch (err) {
+            return false; // silly nodejs is deprecating fs.exists()
+        }
+    };
     ImageRef.prototype.round = function(xplaces, yplaces, zplaces) {
         xplaces = xplaces == null ? 0 : xplaces;
         yplaces = yplaces == null ? xplaces : yplaces;
@@ -242,15 +242,21 @@ temp.track();
         var refParse = firepick.ImageRef.parse(name123a5);
         should.equal(0, firepick.ImageRef.compare(refParse, ref123a5));
     });
-	it("should have chained setters", function() {
-		var ref = new firepick.ImageRef(0,0,0);
-		ref = ref.setX(1);
-		ref = ref.setY(2);
-		ref = ref.setZ(3);
-		ref = ref.setTag("A");
-		ref = ref.setVersion(4);
-		should(ref).have.properties({x:1,y:2,z:3,tag:"A",version:4});
-	});
+    it("should have chained setters", function() {
+        var ref = new firepick.ImageRef(0, 0, 0);
+        ref = ref.setX(1);
+        ref = ref.setY(2);
+        ref = ref.setZ(3);
+        ref = ref.setTag("A");
+        ref = ref.setVersion(4);
+        should(ref).have.properties({
+            x: 1,
+            y: 2,
+            z: 3,
+            tag: "A",
+            version: 4
+        });
+    });
     it("should round", function() {
         var ref123 = new firepick.ImageRef(1, 2, 3);
         var x = 1.09871;
@@ -266,9 +272,13 @@ temp.track();
         should.deepEqual(new firepick.ImageRef(x, y, z).round(0, 0, 1), new firepick.ImageRef(1, 2, 3.3));
         should.deepEqual(new firepick.ImageRef(x, y, z).round(3), new firepick.ImageRef(1.099, 2.246, 3.319));
     });
-	it("exists() should return true iff image reference path exists", function() {
-		new firepick.ImageRef(0,0,0,{path:"no/such/file"}).exists().should.equal(false);
-		new firepick.ImageRef(0,0,0).exists().should.equal(false);
-		new firepick.ImageRef(0,0,0,{path:"test/camX0Y0Z0a.jpg"}).exists().should.equal(true);
-	});
+    it("exists() should return true iff image reference path exists", function() {
+        new firepick.ImageRef(0, 0, 0, {
+            path: "no/such/file"
+        }).exists().should.equal(false);
+        new firepick.ImageRef(0, 0, 0).exists().should.equal(false);
+        new firepick.ImageRef(0, 0, 0, {
+            path: "test/camX0Y0Z0a.jpg"
+        }).exists().should.equal(true);
+    });
 });

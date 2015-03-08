@@ -17,7 +17,7 @@ firepick.XYZCamera = require("./XYZCamera");
 
 (function(firepick) {
     function FPD(options) {
-		var that = this;
+        var that = this;
         options = options || {};
         that.$xyz = options.xyz || new firepick.FireFUSEMarlin();
         that.$camera = options.camera || new firepick.FireFUSECamera();
@@ -41,72 +41,76 @@ firepick.XYZCamera = require("./XYZCamera");
 
     ///////////////// INSTANCE //////////////////////
     FPD.prototype.imgPath = function(imgRef) {
-		var that = this;
+        var that = this;
         return imgRef == null ? that.camera().path : that.pathOf(imgRef);
     };
     FPD.prototype.home = function() {
-		var that = this;
+        var that = this;
         that.$xyz.home();
         return that;
     };
-	FPD.prototype.capture = function(tag, version) {
-		var that = this;
-		var xyz = that.getXYZ();
-		var imgRef = that.imageRef({
-			x:xyz.x,
-			y:xyz.y,
-			z:xyz.z,
-			tag:tag,
-			version:version,
-		});
-		imgRef = imgRef || firepick.ImageRef.copy(that.getXYZ()).setTag(tag).setVersion(version);
-		return that.$imgStore.capture(imgRef);
-	};
+    FPD.prototype.capture = function(tag, version) {
+        var that = this;
+        var xyz = that.getXYZ();
+        var imgRef = that.imageRef({
+            x: xyz.x,
+            y: xyz.y,
+            z: xyz.z,
+            tag: tag,
+            version: version,
+        });
+        imgRef = imgRef || firepick.ImageRef.copy(that.getXYZ()).setTag(tag).setVersion(version);
+        return that.$imgStore.capture(imgRef);
+    };
     FPD.prototype.imageStore = function() {
-		var that = this;
+        var that = this;
         return that.$imgStore;
     };
     FPD.prototype.imageProcessor = function() {
-		var that = this;
+        var that = this;
         return that.$imgProc;
     };
-	FPD.prototype.pathOf = function(imgRef) {
-		var that = this;
-		return that.$imgStore.pathOf(imgRef);
-	};
-	FPD.prototype.imageRef = function(imgRef) {
-		var that = this;
-		imgRef = imgRef || that.getXYZ() || {x:0,y:0,z:0};
-		return firepick.ImageRef.copy(imgRef).setPath(that.pathOf(imgRef));
-	};
+    FPD.prototype.pathOf = function(imgRef) {
+        var that = this;
+        return that.$imgStore.pathOf(imgRef);
+    };
+    FPD.prototype.imageRef = function(imgRef) {
+        var that = this;
+        imgRef = imgRef || that.getXYZ() || {
+            x: 0,
+            y: 0,
+            z: 0
+        };
+        return firepick.ImageRef.copy(imgRef).setPath(that.pathOf(imgRef));
+    };
     FPD.prototype.camera = function() {
-		var that = this;
+        var that = this;
         return that.$camera;
     }
-    FPD.prototype.xyzPositioner= function() {
-		var that = this;
+    FPD.prototype.xyzPositioner = function() {
+        var that = this;
         return that.$xyz;
     }
     FPD.prototype.origin = function() {
-		var that = this;
+        var that = this;
         that.$xyz.origin();
         return that;
     };
     FPD.prototype.move = function(path) {
-		var that = this;
+        var that = this;
         that.$xyz.move(path);
         return that;
     };
     FPD.prototype.moveTo = function(xyz) {
-		var that = this;
+        var that = this;
         return that.move(xyz);
     }
     FPD.prototype.getXYZ = function(path) {
-		var that = this;
+        var that = this;
         return that.$xyz.getXYZ();
     };
     FPD.prototype.health = function() {
-		var that = this;
+        var that = this;
         return (
             that.$camera.health() +
             that.$imgStore.health() +
@@ -114,10 +118,10 @@ firepick.XYZCamera = require("./XYZCamera");
             that.$xyz.health()
         ) / 4;
     };
-	FPD.prototype.image = function(imgRef) {
-		var that = this;
-		return that.$imgStore.image(imgRef);
-	};
+    FPD.prototype.image = function(imgRef) {
+        var that = this;
+        return that.$imgStore.image(imgRef);
+    };
 
     /////////////// CLASS ////////////////
     FPD.validate = function(fpd) {
@@ -143,7 +147,7 @@ firepick.XYZCamera = require("./XYZCamera");
 })(firepick || (firepick = {}));
 
 (typeof describe === 'function') && describe("firepick.FPD", function() {
-	var fpd = new firepick.FPD();
+    var fpd = new firepick.FPD();
     var fpdMock = new firepick.FPD({
         xyz: new firepick.XYZPositioner(),
         camera: new firepick.Camera([
@@ -153,19 +157,19 @@ firepick.XYZCamera = require("./XYZCamera");
             "test/camX1Y0Z0.jpg",
             "test/camX1Y0Z0.jpg",
         ])
-	});
-	if (fpd.health() < 1) {
-		fpd = fpdMock;
-		console.log("STATUS	: FirePick Delta is unavailable. Using mock data");
-	}
-	it("health() should be 1", function() {
-		fpd.xyzPositioner().health().should.equal(1);
-		fpd.camera().health().should.equal(1);
-		fpd.imageStore().health().should.equal(1);
-		fpd.imageProcessor().health().should.equal(1);
-		should(fpd.health()).equal(1);
-	});
-	should.exist(firepick.XYZCamera.validate);
+    });
+    if (fpd.health() < 1) {
+        fpd = fpdMock;
+        console.log("STATUS	: FirePick Delta is unavailable. Using mock data");
+    }
+    it("health() should be 1", function() {
+        fpd.xyzPositioner().health().should.equal(1);
+        fpd.camera().health().should.equal(1);
+        fpd.imageStore().health().should.equal(1);
+        fpd.imageProcessor().health().should.equal(1);
+        should(fpd.health()).equal(1);
+    });
+    should.exist(firepick.XYZCamera.validate);
     firepick.XYZCamera.validate(fpd);
     firepick.FPD.validate(fpd);
 

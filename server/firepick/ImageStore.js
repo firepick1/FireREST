@@ -13,30 +13,30 @@ function isNumeric(obj) {
 
 (function(firepick) {
     function ImageStore(camera, options) {
-			var that = this;
-            that.camera = camera || new firepick.Camera();
-            that.images = options && options.images || {};
-            that.path = options && options.path || os.tmpDir();
-            that.prefix = options && options.prefix || "ImageStore";
-            that.suffix = options && options.suffix || ".jpg";
-            return that;
-        }
-        /////////////// INSTANCE ////////////
+        var that = this;
+        that.camera = camera || new firepick.Camera();
+        that.images = options && options.images || {};
+        that.path = options && options.path || os.tmpDir();
+        that.prefix = options && options.prefix || "ImageStore";
+        that.suffix = options && options.suffix || ".jpg";
+        return that;
+    };
+    /////////////// INSTANCE ////////////
     ImageStore.prototype.health = function() {
-		var that = this;
+        var that = this;
         return that.camera.health();
     };
     ImageStore.prototype.pathOf = function(imgRef) {
-		var that = this;
+        var that = this;
         if (imgRef) {
-            var name = that.prefix+firepick.ImageRef.keyOf(imgRef)+that.suffix;
+            var name = that.prefix + firepick.ImageRef.keyOf(imgRef) + that.suffix;
             return path.join(os.tmpDir(), name);
         } else {
             return that.camera.path;
         }
     };
     ImageStore.prototype.parseImageRef = function(path) {
-		var that = this;
+        var that = this;
         var suffixPos = path.lastIndexOf(that.suffix);
         path = suffixPos < 0 ? path : path.slice(0, suffixPos);
         var prefixPos = path.indexOf(that.prefix);
@@ -44,18 +44,18 @@ function isNumeric(obj) {
         return firepick.ImageRef.parse(path);
     }
     ImageStore.prototype.clear = function() {
-		var that = this;
+        var that = this;
         that.images = {};
         return that;
     };
     ImageStore.prototype.peek = function(imgRef) {
-		var that = this;
+        var that = this;
         should.exist(imgRef);
         var key = firepick.ImageRef.keyOf(imgRef);
         return that.images[key];
     }
     ImageStore.prototype.load = function(imgRef, srcPath) {
-		var that = this;
+        var that = this;
         imgRef = imgRef instanceof firepick.ImageRef ?
             imgRef : firepick.ImageRef.copy(imgRef);
         srcPath = srcPath || imgRef.path;
@@ -69,13 +69,13 @@ function isNumeric(obj) {
         return newRef;
     }
     ImageStore.prototype.capture = function(imgRef) {
-		var that = this;
+        var that = this;
         should.exist(imgRef);
         that.camera.capture();
         return that.load(imgRef, that.camera.path);
     }
     ImageStore.prototype.image = function(imgRef) {
-		var that = this;
+        var that = this;
         should.exist(imgRef);
         var key = firepick.ImageRef.keyOf(imgRef);
         if (that.images[key] == null) {
@@ -142,7 +142,7 @@ function isNumeric(obj) {
             should(imgStore.clear()).equal(imgStore);
             should.not.exist(imgStore.peek(ref123));
         });
-		/*
+        /*
         it("should load an external image", function() {
             var raw123_6 = {
                 x: 1,

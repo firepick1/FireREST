@@ -4,19 +4,19 @@ var should = require("should"),
 
 (function(firepick) {
     function Evolve(solver, options) {
-		var that = this;
-		options = options || {};
-		should.exist(solver);
-		should(solver).have.properties(["generate", "compare", "isDone"]);
-		solver.generate.should.be.a.Function;
-		solver.compare.should.be.a.Function;
-		solver.isDone.should.be.a.Function;
-		that.solver = solver;
+        var that = this;
+        options = options || {};
+        should.exist(solver);
+        should(solver).have.properties(["generate", "compare", "isDone"]);
+        solver.generate.should.be.a.Function;
+        solver.compare.should.be.a.Function;
+        solver.isDone.should.be.a.Function;
+        that.solver = solver;
         that.nElite = options.nElite || 1;
         should(that.nElite).not.below(1);
         that.nSurvivors = options.nSurvivors || 10;
         should(that.nSurvivors).not.below(1);
-		that.verbose = options.verbose == null ? false : options.verbose;
+        that.verbose = options.verbose == null ? false : options.verbose;
         that.generation = [];
         return that;
     };
@@ -24,17 +24,17 @@ var should = require("should"),
 
     ///////////////// INSTANCE ///////////////
     Evolve.prototype.evolve1 = function(generation) {
-		var that = this;
+        var that = this;
         var generation1 = generation ? generation : that.generation;
         var generation2 = [];
         var variantMap = {};
         for (var i = 0; i < Math.min(generation.length, that.nElite); i++) {
-			var c = generation1[i];
-			var key = JSON.stringify(c);
-			if (!variantMap[key]) {
-				variantMap[key] = c;
-				generation2.push(c);
-			}
+            var c = generation1[i];
+            var key = JSON.stringify(c);
+            if (!variantMap[key]) {
+                variantMap[key] = c;
+                generation2.push(c);
+            }
         }
         for (var iv1 = 0; iv1 < generation1.length; iv1++) {
             var v = generation1[iv1];
@@ -51,21 +51,20 @@ var should = require("should"),
                 }
             }
         }
-		generation2.sort(function(a,b) {
-			return that.solver.compare.call(that.solver, a, b);
-		});
+        generation2.sort(function(a, b) {
+            return that.solver.compare.call(that.solver, a, b);
+        });
         return generation2;
     };
     Evolve.prototype.solve = function(generation) {
-		var that = this;
+        var that = this;
         that.generation = generation;
         for (that.iGeneration = 0;
-            (that.status = that.solver.isDone(that.iGeneration, that.generation)) === false; 
-			that.iGeneration++) {
+            (that.status = that.solver.isDone(that.iGeneration, that.generation)) === false; that.iGeneration++) {
             that.generation = that.evolve1(that.generation);
-			if (that.verbose) {
-				//console.log("generation " + that.iGeneration + ": " + JSON.stringify(that.generation));
-			}
+            if (that.verbose) {
+                //console.log("generation " + that.iGeneration + ": " + JSON.stringify(that.generation));
+            }
             if (that.nSurvivors && that.generation.length > that.nSurvivors) {
                 that.generation.splice(that.nSurvivors, that.generation.length);
             }
@@ -73,7 +72,7 @@ var should = require("should"),
         return that.generation;
     };
 
-	////////////// CLASS ///////////////
+    ////////////// CLASS ///////////////
     Evolve.mutate = function(value, minValue, maxValue) {
         // generate new value in given range with median==value 
         // using approximately Gaussian distribution
@@ -94,18 +93,18 @@ var should = require("should"),
 })(firepick || (firepick = {}));
 
 var demo = demo || {};
-(function (demo) {
-	function SqrtSolver(N) {
-		var that = this;
-		that.N = N;
-		that.N2 = N/2;
-		return that;
-	}
-	SqrtSolver.prototype.isDone = function(index, generation) {
-		var that = this;
-		that.N.should.equal(200);
-		that.N2.should.equal(100);
-		done = false;
+(function(demo) {
+    function SqrtSolver(N) {
+        var that = this;
+        that.N = N;
+        that.N2 = N / 2;
+        return that;
+    }
+    SqrtSolver.prototype.isDone = function(index, generation) {
+        var that = this;
+        that.N.should.equal(200);
+        that.N2.should.equal(100);
+        done = false;
         if (Math.abs(that.N - generation[0] * generation[0]) < that.N / 1000) {
             //console.log("Solved in " + index + " generations: " + generation[0]);
             done = true;
@@ -114,11 +113,11 @@ var demo = demo || {};
             //console.log("Giving up after " + index + " generations");
             done = true;
         }
-		//console.log(index + ". " + JSON.stringify(generation));
+        //console.log(index + ". " + JSON.stringify(generation));
         return done;
     };
-	SqrtSolver.prototype.generate = function(parent1, parent2) {
-		var that = this;
+    SqrtSolver.prototype.generate = function(parent1, parent2) {
+        var that = this;
         var kids = [firepick.Evolve.mutate(parent1, 1, that.N2)]; // broad search
         if (parent1 === parent2) {
             kids.push(firepick.Evolve.mutate(parent1, 1, that.N2));
@@ -131,12 +130,12 @@ var demo = demo || {};
 
         return kids;
     };
-	SqrtSolver.prototype.compare = function(a,b) {	// smaller is "better"
-		var that = this;
-		var goal = that.N;
+    SqrtSolver.prototype.compare = function(a, b) { // smaller is "better"
+        var that = this;
+        var goal = that.N;
         return Math.abs(goal - a * a) - Math.abs(goal - b * b);
     };
-	demo.SqrtSolver = SqrtSolver;
+    demo.SqrtSolver = SqrtSolver;
 })(demo);
 
 (typeof describe === 'function') && describe("firepick.Evolve genetic solver", function() {
@@ -144,14 +143,18 @@ var demo = demo || {};
     var N2 = N == 2 ? 2 : N / 2;
 
     describe("compute the square root of " + N, function() {
-		var solver = new demo.SqrtSolver(N);
+        var solver = new demo.SqrtSolver(N);
         var evolve;
-		
-		it("should create a new genetic solver with default options", function() {
-			var options = {};
-			evolve	= new firepick.Evolve(solver, options);
-			should(evolve).have.properties({verbose:false, nElite:1, nSurvivors:10});
-		});
+
+        it("should create a new genetic solver with default options", function() {
+            var options = {};
+            evolve = new firepick.Evolve(solver, options);
+            should(evolve).have.properties({
+                verbose: false,
+                nElite: 1,
+                nSurvivors: 10
+            });
+        });
         var guess1 = (1 + N2) / 2;
         var epsilon = 0.01;
         var sqrtN = Math.sqrt(N);

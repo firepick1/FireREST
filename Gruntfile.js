@@ -7,12 +7,12 @@ module.exports = function(grunt) {
                 options: {
                     //reporter: 'list',
                     reporter: 'dot',
-                    captureFile: 'results.txt', 
-                    quiet: true, 
-                    clearRequireCache: true 
+                    captureFile: 'results.txt',
+                    quiet: true,
+                    clearRequireCache: true
                 },
                 src: ['server/firepick/*.js']
-                //src: ['server/firepick/XYZCamera.js','server/firepick/FPD.js']
+                    //src: ['server/firepick/XYZCamera.js','server/firepick/FPD.js']
             }
         },
         pkg: grunt.file.readJSON('package.json'),
