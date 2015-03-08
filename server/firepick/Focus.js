@@ -24,6 +24,7 @@ Util = require("./Util");
 		that.maxGenerations = options.maxGenerations || 20;
 		should(that.nPlaces).not.below(0);
 		that.captureCount = 0;
+		that.verbose = options.verbose == null ? true : options.verbose;
 		that.ip = new firepick.ImageProcessor();
         return that;
     };
@@ -69,6 +70,9 @@ Util = require("./Util");
 			that.captureCount++;
 			imgRef = that.xyzCam.moveTo(imgRef).capture();
 			imgRef.sharpness = that.ip.sharpness(imgRef).sharpness;
+			if (that.verbose) {
+				console.log("Focus.sharpness(" + z + ") #" + that.captureCount + " => " + imgRef.sharpness);
+			}
 		}
         return imgRef.sharpness;
 	};
