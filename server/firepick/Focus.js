@@ -129,8 +129,11 @@ Util = require("./Util");
             that.captureCount++;
             imgRef = that.xyzCam.moveTo(imgRef).capture();
             imgRef.sharpness = that.ip.sharpness(imgRef).sharpness;
+			that.zSharpSum += z * imgRef.sharpness;
+			that.sharpSum += imgRef.sharpness;
             if (that.verbose) {
-                console.log("Focus.sharpness(" + z + ") #" + that.captureCount + " => " + imgRef.sharpness);
+                console.log("Focus.sharpness(" + z + ") #" + that.captureCount + 
+				" => " + imgRef.sharpness + "zSharpAvg:" + that.zSharpSum/that.sharpSum);
             }
         }
         return imgRef.sharpness;
@@ -148,11 +151,14 @@ Util = require("./Util");
         } else {
             guess = [z2, z1];
         }
+		that.zSharpSum = 0;
+		that.sharpSum = 0;
         that.lastCandidateAge = 0;
         var vSolve = evolve.solve(guess);
         var z = vSolve[0];
         return {
             z: z,
+			zSharpAvg: that.zSharpSum / that.sharpSum,
             sharpness: that.sharpness(z)
         };
     };
