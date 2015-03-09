@@ -116,7 +116,7 @@ Util = require("./Util");
     Focus.prototype.calcSharpestZ = function() {
         var that = this;
         var evolve = new firepick.Evolve(that, {
-            nSurvivors: 5
+            nSurvivors: 3
         });
 		var z1 = Util.roundN(that.zMin + (that.zMax - that.zMin)/3, that.nPlaces);
 		var z2 = Util.roundN(that.zMin + (that.zMax - that.zMin)*2/3, that.nPlaces);
