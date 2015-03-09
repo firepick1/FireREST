@@ -31,16 +31,24 @@ Util = require("./Util");
     /////////////// INSTANCE ////////////
     Focus.prototype.isDone = function(index, generation) {
         var that = this;
+		var zSharpSum = 0;
+		var sharpSum = 0;
 		var zTotal = 0;
         for (var i=0; i<generation.length; i++) {
             var z = generation[i];
 			zTotal += z;
+			var sz = that.sharpness(z);
+			zSharpSum += z * sz;
+			sharpSum += sz;
         }
 		var zAvgGen = zTotal / generation.length;	// generation average
+		var zAvgSharpGen = zSharpSum / sharpSum;	// generation sharpness weighted average
 		// zAvg = exponential average of average generation z
 		var w = 0.8;
 		that.zAvg = w*zAvgGen + (1-w)*(that.zAvg||(that.zMin+that.zMax)/2);	
-        console.log(index + ": " + JSON.stringify(generation) + " zAvg:" + that.zAvg);
+		that.zSharpAvg = w*zAvgSharpGen + (1-w)*(that.zAvgSharp||(that.zMin+that.zMax)/2);
+        console.log(index + ": " + JSON.stringify(generation) + 
+			" zAvg:" + that.zAvg + " zSharpAvg:" + that.zSharpAvg);
         var zFirst = generation[0];
         var zLast = generation[generation.length - 1];
         var zDiff = Math.abs(zLast - zFirst);
