@@ -50,12 +50,12 @@ function isNumeric(obj) {
     };
     ImageStore.prototype.peek = function(imgRef) {
         var that = this;
-        should.exist(imgRef);
+		if (imgRef == null) { return null; }
         var key = firepick.ImageRef.keyOf(imgRef);
         return that.images[key];
     }
     ImageStore.prototype.load = function(imgRef, srcPath) {
-		should(srcPath).be.a.String;
+		should.exist(imgRef);
         var that = this;
         var key = firepick.ImageRef.keyOf(imgRef);
 		var theRef = that.images[key];
@@ -64,7 +64,10 @@ function isNumeric(obj) {
 			that.images[key] = theRef;
 			theRef.path = that.prefix + key + that.suffix;
 		}
-        fs.writeFileSync(theRef.path, fs.readFileSync(srcPath));
+		if (srcPath != null) {
+			should(srcPath).be.a.String;
+			fs.writeFileSync(theRef.path, fs.readFileSync(srcPath));
+		}
 		return theRef;
     }
     ImageStore.prototype.capture = function(imgRef) {
@@ -72,15 +75,6 @@ function isNumeric(obj) {
         should.exist(imgRef);
         that.camera.capture();
         return that.load(imgRef, that.camera.path);
-    }
-    ImageStore.prototype.image = function(imgRef) {
-        var that = this;
-        should.exist(imgRef);
-        var key = firepick.ImageRef.keyOf(imgRef);
-        if (that.images[key] == null) {
-            that.capture(imgRef);
-        }
-        return that.images[key];
     }
 
     /////////////// GLOBAL /////////////
@@ -101,19 +95,37 @@ function isNumeric(obj) {
                 var parse123 = imgStore.parseImageRef(path123);
                 should.equal(0, firepick.ImageRef.compare(parse123, ref123));
             });
-            var stat1;
-            var img123;
-            it("should return unique, client-mutable image", function() {
-                img123 = imgStore.image(ref123);
-                should.exist(img123);
-                should.not.exist(img123.size);
-                var stat1 = fs.statSync(imgStore.pathOf(ref123));
-                should.exist(stat1);
-                img123.size = stat1.size;
-                img123["color"] = "pink";
-                var img2 = imgStore.image(ref123);
-                should(img123.color).equal(img2.color);
-            });
+			it("load(imgRef, srcPath) should store an external image and return its ImageRef", function() {
+				var srcPath = "test/camX0Y0Z0a.jpg";
+				var imgRef = {x:1,y:2,z:3,tag:"test-load", version:1};
+				var theRef = imgStore.load(imgRef, srcPath);
+				should(theRef).have.properties(imgRef);
+				var key = firepick.ImageRef.keyOf(imgRef);
+				should(theRef.path).equal(imgStore.prefix + key + imgStore.suffix);
+				should.ok(theRef.exists());
+			});
+			it("load(imgRef) should register an ImageRef that can be loaded later", function() {
+				var srcPath = "test/camX0Y0Z0a.jpg";
+				var imgRef = {x:1,y:2,z:3,tag:"test-load", version:2};
+				var theRef = imgStore.load(imgRef);
+				should.exist(theRef);
+				var theRef2 = imgStore.load(imgRef, srcPath);
+				should.equal(theRef2, theRef);
+				should.ok(theRef.exists());
+			});
+			it("peek(imgRef) should return the stored ImageRef or null", function() {
+				var ref123 = imgStore.peek({x:1,y:2,z:3,tag:"test-load", version:1});
+				should(ref123).have.properties(ref123);
+				var refBad = imgStore.peek({x:1,y:2,z:3,tag:"test-load", version:911});
+				should.ok(refBad == null);
+
+			});
+			it("peek(imgRef) should return unique, client-mutable ImageRef", function() {
+				var ref123 = imgStore.peek({x:1,y:2,z:3,tag:"test-load", version:1});
+				ref123.color = "pink";
+				var ref123_again = imgStore.peek({x:1,y:2,z:3,tag:"test-load", version:1});
+				should(ref123_again).have.properties({color:"pink"});
+			});
         });
     };
 
@@ -141,40 +153,5 @@ function isNumeric(obj) {
             should(imgStore.clear()).equal(imgStore);
             should.not.exist(imgStore.peek(ref123));
         });
-        /*
-        it("should load an external image", function() {
-            var raw123_6 = {
-                x: 1,
-                y: 2,
-                z: 3,
-                tag: "test",
-                version: 6
-            };
-            var ref123_6 = firepick.ImageRef.copy(raw123_6);
-            var peek123_6 = imgStore.peek(raw123_6);
-            should.not.exist(peek123_6);
-            imgStore.load(raw123_6, "test/camX0Y0Z0a.jpg");
-            peek123_6 = imgStore.peek(raw123_6);
-            peek123_6.x.should.equal(ref123_6.x);
-            peek123_6.y.should.equal(ref123_6.y);
-            peek123_6.z.should.equal(ref123_6.z);
-            peek123_6.tag.should.equal(ref123_6.tag);
-            peek123_6.version.should.equal(ref123_6.version);
-            should.notStrictEqual(peek123_6, ref123_6);
-            var ref123_7 = new firepick.ImageRef(1, 2, 3, {
-                tag: "test",
-                version: 7,
-                path: "test/camX0Y0Z0a.jpg"
-            });
-            var peek123_7 = imgStore.peek(ref123_7);
-            should.not.exist(peek123_7);
-            peek123_7 = imgStore.load(ref123_7);
-            peek123_7.x.should.equal(ref123_7.x);
-            peek123_7.y.should.equal(ref123_7.y);
-            peek123_7.z.should.equal(ref123_7.z);
-            peek123_7.tag.should.equal(ref123_7.tag);
-            peek123_7.version.should.equal(ref123_7.version);
-        });
-		*/
     });
 })

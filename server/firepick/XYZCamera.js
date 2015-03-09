@@ -3,7 +3,6 @@ var should = require("should"),
     firepick = firepick || {};
 var fs = require("fs");
 firepick.ImageRef = require("./ImageRef");
-firepick.ImageRef = require("./ImageRef");
 firepick.ImageStore = require("./ImageStore");
 
 (function(firepick) {
@@ -193,7 +192,7 @@ firepick.ImageStore = require("./ImageStore");
             stat00m5.size.should.be.above(0);
             stat00m5.size.should.not.equal(stat000.size);
         });
-        var imgTest
+        var imgTest;
         it("should tag captured image with {tag:'attempt',version:7} using capture('attempt',7)", function() {
             imgTest = xyzCam.capture('attempt', 7);
             should.exist(imgTest);
@@ -209,6 +208,7 @@ firepick.ImageStore = require("./ImageStore");
         it("origin().imageRef() should return an image reference to origin", function() {
             this.timeout(5000);
             var ref = xyzCam.origin().imageRef();
+			should.exist(ref);
             should(xyzCam.getXYZ()).properties({
                 x: 0,
                 y: 0,
@@ -221,6 +221,7 @@ firepick.ImageStore = require("./ImageStore");
                 y: 0,
                 z: 0
             });
+			should(ref).have.property("path");
             should(ref.path).be.a.String;
             should(ref.path.length).be.above(0);
         });
@@ -243,9 +244,9 @@ firepick.ImageStore = require("./ImageStore");
             var ref = xyzCam.imageRef();
             ref.aDecoration = "hello";
             var ref2 = xyzCam.capture();
-            //	ref2.should.have.properties({aDecoration:"hello"});
+            ref2.should.have.properties({aDecoration:"hello"});
             var ref3 = xyzCam.imageRef();
-            //	ref3.should.have.properties({aDecoration:"hello"});
+            ref3.should.have.properties({aDecoration:"hello"});
         });
         it("imageRef({x:3,y:2,z:1}) should resolve an incomplete image reference", function() {
             var ref = xyzCam.imageRef({

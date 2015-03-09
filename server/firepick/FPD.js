@@ -52,15 +52,15 @@ firepick.XYZCamera = require("./XYZCamera");
     FPD.prototype.capture = function(tag, version) {
         var that = this;
         var xyz = that.getXYZ();
-        var imgRef = that.imageRef({
+		var imgRef = {
             x: xyz.x,
             y: xyz.y,
             z: xyz.z,
             tag: tag,
             version: version,
-        });
-        imgRef = imgRef || firepick.ImageRef.copy(that.getXYZ()).setTag(tag).setVersion(version);
-        return that.$imgStore.capture(imgRef);
+        };
+		var theRef = that.$imgStore.peek(imgRef);
+        return that.$imgStore.capture(theRef || imgRef);
     };
     FPD.prototype.imageStore = function() {
         var that = this;
@@ -76,12 +76,12 @@ firepick.XYZCamera = require("./XYZCamera");
     };
     FPD.prototype.imageRef = function(imgRef) {
         var that = this;
-        imgRef = imgRef || that.getXYZ() || {
-            x: 0,
-            y: 0,
-            z: 0
-        };
-        return firepick.ImageRef.copy(imgRef).setPath(that.pathOf(imgRef));
+		var theRef = that.$imgStore.peek(imgRef);
+		if (theRef == null) {
+			var srcRef = imgRef == null ? that.getXYZ() : imgRef;
+			theRef = that.$imgStore.load(srcRef);
+		}
+		return theRef;
     };
     FPD.prototype.camera = function() {
         var that = this;
