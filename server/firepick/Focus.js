@@ -121,6 +121,7 @@ Util = require("./Util");
         return cmp;
     };
 	Focus.prototype.imageRefAtZ = function(z) {
+        var that = this;
         return that.xyzCam.imageRef({
             x: 0,
             y: 0,
