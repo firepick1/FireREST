@@ -71,6 +71,8 @@ Util = require("./Util");
                 console.log("zLow:" + zLast);
             }
         }
+        var imgRef = that.imageRefAtZ(zFirst);
+		delete imgRef.sharpness; // re-assess elite sharpness
         var doneMsg;
         if (doneMsg == null && index >= that.maxGenerations) {
             doneMsg = "exceeded " + that.maxGenerations + " generations";
@@ -118,13 +120,16 @@ Util = require("./Util");
         }
         return cmp;
     };
-    Focus.prototype.sharpness = function(z) {
-        var that = this;
-        var imgRef = that.xyzCam.imageRef({
+	Focus.prototype.imageRefAtZ = function(z) {
+        return that.xyzCam.imageRef({
             x: 0,
             y: 0,
             z: z
         });
+	};
+    Focus.prototype.sharpness = function(z) {
+        var that = this;
+        var imgRef = that.imageRefAtZ(z);
         if (!imgRef.exists() || imgRef.sharpness == null) {
             that.captureCount++;
             imgRef = that.xyzCam.moveTo(imgRef).capture();
