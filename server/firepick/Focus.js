@@ -31,7 +31,14 @@ Util = require("./Util");
     /////////////// INSTANCE ////////////
     Focus.prototype.isDone = function(index, generation) {
         var that = this;
-        console.log(index + ": " + JSON.stringify(generation));
+		var zTotal = 0;
+        for (var i=0; i<generation.length; i++) {
+            var z = generation[i];
+			zTotal += z;
+        }
+		var w = 0.5;
+		that.zAvg = w*(zTotal/generation.length) + (1-w)*(that.zAvg||(that.zMin+that.zMax)/2);
+        console.log(index + ": " + JSON.stringify(generation) + " zAvg:" + that.zAvg);
         var zFirst = generation[0];
         var zLast = generation[generation.length - 1];
         var zDiff = Math.abs(zLast - zFirst);
@@ -70,13 +77,6 @@ Util = require("./Util");
         }
         if (doneMsg == null) {
             return false;
-        }
-		that.zTotal = 0;
-		that.zCount = 0;
-        for (var i in generation) {
-            var z = generation[i];
-            that.zTotal += z;
-            that.zCount++;
         }
         console.log("STATUS	: Focus.calcSharpestZ " + doneMsg +
             " => z:" + zFirst +
