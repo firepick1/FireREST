@@ -31,28 +31,58 @@ Util = require("./Util");
     /////////////// INSTANCE ////////////
     Focus.prototype.isDone = function(index, generation) {
         var that = this;
+		console.log(index + ": " + JSON.stringify(generation));
         var zFirst = generation[0];
         var zLast = generation[generation.length - 1];
-        var done = index >= that.maxGenerations; // non-convergence cap
-        done = done || index > 1 && Math.abs(zLast - zFirst) <= 1; // candidates roughly same
+		var zDiff = Math.abs(zLast-zFirst);
+		if (index === 0) {
+			that.zLow = that.zMin;
+			that.zHigh = that.zMax;
+			console.log("");
+		} else if (zFirst < zLast) {
+			that.zHigh = zLast;	// no need to look above zLast
+			for (var i = 0; i < generation.length; i++) {
+				that.zHigh = Math.max(that.zHigh, generation[i]);
+			}
+			console.log("zHigh:" + zLast);
+		} else if (zFirst > zLast) {
+			that.zLow = zLast;	// no need to look below zLast
+			for (var i = 0; i < generation.length; i++) {
+				that.zLow = Math.min(that.zLow, generation[i]);
+			}
+			console.log("zLow:" + zLast);
+		}
+        var done = false;
+		if (!done && index >= that.maxGenerations) {
+			done = true;
+			console.log("STATUS	: Focus.calcSharpestZ exceeded " + 
+				that.maxGenerations + " generations => " + zFirst);
+		}
+        if (!done && index > 1 && zDiff <= 1) { // candidates roughly same
+			done = true;
+			console.log("STATUS	: Focus.calcSharpestZ all solutions similar => " + zFirst);
+		}
         if (that.lastCandidate !== zFirst) {
             that.lastCandidate = zFirst;
             that.lastCandidateIndex = index;
         }
-        done = done || (index - that.lastCandidateIndex >= 3); // elite survived three generations
-        console.log(index + " " + JSON.stringify(generation));
+		if (!done && (index - that.lastCandidateIndex >= 3)) {
+			// elite survived three generations
+			done = true;
+			console.log("STATUS	: Focus.calcSharpestZ elite survived 3 generations => " + zFirst);
+		}
         return done;
     };
 
     Focus.prototype.generate = function(z1, z2) {
         var that = this;
-        var kids = [Util.roundN(firepick.Evolve.mutate(z1, that.zMin, that.zMax), that.nPlaces)]; // broad search
+        var kids = [Util.roundN(firepick.Evolve.mutate(z1, that.zLow, that.zHigh), that.nPlaces)]; // broad search
         if (z1 === z2) {
-            kids.push(Util.roundN(firepick.Evolve.mutate(z1, that.zMin, that.zMax), that.nPlaces)); // broad search
+            kids.push(Util.roundN(firepick.Evolve.mutate(z1, that.zLow, that.zHigh), that.nPlaces)); // broad search
         } else { // deep search
             var spread = Math.abs(z1 - z2);
-            var low = Math.max(that.zMin, z1 - spread);
-            var high = Math.min(that.zMax, z1 + spread);
+            var low = Math.max(that.zLow, z1 - spread);
+            var high = Math.min(that.zHigh, z1 + spread);
             kids.push(Util.roundN(firepick.Evolve.mutate(z1, low, high), that.nPlaces));
         }
 
@@ -118,21 +148,27 @@ Util = require("./Util");
     it("compute the sharpness at {x:0,y:0,z:-5}", function() {
         var captureOld = focus.captureCount;
         var sharpness = focus.sharpness(-5);
-        should(sharpness).within(313.4, 313.5);
+		if (fpd.health() < 1) {
+			should(sharpness).within(313.4, 313.5);
+		}
         should(focus.captureCount).equal(captureOld + 1);
     });
     it("should only capture a coordinate once for sharpness", function() {
         var captureOld = focus.captureCount;
         var sharpness = focus.sharpness(-5);
-        should(sharpness).within(313.4, 313.5);
+		if (fpd.health() < 1) {
+			should(sharpness).within(313.4, 313.5);
+		}
         should(focus.captureCount).equal(captureOld);
     });
     it("should calculate the Z-axis coordinate with the sharpest images", function() {
         this.timeout(50000);
         var captureOld = focus.captureCount;
         var result = focus.calcSharpestZ();
-        should(result.z).within(-20, -15);
-        should(result.sharpness).within(338.6, 338.7);
+		if (fpd.health() < 1) {
+			should(result.z).within(-20, -15);
+			should(result.sharpness).within(338.6, 338.7);
+		}
         should(focus.captureCount - captureOld).below(50);
     });
 });
