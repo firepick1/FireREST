@@ -46,7 +46,7 @@ Util = require("./Util");
 		// zAvg = exponential average of average generation z
 		var w = 0.8;
 		that.zAvg = w*zAvgGen + (1-w)*(that.zAvg||(that.zMin+that.zMax)/2);	
-		that.zSharpAvg = w*zSharpAvgGen + (1-w)*(that.zAvgSharp||(that.zMin+that.zMax)/2);
+		that.zSharpAvg = w*zSharpAvgGen + (1-w)*(that.zSharpAvg||(that.zMin+that.zMax)/2);
         console.log(index + ": " + JSON.stringify(generation) + 
 			" zAvgGen:" + zAvgGen + " zSharpAvgGen:" + zSharpAvgGen);
         var zFirst = generation[0];
