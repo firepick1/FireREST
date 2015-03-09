@@ -133,7 +133,7 @@ Util = require("./Util");
 			that.sharpSum += imgRef.sharpness;
             if (that.verbose) {
                 console.log("Focus.sharpness(" + z + ") #" + that.captureCount + 
-				" => " + imgRef.sharpness + "zSharpAvg:" + that.zSharpSum/that.sharpSum);
+				" => " + imgRef.sharpness + " zSharpAvg:" + (that.zSharpSum/that.sharpSum));
             }
         }
         return imgRef.sharpness;
