@@ -38,8 +38,6 @@ Util = require("./Util");
         if (index === 0) {
             that.zLow = that.zMin;
             that.zHigh = that.zMax;
-            that.zTotal = 0;
-            that.zCount = 0;
             console.log("");
         } else {
             if (zFirst < zLast) {
@@ -55,11 +53,6 @@ Util = require("./Util");
                 }
                 console.log("zLow:" + zLast);
             }
-        }
-        for (var i in generation) {
-            var z = generation[i];
-            that.zTotal += z;
-            that.zCount++;
         }
         var doneMsg;
         if (doneMsg == null && index >= that.maxGenerations) {
@@ -77,6 +70,13 @@ Util = require("./Util");
         }
         if (doneMsg == null) {
             return false;
+        }
+		that.zTotal = 0;
+		that.zCount = 0;
+        for (var i in generation) {
+            var z = generation[i];
+            that.zTotal += z;
+            that.zCount++;
         }
         console.log("STATUS	: Focus.calcSharpestZ " + doneMsg +
             " => z:" + zFirst +
