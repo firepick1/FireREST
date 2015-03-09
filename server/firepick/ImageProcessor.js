@@ -51,10 +51,30 @@ firepick.ImageStore = require("./ImageStore");
     /////////////// GLOBAL /////////////
     ImageProcessor.validate = function(ip) {
         describe("ImageProcessor.validate(" + ip.constructor.name + ")", function() {
-            var ref000a = {x:0, y:0, z:0, path:"test/camX0Y0Z0a.jpg" };
-            var ref000b = {x:0, y:0, z:0, path:"test/camX0Y0Z0b.jpg" };
-            var ref100 = {x:0, y:0, z:0, path:"test/camX1Y0Z0.jpg" };
-            var refDuck = {x:0, y:0, z:0, path:"test/duck.jpg" };
+            var ref000a = {
+                x: 0,
+                y: 0,
+                z: 0,
+                path: "test/camX0Y0Z0a.jpg"
+            };
+            var ref000b = {
+                x: 0,
+                y: 0,
+                z: 0,
+                path: "test/camX0Y0Z0b.jpg"
+            };
+            var ref100 = {
+                x: 0,
+                y: 0,
+                z: 0,
+                path: "test/camX1Y0Z0.jpg"
+            };
+            var refDuck = {
+                x: 0,
+                y: 0,
+                z: 0,
+                path: "test/duck.jpg"
+            };
             describe("validating calcOffset", function() {
                 it("should show zero offset for two images at same location", function() {
                     var result = ip.calcOffset(ref000a, ref000b);

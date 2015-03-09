@@ -14,7 +14,7 @@ function isNumeric(obj) {
 (function(firepick) {
     function ImageStore(camera, options) {
         var that = this;
-		options = options || {};
+        options = options || {};
         that.camera = camera || new firepick.Camera();
         that.images = options.images || {};
         that.path = options.path || os.tmpDir();
@@ -42,25 +42,27 @@ function isNumeric(obj) {
     };
     ImageStore.prototype.peek = function(imgRef) {
         var that = this;
-		if (imgRef == null) { return null; }
+        if (imgRef == null) {
+            return null;
+        }
         var key = firepick.ImageRef.keyOf(imgRef);
         return that.images[key];
     }
     ImageStore.prototype.load = function(imgRef, srcPath) {
-		should.exist(imgRef);
+        should.exist(imgRef);
         var that = this;
         var key = firepick.ImageRef.keyOf(imgRef);
-		var theRef = that.images[key];
-		if (theRef == null) {
-			theRef = firepick.ImageRef.copy(imgRef);
-			that.images[key] = theRef;
-			theRef.path = that.prefix + key + that.suffix;
-		}
-		if (srcPath != null) {
-			should(srcPath).be.a.String;
-			fs.writeFileSync(theRef.path, fs.readFileSync(srcPath));
-		}
-		return theRef;
+        var theRef = that.images[key];
+        if (theRef == null) {
+            theRef = firepick.ImageRef.copy(imgRef);
+            that.images[key] = theRef;
+            theRef.path = that.prefix + key + that.suffix;
+        }
+        if (srcPath != null) {
+            should(srcPath).be.a.String;
+            fs.writeFileSync(theRef.path, fs.readFileSync(srcPath));
+        }
+        return theRef;
     }
     ImageStore.prototype.capture = function(imgRef) {
         var that = this;
@@ -82,37 +84,75 @@ function isNumeric(obj) {
                 var parse123 = imgStore.parseImageRef(path123);
                 should.equal(0, firepick.ImageRef.compare(parse123, ref123));
             });
-			it("load(imgRef, srcPath) should store an external image and return its ImageRef", function() {
-				var srcPath = "test/camX0Y0Z0a.jpg";
-				var imgRef = {x:1,y:2,z:3,tag:"test-load", version:1};
-				var theRef = imgStore.load(imgRef, srcPath);
-				should(theRef).have.properties(imgRef);
-				var key = firepick.ImageRef.keyOf(imgRef);
-				should(theRef.path).equal(imgStore.prefix + key + imgStore.suffix);
-				should.ok(theRef.exists());
-			});
-			it("load(imgRef) should register an ImageRef that can be loaded later", function() {
-				var srcPath = "test/camX0Y0Z0a.jpg";
-				var imgRef = {x:1,y:2,z:3,tag:"test-load", version:2};
-				var theRef = imgStore.load(imgRef);
-				should.exist(theRef);
-				var theRef2 = imgStore.load(imgRef, srcPath);
-				should.equal(theRef2, theRef);
-				should.ok(theRef.exists());
-			});
-			it("peek(imgRef) should return the stored ImageRef or null", function() {
-				var ref123 = imgStore.peek({x:1,y:2,z:3,tag:"test-load", version:1});
-				should(ref123).have.properties(ref123);
-				var refBad = imgStore.peek({x:1,y:2,z:3,tag:"test-load", version:911});
-				should.ok(refBad == null);
+            it("load(imgRef, srcPath) should store an external image and return its ImageRef", function() {
+                var srcPath = "test/camX0Y0Z0a.jpg";
+                var imgRef = {
+                    x: 1,
+                    y: 2,
+                    z: 3,
+                    tag: "test-load",
+                    version: 1
+                };
+                var theRef = imgStore.load(imgRef, srcPath);
+                should(theRef).have.properties(imgRef);
+                var key = firepick.ImageRef.keyOf(imgRef);
+                should(theRef.path).equal(imgStore.prefix + key + imgStore.suffix);
+                should.ok(theRef.exists());
+            });
+            it("load(imgRef) should register an ImageRef that can be loaded later", function() {
+                var srcPath = "test/camX0Y0Z0a.jpg";
+                var imgRef = {
+                    x: 1,
+                    y: 2,
+                    z: 3,
+                    tag: "test-load",
+                    version: 2
+                };
+                var theRef = imgStore.load(imgRef);
+                should.exist(theRef);
+                var theRef2 = imgStore.load(imgRef, srcPath);
+                should.equal(theRef2, theRef);
+                should.ok(theRef.exists());
+            });
+            it("peek(imgRef) should return the stored ImageRef or null", function() {
+                var ref123 = imgStore.peek({
+                    x: 1,
+                    y: 2,
+                    z: 3,
+                    tag: "test-load",
+                    version: 1
+                });
+                should(ref123).have.properties(ref123);
+                var refBad = imgStore.peek({
+                    x: 1,
+                    y: 2,
+                    z: 3,
+                    tag: "test-load",
+                    version: 911
+                });
+                should.ok(refBad == null);
 
-			});
-			it("peek(imgRef) should return unique, client-mutable ImageRef", function() {
-				var ref123 = imgStore.peek({x:1,y:2,z:3,tag:"test-load", version:1});
-				ref123.color = "pink";
-				var ref123_again = imgStore.peek({x:1,y:2,z:3,tag:"test-load", version:1});
-				should(ref123_again).have.properties({color:"pink"});
-			});
+            });
+            it("peek(imgRef) should return unique, client-mutable ImageRef", function() {
+                var ref123 = imgStore.peek({
+                    x: 1,
+                    y: 2,
+                    z: 3,
+                    tag: "test-load",
+                    version: 1
+                });
+                ref123.color = "pink";
+                var ref123_again = imgStore.peek({
+                    x: 1,
+                    y: 2,
+                    z: 3,
+                    tag: "test-load",
+                    version: 1
+                });
+                should(ref123_again).have.properties({
+                    color: "pink"
+                });
+            });
         });
     };
 
