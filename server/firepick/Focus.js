@@ -36,8 +36,10 @@ Util = require("./Util");
             var z = generation[i];
 			zTotal += z;
         }
+		var zAvgGen = zTotal / generation.length;	// generation average
+		// zAvg = exponential average of average generation z
 		var w = 0.8;
-		that.zAvg = w*(zTotal/generation.length) + (1-w)*(that.zAvg||(that.zMin+that.zMax)/2);
+		that.zAvg = w*zAvgGen + (1-w)*(that.zAvg||(that.zMin+that.zMax)/2);	
         console.log(index + ": " + JSON.stringify(generation) + " zAvg:" + that.zAvg);
         var zFirst = generation[0];
         var zLast = generation[generation.length - 1];
