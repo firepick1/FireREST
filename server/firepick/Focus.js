@@ -52,26 +52,26 @@ Util = require("./Util");
 			}
 			console.log("zLow:" + zLast);
 		}
-        var done = false;
-		if (!done && index >= that.maxGenerations) {
-			done = true;
-			console.log("STATUS	: Focus.calcSharpestZ exceeded " + 
-				that.maxGenerations + " generations => " + zFirst);
+		var doneMsg;
+		if (doneMsg == null && index >= that.maxGenerations) {
+			doneMsg = "exceeded " + that.maxGenerations + " generations";
 		}
-        if (!done && index > 1 && zDiff <= 1) { // candidates roughly same
-			done = true;
-			console.log("STATUS	: Focus.calcSharpestZ all solutions similar => " + zFirst);
+        if (doneMsg == null && index > 1 && zDiff <= 1) { // candidates roughly same
+			doneMsg = "all solutions similar";
 		}
         if (that.lastCandidate !== zFirst) {
             that.lastCandidate = zFirst;
             that.lastCandidateIndex = index;
         }
-		if (!done && (index - that.lastCandidateIndex >= 3)) {
-			// elite survived three generations
-			done = true;
-			console.log("STATUS	: Focus.calcSharpestZ elite survived 3 generations => " + zFirst);
+		if (doneMsg == null && (index - that.lastCandidateIndex >= 3)) {
+			doneMsg = "elite survived 3 generations";
 		}
-        return done;
+		if (doneMsg == null) {
+			return false;
+		}
+		console.log("STATUS	: Focus.calcSharpestZ " + doneMsg + 
+			" => z:" + zFirst + " sharpness:" + that.sharpness(zFirst));
+        return true;
     };
 
     Focus.prototype.generate = function(z1, z2) {
@@ -118,10 +118,16 @@ Util = require("./Util");
         var evolve = new firepick.Evolve(that, {
             nSurvivors: 5
         });
-        var guess1 = (that.zMin + that.zMax) / 2;
-        var epsilon = 0.01;
+		var z1 = Util.roundN(that.zMin + (that.zMax - that.zMin)/3, that.nPlaces);
+		var z2 = Util.roundN(that.zMin + (that.zMax - that.zMin)*2/3, that.nPlaces);
+		var guess;
+		if (that.sharpness(z1) > that.sharpness(z2)) {
+			guess = [z1, z2];
+		} else {
+			guess = [z2, z1];
+		}
         that.lastCandidateAge = 0;
-        var vSolve = evolve.solve([guess1]);
+        var vSolve = evolve.solve(guess);
         var z = vSolve[0];
         return {
             z: z,
