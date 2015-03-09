@@ -38,41 +38,47 @@ Util = require("./Util");
 		if (index === 0) {
 			that.zLow = that.zMin;
 			that.zHigh = that.zMax;
+			that.zTotal = 0;
+			that.zCount = 0;
 			console.log("");
-		} else if (zFirst < zLast) {
-			that.zHigh = zLast;	// no need to look above zLast
-			for (var i = 0; i < generation.length; i++) {
-				that.zHigh = Math.max(that.zHigh, generation[i]);
+		} else {
+				if (zFirst < zLast) {
+				that.zHigh = zLast;	// no need to look above zLast
+				for (var i = 0; i < generation.length; i++) {
+					that.zHigh = Math.max(that.zHigh, generation[i]);
+				}
+				console.log("zHigh:" + zLast);
+			} else if (zFirst > zLast) {
+				that.zLow = zLast;	// no need to look below zLast
+				for (var i = 0; i < generation.length; i++) {
+					that.zLow = Math.min(that.zLow, generation[i]);
+				}
+				console.log("zLow:" + zLast);
 			}
-			console.log("zHigh:" + zLast);
-		} else if (zFirst > zLast) {
-			that.zLow = zLast;	// no need to look below zLast
-			for (var i = 0; i < generation.length; i++) {
-				that.zLow = Math.min(that.zLow, generation[i]);
+		}
+			var doneMsg;
+			if (doneMsg == null && index >= that.maxGenerations) {
+				doneMsg = "exceeded " + that.maxGenerations + " generations";
 			}
-			console.log("zLow:" + zLast);
-		}
-		var doneMsg;
-		if (doneMsg == null && index >= that.maxGenerations) {
-			doneMsg = "exceeded " + that.maxGenerations + " generations";
-		}
-        if (doneMsg == null && index > 1 && zDiff <= 1) { // candidates roughly same
-			doneMsg = "all solutions similar";
-		}
-        if (that.lastCandidate !== zFirst) {
-            that.lastCandidate = zFirst;
-            that.lastCandidateIndex = index;
-        }
-		if (doneMsg == null && (index - that.lastCandidateIndex >= 3)) {
-			doneMsg = "elite survived 3 generations";
-		}
-		if (doneMsg == null) {
-			return false;
-		}
-		console.log("STATUS	: Focus.calcSharpestZ " + doneMsg + 
-			" => z:" + zFirst + " sharpness:" + that.sharpness(zFirst));
-        return true;
-    };
+			if (doneMsg == null && index > 1 && zDiff <= 1) { // candidates roughly same
+				doneMsg = "all solutions similar";
+			}
+			if (that.lastCandidate !== zFirst) {
+				that.lastCandidate = zFirst;
+				that.lastCandidateIndex = index;
+			}
+			if (doneMsg == null && (index - that.lastCandidateIndex >= 3)) {
+				doneMsg = "elite survived 3 generations";
+			}
+			if (doneMsg == null) {
+				return false;
+			}
+			console.log("STATUS	: Focus.calcSharpestZ " + doneMsg + 
+				" => z:" + zFirst + 
+				" zAvg:" + (that.zTotal/that.zCount) + 
+				" sharpness:" + that.sharpness(zFirst));
+			return true;
+		};
 
     Focus.prototype.generate = function(z1, z2) {
         var that = this;
@@ -105,6 +111,8 @@ Util = require("./Util");
         });
         if (!imgRef.exists() || imgRef.sharpness == null) {
             that.captureCount++;
+			that.zTotal += z;
+			that.zCount++;
             imgRef = that.xyzCam.moveTo(imgRef).capture();
             imgRef.sharpness = that.ip.sharpness(imgRef).sharpness;
             if (that.verbose) {
