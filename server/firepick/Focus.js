@@ -136,19 +136,22 @@ Util = require("./Util");
 (typeof describe === 'function') && describe("firepick.Focus", function() {
     var ip = new firepick.ImageProcessor();
     var fpd = new firepick.FPD();
+	var useMock = fpd.health() < 1;
     var mockXYZCam = new firepick.XYZCamera(); // mock images
-    var xyzCam = fpd.health() < 1 ? mockXYZCam : fpd;
+    var xyzCam = useMock ? mockXYZCam : fpd;
     var focus = new firepick.Focus(xyzCam, -110, 20);
     it("compute the sharpness at {x:0,y:0,z:0}", function() {
         var captureOld = focus.captureCount;
         var sharpness = focus.sharpness(0);
-        should(sharpness).within(278.8, 278.9);
+		if (useMock) {
+			should(sharpness).within(278.8, 278.9);
+		}
         should(focus.captureCount).equal(captureOld + 1);
     });
     it("compute the sharpness at {x:0,y:0,z:-5}", function() {
         var captureOld = focus.captureCount;
         var sharpness = focus.sharpness(-5);
-		if (fpd.health() < 1) {
+		if (useMock) {
 			should(sharpness).within(313.4, 313.5);
 		}
         should(focus.captureCount).equal(captureOld + 1);
@@ -156,7 +159,7 @@ Util = require("./Util");
     it("should only capture a coordinate once for sharpness", function() {
         var captureOld = focus.captureCount;
         var sharpness = focus.sharpness(-5);
-		if (fpd.health() < 1) {
+		if (useMock) {
 			should(sharpness).within(313.4, 313.5);
 		}
         should(focus.captureCount).equal(captureOld);
@@ -165,7 +168,7 @@ Util = require("./Util");
         this.timeout(50000);
         var captureOld = focus.captureCount;
         var result = focus.calcSharpestZ();
-		if (fpd.health() < 1) {
+		if (useMock) {
 			should(result.z).within(-20, -15);
 			should(result.sharpness).within(338.6, 338.7);
 		}
