@@ -80,7 +80,7 @@ Util = require("./Util");
         }
         console.log("STATUS	: Focus.calcSharpestZ " + doneMsg +
             " => z:" + zFirst +
-            " zAvg:" + (that.zTotal / that.zCount) +
+            " zAvg:" + that.zAvg +
             " sharpness:" + that.sharpness(zFirst));
         return true;
     };
