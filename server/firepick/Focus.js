@@ -71,8 +71,8 @@ Util = require("./Util");
                 console.log("zLow:" + zLast);
             }
         }
-        var imgRef = that.imageRefAtZ(zFirst);
-		delete imgRef.sharpness; // re-assess elite sharpness
+        //var imgRef = that.imageRefAtZ(zFirst);
+		//delete imgRef.sharpness; // re-assess elite sharpness
         var doneMsg;
         if (doneMsg == null && index >= that.maxGenerations) {
             doneMsg = "exceeded " + that.maxGenerations + " generations";
