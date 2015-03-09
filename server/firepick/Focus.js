@@ -145,14 +145,14 @@ Util = require("./Util");
         });
         var z1 = Util.roundN(that.zMin + (that.zMax - that.zMin) / 3, that.nPlaces);
         var z2 = Util.roundN(that.zMin + (that.zMax - that.zMin) * 2 / 3, that.nPlaces);
+		that.zSharpSum = 0;
+		that.sharpSum = 0;
         var guess;
         if (that.sharpness(z1) > that.sharpness(z2)) {
             guess = [z1, z2];
         } else {
             guess = [z2, z1];
         }
-		that.zSharpSum = 0;
-		that.sharpSum = 0;
         that.lastCandidateAge = 0;
         var vSolve = evolve.solve(guess);
         var z = vSolve[0];
