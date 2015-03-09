@@ -85,13 +85,8 @@ function isNumeric(obj) {
                 tag: "test",
                 version: 1
             });
-            it("should implement pathOf", function() {
-                var path123 = imgStore.pathOf(ref123);
-                should(path123.indexOf("_1_2_3")).above(-1);
-                should(path.basename(path123)).equal(imgStore.prefix + "_1_2_3#test_1" + imgStore.suffix);
-            });
             it("should parse an ImageREf from a path", function() {
-                var path123 = imgStore.pathOf(ref123);
+                var path123 = imgStore.load(ref123).path;
                 var parse123 = imgStore.parseImageRef(path123);
                 should.equal(0, firepick.ImageRef.compare(parse123, ref123));
             });

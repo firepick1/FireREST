@@ -13,7 +13,7 @@ module.exports = function(grunt) {
                 },
                 src: ['server/firepick/*.js']
                 //src: ['server/firepick/XYZCamera.js','server/firepick/FPD.js']
-                //src: ['server/firepick/ImageStore.js']
+                //src: ['server/firepick/ImageProcessor.js']
             }
         },
         pkg: grunt.file.readJSON('package.json'),

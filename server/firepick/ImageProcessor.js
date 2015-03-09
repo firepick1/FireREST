@@ -32,47 +32,29 @@ firepick.ImageStore = require("./ImageStore");
     ImageProcessor.prototype.health = function() {
         return this.imgStore.health();
     };
-    ImageProcessor.prototype.pathOf = function(imgRef) {
-        return imgRef.path || this.imgStore.pathOf(imgRef);
-    }
     ImageProcessor.prototype.calcOffset = function(imgRef1, imgRef2) {
-        var jout = firesight_cmd(this.pathOf(imgRef1), "calcOffset.json",
-            "-Dtemplate=" + this.pathOf(imgRef2));
+        var jout = firesight_cmd(imgRef1.path, "calcOffset.json",
+            "-Dtemplate=" + imgRef2.path);
         return jout.result.channels['0'];
     };
     ImageProcessor.prototype.meanStdDev = function(imgRef) {
-        return firesight_cmd(this.pathOf(imgRef), "meanStdDev.json").result;
+        return firesight_cmd(imgRef.path, "meanStdDev.json").result;
     };
     ImageProcessor.prototype.sharpness = function(imgRef) {
-        return firesight_cmd(this.pathOf(imgRef), "sharpness.json").result;
+        return firesight_cmd(imgRef.path, "sharpness.json").result;
     };
     ImageProcessor.prototype.PSNR = function(imgRef1, imgRef2) {
-        return firesight_cmd(this.pathOf(imgRef1), "PSNR.json",
-            "-Dpath=" + this.pathOf(imgRef2)).result;
+        return firesight_cmd(imgRef1.path, "PSNR.json",
+            "-Dpath=" + imgRef2.path).result;
     };
 
     /////////////// GLOBAL /////////////
     ImageProcessor.validate = function(ip) {
         describe("ImageProcessor.validate(" + ip.constructor.name + ")", function() {
-            var ref000a = new firepick.ImageRef(0, 0, 0, {
-                tag: "a",
-                src: "test/camX0Y0Z0a.jpg"
-            });
-            var ref000b = new firepick.ImageRef(0, 0, 0, {
-                tag: "b",
-                src: "test/camX0Y0Z0b.jpg"
-            });
-            var ref100 = new firepick.ImageRef(1, 0, 0, {
-                src: "test/camX1Y0Z0.jpg"
-            });
-            var refDuck = new firepick.ImageRef(0, 0, 0, {
-                tag: "duck",
-                src: "test/duck.jpg"
-            });
-            ip.imgStore.load(ref000a, ref000a.src);
-            ip.imgStore.load(ref000b, ref000b.src);
-            ip.imgStore.load(ref100, ref100.src);
-            ip.imgStore.load(refDuck, refDuck.src);
+            var ref000a = {x:0, y:0, z:0, path:"test/camX0Y0Z0a.jpg" };
+            var ref000b = {x:0, y:0, z:0, path:"test/camX0Y0Z0b.jpg" };
+            var ref100 = {x:0, y:0, z:0, path:"test/camX1Y0Z0.jpg" };
+            var refDuck = {x:0, y:0, z:0, path:"test/duck.jpg" };
             describe("validating calcOffset", function() {
                 it("should show zero offset for two images at same location", function() {
                     var result = ip.calcOffset(ref000a, ref000b);

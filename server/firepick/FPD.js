@@ -34,15 +34,15 @@ firepick.XYZCamera = require("./XYZCamera");
     function imageFileNames(fpd, imgRef1, imgRef2) {
         should.exist(imgRef1); // expected one or two images
         return [
-            imgRef2 == null ? fpd.camera().path : fpd.pathOf(imgRef1),
-            imgRef2 == null ? fpd.pathOf(imgRef1) : fpd.pathOf(imgRef2)
+            imgRef2 == null ? fpd.camera().path : imgRef1.path,
+            imgRef2 == null ? imgRef1.path : imgRef2.path
         ];
     }
 
     ///////////////// INSTANCE //////////////////////
     FPD.prototype.imgPath = function(imgRef) {
         var that = this;
-        return imgRef == null ? that.camera().path : that.pathOf(imgRef);
+        return imgRef == null ? that.camera().path : imgRef.path;
     };
     FPD.prototype.home = function() {
         var that = this;
@@ -69,10 +69,6 @@ firepick.XYZCamera = require("./XYZCamera");
     FPD.prototype.imageProcessor = function() {
         var that = this;
         return that.$imgProc;
-    };
-    FPD.prototype.pathOf = function(imgRef) {
-        var that = this;
-        return that.$imgStore.pathOf(imgRef);
     };
     FPD.prototype.imageRef = function(imgRef) {
         var that = this;
