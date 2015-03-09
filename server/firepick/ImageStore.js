@@ -14,26 +14,18 @@ function isNumeric(obj) {
 (function(firepick) {
     function ImageStore(camera, options) {
         var that = this;
+		options = options || {};
         that.camera = camera || new firepick.Camera();
-        that.images = options && options.images || {};
-        that.path = options && options.path || os.tmpDir();
-        that.prefix = options && options.prefix || "ImageStore";
-        that.suffix = options && options.suffix || ".jpg";
+        that.images = options.images || {};
+        that.path = options.path || os.tmpDir();
+        that.prefix = path.join(that.path, options.prefix || "ImageStore");
+        that.suffix = options.suffix || ".jpg";
         return that;
     };
     /////////////// INSTANCE ////////////
     ImageStore.prototype.health = function() {
         var that = this;
         return that.camera.health();
-    };
-    ImageStore.prototype.pathOf = function(imgRef) {
-        var that = this;
-        if (imgRef) {
-            var name = that.prefix + firepick.ImageRef.keyOf(imgRef) + that.suffix;
-            return path.join(os.tmpDir(), name);
-        } else {
-            return that.camera.path;
-        }
     };
     ImageStore.prototype.parseImageRef = function(path) {
         var that = this;
