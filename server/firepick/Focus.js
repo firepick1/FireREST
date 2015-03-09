@@ -42,13 +42,13 @@ Util = require("./Util");
 			sharpSum += sz;
         }
 		var zAvgGen = zTotal / generation.length;	// generation average
-		var zAvgSharpGen = zSharpSum / sharpSum;	// generation sharpness weighted average
+		var zSharpAvgGen = zSharpSum / sharpSum;	// generation sharpness weighted average
 		// zAvg = exponential average of average generation z
 		var w = 0.8;
 		that.zAvg = w*zAvgGen + (1-w)*(that.zAvg||(that.zMin+that.zMax)/2);	
-		that.zSharpAvg = w*zAvgSharpGen + (1-w)*(that.zAvgSharp||(that.zMin+that.zMax)/2);
+		that.zSharpAvg = w*zSharpAvgGen + (1-w)*(that.zAvgSharp||(that.zMin+that.zMax)/2);
         console.log(index + ": " + JSON.stringify(generation) + 
-			" zAvg:" + that.zAvg + " zSharpAvg:" + that.zSharpAvg);
+			" zAvgGen:" + that.zAvgGen + " zSharpAvgGen:" + that.zSharpAvgGen);
         var zFirst = generation[0];
         var zLast = generation[generation.length - 1];
         var zDiff = Math.abs(zLast - zFirst);
@@ -91,6 +91,7 @@ Util = require("./Util");
         console.log("STATUS	: Focus.calcSharpestZ " + doneMsg +
             " => z:" + zFirst +
             " zAvg:" + that.zAvg +
+            " zAvgSharp:" + that.zAvgSharp +
             " sharpness:" + that.sharpness(zFirst));
         return true;
     };
