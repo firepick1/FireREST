@@ -48,7 +48,7 @@ Util = require("./Util");
 		if (that.verbose) {
 			var msg = "Focus	: GEN_" + index + " " + JSON.stringify(generation);
 			if (generation.length >= 3) {
-				zGuess = that.polyFit(generation[0],generation[1],generation[3]);
+				zGuess = that.polyFit(generation[0],generation[1],generation[2]);
 				msg += " zGuess:" + that.round(zGuess);
 			}
 			console.log(msg);
