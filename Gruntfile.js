@@ -5,8 +5,9 @@ module.exports = function(grunt) {
         mochaTest: {
             test: {
                 options: {
-                    //reporter: 'list',
-                    reporter: 'dot',
+                    //reporter:'list',
+                    //reporter:'dot',
+					reporter:'min',
                     captureFile: 'results.txt',
                     quiet: true,
                     clearRequireCache: true

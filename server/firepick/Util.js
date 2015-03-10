@@ -26,6 +26,10 @@ var should = require("should"),
         return id;
     }
     Util.roundN = function(value, places) {
+		places = places || 0;
+		if (places === 0) {
+			return Math.round(value);
+		}
         return +(Math.round(value + "e+" + places) + "e-" + places);
     };
 
