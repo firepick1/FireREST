@@ -44,8 +44,14 @@ Util = require("./Util");
 	};
     Focus.prototype.isDone = function(index, generation) {
         var that = this;
+		var zGuess;
 		if (that.verbose) {
-			console.log("Focus	: GEN_" + index + " " + JSON.stringify(generation));
+			var msg = "Focus	: GEN_" + index + " " + JSON.stringify(generation);
+			if (generation.length >= 3) {
+				zGuess = that.polyFit(generation[0],generation[1],generation[3]);
+				msg += " zGuess:" + that.round(zGuess);
+			}
+			console.log(msg);
 		}
         var zFirst = generation[0];
         var zLast = generation[generation.length - 1];
@@ -70,14 +76,14 @@ Util = require("./Util");
         if (that.doneMsg == null && index >= that.maxGenerations) {
             that.doneMsg = "exceeded " + that.maxGenerations + " generations";
         }
-        if (that.doneMsg == null && index > 1 && zDiff <= that.tolerance) { // candidates roughly same
+        if (that.doneMsg == null && zGuess != null && zDiff <= that.tolerance) { // candidates roughly same
             that.doneMsg = "|zWorst-zBest| <= " + that.tolerance;
         }
         if (that.lastCandidate !== zFirst) {
             that.lastCandidate = zFirst;
             that.lastCandidateIndex = index;
         }
-        if (that.doneMsg == null && (index - that.lastCandidateIndex >= 3)) {
+        if (that.doneMsg == null && zGuess != null && (index - that.lastCandidateIndex >= 3)) {
             that.doneMsg = "elite survived 3 generations";
         }
 		return that.doneMsg != null;
@@ -123,17 +129,22 @@ Util = require("./Util");
             that.captureCount++;
             imgRef = that.xyzCam.moveTo(imgRef).capture();
             imgRef.sharpness = that.ip.sharpness(imgRef).sharpness;
-			that.zSharpSum = (that.zSharpSum||0) + z * imgRef.sharpness;
-			that.sharpSum = (that.sharpSum||0) + imgRef.sharpness;
 			that.samples.push(imgRef.z);
             if (that.verbose) {
                 console.log("Focus	:   IMG" + that.captureCount + "(" + z + ")" + 
-					" sharp:" + that.round(imgRef.sharpness) + 
-					" zSharpAvg:" + that.round(that.zSharpSum/that.sharpSum));
+					" sharp:" + that.round(imgRef.sharpness));
             }
         }
         return imgRef.sharpness;
     };
+	Focus.prototype.polyFit = function(z1,z2,z3) {
+        var that = this;
+		return Util.criticalPoints([
+				{x:z1, y:that.sharpness(z1)},
+				{x:z2, y:that.sharpness(z2)},
+				{x:z3, y:that.sharpness(z3)},
+			])[0];
+	};
     Focus.prototype.calcSharpestZ = function() {
         var that = this;
         var evolve = new Evolve(that, {
@@ -141,8 +152,6 @@ Util = require("./Util");
         });
         var z1 = that.round(that.zMin + (that.zMax - that.zMin) / 3, that.nPlaces);
         var z2 = that.round(that.zMin + (that.zMax - that.zMin) * 2 / 3, that.nPlaces);
-		that.zSharpSum = 0;
-		that.sharpSum = 0;
 		that.samples = [];
         var guess;
         if (that.sharpness(z1) > that.sharpness(z2)) {
@@ -154,11 +163,7 @@ Util = require("./Util");
         var vSolve = evolve.solve(guess);
         that.samples.sort();
         var zBest = vSolve[0];
-		var zPolyFit = Util.criticalPoints([
-				{x:zBest-that.dzPolyFit, y:that.sharpness(zBest-that.dzPolyFit)},
-				{x:zBest, y:that.sharpness(zBest)},
-				{x:zBest+that.dzPolyFit, y:that.sharpness(zBest+that.dzPolyFit)},
-			])[0];
+		var zPolyFit = that.polyFit(zBest-that.dzPolyFit, zBest, zBest+that.dzPolyFit);
 		if (that.verbose) {
 			console.log("Focus	: calcSharpestZ() " + that.doneMsg +
 				" zBest:" + that.round(zBest) +
@@ -168,7 +173,6 @@ Util = require("./Util");
         return {
             zBest: zBest,
 			zPolyFit: zPolyFit,
-			zSharpAvg: that.zSharpSum / that.sharpSum,
 			samples:that.samples
         };
     };
