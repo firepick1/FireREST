@@ -21,6 +21,7 @@ Util = require("./Util");
         that.zMax = zMax;
         that.nPlaces = options.nPlaces || 0;
         that.maxGenerations = options.maxGenerations || 20;
+		that.tolerance = options.tolerance || 1;
 		that.samples = [];
         should(that.nPlaces).not.below(0);
         that.captureCount = 0;
@@ -52,7 +53,7 @@ Util = require("./Util");
 		var w = 0.8;
 		that.zAvg = w*zAvgGen + (1-w)*(that.zAvg||(that.zMin+that.zMax)/2);	
 		that.zSharpAvg = w*zSharpAvgGen + (1-w)*(that.zSharpAvg||(that.zMin+that.zMax)/2);
-        console.log("Focus	: " + index + ": " + JSON.stringify(generation) + 
+        console.log("Focus	: GEN_" + index + " " + JSON.stringify(generation) + 
 			" zAvgGen:" + that.round(zAvgGen) +
 			" zSharpAvgGen:" + that.round(zSharpAvgGen) );
         var zFirst = generation[0];
@@ -61,7 +62,6 @@ Util = require("./Util");
         if (index === 0) {
             that.zLow = that.zMin;
             that.zHigh = that.zMax;
-            console.log("");
         } else {
             if (zFirst < zLast) {
                 that.zHigh = zLast; // no need to look above zLast
@@ -79,7 +79,7 @@ Util = require("./Util");
         if (doneMsg == null && index >= that.maxGenerations) {
             doneMsg = "exceeded " + that.maxGenerations + " generations";
         }
-        if (doneMsg == null && index > 1 && zDiff <= 1) { // candidates roughly same
+        if (doneMsg == null && index > 1 && zDiff <= that.tolerance) { // candidates roughly same
             doneMsg = "all solutions similar";
         }
         if (that.lastCandidate !== zFirst) {
@@ -140,12 +140,12 @@ Util = require("./Util");
             that.captureCount++;
             imgRef = that.xyzCam.moveTo(imgRef).capture();
             imgRef.sharpness = that.ip.sharpness(imgRef).sharpness;
-			that.zSharpSum += z * imgRef.sharpness;
-			that.sharpSum += imgRef.sharpness;
+			that.zSharpSum = (that.zSharpSum||0) + z * imgRef.sharpness;
+			that.sharpSum = (that.sharpSum||0) + imgRef.sharpness;
 			that.samples.push(imgRef.z);
             if (that.verbose) {
-                console.log("Focus	: sharpness#" + that.captureCount + "(" + z + ") " + 
-				that.round(imgRef.sharpness) + 
+                console.log("Focus	: capture#" + that.captureCount + "(" + z + ")" + 
+					" sharp:" + that.round(imgRef.sharpness) + 
 					" zSharpAvg:" + that.round(that.zSharpSum/that.sharpSum));
             }
         }
