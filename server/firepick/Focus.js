@@ -76,14 +76,14 @@ Util = require("./Util");
         if (that.doneMsg == null && index >= that.maxGenerations) {
             that.doneMsg = "exceeded " + that.maxGenerations + " generations";
         }
-        if (that.doneMsg == null && zGuess != null && zDiff <= that.tolerance) { // candidates roughly same
+        if (that.doneMsg == null && zGuess && zDiff <= that.tolerance) { // candidates roughly same
             that.doneMsg = "|zWorst-zBest| <= " + that.tolerance;
         }
-        if (that.lastCandidate !== zFirst) {
-            that.lastCandidate = zFirst;
-            that.lastCandidateIndex = index;
+        if (that.zFirstPrev !== zFirst) {
+            that.zFirstPrev = zFirst;
+            that.zFirstPrevIndex = index;
         }
-        if (that.doneMsg == null && zGuess != null && (index - that.lastCandidateIndex >= 3)) {
+        if (that.doneMsg == null && zGuess && (index - that.zFirstPrevIndex+1 >= that.eliteAge)) {
             that.doneMsg = "elite survived 3 generations";
         }
 		return that.doneMsg != null;
@@ -139,33 +139,38 @@ Util = require("./Util");
     };
 	Focus.prototype.polyFit = function(z1,z2,z3) {
         var that = this;
-		return Util.criticalPoints([
-				{x:z1, y:that.sharpness(z1)},
-				{x:z2, y:that.sharpness(z2)},
-				{x:z3, y:that.sharpness(z3)},
-			])[0];
+		var pts =[
+			{x:z1, y:that.sharpness(z1)},
+			{x:z2, y:that.sharpness(z2)},
+			{x:z3, y:that.sharpness(z3)},
+		];
+		if (pts[0].y === pts[1].y && pts[0].y === pts[2].y) { // flat
+			return (z1+z2+z3)/3;
+		}
+		return Util.criticalPoints(pts)[0];
 	};
-    Focus.prototype.calcSharpestZ = function() {
+    Focus.prototype.sharpestZ = function() {
         var that = this;
         var evolve = new Evolve(that, {
             nSurvivors: 4
         });
-        var z1 = that.round(that.zMin + (that.zMax - that.zMin) / 3, that.nPlaces);
-        var z2 = that.round(that.zMin + (that.zMax - that.zMin) * 2 / 3, that.nPlaces);
+		var zDomain = that.zMax - that.zMin;
+		var guess = [
+			//that.round(that.zMin + zDomain * 1 / 5, that.nPlaces),
+			//that.round(that.zMin + zDomain * 2 / 5, that.nPlaces),
+			Util.roundN(that.zMin + zDomain * 1 / 3, that.nPlaces),
+			Util.roundN(that.zMin + zDomain * 1 / 2, that.nPlaces),
+			Util.roundN(that.zMin + zDomain * 2 / 3, that.nPlaces),
+			//that.round(that.zMin + zDomain * 3 / 5, that.nPlaces),
+			//that.round(that.zMin + zDomain * 4 / 5, that.nPlaces),
+		];
 		that.samples = [];
-        var guess;
-        if (that.sharpness(z1) > that.sharpness(z2)) {
-            guess = [z1, z2];
-        } else {
-            guess = [z2, z1];
-        }
-        that.lastCandidateAge = 0;
         var vSolve = evolve.solve(guess);
         that.samples.sort();
         var zBest = vSolve[0];
 		var zPolyFit = that.polyFit(zBest-that.dzPolyFit, zBest, zBest+that.dzPolyFit);
 		if (that.verbose) {
-			console.log("Focus	: calcSharpestZ() " + that.doneMsg +
+			console.log("Focus	: sharpestZ() " + that.doneMsg +
 				" zBest:" + that.round(zBest) +
 				" zPolyFit:" + that.round(zPolyFit) +
 				"");
@@ -188,7 +193,7 @@ Util = require("./Util");
     var mockXYZCam = new firepick.XYZCamera(); // mock images
     var xyzCam = useMock ? mockXYZCam : fpd;
     var focus = new firepick.Focus(xyzCam, -110, 20);
-    it("compute the sharpness at {x:0,y:0,z:0}", function() {
+    it("sharpness(0) should compute the sharpness at {x:0,y:0,z:0}", function() {
         var captureOld = focus.captureCount;
         var sharpness = focus.sharpness(0);
         if (useMock) {
@@ -196,7 +201,7 @@ Util = require("./Util");
         }
         should(focus.captureCount).equal(captureOld + 1);
     });
-    it("compute the sharpness at {x:0,y:0,z:-5}", function() {
+    it("sharpness(-5) should capture an image at (0,0,-5) and return its sharpness", function() {
         var captureOld = focus.captureCount;
         var sharpness = focus.sharpness(-5);
         if (useMock) {
@@ -204,7 +209,7 @@ Util = require("./Util");
         }
         should(focus.captureCount).equal(captureOld + 1);
     });
-    it("should only capture a coordinate once for sharpness", function() {
+    it("sharpness(-5) should only capture a coordinate once for sharpness", function() {
         var captureOld = focus.captureCount;
         var sharpness = focus.sharpness(-5);
         if (useMock) {
@@ -212,13 +217,13 @@ Util = require("./Util");
         }
         should(focus.captureCount).equal(captureOld);
     });
-    it("should calculate the Z-axis coordinate with the sharpest images", function() {
-		var epsilon = 0.0000001;
+    it("sharpestZ() should calculate the Z-axis coordinate with the sharpest focus", function() {
+		var epsilon = 0.3;
         this.timeout(50000);
         var captureOld = focus.captureCount;
-        var result = focus.calcSharpestZ();
+        var result = focus.sharpestZ();
         if (useMock) {
-            should(result.zBest).equal(-19);
+            should(result.zBest).within(-19,-18);
             should(result.zPolyFit).within(-17-epsilon,-17+epsilon);
         }
         should(focus.captureCount - captureOld).below(50);

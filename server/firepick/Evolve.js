@@ -59,6 +59,9 @@ var should = require("should"),
     Evolve.prototype.solve = function(generation) {
         var that = this;
         that.generation = generation;
+        that.generation.sort(function(a, b) {
+            return that.solver.compare.call(that.solver, a, b);
+        });
         for (that.iGeneration = 0;
             (that.status = that.solver.isDone(that.iGeneration, that.generation)) === false; that.iGeneration++) {
             that.generation = that.evolve1(that.generation);
