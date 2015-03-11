@@ -12,9 +12,10 @@ var should = require("should"),
         solver.compare.should.be.a.Function;
         solver.isDone.should.be.a.Function;
         that.solver = solver;
-        that.nElite = options.nElite || 1;
-        should(that.nElite).not.below(1);
+        that.nElites = options.nElites || 1;
+        should(that.nElites).not.below(1);
         that.nSurvivors = options.nSurvivors || 10;
+		that.nFamilies = options.nFamilies || that.nSurvivors;
         should(that.nSurvivors).not.below(1);
         that.verbose = options.verbose == null ? false : options.verbose;
         that.generation = [];
@@ -28,15 +29,15 @@ var should = require("should"),
         var generation1 = generation ? generation : that.generation;
         var generation2 = [];
         var variantMap = {};
-        for (var i = 0; i < Math.min(generation.length, that.nElite); i++) {
+        for (var i = 0; i < Math.min(generation.length, that.nElites); i++) {
             var c = generation1[i];
             var key = JSON.stringify(c);
             if (!variantMap[key]) {
                 variantMap[key] = c;
-                generation2.push(c);
             }
+			generation2.push(c);
         }
-        for (var iv1 = 0; iv1 < generation1.length; iv1++) {
+        for (var iv1 = 0; iv1 < Math.min(generation1.length,that.nFamilies); iv1++) {
             var v = generation1[iv1];
             var iv2 = Math.round(Math.random() * 7919) % Math.min(generation.length, that.nSurvivors);
             var parent1 = generation[Math.min(iv1, iv2)];
@@ -154,7 +155,7 @@ var demo = demo || {};
             evolve = new firepick.Evolve(solver, options);
             should(evolve).have.properties({
                 verbose: false,
-                nElite: 1,
+                nElites: 1,
                 nSurvivors: 10
             });
         });
