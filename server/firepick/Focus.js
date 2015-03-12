@@ -24,13 +24,6 @@ Maximizer = require("./Maximizer");
         that.zMax = zMax;
         that.nPlaces = options.nPlaces || 0;
         should(that.nPlaces).not.below(0);
-        that.maxGen = options.maxGen || 30;
-		that.nSurvivors = options.nSurvivors || 4;
-		that.nFamilies = options.nFamilies || 1;
-		that.tolerance = options.tolerance || 1;
-		that.bestAge = options.bestAge || 10;
-		that.stableAge = options.stableAge || 5;
-		that.dzPolyFit = options.dzPolyFit || 3;
 		that.logLevel = options.logLevel || "info";
         that.logTrace = that.logLevel === "trace";
         that.logDebug = that.logTrace || that.logLevel == "debug";
@@ -56,7 +49,7 @@ Maximizer = require("./Maximizer");
             z: z
         });
 	};
-	Focus.prototype.evaluate = function(z) {
+	Focus.prototype.evaluate = function(z) { // for Maximizer
         var that = this;
 		return that.sharpness(z);
 	};
@@ -150,6 +143,6 @@ Maximizer = require("./Maximizer");
             should(result.zPolyFit).within(-19-epsilon,-16+epsilon);
             should(result.zPolyFitAvg).within(-19-epsilon,-16+epsilon);
         }
-        should(focus.captureCount - captureOld).below(50);
+        should(focus.captureCount - captureOld).below(30);
     });
 });
