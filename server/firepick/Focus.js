@@ -24,11 +24,12 @@ Util = require("./Util");
         that.nPlaces = options.nPlaces || 0;
         should(that.nPlaces).not.below(0);
         that.maxGen = options.maxGen || 30;
-		that.nBreeders = options.nBreeders || 6;
+		that.nSurvivors = options.nSurvivors || 4;
 		that.nFamilies = options.nFamilies || 1;
-		that.nElites = options.nElites || (that.nBreeders);
+		that.nElites = options.nElites || (that.nSurvivors);
 		that.tolerance = options.tolerance || 1;
-		that.eliteAge = options.eliteAge || 8;
+		that.eliteAge = options.eliteAge || 10;
+		that.stableAge = options.stableAge || 5;
 		that.dzPolyFit = options.dzPolyFit || 3;
         that.verbose = options.verbose == null ? true : options.verbose;
 
@@ -45,38 +46,45 @@ Util = require("./Util");
 		nPlaces.should.be.equal(1);
 		return Util.roundN(value, nPlaces); // reporting precision
 	};
-    Focus.prototype.isDone = function(iGen, curGen) {
+    Focus.prototype.isDone = function(iGen, curGen, rejects) {
         var that = this;
         var zBest = curGen[0];
         var zWorst = curGen[curGen.length - 1];
         var zDiff = Math.abs(zWorst - zBest);
-		var zPolyFit;
-		if (curGen.length >= 3 && zDiff <= 2*that.dzPolyFit) {
-			var dz = that.dzPolyFit;
-			zPolyFit = that.polyFit(zBest-dz, zBest, zBest+dz);
-		}
-		if (that.verbose) {
-			var msg = "Focus	: GEN_" + iGen + ":" + JSON.stringify(curGen);
-			msg += zPolyFit && " zPolyFit:" + that.round(zPolyFit) || "";
-			msg += " z:[" + that.zLow + "," + that.zHigh+"]";
-			console.log(msg);
-		}
         if (iGen === 0) {
             that.zLow = that.zMin;
             that.zHigh = that.zMax;
-        } else {
-            if (zBest < zWorst) {
-                that.zHigh = zWorst; // no need to look above zWorst
-                for (var i = 0; i < curGen.length; i++) {
-                    that.zHigh = Math.max(that.zHigh, curGen[i]);
-                }
-            } else if (zBest > zWorst) {
-				that.zLow = zWorst; // no need to look below zWorst
-                for (var i = 0; i < curGen.length; i++) {
-                    that.zLow = Math.min(that.zLow, curGen[i]);
-                }
-            }
+		} else {
+			var zMin = zBest;
+			var zMax = zBest;
+            for (var i = 0; i < curGen.length; i++) {
+				zMin = Math.min(zMin, curGen[i]);
+				zMax = Math.max(zMax, curGen[i]);
+			}
+			if (zBest < zWorst) {
+				that.zHigh = Math.min(that.zHigh, zMax);
+			} else {
+				that.zLow = Math.max(that.zLow, zMin);
+			}
+			for (var i = 0; i < rejects.length; i++) {
+				if (zMax < rejects[i] &&  rejects[i] < that.zHigh) {
+					that.zHigh = rejects[i];
+				}
+				if (that.zLow < rejects[i] && rejects[i] < zMin) {
+					that.zLow = rejects[i];
+				}
+			}
         }
+		var genKey = JSON.stringify(curGen);
+		if (that.genKey !== genKey) {
+			that.genKey = genKey;
+			that.genKeyGen = iGen;
+		}
+		if (that.verbose) {
+			var msg = "Focus	: GEN_" + iGen + ":" + JSON.stringify(curGen);
+			msg += " z:[" + that.zLow + "," + that.zHigh+"]";
+			console.log(msg);
+		}
 		that.doneMsg = null;
         if (that.doneMsg == null && iGen >= that.maxGen) {
             that.doneMsg = "exceeded " + that.maxGen + " generations";
@@ -85,7 +93,10 @@ Util = require("./Util");
             that.zBestPrev = zBest;
             that.zBestPrevGen = iGen;
         }
-        if (that.doneMsg == null && zPolyFit && (iGen - that.zBestPrevGen+1 >= that.eliteAge)) {
+		if (that.doneMsg == null && (iGen-that.genKeyGen+1 >= that.stableAge)) {
+			that.doneMsg = "population stable for " + that.stableAge + " generations";
+		}
+        if (that.doneMsg == null && (iGen - that.zBestPrevGen+1 >= that.eliteAge)) {
             that.doneMsg = "elite survived " + that.eliteAge + " generations";
         }
 		return that.doneMsg != null;
@@ -95,20 +106,16 @@ Util = require("./Util");
 		var dz = that.dzPolyFit;
 		var zBest = prevGen[0];
 		var zWorst = prevGen[prevGen.length-1];
-		if (prevGen.length >= 3 && Math.abs(zWorst-zBest) <= 2*dz) {
-			var zPolyFit = that.polyFit(zBest-dz, zBest, zBest+dz);
-			zPolyFit = Util.roundN(zPolyFit, that.nPlaces);
-			prevGen.splice(0,0,zPolyFit);
-		}
+		var zBisect = Util.roundN((that.zLow+that.zHigh)/2,that.nPlaces);
+		var zNew1 = Util.roundN(Evolve.mutate(zBisect, that.zLow, that.zHigh), that.nPlaces); 
+		prevGen.push(zNew1);
 		return prevGen;
 	};
     Focus.prototype.breed = function(z1, z2) {
         var that = this;
-		var zNew1 = Util.roundN(Evolve.mutate(z1, that.zLow, that.zHigh), that.nPlaces); 
-        var kids = [zNew1]; // broad search
+        var kids = []; 
         if (z1 === z2) {
-			var zNew2 = Util.roundN(Evolve.mutate(z1, that.zLow, that.zHigh), that.nPlaces); 
-            kids.push(zNew2); // broad search
+			// don't inbreed
         } else { 
             var spread = Math.abs(z1 - z2);
             var low = Math.max(that.zLow, z1 - spread);
@@ -165,7 +172,7 @@ Util = require("./Util");
     Focus.prototype.sharpestZ = function() {
         var that = this;
         var evolve = new Evolve(that, {
-            nBreeders: that.nBreeders,
+            nSurvivors: that.nSurvivors,
 			nFamilies: that.nFamilies,
 			nElites:that.nElites,
         });
@@ -192,14 +199,14 @@ Util = require("./Util");
 			console.log("Focus	: sharpestZ() " + that.doneMsg +
 				" zBest:" + Util.roundN(zBest,that.nPlaces) +
 				" zPolyFit:" + that.round(zPolyFit) +
-				" zPolyFitLow:" + that.round(zPolyFitLow) +
-				" zPolyFitHigh:" + that.round(zPolyFitHigh) +
 				" zPolyFitAvg:" + that.round(zPolyFitAvg) +
+				" samples:" + that.samples.length +
 				"");
 		}
         return {
             zBest: zBest,
 			zPolyFit: zPolyFit,
+			zPolyFitAvg: zPolyFitAvg,
 			samples:that.samples
         };
     };
@@ -246,7 +253,8 @@ Util = require("./Util");
         var result = focus.sharpestZ();
         if (useMock) {
             should(result.zBest).within(-19,-17);
-            should(result.zPolyFit).within(-17-epsilon,-17+epsilon);
+            should(result.zPolyFit).within(-19-epsilon,-16+epsilon);
+            should(result.zPolyFitAvg).within(-19-epsilon,-16+epsilon);
         }
         should(focus.captureCount - captureOld).below(50);
     });

@@ -14,10 +14,10 @@ var should = require("should"),
         that.solver = solver;
         that.nElites = options.nElites || 1;
         should(that.nElites).not.below(1);
-        that.nBreeders = options.nBreeders || 10;
-		that.nFamilies = options.nFamilies || that.nBreeders;
-		that.maxGen = options.maxGen || 20;
-        should(that.nBreeders).not.below(1);
+        that.nSurvivors = options.nSurvivors || 10;
+		that.nFamilies = options.nFamilies || that.nSurvivors;
+		that.maxGen = options.maxGen || 50;
+        should(that.nSurvivors).not.below(1);
         that.verbose = options.verbose == null ? false : options.verbose;
         that.curGen = [];
         return that;
@@ -46,7 +46,7 @@ var should = require("should"),
         var that = this;
         var gen1 = candidates; 
         var gen2 = that.normalize(gen1);
-		var nBreeders = Math.min(gen1.length, that.nBreeders);
+		var nBreeders = Math.min(gen1.length, that.nSurvivors);
         for (var i1 = 0; i1 < Math.min(gen1.length,that.nFamilies); i1++) {
             var i2 = Math.round(Math.random() * 7919) % nBreeders;
             var parent1 = candidates[Math.min(i1, i2)];
@@ -62,8 +62,9 @@ var should = require("should"),
         that.curGen.sort(function(a, b) {
             return that.solver.compare.call(that.solver, a, b);
         });
+		var rejects = [];
         for (that.iGen = 0; that.iGen < that.maxGen; that.iGen++) {
-            that.status = that.solver.isDone(that.iGen, that.curGen);
+            that.status = that.solver.isDone(that.iGen, that.curGen, rejects);
 			if (that.status !== false) {
 				break;
 			}
@@ -72,8 +73,8 @@ var should = require("should"),
             if (that.verbose) {
                 console.log("Evolve	: spawn() => " + that.iGen + ": " + JSON.stringify(that.curGen));
             }
-            if (that.nBreeders && that.curGen.length > that.nBreeders) {
-                that.curGen.splice(that.nBreeders, that.curGen.length);
+            if (that.nSurvivors && that.curGen.length > that.nSurvivors) {
+                rejects = that.curGen.splice(that.nSurvivors, that.curGen.length) || [];
             }
         }
         return that.curGen;
@@ -155,7 +156,7 @@ var demo = demo || {};
             should(evolve).have.properties({
                 verbose: false,
                 nElites: 1,
-                nBreeders: 10
+                nSurvivors: 10
             });
         });
         var guess1 = (1 + N2) / 2;
