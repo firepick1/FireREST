@@ -24,9 +24,9 @@ Util = require("./Util");
         that.nPlaces = options.nPlaces || 0;
         should(that.nPlaces).not.below(0);
         that.maxGenerations = options.maxGenerations || 30;
-		that.nSurvivors = options.nSurvivors || 4;
+		that.nBreeders = options.nBreeders || 4;
 		that.nFamilies = options.nFamilies || 1;
-		that.nElites = options.nElites || (that.nSurvivors);
+		that.nElites = options.nElites || (that.nBreeders);
 		that.tolerance = options.tolerance || 1;
 		that.eliteAge = options.eliteAge || 8;
 		that.dzPolyFit = options.dzPolyFit || 3;
@@ -45,44 +45,44 @@ Util = require("./Util");
 		nPlaces.should.be.equal(1);
 		return Util.roundN(value, nPlaces); // reporting precision
 	};
-    Focus.prototype.isDone = function(index, generation) {
+    Focus.prototype.isDone = function(iGen, curGen) {
         var that = this;
-        var zBest = generation[0];
-        var zWorst = generation[generation.length - 1];
+        var zBest = curGen[0];
+        var zWorst = curGen[curGen.length - 1];
         var zDiff = Math.abs(zWorst - zBest);
 		var zGuess;
 		var zPolyFit;
-		if (generation.length >= 3) {
-			zGuess = that.polyFit(generation[0],generation[1],generation[2]);
+		if (curGen.length >= 3) {
+			zGuess = that.polyFit(curGen[0],curGen[1],curGen[2]);
 			if (zDiff <= 2*that.dzPolyFit) {
-				var dz = that.dzPolyFit + (index%2);
+				var dz = that.dzPolyFit + (iGen%2);
 				zPolyFit = that.polyFit(zBest-dz, zBest, zBest+dz);
 			}
 		}
 		if (that.verbose) {
-			var msg = "Focus	: GEN_" + index + " " + JSON.stringify(generation);
+			var msg = "Focus	: GEN_" + iGen + " " + JSON.stringify(curGen);
 			msg += zGuess && " zGuess:" + that.round(zGuess) || "";
 			msg += zPolyFit && " zPolyFit:" + that.round(zPolyFit) || "";
 			console.log(msg);
 		}
-        if (index === 0) {
+        if (iGen === 0) {
             that.zLow = that.zMin;
             that.zHigh = that.zMax;
         } else {
             if (zBest < zWorst) {
                 that.zHigh = zWorst; // no need to look above zWorst
-                for (var i = 0; i < generation.length; i++) {
-                    that.zHigh = Math.max(that.zHigh, generation[i]);
+                for (var i = 0; i < curGen.length; i++) {
+                    that.zHigh = Math.max(that.zHigh, curGen[i]);
                 }
             } else if (zBest > zWorst) {
 				that.zLow = zWorst; // no need to look below zWorst
-                for (var i = 0; i < generation.length; i++) {
-                    that.zLow = Math.min(that.zLow, generation[i]);
+                for (var i = 0; i < curGen.length; i++) {
+                    that.zLow = Math.min(that.zLow, curGen[i]);
                 }
             }
         }
 		that.doneMsg = null;
-        if (that.doneMsg == null && index >= that.maxGenerations) {
+        if (that.doneMsg == null && iGen >= that.maxGenerations) {
             that.doneMsg = "exceeded " + that.maxGenerations + " generations";
         }
         //if (that.doneMsg == null && zGuess && zDiff <= that.tolerance) { // candidates roughly same
@@ -90,15 +90,17 @@ Util = require("./Util");
         //}
         if (that.zBestPrev !== zBest) {
             that.zBestPrev = zBest;
-            that.zBestPrevIndex = index;
+            that.zBestPrevGen = iGen;
         }
-        if (that.doneMsg == null && zGuess && (index - that.zBestPrevIndex+1 >= that.eliteAge)) {
+        if (that.doneMsg == null && zGuess && (iGen - that.zBestPrevGen+1 >= that.eliteAge)) {
             that.doneMsg = "elite survived " + that.eliteAge + " generations";
         }
 		return that.doneMsg != null;
     };
-
-    Focus.prototype.generate = function(z1, z2) {
+	Focus.prototype.select = function(prevGen) {
+		return prevGen;
+	};
+    Focus.prototype.breed = function(z1, z2) {
         var that = this;
 		var zNew1 = Util.roundN(Evolve.mutate(z1, that.zLow, that.zHigh), that.nPlaces); 
         var kids = [zNew1]; // broad search
@@ -161,7 +163,7 @@ Util = require("./Util");
     Focus.prototype.sharpestZ = function() {
         var that = this;
         var evolve = new Evolve(that, {
-            nSurvivors: that.nSurvivors,
+            nBreeders: that.nBreeders,
 			nFamilies: that.nFamilies,
 			nElites:that.nElites,
         });

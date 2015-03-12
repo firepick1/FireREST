@@ -7,29 +7,30 @@ var should = require("should"),
         var that = this;
         options = options || {};
         should.exist(solver);
-        should(solver).have.properties(["generate", "compare", "isDone"]);
-        solver.generate.should.be.a.Function;
+        should(solver).have.properties(["breed", "compare", "isDone"]);
+        solver.breed.should.be.a.Function;
         solver.compare.should.be.a.Function;
         solver.isDone.should.be.a.Function;
         that.solver = solver;
         that.nElites = options.nElites || 1;
         should(that.nElites).not.below(1);
-        that.nSurvivors = options.nSurvivors || 10;
-		that.nFamilies = options.nFamilies || that.nSurvivors;
-        should(that.nSurvivors).not.below(1);
+        that.nBreeders = options.nBreeders || 10;
+		that.nFamilies = options.nFamilies || that.nBreeders;
+		that.maxGen = options.maxGen || 20;
+        should(that.nBreeders).not.below(1);
         that.verbose = options.verbose == null ? false : options.verbose;
-        that.generation = [];
+        that.curGen = [];
         return that;
     };
 
 
     ///////////////// INSTANCE ///////////////
-    Evolve.prototype.evolve1 = function(generation) {
+    Evolve.prototype.evolve1 = function(prevGen) {
         var that = this;
-        var generation1 = generation ? generation : that.generation;
+        var generation1 = prevGen ? prevGen : that.curGen;
         var generation2 = [];
         var variantMap = {};
-        for (var i = 0; i < Math.min(generation.length, that.nElites); i++) {
+        for (var i = 0; i < Math.min(prevGen.length, that.nElites); i++) {
             var c = generation1[i];
             var key = JSON.stringify(c);
             if (!variantMap[key]) {
@@ -39,10 +40,10 @@ var should = require("should"),
         }
         for (var iv1 = 0; iv1 < Math.min(generation1.length,that.nFamilies); iv1++) {
             var v = generation1[iv1];
-            var iv2 = Math.round(Math.random() * 7919) % Math.min(generation.length, that.nSurvivors);
-            var parent1 = generation[Math.min(iv1, iv2)];
-            var parent2 = generation[Math.max(iv1, iv2)];
-            var candidates = that.solver.generate(parent1, parent2);
+            var iv2 = Math.round(Math.random() * 7919) % Math.min(prevGen.length, that.nBreeders);
+            var parent1 = prevGen[Math.min(iv1, iv2)];
+            var parent2 = prevGen[Math.max(iv1, iv2)];
+            var candidates = that.solver.breed(parent1, parent2);
             for (var ic = 0; ic < candidates.length; ic++) {
                 var c = candidates[ic];
                 var key = JSON.stringify(c);
@@ -57,28 +58,32 @@ var should = require("should"),
         });
         return generation2;
     };
-    Evolve.prototype.solve = function(generation) {
+    Evolve.prototype.solve = function(gen1) {
         var that = this;
-        that.generation = generation;
-        that.generation.sort(function(a, b) {
+        that.curGen = gen1;
+        that.curGen.sort(function(a, b) {
             return that.solver.compare.call(that.solver, a, b);
         });
-        for (that.iGeneration = 0;
-            (that.status = that.solver.isDone(that.iGeneration, that.generation)) === false; that.iGeneration++) {
-            that.generation = that.evolve1(that.generation);
+        for (that.iGen = 0; that.iGen < that.maxGen; that.iGen++) {
+            that.status = that.solver.isDone(that.iGen, that.curGen);
+			if (that.status !== false) {
+				break;
+			}
+			var candidates = that.solver.select && that.solver.select(that.curGen) || that.curGen;
+            that.curGen = that.evolve1(candidates);
             if (that.verbose) {
-                //console.log("generation " + that.iGeneration + ": " + JSON.stringify(that.generation));
+                //console.log("generation " + that.iGen + ": " + JSON.stringify(that.curGen));
             }
-            if (that.nSurvivors && that.generation.length > that.nSurvivors) {
-                that.generation.splice(that.nSurvivors, that.generation.length);
+            if (that.nBreeders && that.curGen.length > that.nBreeders) {
+                that.curGen.splice(that.nBreeders, that.curGen.length);
             }
         }
-        return that.generation;
+        return that.curGen;
     };
 
     ////////////// CLASS ///////////////
     Evolve.mutate = function(value, minValue, maxValue) {
-        // generate new value in given range with median==value 
+        // breed new value in given range with median==value 
         // using approximately Gaussian distribution
         should(value).be.within(minValue, maxValue);
         var r = (Math.random() + Math.random() + Math.random()) / 3;
@@ -104,23 +109,19 @@ var demo = demo || {};
         that.N2 = N / 2;
         return that;
     }
-    SqrtSolver.prototype.isDone = function(index, generation) {
+    SqrtSolver.prototype.isDone = function(index, curGen) {
         var that = this;
         that.N.should.equal(200);
         that.N2.should.equal(100);
         done = false;
-        if (Math.abs(that.N - generation[0] * generation[0]) < that.N / 1000) {
-            //console.log("Solved in " + index + " generations: " + generation[0]);
+        if (Math.abs(that.N - curGen[0] * curGen[0]) < that.N / 1000) {
+            //console.log("Solved in " + index + " curGen: " + curGen[0]);
             done = true;
         }
-        if (index >= 100) {
-            //console.log("Giving up after " + index + " generations");
-            done = true;
-        }
-        //console.log(index + ". " + JSON.stringify(generation));
+        //console.log(index + ". " + JSON.stringify(curGen));
         return done;
     };
-    SqrtSolver.prototype.generate = function(parent1, parent2) {
+    SqrtSolver.prototype.breed = function(parent1, parent2) {
         var that = this;
         var kids = [firepick.Evolve.mutate(parent1, 1, that.N2)]; // broad search
         if (parent1 === parent2) {
@@ -156,7 +157,7 @@ var demo = demo || {};
             should(evolve).have.properties({
                 verbose: false,
                 nElites: 1,
-                nSurvivors: 10
+                nBreeders: 10
             });
         });
         var guess1 = (1 + N2) / 2;
