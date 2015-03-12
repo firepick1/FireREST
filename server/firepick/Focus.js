@@ -46,7 +46,8 @@ Maximizer = require("./Maximizer");
         return that.xyzCam.imageRef({
             x: 0,
             y: 0,
-            z: z
+            z: z,
+			//tag: "calibration",
         });
 	};
 	Focus.prototype.evaluate = function(z) { // for Maximizer
@@ -58,6 +59,7 @@ Maximizer = require("./Maximizer");
         var imgRef = that.imageRefAtZ(z);
         if (!imgRef.exists() || imgRef.sharpness == null) {
             that.captureCount++;
+            //imgRef = that.xyzCam.moveTo(imgRef).capture("calibration");
             imgRef = that.xyzCam.moveTo(imgRef).capture();
             imgRef.sharpness = that.ip.sharpness(imgRef).sharpness;
 			that.samples.push(imgRef.z);
