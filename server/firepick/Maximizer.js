@@ -14,14 +14,14 @@ Util = require("./Util");
 		this.fitness = fitness;
 		fitness.should.have.properties(["evaluate"]);
 		fitness.evaluate.should.be.a.Function;
-        that.nPlaces = options.nPlaces || 3;
+        that.nPlaces = options.nPlaces == null ? 3 : options.nPlaces;
         should(that.nPlaces).not.below(0);
         that.maxGen = options.maxGen || 30;
 		that.nSurvivors = options.nSurvivors || 4;
 		that.nFamilies = options.nFamilies || 1;
 		that.bestAge = options.bestAge || 10;
 		that.stableAge = options.stableAge || 5;
-		that.dxPolyFit = 3;
+		that.dxPolyFit = 2;
 		for (var i = 0; i < that.nPlaces; i++) {
 			that.dxPolyFit /= 10;
 		}
@@ -29,6 +29,11 @@ Util = require("./Util");
 		that.logLevel = options.logLevel || "info";
         that.logTrace = that.logLevel === "trace";
         that.logDebug = that.logTrace || that.logLevel == "debug";
+		if (that.logTrace) {
+			console.log("TRACE	: nPlaces:" + that.nPlaces
+				+ " dxPolyFit:" + that.dxPolyFit
+			);
+		}
         return that;
     };
 
@@ -106,9 +111,7 @@ Util = require("./Util");
     Maximizer.prototype.breed = function(x1, x2) {
         var that = this;
         var kids = []; 
-        if (x1 === x2) {
-			// don't inbreed
-        } else { 
+        if (x1 !== x2) { // don't inbreed
             var spread = Math.abs(x1 - x2);
             var low = Math.max(that.xLow, x1 - spread);
             var high = Math.min(that.xHigh, x1 + spread);
@@ -141,6 +144,8 @@ Util = require("./Util");
 	};
     Maximizer.prototype.solve = function(xMin,xMax) {
         var that = this;
+		should.exists(xMin, "xMin?");
+		should.exists(xMax, "xMax?");
 		xMin.should.be.a.Number;
 		xMax.should.be.a.Number;
 		that.xMin = xMin;
@@ -158,8 +163,19 @@ Util = require("./Util");
         var vSolve = evolve.solve(guess);
 		var dx = that.dxPolyFit;
         var xBest = vSolve[0];
-		var dAvg = Number("10e-"+that.nPlaces);
-		var xPolyFitLow = that.polyFit(xBest-dx-dAvg, xBest-dAvg, xBest+dx);
+		var dAvg = Number("1e-"+that.nPlaces);
+		var xLow1 = xBest-dx-dAvg;
+		var xLow2 = xBest-dAvg;
+		var xLow3 = xBest+dx;
+		var xHigh1 = xBest-dx;
+		var xHigh2 = xBest+dAvg;
+		var xHigh3 = xBest+dx+dAvg;
+		if (that.logTrace) {
+			console.log("TRACE	: polyFit average of " +
+				" low:[" + xLow1 + "," + xLow2 + "," + xLow3 + "]" +
+				" high:[" + xHigh1 + "," + xHigh2 + "," + xHigh3 + "]");
+		}
+		var xPolyFitLow = that.polyFit(xLow1,xLow2,xLow3);
 		var xPolyFitHigh = that.polyFit(xBest-dx, xBest+dAvg, xBest+dx+dAvg);
 		var xPolyFitAvg = (xPolyFitLow+xPolyFitHigh)/2;
 		var xPolyFit = that.polyFit(xBest-dx, xBest, xBest+dx);
@@ -174,6 +190,7 @@ Util = require("./Util");
             xBest: xBest,
 			xPolyFit: xPolyFit,
 			xPolyFitAvg: xPolyFitAvg,
+			status: that.doneMsg,
         };
     };
 
@@ -197,10 +214,9 @@ var demo = demo || {};
 })(demo);
 
 (typeof describe === 'function') && describe("firepick.Maximizer", function() {
-	var N = 200;
-	var sqrtSolver = new demo.SqrtSolver(N);
-    var solver = new firepick.Maximizer(sqrtSolver);
 	it("should have default options", function() {
+		var N = 200;
+		var sqrtSolver = new demo.SqrtSolver(N);
 		var max = new firepick.Maximizer(sqrtSolver);
 		max.should.have.properties({
 			nPlaces: 3,		// x domain precision
@@ -209,13 +225,16 @@ var demo = demo || {};
 			nFamilies: 1,	// number of breeding pairs per generation
 			bestAge: 10,	// terminate if best candidate is same for this many generations
 			stableAge: 5,	// terminate if this many successive generations are the same
-			dxPolyFit:0.003,	// polynomial fitting interval = 2*dxPolyFit + 1
+			dxPolyFit:0.002,	// polynomial fitting interval = 2*dxPolyFit + 1
 			logLevel:"info"	// info, debug, trace
 		});
 	});
     it("should calculate sqrt(200) using demo.SqrtSolver(200)", function() {
+		var N = 200;
+		var sqrtSolver = new demo.SqrtSolver(N);
+		var solver = new firepick.Maximizer(sqrtSolver);
         var result = solver.solve(1,100);
-		var ans = Math.sqrt(200);
+		var ans = Math.sqrt(N);
 		var epsilon = 0.05;
 		should(result.xBest).within(ans-epsilon,ans+epsilon);
 		should(result.xPolyFit).within(ans-epsilon*10,ans+epsilon*10);
