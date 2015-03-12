@@ -25,38 +25,36 @@ var should = require("should"),
 
 
     ///////////////// INSTANCE ///////////////
-    Evolve.prototype.evolve1 = function(prevGen) {
+    Evolve.prototype.normalize = function(candidates) {
         var that = this;
-        var generation1 = prevGen ? prevGen : that.curGen;
-        var generation2 = [];
-        var variantMap = {};
-        for (var i = 0; i < Math.min(prevGen.length, that.nElites); i++) {
-            var c = generation1[i];
+		var gen = [];
+		var candidateMap = {};
+        for (var i = 0; i < candidates.length; i++) {
+            var c = candidates[i];
             var key = JSON.stringify(c);
-            if (!variantMap[key]) {
-                variantMap[key] = c;
-            }
-			generation2.push(c);
-        }
-        for (var iv1 = 0; iv1 < Math.min(generation1.length,that.nFamilies); iv1++) {
-            var v = generation1[iv1];
-            var iv2 = Math.round(Math.random() * 7919) % Math.min(prevGen.length, that.nBreeders);
-            var parent1 = prevGen[Math.min(iv1, iv2)];
-            var parent2 = prevGen[Math.max(iv1, iv2)];
-            var candidates = that.solver.breed(parent1, parent2);
-            for (var ic = 0; ic < candidates.length; ic++) {
-                var c = candidates[ic];
-                var key = JSON.stringify(c);
-                if (!variantMap[key]) {
-                    variantMap[key] = c;
-                    generation2.push(c);
-                }
+            if (!candidateMap[key]) {
+                candidateMap[key] = c;
+				gen.push(c);
             }
         }
-        generation2.sort(function(a, b) {
+        gen.sort(function(a, b) {
             return that.solver.compare.call(that.solver, a, b);
         });
-        return generation2;
+		return gen;
+	};
+    Evolve.prototype.spawn = function(candidates) {
+        var that = this;
+        var gen1 = candidates; 
+        var gen2 = that.normalize(gen1);
+		var nBreeders = Math.min(gen1.length, that.nBreeders);
+        for (var i1 = 0; i1 < Math.min(gen1.length,that.nFamilies); i1++) {
+            var i2 = Math.round(Math.random() * 7919) % nBreeders;
+            var parent1 = candidates[Math.min(i1, i2)];
+            var parent2 = candidates[Math.max(i1, i2)];
+            var kids = that.solver.breed(parent1, parent2);
+			gen2.push.apply(gen2, kids);
+        }
+        return that.normalize(gen2);
     };
     Evolve.prototype.solve = function(gen1) {
         var that = this;
@@ -70,9 +68,9 @@ var should = require("should"),
 				break;
 			}
 			var candidates = that.solver.select && that.solver.select(that.curGen) || that.curGen;
-            that.curGen = that.evolve1(candidates);
+            that.curGen = that.spawn(candidates);
             if (that.verbose) {
-                //console.log("generation " + that.iGen + ": " + JSON.stringify(that.curGen));
+                console.log("Evolve	: spawn() => " + that.iGen + ": " + JSON.stringify(that.curGen));
             }
             if (that.nBreeders && that.curGen.length > that.nBreeders) {
                 that.curGen.splice(that.nBreeders, that.curGen.length);

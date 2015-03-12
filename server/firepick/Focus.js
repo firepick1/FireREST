@@ -23,8 +23,8 @@ Util = require("./Util");
         that.zMax = zMax;
         that.nPlaces = options.nPlaces || 0;
         should(that.nPlaces).not.below(0);
-        that.maxGenerations = options.maxGenerations || 30;
-		that.nBreeders = options.nBreeders || 4;
+        that.maxGen = options.maxGen || 30;
+		that.nBreeders = options.nBreeders || 6;
 		that.nFamilies = options.nFamilies || 1;
 		that.nElites = options.nElites || (that.nBreeders);
 		that.tolerance = options.tolerance || 1;
@@ -50,19 +50,15 @@ Util = require("./Util");
         var zBest = curGen[0];
         var zWorst = curGen[curGen.length - 1];
         var zDiff = Math.abs(zWorst - zBest);
-		var zGuess;
 		var zPolyFit;
-		if (curGen.length >= 3) {
-			zGuess = that.polyFit(curGen[0],curGen[1],curGen[2]);
-			if (zDiff <= 2*that.dzPolyFit) {
-				var dz = that.dzPolyFit + (iGen%2);
-				zPolyFit = that.polyFit(zBest-dz, zBest, zBest+dz);
-			}
+		if (curGen.length >= 3 && zDiff <= 2*that.dzPolyFit) {
+			var dz = that.dzPolyFit;
+			zPolyFit = that.polyFit(zBest-dz, zBest, zBest+dz);
 		}
 		if (that.verbose) {
-			var msg = "Focus	: GEN_" + iGen + " " + JSON.stringify(curGen);
-			msg += zGuess && " zGuess:" + that.round(zGuess) || "";
+			var msg = "Focus	: GEN_" + iGen + ":" + JSON.stringify(curGen);
 			msg += zPolyFit && " zPolyFit:" + that.round(zPolyFit) || "";
+			msg += " z:[" + that.zLow + "," + that.zHigh+"]";
 			console.log(msg);
 		}
         if (iGen === 0) {
@@ -82,22 +78,28 @@ Util = require("./Util");
             }
         }
 		that.doneMsg = null;
-        if (that.doneMsg == null && iGen >= that.maxGenerations) {
-            that.doneMsg = "exceeded " + that.maxGenerations + " generations";
+        if (that.doneMsg == null && iGen >= that.maxGen) {
+            that.doneMsg = "exceeded " + that.maxGen + " generations";
         }
-        //if (that.doneMsg == null && zGuess && zDiff <= that.tolerance) { // candidates roughly same
-         //   that.doneMsg = "|zWorst-zBest| <= " + that.tolerance;
-        //}
         if (that.zBestPrev !== zBest) {
             that.zBestPrev = zBest;
             that.zBestPrevGen = iGen;
         }
-        if (that.doneMsg == null && zGuess && (iGen - that.zBestPrevGen+1 >= that.eliteAge)) {
+        if (that.doneMsg == null && zPolyFit && (iGen - that.zBestPrevGen+1 >= that.eliteAge)) {
             that.doneMsg = "elite survived " + that.eliteAge + " generations";
         }
 		return that.doneMsg != null;
     };
 	Focus.prototype.select = function(prevGen) {
+        var that = this;
+		var dz = that.dzPolyFit;
+		var zBest = prevGen[0];
+		var zWorst = prevGen[prevGen.length-1];
+		if (prevGen.length >= 3 && Math.abs(zWorst-zBest) <= 2*dz) {
+			var zPolyFit = that.polyFit(zBest-dz, zBest, zBest+dz);
+			zPolyFit = Util.roundN(zPolyFit, that.nPlaces);
+			prevGen.splice(0,0,zPolyFit);
+		}
 		return prevGen;
 	};
     Focus.prototype.breed = function(z1, z2) {
@@ -180,12 +182,19 @@ Util = require("./Util");
 		that.samples = [];
         var vSolve = evolve.solve(guess);
         that.samples.sort();
+		var dz = that.dzPolyFit;
         var zBest = vSolve[0];
-		var zPolyFit = that.polyFit(zBest-that.dzPolyFit, zBest, zBest+that.dzPolyFit);
+		var zPolyFitLow = that.polyFit(zBest-dz-1, zBest-1, zBest+dz-1);
+		var zPolyFitHigh = that.polyFit(zBest-dz+1, zBest+1, zBest+dz+1);
+		var zPolyFitAvg = (zPolyFitLow+zPolyFitHigh)/2;
+		var zPolyFit = that.polyFit(zBest-dz, zBest, zBest+dz);
 		if (that.verbose) {
 			console.log("Focus	: sharpestZ() " + that.doneMsg +
-				" zBest:" + that.round(zBest) +
+				" zBest:" + Util.roundN(zBest,that.nPlaces) +
 				" zPolyFit:" + that.round(zPolyFit) +
+				" zPolyFitLow:" + that.round(zPolyFitLow) +
+				" zPolyFitHigh:" + that.round(zPolyFitHigh) +
+				" zPolyFitAvg:" + that.round(zPolyFitAvg) +
 				"");
 		}
         return {
