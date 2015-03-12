@@ -106,6 +106,7 @@ firepick.ImageStore = require("./ImageStore");
     };
     XYZCamera.isInterfaceOf = function(xyzCam) {
         should.exist(xyzCam);
+		xyzCam.should.have.properties(["origin","moveTo","getXYZ","capture","imageRef"]);
         xyzCam.origin.should.be.a.Function;
         xyzCam.moveTo.should.be.a.Function;
         xyzCam.getXYZ.should.be.a.Function;

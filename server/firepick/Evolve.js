@@ -1,6 +1,7 @@
 var should = require("should"),
     module = module || {},
     firepick = firepick || {};
+Util = require("./Util");
 
 (function(firepick) {
     function Evolve(solver, options) {
@@ -12,13 +13,13 @@ var should = require("should"),
         solver.compare.should.be.a.Function;
         solver.isDone.should.be.a.Function;
         that.solver = solver;
-        that.nElites = options.nElites || 1;
-        should(that.nElites).not.below(1);
-        that.nSurvivors = options.nSurvivors || 10;
+        that.nSurvivors = options.nSurvivors || 5;
 		that.nFamilies = options.nFamilies || that.nSurvivors;
 		that.maxGen = options.maxGen || 50;
         should(that.nSurvivors).not.below(1);
-        that.verbose = options.verbose == null ? false : options.verbose;
+		that.logLevel = options.logLevel || "info";
+        that.logTrace = that.logLevel === "trace";
+        that.logDebug = that.logTrace || that.logLevel == "debug";
         that.curGen = [];
         return that;
     };
@@ -70,13 +71,17 @@ var should = require("should"),
 			}
 			var candidates = that.solver.select && that.solver.select(that.curGen) || that.curGen;
             that.curGen = that.spawn(candidates);
-            if (that.verbose) {
-                console.log("Evolve	: spawn() => " + that.iGen + ": " + JSON.stringify(that.curGen));
+            if (that.logTrace) {
+                console.log("TRACE	: spawn#"+that.iGen + "() => " + JSON.stringify(that.curGen));
             }
             if (that.nSurvivors && that.curGen.length > that.nSurvivors) {
                 rejects = that.curGen.splice(that.nSurvivors, that.curGen.length) || [];
             }
         }
+		if (that.logDebug) {
+			console.log("DEBUG	: solve() " + that.iGen + " generations => " 
+				+ JSON.stringify(that.curGen[0]));
+		}
         return that.curGen;
     };
 
@@ -100,36 +105,45 @@ var should = require("should"),
     module.exports = firepick.Evolve = Evolve;
 })(firepick || (firepick = {}));
 
+Evolve = firepick.Evolve;
+
 var demo = demo || {};
 (function(demo) {
-    function SqrtSolver(N) {
+    function SqrtSolver(N,nPlaces) {
         var that = this;
         that.N = N;
         that.N2 = N / 2;
+		that.nPlaces = nPlaces || 2;
         return that;
     }
+	SqrtSolver.prototype.select = function(candidates) {
+        var that = this;
+		for (var i=0; i < 5; i++) {	// broad search
+			var broadSearch = firepick.Evolve.mutate((1+that.N2)/2, 1, that.N2); 
+			candidates.push(broadSearch);
+		}
+		return candidates;
+	};
     SqrtSolver.prototype.isDone = function(index, curGen) {
         var that = this;
-        that.N.should.equal(200);
-        that.N2.should.equal(100);
         done = false;
         if (Math.abs(that.N - curGen[0] * curGen[0]) < that.N / 1000) {
-            //console.log("Solved in " + index + " curGen: " + curGen[0]);
             done = true;
         }
-        //console.log(index + ". " + JSON.stringify(curGen));
         return done;
     };
     SqrtSolver.prototype.breed = function(parent1, parent2) {
         var that = this;
-        var kids = [firepick.Evolve.mutate(parent1, 1, that.N2)]; // broad search
-        if (parent1 === parent2) {
-            kids.push(firepick.Evolve.mutate(parent1, 1, that.N2));
-        } else { // deep search
+		var broadSearch = firepick.Evolve.mutate((1+that.N2)/2, 1, that.N2); 
+        var kids = [ 
+			//Util.roundN(broadSearch, that.nPlaces) 
+			];
+        if (parent1 !== parent2) { // no inbreeding
             var spread = Math.abs(parent1 - parent2);
             var low = Math.max(1, parent1 - spread);
             var high = Math.min(that.N2, parent1 + spread);
-            kids.push(firepick.Evolve.mutate(parent1, low, high));
+			var narrowSearch = firepick.Evolve.mutate(parent1, low, high); 
+            kids.push(Util.roundN(narrowSearch,that.nPlaces)); 
         }
 
         return kids;
@@ -145,38 +159,31 @@ var demo = demo || {};
 (typeof describe === 'function') && describe("firepick.Evolve genetic solver", function() {
     var N = 200;
     var N2 = N == 2 ? 2 : N / 2;
-
+	var solver = new demo.SqrtSolver(N);
+	it("should create a new genetic solver with default options", function() {
+		var options = {};
+		var evolve = new firepick.Evolve(solver);
+		should(evolve).have.properties({
+			logLevel: "info",
+			nSurvivors: 5,
+			nFamilies: 5,
+			maxGen: 50,
+		});
+	});
     describe("compute the square root of " + N, function() {
-        var solver = new demo.SqrtSolver(N);
-        var evolve;
-
-        it("should create a new genetic solver with default options", function() {
-            var options = {};
-            evolve = new firepick.Evolve(solver, options);
-            should(evolve).have.properties({
-                verbose: false,
-                nElites: 1,
-                nSurvivors: 10
-            });
-        });
+		var evolve = new firepick.Evolve(solver,{
+			logLevel:"debug",
+			maxGen:300
+		});
         var guess1 = (1 + N2) / 2;
         var epsilon = 0.01;
         var sqrtN = Math.sqrt(N);
         it("should compute the square root of " + N, function() {
             var vSolve = evolve.solve([guess1]);
             should(vSolve).be.Array;
-            should(vSolve.length).equal(10);
+            should(vSolve.length).equal(5);
             should(vSolve[0]).within(sqrtN - epsilon, sqrtN + epsilon);
             should(evolve.status).equal(true);
-        });
-        it("should repeatedly compute the square root of " + N, function() {
-            for (var i = 0; i < 10; i++) {
-                var vSolve = evolve.solve([guess1]);
-                //console.log("Last generation:" + JSON.stringify(vSolve));
-                var solution = vSolve[0];
-                should(evolve.status).equal(true);
-                should(Math.abs(N - solution * solution)).be.below(N / 1000);
-            }
         });
     });
 })

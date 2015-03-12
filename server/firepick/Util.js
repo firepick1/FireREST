@@ -27,10 +27,14 @@ var should = require("should"),
     }
     Util.roundN = function(value, places) {
 		places = places || 0;
-		if (places === 0) {
-			return Math.round(value);
+		var result;
+		if (places > 0) {
+			result = +(Math.round(value + "e+" + places) + "e-" + places);
 		}
-        return +(Math.round(value + "e+" + places) + "e-" + places);
+		if (isNaN(result)) {
+			result = Math.round(value);
+		}
+		return result;
     };
 	Util.lagrange = function(x,pts) {
 		should.exist(pts, "expected lagrange(x,[{x,y},...])");
@@ -48,18 +52,27 @@ var should = require("should"),
 		var p1 = pts[0];
 		var p2 = pts[1];
 		var p3 = pts[2];
+		var dx12 = p1.x-p2.x;
+		var dx21 = -dx12;
+		var dx13 = p1.x-p3.x;
+		var dx31 = -dx13;
+		var dx23 = p2.x-p3.x;
+		var dx32 = -dx23;
+		var dx1213 = dx12*dx13;
+		var dx2123 = dx21*dx23;
+		var dx3132 = dx31*dx32;
 		return [
-			p1.y/((p1.x-p2.x)*(p1.x-p3.x)) + 
-			p2.y/((p2.x-p1.x)*(p2.x-p3.x)) + 
-			p3.y/((p3.x-p1.x)*(p3.x-p2.x)),
+			p1.y/((dx12)*(dx13)) + 
+			p2.y/((dx21)*(dx23)) + 
+			p3.y/((dx31)*(dx32)),
 	
-			-p1.y*(p2.x+p3.x)/((p1.x-p2.x)*(p1.x-p3.x))
-			-p2.y*(p1.x+p3.x)/((p2.x-p1.x)*(p2.x-p3.x))
-		    -p3.y*(p1.x+p2.x)/((p3.x-p1.x)*(p3.x-p2.x)),
+			-p1.y*(p2.x+p3.x)/dx1213
+			-p2.y*(p1.x+p3.x)/dx2123
+		    -p3.y*(p1.x+p2.x)/dx3132,
 			
-			p1.y*p2.x*p3.x/((p1.x-p2.x)*(p1.x-p3.x))
-			+ p2.y*p1.x*p3.x/((p2.x-p1.x)*(p2.x-p3.x))
-			+ p3.y*p1.x*p2.x/((p3.x-p1.x)*(p3.x-p2.x))
+			p1.y*p2.x*p3.x/dx1213
+			+ p2.y*p1.x*p3.x/dx2123
+			+ p3.y*p1.x*p2.x/dx3132
 			];
 	};
 	Util.criticalPoints = function(pts) { 
@@ -108,6 +121,12 @@ var should = require("should"),
     it("should roundN(3.14159,2) to two places", function() {
         should(firepick.Util.roundN(3.14159, 2)).equal(3.14);
     });
+    it("should roundN(3.14159) to zero places", function() {
+        should(firepick.Util.roundN(3)).equal(3);
+    });
+	it("should roundN(1.3e-8,2) to zero", function() {
+		should(firepick.Util.roundN(1.3e-8,2)).equal(0);
+	});
     it("should do this and that", function() {
         var util1 = new firepick.Util();
         var util2 = new firepick.Util();
