@@ -220,8 +220,10 @@ Maximizer = require("./Maximizer");
 		this.timeout(50000);
 		var result = focus.focalRange(0.7);
 		should(result).have.properties(["zLow","zHigh","zBest", "sharpness"]);
-		should(result.zLow).within(-34,-34);
-		should(result.zHigh).within(5,5);
+		if (useMock) {
+			should(result.zLow).within(-34,-34);
+			should(result.zHigh).within(5,5);
+		}
 		should(result.sharpness).have.properties(["min","max"]);
 		result.sharpness.min.should.be.a.Number;
 		result.sharpness.max.should.be.a.Number;
