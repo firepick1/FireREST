@@ -23,12 +23,13 @@ Maximizer = require("./Maximizer");
         that.zMin = zMin;
         that.zMax = zMax;
         that.nPlaces = options.nPlaces || 0;
-        should(that.nPlaces).not.below(0);
+        that.nPlaces.should.not.be.below(0);
+		that.dzPolyFit = options.dzPolyFit;
 		that.logLevel = options.logLevel || "info";
         that.logTrace = that.logLevel === "trace";
         that.logDebug = that.logTrace || that.logLevel == "debug";
 
-		that.samples = [];
+		that.samples = {};
         that.captureCount = 0;
         that.ip = new firepick.ImageProcessor();
         return that;
@@ -50,22 +51,18 @@ Maximizer = require("./Maximizer");
 			//tag: "calibration",
         });
 	};
-	Focus.prototype.evaluate = function(z) { // for Maximizer
-        var that = this;
-		return that.sharpness(z);
-	};
     Focus.prototype.sharpness = function(z) {
         var that = this;
         var imgRef = that.imageRefAtZ(z);
+		that.samples[z] = imgRef;
         if (!imgRef.exists() || imgRef.sharpness == null) {
             that.captureCount++;
             //imgRef = that.xyzCam.moveTo(imgRef).capture("calibration");
             imgRef = that.xyzCam.moveTo(imgRef).capture();
             imgRef.sharpness = that.ip.sharpness(imgRef).sharpness;
-			that.samples.push(imgRef.z);
-            if (that.logTrace) {
-                console.log("TRACE	:   IMG" + that.captureCount + "(" + z + ")" + 
-					" sharp:" + that.round(imgRef.sharpness));
+            if (that.logDebug) {
+                console.log("DEBUG	:   IMG(" + z + ")" + 
+					" sharp:" + that.round(imgRef.sharpness) + " [" + that.captureCount + "]");
             }
         }
         return imgRef.sharpness;
@@ -73,30 +70,99 @@ Maximizer = require("./Maximizer");
     Focus.prototype.sharpestZ = function() {
         var that = this;
 		var captureOld = that.captureCount;
-		var solver = new Maximizer(that, {
+		var fitness = {evaluate:function(z) {
+			return that.sharpness(z);
+		}};
+		var solver = new Maximizer(fitness, {
 			nPlaces: that.nPlaces,
 			logLevel:that.logLevel,
+			dxPolyFit:that.dzPolyFit,
 		});
-		that.samples = [];
+		that.samples = {};
         var rawResult = solver.solve(that.zMin, that.zMax);
-        that.samples.sort();
 		var result = {
 			zBest: rawResult.xBest,
-			zPolyFit: rawResult.xPolyFit,
-			zPolyFitAvg: rawResult.xPolyFitAvg,
 			status: rawResult.status,
-			samples: that.samples,
+			samples: [],
 		};
+		if (that.dzPolyFit == null || that.dzPolyFit != 0) {
+			result.zPolyFit = that.round(rawResult.xPolyFit);
+			result.zPolyFitAvg = that.round(rawResult.xPolyFitAvg);
+		}
+		for (var k in that.samples) {
+			result.samples.push(Number(k));
+		}
+        result.samples.sort(function(a,b){
+			return a-b;
+		});
 		if (that.logDebug) {
-			console.log("DEBUG	: sharpestZ() " + result.status +
-				" zBest:" + Util.roundN(result.zBest,that.nPlaces) +
-				" zPolyFit:" + that.round(result.zPolyFit) +
-				" zPolyFitAvg:" + that.round(result.zPolyFitAvg) +
-				" samples:" + result.samples.length +
-				"");
+			console.log("DEBUG	: sharpestZ():" + JSON.stringify(result));
 		}
 		return result;
     };
+	Focus.prototype.bisectThreshold = function(zBelow, zAbove, threshold) {
+		var that = this;
+		var zBisect = Util.roundN((zBelow+zAbove)/2, that.nPlaces);
+		if (zBisect === zAbove || zBisect === zBelow) {
+			return zAbove;
+		}
+		var sharpBisect = that.sharpness(zBisect);
+		if (sharpBisect >= threshold) {
+			return that.bisectThreshold(zBelow, zBisect, threshold);
+		} else {
+			return that.bisectThreshold(zBisect, zAbove, threshold);
+		}
+	};
+	Focus.prototype.focalRange = function(threshold) {
+		var that = this;
+		threshold.should.be.a.Number;
+		threshold.should.be.above(0);
+		threshold.should.be.below(1);
+		var peak = that.sharpestZ();
+		var zBest = peak.zBest;
+		var sharpMax = that.sharpness(zBest);
+		var sharpThreshold = sharpMax * threshold;
+		var zLow = zBest;
+		var iLow;
+		var zHigh = zBest;
+		var iHigh;
+		for (var i=0; i < peak.samples.length; i++) {
+			var z = peak.samples[i];
+			var zSharp = that.sharpness(z);
+			if (z < zLow && sharpThreshold < zSharp) {
+				zLow = z;
+				iLow = i;
+			}
+			if (zHigh < z && sharpThreshold < zSharp) {
+				zHigh = z;
+				iHigh = i;
+			}
+		}
+		if (iLow > 0) {
+			zLow = that.bisectThreshold(peak.samples[iLow-1], zLow, sharpThreshold);
+		} else {
+			zLow = that.bisectThreshold(that.zMin, zLow, sharpThreshold);
+		}
+		if (iHigh+1 < peak.samples.length) {
+			zHigh = that.bisectThreshold(peak.samples[iHigh+1],zHigh,sharpThreshold);
+		} else {
+			zHigh = that.bisectThreshold(that.zMax,zHigh,sharpThreshold);
+		}
+		var result = {
+			zLow: zLow,
+			zHigh: zHigh,
+			zBest: zBest,
+			sharpness:{min:that.round(sharpThreshold), max:that.round(sharpMax)},
+		};
+		if (peak.zPolyFit) {
+			result.zPolyFit = peak.zPolyFit;
+			result.zPolyFitAvg = peak.zPolyFitAvg;
+		}
+		if (that.logDebug) {
+			console.log("DEBUG	: focalRange(" + threshold + "):" + JSON.stringify(result));
+		}
+		return result;
+	};
 
     console.log("LOADED	: firepick.Focus");
     module.exports = firepick.Focus = Focus;
@@ -109,7 +175,8 @@ Maximizer = require("./Maximizer");
     var mockXYZCam = new firepick.XYZCamera(); // mock images
     var xyzCam = useMock ? mockXYZCam : fpd;
     var focus = new firepick.Focus(xyzCam, -110, 20, {
-		logLevel: "trace",
+		logLevel: "debug",
+		dzPolyFit: 0,
 	});
     it("sharpness(0) should compute the sharpness at {x:0,y:0,z:0}", function() {
         var captureOld = focus.captureCount;
@@ -141,10 +208,23 @@ Maximizer = require("./Maximizer");
         var captureOld = focus.captureCount;
         var result = focus.sharpestZ();
         if (useMock) {
-            should(result.zBest).within(-19,-17);
-            should(result.zPolyFit).within(-19-epsilon,-16+epsilon);
-            should(result.zPolyFitAvg).within(-19-epsilon,-16+epsilon);
+            should(result.zBest).within(-19,-16);
+			if (focus.dzPolyFit == null) {
+				should(result.zPolyFit).within(-19-epsilon,-16+epsilon);
+				should(result.zPolyFitAvg).within(-19-epsilon,-16+epsilon);
+			}
         }
         should(focus.captureCount - captureOld).below(30);
     });
+	it("focalRange(threshold) should calculate the Z-axis focal range", function() {
+		this.timeout(50000);
+		var result = focus.focalRange(0.7);
+		should(result).have.properties(["zLow","zHigh","zBest", "sharpness"]);
+		should(result.zLow).within(-34,-34);
+		should(result.zHigh).within(5,5);
+		should(result.sharpness).have.properties(["min","max"]);
+		result.sharpness.min.should.be.a.Number;
+		result.sharpness.max.should.be.a.Number;
+		result.sharpness.min.should.be.below(result.sharpness.max);
+	});
 });

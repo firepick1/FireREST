@@ -25,7 +25,7 @@ Util = require("./Util");
 		for (var i = 0; i < that.nPlaces; i++) {
 			that.dxPolyFit /= 10;
 		}
-		that.dxPolyFit = options.dxPolyFit || that.dxPolyFit;
+		that.dxPolyFit = options.dxPolyFit == null ? that.dxPolyFit : options.dxPolyFit;
 		that.logLevel = options.logLevel || "info";
         that.logTrace = that.logLevel === "trace";
         that.logDebug = that.logTrace || that.logLevel == "debug";
@@ -100,7 +100,6 @@ Util = require("./Util");
     };
 	Maximizer.prototype.select = function(prevGen) {
         var that = this;
-		var dx = that.dxPolyFit;
 		var xBest = prevGen[0];
 		var xWorst = prevGen[prevGen.length-1];
 		var xBisect = Util.roundN((that.xLow+that.xHigh)/2,that.nPlaces);
@@ -175,23 +174,26 @@ Util = require("./Util");
 				" low:[" + xLow1 + "," + xLow2 + "," + xLow3 + "]" +
 				" high:[" + xHigh1 + "," + xHigh2 + "," + xHigh3 + "]");
 		}
-		var xPolyFitLow = that.polyFit(xLow1,xLow2,xLow3);
-		var xPolyFitHigh = that.polyFit(xBest-dx, xBest+dAvg, xBest+dx+dAvg);
-		var xPolyFitAvg = (xPolyFitLow+xPolyFitHigh)/2;
-		var xPolyFit = that.polyFit(xBest-dx, xBest, xBest+dx);
-		if (that.logDebug) {
-			console.log("DEBUG	: solve() " + that.doneMsg +
-				" xBest:" + Util.roundN(xBest,that.nPlaces) +
-				" xPolyFit:" + that.round(xPolyFit) +
-				" xPolyFitAvg:" + that.round(xPolyFitAvg) +
-				"");
-		}
-        return {
+        var result = {
             xBest: xBest,
-			xPolyFit: xPolyFit,
-			xPolyFitAvg: xPolyFitAvg,
 			status: that.doneMsg,
         };
+		if (that.dxPolyFit) {
+			var xPolyFitLow = that.polyFit(xLow1,xLow2,xLow3);
+			var xPolyFitHigh = that.polyFit(xBest-dx, xBest+dAvg, xBest+dx+dAvg);
+			var xPolyFitAvg = (xPolyFitLow+xPolyFitHigh)/2;
+			var xPolyFit = that.polyFit(xBest-dx, xBest, xBest+dx);
+			result.xPolyFit = xPolyFit;
+			result.xPolyFitAvg = xPolyFitAvg;
+			if (that.logDebug) {
+				console.log("DEBUG	: solve() " + that.doneMsg +
+					" xBest:" + Util.roundN(xBest,that.nPlaces) +
+					" xPolyFit:" + that.round(xPolyFit) +
+					" xPolyFitAvg:" + that.round(xPolyFitAvg) +
+					"");
+			}
+		}
+        return result;
     };
 
     console.log("LOADED	: firepick.Maximizer");
