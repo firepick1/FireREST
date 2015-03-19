@@ -157,11 +157,11 @@ Logger = require("./Logger");
 		basis:basis,
 	});
     it("maxFeedRate() should calculate the maximum feed rate", function() {
+        this.timeout(120000);
 		var epsilon = 0.6;
-        this.timeout(50000);
         var captureOld = feedRate.captureCount;
         var result = feedRate.maxFeedRate();
-		should(result.feedRate).within(1000, 10000);
+		should(result.feedRate).within(1000, 20000);
         if (useMock) {
             should(result.feedRate).within(5880, 6000);
         }
