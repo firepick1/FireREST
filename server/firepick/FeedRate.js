@@ -63,8 +63,8 @@ Logger = require("./Logger");
 		that.xyzCam.moveTo(that.basis);
 		var imgRef = that.xyzCam.capture("feedrate", feedRate);
 		var psnr = that.ip.PSNR(that.basis, imgRef).PSNR;
-		var sameness = psnr === "SAME" ? 1 : Math.min(that.maxPSNR, (psnr || 0)) / that.maxPSNR; // 0..1
-		var quality = Util.roundN(100*feedRate /that.feedMax * sameness, that.nPlaces);
+		var sameness = psnr === "SAME" ? that.maxPSNR : Math.min(that.maxPSNR, (psnr || 0));
+		var quality = 10*feedRate /that.feedMax + sameness;
 		that.samples[feedRate] = quality;
 		that.logger.debug("evaluate(",feedRate,") PSNR:",psnr, " quality:", quality);
 		return quality;
