@@ -41,11 +41,11 @@ Logger = require("./Logger");
 		that.feedRate = feedRate;
 		return that;
 	};
-    XYZCamera.prototype.origin = function() {
+    XYZCamera.prototype.origin = function() { // mock
         var that = this;
         return that.moveTo(ref000);
     };
-    XYZCamera.prototype.moveTo = function(xyz) {
+    XYZCamera.prototype.moveTo = function(xyz) { // mock
         var that = this;
         should.exist(xyz);
         if (that.position == null) {
@@ -62,7 +62,7 @@ Logger = require("./Logger");
         }
         return that;
     };
-    XYZCamera.prototype.getXYZ = function() {
+    XYZCamera.prototype.getXYZ = function() { // mock
         var that = this;
         return that.position;
     };

@@ -53,14 +53,14 @@ Logger = require("./Logger");
 		if (that.basis.path == null) {
 			that.xyzCam.origin();
 			that.xyzCam.setFeedRate(that.feedMin)
-			that.xyzCam.moveTo({x:50,y:50,z:0}); // lateral move introduces image offset
 			that.xyzCam.moveTo(that.basis);
-			that.basis = that.xyzCam.capture();
-			that.basis = that.xyzCam.capture();
+			that.basis = that.xyzCam.capture("feedrate-basis");
 		}
 		that.xyzCam.origin(); // recalibrate
-		that.xyzCam.setFeedRate(feedRate).moveTo(that.basis);
-		var imgRef = that.xyzCam.capture("feedrate");
+		that.xyzCam.setFeedRate(feedRate);
+		that.xyzCam.moveTo({x:50,y:50,z:0}); // lateral move introduces image offset
+		that.xyzCam.moveTo(that.basis);
+		var imgRef = that.xyzCam.capture("feedrate", feedRate);
 		var psnr = that.ip.PSNR(that.basis, imgRef).PSNR;
 		var sameness = psnr === "SAME" ? 1 : Math.min(that.maxPSNR, (psnr || 0)) / that.maxPSNR; // 0..1
 		var quality = Util.roundN(100*feedRate /that.feedMax * sameness, that.nPlaces);
