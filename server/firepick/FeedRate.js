@@ -60,7 +60,7 @@ Logger = require("./Logger");
 		//that.xyzCam.moveTo({x:50,y:50,z:that.basis.z}); // lateral move introduces image offset
 		that.xyzCam.setFeedRate(feedRate);
 		var quality = 0;
-		for (var i = 0; i < 3; i++) {
+		for (var i = 0; i < 5; i++) {
 			that.xyzCam.moveTo({x:10,y:0,z:that.basis.z}); // lateral move introduces image offset
 			that.xyzCam.moveTo({x:20,y:0,z:that.basis.z}); // lateral move introduces image offset
 			that.xyzCam.moveTo({x:30,y:0,z:that.basis.z}); // lateral move introduces image offset
@@ -87,7 +87,7 @@ Logger = require("./Logger");
 				q = (feedRate/that.feedMax)/10 + Number(result.match) - (result.dx*result.dx +result.dy*result.dy);
 			}
 			quality += q;
-			that.logger.debug("evaluate(",feedRate,") result:",result, " q:", q);
+			that.logger.trace("evaluate(",feedRate,") result:",result, " q:", q);
 		}
 		that.logger.debug("evaluate(",feedRate,") result:",result, " quality:", quality);
 		that.samples[feedRate] = quality;
@@ -186,7 +186,7 @@ Logger = require("./Logger");
 		basis:basis,
 	});
     it("maxFeedRate() should calculate the maximum feed rate", function() {
-        this.timeout(5*60000);
+        this.timeout(25*60000);
 		var epsilon = 0.6;
         var captureOld = feedRate.captureCount;
         var result = feedRate.maxFeedRate();
