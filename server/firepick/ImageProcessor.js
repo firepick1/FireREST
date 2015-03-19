@@ -32,15 +32,25 @@ Logger = require("./Logger");
     ImageProcessor.prototype.health = function() {
         return 1;
     };
-    ImageProcessor.prototype.calcOffset = function(imgRef1, imgRef2) {
+    ImageProcessor.prototype.calcOffset = function(imgRef1, imgRef2, channel) {
 		var that = this;
+		channel = channel == null && "0" ||
+			channel === "B" && "0" ||
+			channel === "G" && "1" ||
+			channel === "R" && "2" ||
+			channel;
         var jout = that.firesight_cmd(imgRef1.path, "calcOffset.json",
             "-Dtemplate=" + imgRef2.path);
-        return jout.result.channels['0'];
+        return jout.result.channels[channel];
     };
     ImageProcessor.prototype.meanStdDev = function(imgRef) {
 		var that = this;
         return that.firesight_cmd(imgRef.path, "meanStdDev.json").result;
+    };
+    ImageProcessor.prototype.matchTemplate = function(imgRef, tmpltRef) {
+		var that = this;
+        return that.firesight_cmd(imgRef.path, "matchTemplate.json", 
+			"-Dtemplate="+tmpltRef.path).result;
     };
     ImageProcessor.prototype.sharpness = function(imgRef) {
 		var that = this;
@@ -107,7 +117,7 @@ Logger = require("./Logger");
                 });
             });
             describe("validating sharpness", function() {
-                it("should calculate the sharpness of an image", function() {
+                it("sharpness(imgRef) should calculate the sharpness of an image", function() {
                     var result = ip.sharpness(ref000a);
                     should.deepEqual(result, {
                         "sharpness": 3.0546240601503762
@@ -115,13 +125,20 @@ Logger = require("./Logger");
                 });
             });
             describe("validating PSNR", function() {
-                it("should calculate the Power Signal to Noise Ratio of two images", function() {
+                it("PSNR(imgRef1,imgRef2) should calculate the Power Signal to Noise Ratio of two images", function() {
                     var result = ip.PSNR(ref000a, ref000b);
                     should.deepEqual(result, {
                         "PSNR": 52.54224351193264
                     });
                 });
             });
+			/* TBD
+            describe("validating matchTemplate", function() {
+                it("matchTemplate(imgRef,tmpltRef) should locate all subimages that match given template", function() {
+                    var result = ip.matchTemplate(ref000a, tmpltRef);
+                });
+            });
+			*/
         });
         return true;
     };

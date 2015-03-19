@@ -61,11 +61,20 @@ Logger = require("./Logger");
 		that.xyzCam.setFeedRate(feedRate);
 		that.xyzCam.moveTo(that.basis);
 		var imgRef = that.xyzCam.capture("feedrate", feedRate);
+		/*
 		var psnr = that.ip.PSNR(that.basis, imgRef).PSNR;
 		var sameness = psnr === "SAME" ? that.maxPSNR : Math.min(that.maxPSNR, (psnr || 0));
 		var quality = feedRate /that.feedMax + sameness;
 		that.samples[feedRate] = quality;
 		that.logger.debug("evaluate(",feedRate,") PSNR:",psnr, " quality:", quality);
+		*/
+		var result = that.ip.calcOffset(that.basis, imgRef);
+		var quality = 0;
+		if (result && result.hasOwnProperty("match")) {
+			quality = feedRate/that.feedMax * result.match - (result.dx*result.dx +result.dy*result.dy);
+		}
+		that.samples[feedRate] = quality;
+		that.logger.debug("evaluate(",feedRate,") result:",result, " quality:", quality);
 		return quality;
 	};
     FeedRate.prototype.maxFeedRate = function() {
