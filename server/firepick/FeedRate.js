@@ -57,7 +57,7 @@ Logger = require("./Logger");
 			that.basis = that.xyzCam.capture("feedrate-basis");
 		//}
 		that.xyzCam.setFeedRate(that.feedMin);	// come back slowly
-		that.xyzCam.moveTo({x:50,y:50,z:0}); // lateral move introduces image offset
+		that.xyzCam.moveTo({x:50,y:50,z:that.basis.z}); // lateral move introduces image offset
 		that.xyzCam.setFeedRate(feedRate);
 		that.xyzCam.moveTo(that.basis);
 		var imgRef = that.xyzCam.capture("feedrate", feedRate);
@@ -151,7 +151,7 @@ Logger = require("./Logger");
 
     var fpd = new FPD();
     var useMock = fpd.health() < 1;
-	var basis = {x:0,y:0,z:0};
+	var basis = {x:0,y:0,z:-40};
     var mockXYZCam = new mock.MockXYZCamera({basis:basis});
     var xyzCam = useMock ? mockXYZCam : fpd;
     var feedRate = new firepick.FeedRate(xyzCam, 
