@@ -156,7 +156,8 @@ Logger = require("./Logger");
 	var basis = {x:0,y:0,z:0};
     var mockXYZCam = new mock.MockXYZCamera({basis:basis});
     var xyzCam = useMock ? mockXYZCam : fpd;
-    var feedRate = new firepick.FeedRate(xyzCam, 1000, useMock ? 10000 : 20000, {
+    var feedRate = new firepick.FeedRate(xyzCam, 
+		useMock ? 1000 : 500, 10000 , {
 		logLevel:"debug",
 		imageProcessor: new ImageProcessor(),
 		basis:basis,
