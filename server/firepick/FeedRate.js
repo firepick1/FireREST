@@ -52,7 +52,10 @@ Logger = require("./Logger");
 		}
 		if (that.basis.path == null) {
 			that.xyzCam.origin();
-			that.xyzCam.setFeedRate(that.feedMin).moveTo(that.basis);
+			that.xyzCam.setFeedRate(that.feedMin)
+			that.xyzCam.moveTo({x:50,y:50,z:0}); // lateral move introduces image offset
+			that.xyzCam.moveTo(that.basis);
+			that.basis = that.xyzCam.capture();
 			that.basis = that.xyzCam.capture();
 		}
 		that.xyzCam.origin(); // recalibrate
