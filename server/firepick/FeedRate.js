@@ -81,7 +81,8 @@ Logger = require("./Logger");
 		var result = that.ip.calcOffset(that.basis, imgRef);
 		var quality = 0;
 		if (result && result.hasOwnProperty("match")) {
-			quality = (feedRate/that.feedMax*10) +  result.match - (result.dx*result.dx +result.dy*result.dy);
+			//quality = (feedRate/that.feedMax)/10 + result.match - (result.dx*result.dx +result.dy*result.dy);
+			quality = (feedRate/that.feedMax)/10 + Number(result.match) - (result.dx*result.dx +result.dy*result.dy);
 		}
 		that.samples[feedRate] = quality;
 		that.logger.debug("evaluate(",feedRate,") result:",result, " quality:", quality);
