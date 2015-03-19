@@ -8,18 +8,22 @@ temp.track();
 
 (function(firepick) {
     function ImageRef(x, y, z, properties) {
-        this.x = x || 0;
-        this.y = y || 0;
-        this.z = z || 0;
+		var that = this;
+        that.x = x || 0;
+        that.y = y || 0;
+        that.z = z || 0;
+		that.x.should.be.Number;
+		that.y.should.be.Number;
+		that.z.should.be.Number;
         if (properties) {
             should.ok(typeof properties === 'object');
             for (var prop in properties) {
                 if (properties.hasOwnProperty(prop) && properties[prop] != null) {
-                    this[prop] = properties[prop];
+                    that[prop] = properties[prop];
                 }
             }
         }
-        return this;
+        return that;
     }
 
     //////////////// CLASS //////////////////////
@@ -72,63 +76,74 @@ temp.track();
 
     //////////////// INSTANCE /////////////////////
     ImageRef.prototype.copy = function() {
-        return ImageRef.copy(this);
+		var that = this;
+        return ImageRef.copy(that);
     };
     ImageRef.prototype.setPath = function(path) {
+		var that = this;
         path.should.be.a.String;
-        this.path = path;
-        return this;
+        that.path = path;
+        return that;
     };
     ImageRef.prototype.setVersion = function(version) {
+		var that = this;
         if (version == null) {
-            delete this.version;
+            delete that.version;
         } else {
-            this.version = version;
+            that.version = version;
         }
-        return this;
+        return that;
     };
     ImageRef.prototype.setTag = function(tag) {
+		var that = this;
         if (tag == null) {
-            delete this.tag;
+            delete that.tag;
         } else {
-            this.tag = tag;
+            that.tag = tag;
         }
-        return this;
+        return that;
     };
     ImageRef.prototype.setX = function(x) {
-        this.x = x;
-        return this;
+		var that = this;
+        that.x = x;
+        return that;
     };
     ImageRef.prototype.setY = function(y) {
-        this.y = y;
-        return this;
+		var that = this;
+        that.y = y;
+        return that;
     };
     ImageRef.prototype.setZ = function(z) {
-        this.z = z;
-        return this;
+		var that = this;
+        that.z = z;
+        return that;
     };
     ImageRef.prototype.name = function(prefix, suffix) {
-        return (prefix || "") + ImageRef.keyOf(this) + (suffix || "");
+		var that = this;
+        return (prefix || "") + ImageRef.keyOf(that) + (suffix || "");
     };
-    ImageRef.prototype.compare = function(that) {
-        return ImageRef.compare(this, that);
+    ImageRef.prototype.compare = function(that2) {
+		var that = this;
+        return ImageRef.compare(that, that2);
     };
     ImageRef.prototype.exists = function() {
+		var that = this;
         try {
-            fs.statSync(this.path);
+            fs.statSync(that.path);
             return true;
         } catch (err) {
             return false; // silly nodejs is deprecating fs.exists()
         }
     };
     ImageRef.prototype.round = function(xplaces, yplaces, zplaces) {
+		var that = this;
         xplaces = xplaces == null ? 0 : xplaces;
         yplaces = yplaces == null ? xplaces : yplaces;
         zplaces = zplaces == null ? yplaces : zplaces;
-        this.x = +(Math.round(this.x + "e+" + xplaces) + "e-" + xplaces);
-        this.y = +(Math.round(this.y + "e+" + yplaces) + "e-" + yplaces);
-        this.z = +(Math.round(this.z + "e+" + zplaces) + "e-" + zplaces);
-        return this;
+        that.x = +(Math.round(that.x + "e+" + xplaces) + "e-" + xplaces);
+        that.y = +(Math.round(that.y + "e+" + yplaces) + "e-" + yplaces);
+        that.z = +(Math.round(that.z + "e+" + zplaces) + "e-" + zplaces);
+        return that;
     };
 
     console.log("LOADED	: firepick.ImageRef");

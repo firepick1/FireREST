@@ -1,13 +1,7 @@
 var should = require("should"),
     module = module || {},
     firepick = firepick || {};
-firepick.ImageProcessor = require("./ImageProcessor");
-firepick.ImageRef = require("./ImageRef");
-firepick.XYZCamera = require("./XYZCamera");
-Evolve = require("./Evolve");
-FPD = require("./FPD");
 Util = require("./Util");
-Maximizer = require("./Maximizer");
 
 (function(firepick) {
     function Logger(options) {
@@ -15,6 +9,7 @@ Maximizer = require("./Maximizer");
 
 		// Options
         options = options || {};
+		that.nPlaces = options.nPlaces || 2;
 		that.setLevel(options.logLevel);
 		that.write = options.write || function(msg) {
 			console.log(msg);
@@ -24,19 +19,21 @@ Maximizer = require("./Maximizer");
         return that;
     };
 
-	function message(args) {
+    /////////////// INSTANCE ////////////
+	Logger.prototype.message = function(args) {
+		var that = this;
 		var msg = "";
 		for (var i=0; i < args.length; i++) {
 			if (typeof args[i] ==="object") {
 				msg += JSON.stringify(args[i]);
+			} else if (typeof args[i] === "number") {
+				msg += Util.roundN(args[i], that.nPlaces);
 			} else {
 				msg += args[i];
 			}
 		}
 		return msg;
 	};
-
-    /////////////// INSTANCE ////////////
 	Logger.prototype.setLevel = function(level) {
 		var that = this;
 		that.logLevel = level || "info";
@@ -50,31 +47,31 @@ Maximizer = require("./Maximizer");
 	Logger.prototype.error = function(msg) { 
         var that = this;
 		if (that.logError) {
-			that.write("ERROR	: " + message(arguments));
+			that.write("ERROR	: " + that.message(arguments));
 		}
 	};
 	Logger.prototype.warn = function(msg) { 
         var that = this;
 		if (that.logWarn) {
-			that.write("WARN	: " + message(arguments));
+			that.write("WARN	: " + that.message(arguments));
 		}
 	};
 	Logger.prototype.info = function(msg) { 
         var that = this;
 		if (that.logInfo) {
-			that.write("INFO	: " + message(arguments));
+			that.write("INFO	: " + that.message(arguments));
 		}
 	};
 	Logger.prototype.debug = function(msg) { 
         var that = this;
 		if (that.logDebug) {
-			that.write("DEBUG	: " + message(arguments));
+			that.write("DEBUG	: " + that.message(arguments));
 		}
 	};
 	Logger.prototype.trace = function(msg) { 
         var that = this;
 		if (that.logTrace) {
-			that.write("TRACE	: " + message(arguments));
+			that.write("TRACE	: " + that.message(arguments));
 		}
 	};
 

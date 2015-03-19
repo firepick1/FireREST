@@ -28,6 +28,7 @@ firepick.XYZCamera = require("./XYZCamera");
             }
         );
         that.$imgProc = options.imgProc || new firepick.ImageProcessor(that.$imgStore);
+		that.setFeedRate(options.feedRate || that.$xyz.feedRate);
         return that;
     };
     //////////// PRIVATE ////////////////
@@ -49,6 +50,12 @@ firepick.XYZCamera = require("./XYZCamera");
         that.$xyz.home();
         return that;
     };
+	FPD.prototype.setFeedRate = function(feedRate) {
+        var that = this;
+		that.$xyz.setFeedRate(feedRate);
+		that.feedRate = feedRate;
+		return that;
+	};
     FPD.prototype.capture = function(tag, version) {
         var that = this;
         var xyz = that.getXYZ();

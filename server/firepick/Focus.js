@@ -4,7 +4,6 @@ var should = require("should"),
 firepick.ImageProcessor = require("./ImageProcessor");
 firepick.ImageRef = require("./ImageRef");
 firepick.XYZCamera = require("./XYZCamera");
-Evolve = require("./Evolve");
 FPD = require("./FPD");
 Util = require("./Util");
 Maximizer = require("./Maximizer");
@@ -14,8 +13,6 @@ Logger = require("./Logger");
     function Focus(xyzCam, zMin, zMax, options) {
         var that = this;
 
-		// Options
-        options = options || {};
         firepick.XYZCamera.isInterfaceOf(xyzCam);
         that.xyzCam = xyzCam;
         should(zMin).be.a.Number;
@@ -23,6 +20,9 @@ Logger = require("./Logger");
         should(zMin).be.below(zMax);
         that.zMin = zMin;
         that.zMax = zMax;
+
+		// Options
+        options = options || {};
         that.nPlaces = options.nPlaces || 0;
         that.nPlaces.should.not.be.below(0);
 		that.dzPolyFit = options.dzPolyFit || 0;

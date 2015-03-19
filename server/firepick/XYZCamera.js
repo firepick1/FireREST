@@ -2,31 +2,45 @@ var should = require("should"),
     module = module || {},
     firepick = firepick || {};
 var fs = require("fs");
-firepick.ImageRef = require("./ImageRef");
-firepick.ImageStore = require("./ImageStore");
+ImageRef = require("./ImageRef");
+ImageStore = require("./ImageStore");
+Logger = require("./Logger");
 
 (function(firepick) {
     function XYZCamera(options) {
         var that = this;
+		var mock = that;
         options = options || {};
+		that.$xyz = options.xyz || mock;
+		that.$camera = options.camera || mock;
         that.mockImages = {};
         var mockPaths = options.mockPaths || firepick.XYZCamera.mockPaths;
         for (var i in mockPaths) {
-            var imgRef = firepick.XYZCamera.mockImageRef(mockPaths[i]);
-            var name = firepick.ImageRef.keyOf(imgRef);
+            var imgRef = XYZCamera.mockImageRef(mockPaths[i]);
+            var name = ImageRef.keyOf(imgRef);
             that.mockImages[name] = imgRef;
             that.defaultRef = that.defaultRef || imgRef;
             that.zMax = Math.max(that.zMax || imgRef.z, imgRef.z);
         }
+		that.setFeedRate(options.feedRate || that.$xyz.feedRate || 1000);
+		that.logger = options.logger || new Logger(options.logLevel);
         return that;
     };
 
-    var ref000 = new firepick.ImageRef(0, 0, 0);
+    var ref000 = new ImageRef(0, 0, 0);
 
     /////////////// INSTANCE ////////////////
     XYZCamera.prototype.health = function() {
         return 1;
     };
+	XYZCamera.prototype.setFeedRate = function(feedRate) {
+        var that = this;
+		if (that.$xyz !== that) {
+			that.$xyz.setFeedRate(feedRate);
+		}
+		that.feedRate = feedRate;
+		return that;
+	};
     XYZCamera.prototype.origin = function() {
         var that = this;
         return that.moveTo(ref000);
@@ -34,27 +48,27 @@ firepick.ImageStore = require("./ImageStore");
     XYZCamera.prototype.moveTo = function(xyz) {
         var that = this;
         should.exist(xyz);
-        if (that.xyz == null) {
+        if (that.position == null) {
             should(xyz).have.properties(["x", "y", "z"]);
-            that.xyz = {
+            that.position = {
                 x: xyz.x,
                 y: xyz.y,
                 z: xyz.z
             };
         } else {
-            that.xyz.x = xyz.x == null ? that.xyz.x : xyz.x;
-            that.xyz.y = xyz.y == null ? that.xyz.y : xyz.y;
-            that.xyz.z = xyz.z == null ? that.xyz.z : xyz.z;
+            that.position.x = xyz.x == null ? that.position.x : xyz.x;
+            that.position.y = xyz.y == null ? that.position.y : xyz.y;
+            that.position.z = xyz.z == null ? that.position.z : xyz.z;
         }
         return that;
     };
     XYZCamera.prototype.getXYZ = function() {
         var that = this;
-        return that.xyz;
+        return that.position;
     };
     XYZCamera.prototype.capture = function(tag, version) {
         var that = this;
-        var imgRef = firepick.ImageRef.copy(that.xyz);
+        var imgRef = ImageRef.copy(that.position);
         if (tag != null) {
             imgRef.tag = tag;
         }
@@ -65,20 +79,20 @@ firepick.ImageStore = require("./ImageStore");
     }
     XYZCamera.prototype.imageRef = function(imgRef) {
         var that = this;
-        imgRef = imgRef || that.xyz || that.ref000;
-        var name = firepick.ImageRef.keyOf(imgRef);
+        imgRef = imgRef || that.position || that.ref000;
+        var name = ImageRef.keyOf(imgRef);
         var foundRef = that.mockImages[name];
         if (foundRef == null) {
             var newImgPath = that.defaultRef.path;
             if (imgRef.x === 0 && imgRef.y === 0) { // mock with next greater available z
                 if (imgRef.z < that.zMax) {
                     var z = Math.floor(imgRef.z) + 1;
-                    newImgPath = that.imageRef(new firepick.ImageRef().setZ(z)).path;
+                    newImgPath = that.imageRef(new ImageRef().setZ(z)).path;
                 }
             } else { // mock all images from z-axis 
-                newImgPath = that.imageRef(new firepick.ImageRef().setZ(imgRef.z)).path;
+                newImgPath = that.imageRef(new ImageRef().setZ(imgRef.z)).path;
             }
-            foundRef = new firepick.ImageRef(imgRef.x, imgRef.y, imgRef.z, {
+            foundRef = new ImageRef(imgRef.x, imgRef.y, imgRef.z, {
                 path: newImgPath
             });
             if (imgRef.tag != null) {
@@ -100,24 +114,25 @@ firepick.ImageStore = require("./ImageStore");
         xyz = suffix_tokens[0];
         var z_tokens = xyz.split("X");
         var xy_tokens = z_tokens[1].split("Y");
-        return new firepick.ImageRef(Number(xy_tokens[0]), Number(xy_tokens[1]), Number(z_tokens[0]), {
+        return new ImageRef(Number(xy_tokens[0]), Number(xy_tokens[1]), Number(z_tokens[0]), {
             path: path
         });
     };
     XYZCamera.isInterfaceOf = function(xyzCam) {
         should.exist(xyzCam);
-		xyzCam.should.have.properties(["origin","moveTo","getXYZ","capture","imageRef"]);
+		xyzCam.should.have.properties(["origin","moveTo","getXYZ","capture","imageRef","setFeedRate"]);
         xyzCam.origin.should.be.a.Function;
         xyzCam.moveTo.should.be.a.Function;
         xyzCam.getXYZ.should.be.a.Function;
         xyzCam.capture.should.be.a.Function;
         xyzCam.imageRef.should.be.a.Function;
+        xyzCam.setFeedRate.should.be.a.Function;
         return true;
     };
     XYZCamera.validate = function(xyzCam) {
         var ref = [];
         var ip;
-        it("firepick.XYZCamera.isInterfaceOf", function() {
+        it("XYZCamera.isInterfaceOf", function() {
             firepick.XYZCamera.isInterfaceOf(xyzCam);
         });
         it("should origin(), re-calibrating as necessary", function() {
@@ -145,6 +160,14 @@ firepick.ImageStore = require("./ImageStore");
                 z: 3
             });
         });
+		it("setFeedRate(rate) should set the feed rate for subsequent moves", function() {
+			var fr = xyzCam.feedRate;
+			fr.should.be.Number;
+			fr.should.be.above(0);
+			should(xyzCam.setFeedRate(fr/2)).equal(xyzCam);
+			xyzCam.feedRate.should.equal(fr/2);
+			xyzCam.setFeedRate(fr);
+		});
         it("should moveTo({z:5})", function() {
             xyzCam.moveTo({
                 z: 5
@@ -216,7 +239,7 @@ firepick.ImageStore = require("./ImageStore");
                 z: 0
             });
             should(ref.constructor.name).equal("ImageRef");
-            should(ref).instanceof(firepick.ImageRef);
+            should(ref).instanceof(ImageRef);
             should(ref).properties({
                 x: 0,
                 y: 0,
@@ -232,7 +255,7 @@ firepick.ImageStore = require("./ImageStore");
                 y: 2,
                 z: 3
             }).imageRef();
-            should(ref).instanceof(firepick.ImageRef);
+            should(ref).instanceof(ImageRef);
             should(ref).properties({
                 x: 1,
                 y: 2,
@@ -259,7 +282,7 @@ firepick.ImageStore = require("./ImageStore");
                 y: 2,
                 z: 1
             });
-            should(ref).instanceof(firepick.ImageRef);
+            should(ref).instanceof(ImageRef);
             should(ref).properties({
                 x: 3,
                 y: 2,

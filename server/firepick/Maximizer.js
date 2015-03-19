@@ -27,7 +27,7 @@ Logger = require("./Logger");
 			that.dxPolyFit /= 10;
 		}
 		that.dxPolyFit = options.dxPolyFit == null ? that.dxPolyFit : options.dxPolyFit;
-		that.logger = new Logger(options);
+		that.logger = options.logger || new Logger(options);
 		that.logger.trace("nPlaces:" + that.nPlaces + " dxPolyFit:" + that.dxPolyFit);
         return that;
     };

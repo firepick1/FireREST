@@ -5,46 +5,50 @@ var should = require("should"),
 var fs = require("fs");
 var path = require("path");
 var os = require("os");
-firepick.Camera = require("./Camera");
-firepick.ImageRef = require("./ImageRef");
-firepick.ImageStore = require("./ImageStore");
+Camera = require("./Camera");
+ImageRef = require("./ImageRef");
+ImageStore = require("./ImageStore");
+Logger = require("./Logger");
 
 (function(firepick) {
-    function ImageProcessor(imgStore) {
-        this.imgStore = imgStore || new firepick.ImageStore();
+    function ImageProcessor(options) {
+		options = options || {};
+		this.logger = options.logger || new Logger(options);
         return this;
     }
 
-    ////////// INTERNAL ////////////////
-    function firesight_cmd(fname1, pipeline, args) {
+    /////////////// INSTANCE ////////////
+    ImageProcessor.prototype.firesight_cmd = function(fname1, pipeline, args) {
+		var that = this;
         var cmd = "firesight -i " + fname1 + " -p server/json/" + pipeline;
         if (args) {
             cmd += " " + args;
         }
-        //console.log(cmd);
         var out = child_process.execSync(cmd);
         var jout = JSON.parse(out.toString());
-        //console.log(JSON.stringify(jout));
+		that.logger.debug(cmd, " => ", jout);
         return jout;
     };
-
-    /////////////// INSTANCE ////////////
     ImageProcessor.prototype.health = function() {
-        return this.imgStore.health();
+        return 1;
     };
     ImageProcessor.prototype.calcOffset = function(imgRef1, imgRef2) {
-        var jout = firesight_cmd(imgRef1.path, "calcOffset.json",
+		var that = this;
+        var jout = that.firesight_cmd(imgRef1.path, "calcOffset.json",
             "-Dtemplate=" + imgRef2.path);
         return jout.result.channels['0'];
     };
     ImageProcessor.prototype.meanStdDev = function(imgRef) {
-        return firesight_cmd(imgRef.path, "meanStdDev.json").result;
+		var that = this;
+        return that.firesight_cmd(imgRef.path, "meanStdDev.json").result;
     };
     ImageProcessor.prototype.sharpness = function(imgRef) {
-        return firesight_cmd(imgRef.path, "sharpness.json").result;
+		var that = this;
+        return that.firesight_cmd(imgRef.path, "sharpness.json").result;
     };
     ImageProcessor.prototype.PSNR = function(imgRef1, imgRef2) {
-        return firesight_cmd(imgRef1.path, "PSNR.json",
+		var that = this;
+        return that.firesight_cmd(imgRef1.path, "PSNR.json",
             "-Dpath=" + imgRef2.path).result;
     };
 
