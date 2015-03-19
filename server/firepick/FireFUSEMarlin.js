@@ -40,6 +40,7 @@ var firefuse_path = "/dev/firefuse/sync/cnc/marlin/gcode.fire";
 		if (that.err == null) {
 			that.xyz.setFeedRate(feedRate);
 		}
+		that.feedRate = feedRate;
 		return that;
     };
     FireFUSEMarlin.prototype.health = function() {
