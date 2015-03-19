@@ -80,12 +80,17 @@ Logger = require("./Logger");
 		*/
 		var result = that.ip.calcOffset(that.basis, imgRef);
 		var quality = 0;
-		if (result && result.hasOwnProperty("match")) {
-			//quality = (feedRate/that.feedMax)/10 + result.match - (result.dx*result.dx +result.dy*result.dy);
-			quality = (feedRate/that.feedMax)/10 + Number(result.match) - (result.dx*result.dx +result.dy*result.dy);
+		for (var i = 0; i < 3; i++) {
+			var q = 0;
+			if (result && result.hasOwnProperty("match")) {
+				//quality = (feedRate/that.feedMax)/10 + result.match - (result.dx*result.dx +result.dy*result.dy);
+				q = (feedRate/that.feedMax)/10 + Number(result.match) - (result.dx*result.dx +result.dy*result.dy);
+			}
+			quality += q;
+			that.logger.debug("evaluate(",feedRate,") result:",result, " q:", q);
 		}
-		that.samples[feedRate] = quality;
 		that.logger.debug("evaluate(",feedRate,") result:",result, " quality:", quality);
+		that.samples[feedRate] = quality;
 		return quality;
 	};
     FeedRate.prototype.maxFeedRate = function() {
