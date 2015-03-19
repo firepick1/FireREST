@@ -8,15 +8,17 @@ var firefuse_path = "/dev/firefuse/sync/cnc/marlin/gcode.fire";
 //var firefuse_path = "/tmp/Marlin";
 
 (function(firepick) {
-    function FireFUSEMarlin(path) {
-        this.path = path || firefuse_path;
+    function FireFUSEMarlin(path, options) {
+		var that = this;
+        that.path = path || firefuse_path;
+		options = options || {};
         var writer = function(data) {
             throw new Error("FireFUSEMarlin is unavailable");
         }
         try {
-            this.stat = fs.statSync(this.path);
-            var fd = fs.openSync(this.path, 'w');
-            this.fd = fd;
+            that.stat = fs.statSync(that.path);
+            var fd = fs.openSync(that.path, 'w');
+            that.fd = fd;
             writer = function(data) {
                 var bytes = fs.writeSync(fd, data);
                 //console.log("FireFUSEMarlin("+data+")");
@@ -27,28 +29,41 @@ var firefuse_path = "/dev/firefuse/sync/cnc/marlin/gcode.fire";
             if (err.code != "ENOENT") {
                 console.log(err);
             }
-            this.err = err;
+            that.err = err;
         }
-        this.xyz = new firepick.XYZPositioner(writer);
-        return this;
+        that.xyz = new firepick.XYZPositioner(writer);
+		that.setFeedRate(options.feedRate || 3000);
+        return that;
+    };
+    FireFUSEMarlin.prototype.setFeedRate = function(feedRate) {
+		var that = this;
+		if (that.err == null) {
+			that.xyz.setFeedRate(feedRate);
+		}
+		return that;
     };
     FireFUSEMarlin.prototype.health = function() {
-        return this.err == null ? 1 : 0;
+		var that = this;
+        return that.err == null ? 1 : 0;
     };
     FireFUSEMarlin.prototype.home = function() {
-        this.xyz.home();
-        return this;
+		var that = this;
+        that.xyz.home();
+        return that;
     };
     FireFUSEMarlin.prototype.origin = function() {
-        this.xyz.origin();
-        return this;
+		var that = this;
+        that.xyz.origin();
+        return that;
     };
     FireFUSEMarlin.prototype.move = function(path) {
-        this.xyz.move(path);
-        return this;
+		var that = this;
+        that.xyz.move(path);
+        return that;
     };
     FireFUSEMarlin.prototype.getXYZ = function() {
-        return this.xyz.getXYZ();
+		var that = this;
+        return that.xyz.getXYZ();
     };
 
     console.log("LOADED	: firepick.FireFUSEMarlin");

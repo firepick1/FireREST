@@ -2,6 +2,7 @@ var should = require("should"),
     module = module || {},
     firepick = firepick || {};
 Util = require("./Util");
+Logger = require("./Logger");
 
 (function(firepick) {
     function Evolve(solver, options) {
@@ -17,9 +18,7 @@ Util = require("./Util");
 		that.nFamilies = options.nFamilies || that.nSurvivors;
 		that.maxGen = options.maxGen || 50;
         should(that.nSurvivors).not.below(1);
-		that.logLevel = options.logLevel || "info";
-        that.logTrace = that.logLevel === "trace";
-        that.logDebug = that.logTrace || that.logLevel == "debug";
+		that.logger = options.logger || new Logger();
         that.curGen = [];
         return that;
     };
@@ -71,17 +70,14 @@ Util = require("./Util");
 			}
 			var candidates = that.solver.select && that.solver.select(that.curGen) || that.curGen;
             that.curGen = that.spawn(candidates);
-            if (that.logTrace) {
-                console.log("TRACE	: spawn#"+that.iGen + "() => " + JSON.stringify(that.curGen));
+            if (that.logger.logTrace) {
+                that.logger.trace("spawn#"+that.iGen + "() => " + JSON.stringify(that.curGen));
             }
             if (that.nSurvivors && that.curGen.length > that.nSurvivors) {
                 rejects = that.curGen.splice(that.nSurvivors, that.curGen.length) || [];
             }
         }
-		if (that.logDebug) {
-			console.log("DEBUG	: solve() " + that.iGen + " generations => " 
-				+ JSON.stringify(that.curGen[0]));
-		}
+		that.logger.debug("solve() ", that.iGen, " generations => ", that.curGen[0]);
         return that.curGen;
     };
 
@@ -164,15 +160,14 @@ var demo = demo || {};
 		var options = {};
 		var evolve = new firepick.Evolve(solver);
 		should(evolve).have.properties({
-			logLevel: "info",
 			nSurvivors: 5,
 			nFamilies: 5,
 			maxGen: 50,
 		});
+		evolve.logger.should.have.properties({logLevel:"info"});
 	});
     describe("compute the square root of " + N, function() {
 		var evolve = new firepick.Evolve(solver,{
-			logLevel:"debug",
 			maxGen:300
 		});
         var guess1 = (1 + N2) / 2;

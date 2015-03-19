@@ -8,10 +8,9 @@ Evolve = require("./Evolve");
 FPD = require("./FPD");
 Util = require("./Util");
 Maximizer = require("./Maximizer");
-Logger = require("./Logger");
 
 (function(firepick) {
-    function Focus(xyzCam, zMin, zMax, options) {
+    function FeedRate(xyzCam, zMin, zMax, options) {
         var that = this;
 
 		// Options
@@ -25,8 +24,16 @@ Logger = require("./Logger");
         that.zMax = zMax;
         that.nPlaces = options.nPlaces || 0;
         that.nPlaces.should.not.be.below(0);
-		that.dzPolyFit = options.dzPolyFit || 0;
-		that.logger = options.logger || new Logger(options);
+		that.dzPolyFit = options.dzPolyFit;
+
+		that.basis = options.basis || {x:0,y:0,z:0};
+		that.basis.should.have.properties(["x","y","z"]);
+		that.basis.x.should.be.Number;
+		that.basis.y.should.be.Number;
+		that.basis.z.should.be.Number;
+		that.logLevel = options.logLevel || "info";
+        that.logTrace = that.logLevel === "trace";
+        that.logDebug = that.logTrace || that.logLevel == "debug";
 
 		that.samples = {};
         that.captureCount = 0;
@@ -35,13 +42,13 @@ Logger = require("./Logger");
     };
 
     /////////////// INSTANCE ////////////
-	Focus.prototype.round = function(value) { 
+	FeedRate.prototype.round = function(value) { 
         var that = this;
 		var nPlaces = that.nPlaces + 1;
 		nPlaces.should.be.equal(1);
 		return Util.roundN(value, nPlaces); // reporting precision
 	};
-	Focus.prototype.imageRefAtZ = function(z) {
+	FeedRate.prototype.imageRefAtZ = function(z) {
         var that = this;
         return that.xyzCam.imageRef({
             x: 0,
@@ -50,7 +57,7 @@ Logger = require("./Logger");
 			//tag: "calibration",
         });
 	};
-    Focus.prototype.sharpness = function(z) {
+    FeedRate.prototype.sharpness = function(z) {
         var that = this;
         var imgRef = that.imageRefAtZ(z);
 		that.samples[z] = imgRef;
@@ -59,12 +66,22 @@ Logger = require("./Logger");
             //imgRef = that.xyzCam.moveTo(imgRef).capture("calibration");
             imgRef = that.xyzCam.moveTo(imgRef).capture();
             imgRef.sharpness = that.ip.sharpness(imgRef).sharpness;
-			that.logger.debug("IMG(",z,")"," sharp:",
-				that.round(imgRef.sharpness)," [",that.captureCount,"]");
+            if (that.logDebug) {
+                console.log("DEBUG	:   IMG(" + z + ")" + 
+					" sharp:" + that.round(imgRef.sharpness) + " [" + that.captureCount + "]");
+            }
         }
         return imgRef.sharpness;
     };
-    Focus.prototype.sharpestZ = function() {
+	FeedRate.prototype.captureBasis = function() {
+		var that = this;
+		return that.xyzCam.origin().moveTo(that.basis).capture();
+	};
+	FeedRate.prototype.feedRateQuality = function(feedrate) {
+		var that = this;
+		that.xyzCam.origin().setFeedRate(feedRate).moveTo(that.basis);
+	};
+    FeedRate.prototype.sharpestZ = function() {
         var that = this;
 		var captureOld = that.captureCount;
 		var fitness = {evaluate:function(z) {
@@ -72,7 +89,7 @@ Logger = require("./Logger");
 		}};
 		var solver = new Maximizer(fitness, {
 			nPlaces: that.nPlaces,
-			logLevel:that.logger.logLevel,
+			logLevel:that.logLevel,
 			dxPolyFit:that.dzPolyFit,
 		});
 		that.samples = {};
@@ -92,10 +109,12 @@ Logger = require("./Logger");
         result.samples.sort(function(a,b){
 			return a-b;
 		});
-		that.logger.debug("sharpestZ():",result);
+		if (that.logDebug) {
+			console.log("DEBUG	: sharpestZ():" + JSON.stringify(result));
+		}
 		return result;
     };
-	Focus.prototype.bisectThreshold = function(zBelow, zAbove, threshold) {
+	FeedRate.prototype.bisectThreshold = function(zBelow, zAbove, threshold) {
 		var that = this;
 		var zBisect = Util.roundN((zBelow+zAbove)/2, that.nPlaces);
 		if (zBisect === zAbove || zBisect === zBelow) {
@@ -108,7 +127,7 @@ Logger = require("./Logger");
 			return that.bisectThreshold(zBisect, zAbove, threshold);
 		}
 	};
-	Focus.prototype.focalRange = function(threshold) {
+	FeedRate.prototype.focalRange = function(threshold) {
 		var that = this;
 		threshold.should.be.a.Number;
 		threshold.should.be.above(0);
@@ -153,30 +172,25 @@ Logger = require("./Logger");
 			result.zPolyFit = peak.zPolyFit;
 			result.zPolyFitAvg = peak.zPolyFitAvg;
 		}
-		that.logger.debug("focalRange(", threshold, "):", result);
+		if (that.logDebug) {
+			console.log("DEBUG	: focalRange(" + threshold + "):" + JSON.stringify(result));
+		}
 		return result;
 	};
 
-    console.log("LOADED	: firepick.Focus");
-    module.exports = firepick.Focus = Focus;
+    console.log("LOADED	: firepick.FeedRate");
+    module.exports = firepick.FeedRate = FeedRate;
 })(firepick || (firepick = {}));
 
-(typeof describe === 'function') && describe("firepick.Focus", function() {
+(typeof describe === 'function') && describe("firepick.FeedRate", function() {
     var ip = new firepick.ImageProcessor();
     var fpd = new FPD();
     var useMock = fpd.health() < 1;
     var mockXYZCam = new firepick.XYZCamera(); // mock images
     var xyzCam = useMock ? mockXYZCam : fpd;
-    var focus = new firepick.Focus(xyzCam, -110, 20, {
+    var focus = new firepick.FeedRate(xyzCam, -110, 20, {
 		logLevel: "info",
 		dzPolyFit: 0,
-	});
-	it("should have default options", function() {
-		var focus1 = new firepick.Focus(xyzCam, -10,10);
-		focus1.should.have.properties(["logger","nPlaces", "dzPolyFit"]);
-		focus1.logger.should.have.properties({logLevel:"info"});
-		focus1.nPlaces.should.equal(0);
-		focus1.dzPolyFit.should.equal(0);
 	});
     it("sharpness(0) should compute the sharpness at {x:0,y:0,z:0}", function() {
         var captureOld = focus.captureCount;

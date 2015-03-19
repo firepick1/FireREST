@@ -3,6 +3,7 @@ var should = require("should"),
     firepick = firepick || {};
 Evolve = require("./Evolve");
 Util = require("./Util");
+Logger = require("./Logger");
 
 (function(firepick) {
     function Maximizer(fitness, options) {
@@ -26,14 +27,8 @@ Util = require("./Util");
 			that.dxPolyFit /= 10;
 		}
 		that.dxPolyFit = options.dxPolyFit == null ? that.dxPolyFit : options.dxPolyFit;
-		that.logLevel = options.logLevel || "info";
-        that.logTrace = that.logLevel === "trace";
-        that.logDebug = that.logTrace || that.logLevel == "debug";
-		if (that.logTrace) {
-			console.log("TRACE	: nPlaces:" + that.nPlaces
-				+ " dxPolyFit:" + that.dxPolyFit
-			);
-		}
+		that.logger = new Logger(options);
+		that.logger.trace("nPlaces:" + that.nPlaces + " dxPolyFit:" + that.dxPolyFit);
         return that;
     };
 
@@ -77,10 +72,10 @@ Util = require("./Util");
 			that.genKey = genKey;
 			that.genKeyGen = iGen;
 		}
-		if (that.logTrace) {
-			var msg = "TRACE	: GEN_" + iGen + ":" + JSON.stringify(curGen);
+		if (that.logger.logTrace) {
+			var msg = "GEN_" + iGen + ":" + JSON.stringify(curGen);
 			msg += " x:[" + that.xLow + "," + that.xHigh+"]";
-			console.log(msg);
+			that.logger.trace(msg);
 		}
 		that.doneMsg = null;
         if (that.doneMsg == null && iGen >= that.maxGen) {
@@ -170,7 +165,7 @@ Util = require("./Util");
 		var xHigh2 = xBest+dAvg;
 		var xHigh3 = xBest+dx+dAvg;
 		if (that.logTrace) {
-			console.log("TRACE	: polyFit average of " +
+			that.logger.trace("polyFit average of " +
 				" low:[" + xLow1 + "," + xLow2 + "," + xLow3 + "]" +
 				" high:[" + xHigh1 + "," + xHigh2 + "," + xHigh3 + "]");
 		}
@@ -185,13 +180,11 @@ Util = require("./Util");
 			var xPolyFit = that.polyFit(xBest-dx, xBest, xBest+dx);
 			result.xPolyFit = xPolyFit;
 			result.xPolyFitAvg = xPolyFitAvg;
-			if (that.logDebug) {
-				console.log("DEBUG	: solve() " + that.doneMsg +
-					" xBest:" + Util.roundN(xBest,that.nPlaces) +
-					" xPolyFit:" + that.round(xPolyFit) +
-					" xPolyFitAvg:" + that.round(xPolyFitAvg) +
-					"");
-			}
+			that.logger.debug("DEBUG	: solve() " + that.doneMsg +
+				" xBest:" + Util.roundN(xBest,that.nPlaces) +
+				" xPolyFit:" + that.round(xPolyFit) +
+				" xPolyFitAvg:" + that.round(xPolyFitAvg) +
+				"");
 		}
         return result;
     };
@@ -228,8 +221,8 @@ var demo = demo || {};
 			bestAge: 10,	// terminate if best candidate is same for this many generations
 			stableAge: 5,	// terminate if this many successive generations are the same
 			dxPolyFit:0.002,	// polynomial fitting interval = 2*dxPolyFit + 1
-			logLevel:"info"	// info, debug, trace
 		});
+		max.logger.should.have.properties({logLevel:"info"});
 	});
     it("should calculate sqrt(200) using demo.SqrtSolver(200)", function() {
 		var N = 200;
