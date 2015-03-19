@@ -52,7 +52,9 @@ firepick.XYZCamera = require("./XYZCamera");
     };
 	FPD.prototype.setFeedRate = function(feedRate) {
         var that = this;
-		that.$xyz.setFeedRate(feedRate);
+		if (that.$xyz.health() === 1) {
+			that.$xyz.setFeedRate(feedRate);
+		}
 		that.feedRate = feedRate;
 		return that;
 	};
