@@ -58,6 +58,9 @@ Logger = require("./Logger");
 		//}
 		that.xyzCam.setFeedRate(feedRate);
 		that.xyzCam.moveTo({x:50,y:50,z:0}); // lateral move introduces image offset
+		that.xyzCam.moveTo({x:50,y:-50,z:0}); // lateral move introduces image offset
+		that.xyzCam.moveTo({x:-50,y:-50,z:0}); // lateral move introduces image offset
+		that.xyzCam.moveTo({x:-50,y:50,z:0}); // lateral move introduces image offset
 		that.xyzCam.moveTo(that.basis);
 		var imgRef = that.xyzCam.capture("feedrate", feedRate);
 		var psnr = that.ip.PSNR(that.basis, imgRef).PSNR;
@@ -159,7 +162,7 @@ Logger = require("./Logger");
 		basis:basis,
 	});
     it("maxFeedRate() should calculate the maximum feed rate", function() {
-        this.timeout(120000);
+        this.timeout(5*60000);
 		var epsilon = 0.6;
         var captureOld = feedRate.captureCount;
         var result = feedRate.maxFeedRate();
