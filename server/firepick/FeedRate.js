@@ -61,16 +61,16 @@ Logger = require("./Logger");
 		that.xyzCam.setFeedRate(feedRate);
 		var quality = 0;
 		for (var i = 0; i < 5; i++) {
-			that.xyzCam.moveTo({x:10,y:0,z:that.basis.z}); // lateral move introduces image offset
-			that.xyzCam.moveTo({x:20,y:0,z:that.basis.z}); // lateral move introduces image offset
-			that.xyzCam.moveTo({x:30,y:0,z:that.basis.z}); // lateral move introduces image offset
-			that.xyzCam.moveTo({x:40,y:0,z:that.basis.z}); // lateral move introduces image offset
-			that.xyzCam.moveTo({x:50,y:0,z:that.basis.z}); // lateral move introduces image offset
-			that.xyzCam.moveTo({x:50,y:10,z:that.basis.z}); // lateral move introduces image offset
-			that.xyzCam.moveTo({x:50,y:20,z:that.basis.z}); // lateral move introduces image offset
-			that.xyzCam.moveTo({x:50,y:30,z:that.basis.z}); // lateral move introduces image offset
-			that.xyzCam.moveTo({x:50,y:40,z:that.basis.z}); // lateral move introduces image offset
-			that.xyzCam.moveTo({x:50,y:50,z:that.basis.z}); // lateral move introduces image offset
+			that.xyzCam.moveTo({x:10,y:0,z:that.basis.z}); 
+			that.xyzCam.moveTo({x:20,y:0,z:that.basis.z+5});
+			that.xyzCam.moveTo({x:30,y:0,z:that.basis.z+10});
+			that.xyzCam.moveTo({x:40,y:0,z:that.basis.z+15});
+			that.xyzCam.moveTo({x:50,y:0,z:that.basis.z+20});
+			that.xyzCam.moveTo({x:50,y:10,z:that.basis.z-20});
+			that.xyzCam.moveTo({x:50,y:20,z:that.basis.z-15});
+			that.xyzCam.moveTo({x:50,y:30,z:that.basis.z-10});
+			that.xyzCam.moveTo({x:50,y:40,z:that.basis.z-5});
+			that.xyzCam.moveTo({x:50,y:50,z:that.basis.z});
 			that.xyzCam.moveTo(that.basis);
 			var imgRef = that.xyzCam.capture("feedrate", feedRate);
 			/*
