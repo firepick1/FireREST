@@ -59,28 +59,28 @@ Logger = require("./Logger");
 		//that.xyzCam.setFeedRate(that.feedMin);	// come back slowly
 		//that.xyzCam.moveTo({x:50,y:50,z:that.basis.z}); // lateral move introduces image offset
 		that.xyzCam.setFeedRate(feedRate);
-		that.xyzCam.moveTo({x:10,y:0,z:that.basis.z}); // lateral move introduces image offset
-		that.xyzCam.moveTo({x:20,y:0,z:that.basis.z}); // lateral move introduces image offset
-		that.xyzCam.moveTo({x:30,y:0,z:that.basis.z}); // lateral move introduces image offset
-		that.xyzCam.moveTo({x:40,y:0,z:that.basis.z}); // lateral move introduces image offset
-		that.xyzCam.moveTo({x:50,y:0,z:that.basis.z}); // lateral move introduces image offset
-		that.xyzCam.moveTo({x:50,y:10,z:that.basis.z}); // lateral move introduces image offset
-		that.xyzCam.moveTo({x:50,y:20,z:that.basis.z}); // lateral move introduces image offset
-		that.xyzCam.moveTo({x:50,y:30,z:that.basis.z}); // lateral move introduces image offset
-		that.xyzCam.moveTo({x:50,y:40,z:that.basis.z}); // lateral move introduces image offset
-		that.xyzCam.moveTo({x:50,y:50,z:that.basis.z}); // lateral move introduces image offset
-		that.xyzCam.moveTo(that.basis);
-		var imgRef = that.xyzCam.capture("feedrate", feedRate);
-		/*
-		var psnr = that.ip.PSNR(that.basis, imgRef).PSNR;
-		var sameness = psnr === "SAME" ? that.maxPSNR : Math.min(that.maxPSNR, (psnr || 0));
-		var quality = feedRate /that.feedMax + sameness;
-		that.samples[feedRate] = quality;
-		that.logger.debug("evaluate(",feedRate,") PSNR:",psnr, " quality:", quality);
-		*/
-		var result = that.ip.calcOffset(that.basis, imgRef);
 		var quality = 0;
 		for (var i = 0; i < 3; i++) {
+			that.xyzCam.moveTo({x:10,y:0,z:that.basis.z}); // lateral move introduces image offset
+			that.xyzCam.moveTo({x:20,y:0,z:that.basis.z}); // lateral move introduces image offset
+			that.xyzCam.moveTo({x:30,y:0,z:that.basis.z}); // lateral move introduces image offset
+			that.xyzCam.moveTo({x:40,y:0,z:that.basis.z}); // lateral move introduces image offset
+			that.xyzCam.moveTo({x:50,y:0,z:that.basis.z}); // lateral move introduces image offset
+			that.xyzCam.moveTo({x:50,y:10,z:that.basis.z}); // lateral move introduces image offset
+			that.xyzCam.moveTo({x:50,y:20,z:that.basis.z}); // lateral move introduces image offset
+			that.xyzCam.moveTo({x:50,y:30,z:that.basis.z}); // lateral move introduces image offset
+			that.xyzCam.moveTo({x:50,y:40,z:that.basis.z}); // lateral move introduces image offset
+			that.xyzCam.moveTo({x:50,y:50,z:that.basis.z}); // lateral move introduces image offset
+			that.xyzCam.moveTo(that.basis);
+			var imgRef = that.xyzCam.capture("feedrate", feedRate);
+			/*
+			var psnr = that.ip.PSNR(that.basis, imgRef).PSNR;
+			var sameness = psnr === "SAME" ? that.maxPSNR : Math.min(that.maxPSNR, (psnr || 0));
+			var quality = feedRate /that.feedMax + sameness;
+			that.samples[feedRate] = quality;
+			that.logger.debug("evaluate(",feedRate,") PSNR:",psnr, " quality:", quality);
+			*/
+			var result = that.ip.calcOffset(that.basis, imgRef);
 			var q = 0;
 			if (result && result.hasOwnProperty("match")) {
 				//quality = (feedRate/that.feedMax)/10 + result.match - (result.dx*result.dx +result.dy*result.dy);
