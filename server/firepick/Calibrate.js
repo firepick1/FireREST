@@ -24,7 +24,7 @@ var XYZPositioner = require("./XYZPositioner.js");
     function testWriter(cmd) {
         output = output ? (output + ";" + cmd) : cmd;
     }
-    var gcode = new XYZPositioner().withWriter(testWriter);
+    var gcode = new XYZPositioner({write:testWriter});
     var cal = new firepick.Calibrate(gcode);
 
     function assertCommand(result, expected) {

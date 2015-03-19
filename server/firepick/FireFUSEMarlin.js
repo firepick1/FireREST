@@ -48,21 +48,25 @@ var firefuse_path = "/dev/firefuse/sync/cnc/marlin/gcode.fire";
     };
     FireFUSEMarlin.prototype.home = function() {
 		var that = this;
+		if (that.err) { throw that.err; }
         that.xyz.home();
         return that;
     };
     FireFUSEMarlin.prototype.origin = function() {
 		var that = this;
+		if (that.err) { throw that.err; }
         that.xyz.origin();
         return that;
     };
     FireFUSEMarlin.prototype.move = function(path) {
 		var that = this;
+		if (that.err) { throw that.err; }
         that.xyz.move(path);
         return that;
     };
     FireFUSEMarlin.prototype.getXYZ = function() {
 		var that = this;
+		if (that.err) { throw that.err; }
         return that.xyz.getXYZ();
     };
 

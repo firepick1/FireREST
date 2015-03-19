@@ -1,18 +1,21 @@
 var should = require("should"),
     module = module || {},
     firepick;
+Logger = require("./Logger");
 
 function isNumeric(obj) {
     return (obj - parseFloat(obj) + 1) >= 0;
 }
 
 (function(firepick) {
-    function XYZPositioner(writer) {
+    function XYZPositioner(options) {
 		var that = this;
-        that.feedRate = 6000;
-        that.sync = "M400";
+		options = options || {};
+        that.feedRate = options.feedRate || 6000;
+        that.sync = options.sync || "M400";
         that.xyz = {};
-        that.write = writer || function(cmd) { /* default discards data */ }
+        that.write = options.write || function(cmd) { /* default discards data */ }
+		that.logger = options.logger || new Logger(options);
         return that;
     }
     XYZPositioner.validate = function(xyzPositioner) {
@@ -101,8 +104,9 @@ function isNumeric(obj) {
     }
     XYZPositioner.prototype.setFeedRate = function(feedRate) { // Fxxx: Feed rate in mm/min
 		var that = this;
-        should.ok(isNumeric(feedRate));
-        should(feedRate).above(0);
+		should.exist(feedRate);
+		feedRate.should.be.Number;
+        feedRate.should.be.above(0);
         that.feedRate = feedRate;
         that.write("G0F" + that.feedRate);
         return that;
@@ -188,7 +192,7 @@ function isNumeric(obj) {
         testWriter1(cmd);
         output2 = output2 ? (output2 + ";" + cmd) : cmd;
     }
-    var xyz = new firepick.XYZPositioner(testWriter1);
+    var xyz = new firepick.XYZPositioner({write:testWriter1});
 
     function assertCommand(result, expected) {
         should(result).equal(xyz, "expected fluent call returning xyz object");
