@@ -50,21 +50,19 @@ Logger = require("./Logger");
 		if (that.samples[feedRate] != null) {
 			return that.samples[feedRate];
 		}
-		if (that.basis.path == null) {
-			that.xyzCam.origin();
-			that.xyzCam.setFeedRate(that.feedMin)
-			that.xyzCam.moveTo(that.basis);
-			that.basis = that.xyzCam.capture("feedrate-basis");
-		}
 		that.xyzCam.setFeedRate(that.feedMin);
 		that.xyzCam.origin(); // recalibrate
+		that.xyzCam.moveTo(that.basis);
+		//if (that.basis.path == null) {
+			that.basis = that.xyzCam.capture("feedrate-basis");
+		//}
 		that.xyzCam.setFeedRate(feedRate);
 		that.xyzCam.moveTo({x:50,y:50,z:0}); // lateral move introduces image offset
 		that.xyzCam.moveTo(that.basis);
 		var imgRef = that.xyzCam.capture("feedrate", feedRate);
 		var psnr = that.ip.PSNR(that.basis, imgRef).PSNR;
 		var sameness = psnr === "SAME" ? that.maxPSNR : Math.min(that.maxPSNR, (psnr || 0));
-		var quality = 10*feedRate /that.feedMax + sameness;
+		var quality = feedRate /that.feedMax + sameness;
 		that.samples[feedRate] = quality;
 		that.logger.debug("evaluate(",feedRate,") PSNR:",psnr, " quality:", quality);
 		return quality;
