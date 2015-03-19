@@ -56,11 +56,9 @@ Logger = require("./Logger");
 		//if (that.basis.path == null) {
 			that.basis = that.xyzCam.capture("feedrate-basis");
 		//}
-		that.xyzCam.setFeedRate(feedRate);
+		that.xyzCam.setFeedRate(that.feedMin);	// come back slowly
 		that.xyzCam.moveTo({x:50,y:50,z:0}); // lateral move introduces image offset
-		that.xyzCam.moveTo({x:50,y:-50,z:0}); // lateral move introduces image offset
-		that.xyzCam.moveTo({x:-50,y:-50,z:0}); // lateral move introduces image offset
-		that.xyzCam.moveTo({x:-50,y:50,z:0}); // lateral move introduces image offset
+		that.xyzCam.setFeedRate(feedRate);
 		that.xyzCam.moveTo(that.basis);
 		var imgRef = that.xyzCam.capture("feedrate", feedRate);
 		var psnr = that.ip.PSNR(that.basis, imgRef).PSNR;
