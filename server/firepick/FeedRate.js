@@ -116,6 +116,7 @@ Logger = require("./Logger");
 			nPlaces: that.nPlaces,
 			logger:that.logger,
 			dxPolyFit:0,
+			pinLow: true,
 		});
 		that.samples = {};
         var rawResult = solver.solve(that.feedMin/that.scale, that.feedMax/that.scale);
@@ -205,7 +206,7 @@ Logger = require("./Logger");
         var result = feedRate.maxFeedRate();
 		should(result.feedRate).within(1000, 20000);
         if (useMock) {
-            should(result.feedRate).within(5880, 6000);
+            should(result.feedRate).within(5820, 6000);
         }
     });
 });

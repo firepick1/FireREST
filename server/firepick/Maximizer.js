@@ -22,6 +22,8 @@ Logger = require("./Logger");
 		that.nFamilies = options.nFamilies || 1;
 		that.bestAge = options.bestAge || 10;
 		that.stableAge = options.stableAge || 5;
+		that.pinLow = options.pinLow == null ? false : options.pinLow;
+		that.pinHigh = options.pinHigh == null ? false : options.pinHigh;
 		that.dxPolyFit = 2;
 		for (var i = 0; i < that.nPlaces; i++) {
 			that.dxPolyFit /= 10;
@@ -54,9 +56,13 @@ Logger = require("./Logger");
 				xMax = Math.max(xMax, curGen[i]);
 			}
 			if (xBest < xWorst) {
-				that.xHigh = Math.min(that.xHigh, xMax);
+				if (that.pinHigh === false) {
+					that.xHigh = Math.min(that.xHigh, xMax);
+				}
 			} else {
-				that.xLow = Math.max(that.xLow, xMin);
+				if (that.pinLow === false) {
+					that.xLow = Math.max(that.xLow, xMin);
+				}
 			}
 			for (var i = 0; i < rejects.length; i++) {
 				if (xMax < rejects[i] &&  rejects[i] < that.xHigh) {
@@ -220,7 +226,9 @@ var demo = demo || {};
 			nFamilies: 1,	// number of breeding pairs per generation
 			bestAge: 10,	// terminate if best candidate is same for this many generations
 			stableAge: 5,	// terminate if this many successive generations are the same
-			dxPolyFit:0.002,	// polynomial fitting interval = 2*dxPolyFit + 1
+			dxPolyFit:0.002,	// polynomial fitting interval = 2*dxPolyFit + 1 or zero for none
+			pinLow: false,	// pin lower boundary of possible solutions for each generation
+			pinHigh: false,	// pin upper boundary of possible solutions for each generation
 		});
 		max.logger.should.have.properties({logLevel:"info"});
 	});
