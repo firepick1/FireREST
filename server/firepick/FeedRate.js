@@ -85,6 +85,8 @@ Logger = require("./Logger");
 			if (result && result.hasOwnProperty("match")) {
 				//quality = (feedRate/that.feedMax)/10 + result.match - (result.dx*result.dx +result.dy*result.dy);
 				q = (feedRate/that.feedMax)/10 + Number(result.match) - (result.dx*result.dx +result.dy*result.dy);
+			} else {
+				q = -10000;
 			}
 			quality += q;
 			that.logger.trace("evaluate(",feedRate,") result:",result, " q:", q);
