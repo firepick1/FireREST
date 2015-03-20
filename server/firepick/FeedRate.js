@@ -84,7 +84,8 @@ Logger = require("./Logger");
 			var q = 0;
 			if (result && result.hasOwnProperty("match")) {
 				//quality = (feedRate/that.feedMax)/10 + result.match - (result.dx*result.dx +result.dy*result.dy);
-				q = (feedRate/that.feedMax)/10 + Number(result.match) - (result.dx*result.dx +result.dy*result.dy);
+				q = (feedRate/that.feedMax)/10 + Number(result.match) 
+					- (result.dx*result.dx +result.dy*result.dy)/10;
 			} else {
 				q = -10000;
 			}
