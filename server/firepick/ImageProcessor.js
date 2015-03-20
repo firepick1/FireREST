@@ -32,16 +32,11 @@ Logger = require("./Logger");
     ImageProcessor.prototype.health = function() {
         return 1;
     };
-    ImageProcessor.prototype.calcOffset = function(imgRef1, imgRef2, channel) {
+    ImageProcessor.prototype.calcOffset = function(imgRef1, imgRef2) {
 		var that = this;
-		channel = channel == null && "0" ||
-			channel === "B" && "0" ||
-			channel === "G" && "1" ||
-			channel === "R" && "2" ||
-			channel;
         var jout = that.firesight_cmd(imgRef1.path, "calcOffset.json",
             "-Dtemplate=" + imgRef2.path);
-        return jout.result.channels[channel];
+        return jout.result.channels;
     };
     ImageProcessor.prototype.meanStdDev = function(imgRef) {
 		var that = this;

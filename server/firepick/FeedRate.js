@@ -33,15 +33,17 @@ Logger = require("./Logger");
 		that.xFar = options.xFar || 75;
 		that.yHome = options.yHome || 0;
 		that.yFar = options.yFar || 75;
+		that.pathIterations = options.pathIterations || 5;
+		that.pathSteps = options.pathSteps || 4;
 		that.ip = options.imageProcessor || new ImageProcessor(options);
 		that.scale = options.scale || 60; // mm/s
 		that.maxPSNR = 50;
-		that.basis = options.basis || {
+		var basis = options.basis || {
 			x:that.xHome,
 			y:that.yHome,
 			z:that.zMin,
 		};
-		that.basis = ImageRef.copy(that.basis);
+		that.basis = ImageRef.copy(basis);
 		that.logger = options.logger || new Logger(options);
 
 		that.samples = {};
@@ -56,24 +58,21 @@ Logger = require("./Logger");
 		nPlaces.should.be.equal(1);
 		return Util.roundN(value, nPlaces); // reporting precision
 	};
-	FeedRate.prototype.traverse = function() {
+	FeedRate.prototype.testPathA = function() {
 		var that = this;
-		var N = 5;
-		var zStep = (that.zMax-that.zMin)/N;
-		var xStep = (that.xFar-that.xHome)/N;
-		var yStep = (that.yFar-that.yHome)/N;
-		for (var i=0; i<N; i++) {
+		var N = that.pathSteps;
+		var zStep = (that.zMax-that.basis.z)/N;
+		var xStep = (that.xFar-that.basis.x)/N;
+		var yStep = (that.yFar-that.basis.y)/N;
+		for (var i=1; i<=N; i++) {
 			that.xyzCam.moveTo({
-				x:(i+1)*xStep+that.xHome,
-			//	y:that.yHome,
-				z:that.zMin + i*zStep
+				x:that.basis.x + i*xStep,
+				z:that.basis.z + i*zStep
 			}); 
 		}
-		for (var i=0; i<N; i++) {
+		for (var i=1; i<=N; i++) {
 			that.xyzCam.moveTo({
-				//x:N*xStep+that.xHome,
-				y:(i+1)*yStep+that.yHome,
-				//z:that.zMin + (N-1)*zStep
+				y:that.basis.y + i*yStep,
 			}); 
 		}
 		that.xyzCam.moveTo(that.basis);
@@ -90,8 +89,8 @@ Logger = require("./Logger");
 		that.xyzCam.setFeedRate(feedRate);
 		var quality = 0;
 		var result;
-		for (var i = 0; i < 5; i++) {
-			that.traverse();
+		for (var i = 0; i < that.pathIterations; i++) {
+			that.testPathA();
 			var imgRef = that.xyzCam.capture("feedrate"+i, feedRate);
 			var q;
 			result = that.ip.PSNR(that.basis, imgRef);
@@ -99,7 +98,9 @@ Logger = require("./Logger");
 			var sameness = psnr === "SAME" ? that.maxPSNR : Math.min(that.maxPSNR, (psnr || 0));
 			q = feedRate /that.feedMax + sameness;
 			result.offset = that.ip.calcOffset(that.basis, imgRef);
-			quality += q;
+			if (result.offset["0"] && result.offset["0"].match) {
+				quality += q; // ignore samples with no offset
+			}
 			that.logger.trace("evaluate(",feedRate,") result:",result, " q:", q);
 		}
 		that.logger.debug("evaluate(",feedRate,") result:",result, " quality:", quality);
