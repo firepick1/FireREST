@@ -53,13 +53,10 @@ Logger = require("./Logger");
 		that.xyzCam.setFeedRate(that.feedMin);
 		that.xyzCam.origin(); // recalibrate
 		that.xyzCam.moveTo(that.basis);
-		//if (that.basis.path == null) {
-			that.basis = that.xyzCam.capture("feedrate-basis");
-		//}
-		//that.xyzCam.setFeedRate(that.feedMin);	// come back slowly
-		//that.xyzCam.moveTo({x:50,y:50,z:that.basis.z}); // lateral move introduces image offset
+		that.basis = that.xyzCam.capture("feedrate-basis");
 		that.xyzCam.setFeedRate(feedRate);
 		var quality = 0;
+		var result;
 		for (var i = 0; i < 5; i++) {
 			that.xyzCam.moveTo({x:10,y:0,z:that.basis.z}); 
 			that.xyzCam.moveTo({x:20,y:0,z:that.basis.z+5});
@@ -73,21 +70,20 @@ Logger = require("./Logger");
 			that.xyzCam.moveTo({x:50,y:50,z:that.basis.z});
 			that.xyzCam.moveTo(that.basis);
 			var imgRef = that.xyzCam.capture("feedrate", feedRate);
-			/*
-			var psnr = that.ip.PSNR(that.basis, imgRef).PSNR;
-			var sameness = psnr === "SAME" ? that.maxPSNR : Math.min(that.maxPSNR, (psnr || 0));
-			var quality = feedRate /that.feedMax + sameness;
-			that.samples[feedRate] = quality;
-			that.logger.debug("evaluate(",feedRate,") PSNR:",psnr, " quality:", quality);
-			*/
-			var result = that.ip.calcOffset(that.basis, imgRef);
-			var q = 0;
-			if (result && result.hasOwnProperty("match")) {
-				//quality = (feedRate/that.feedMax)/10 + result.match - (result.dx*result.dx +result.dy*result.dy);
-				q = (feedRate/that.feedMax)/10 + Number(result.match) 
-					- (result.dx*result.dx +result.dy*result.dy)/10;
+			var q;
+			if (true) {
+				result = that.ip.PSNR(that.basis, imgRef);
+				var psnr = result.PSNR;
+				var sameness = psnr === "SAME" ? that.maxPSNR : Math.min(that.maxPSNR, (psnr || 0));
+				q = feedRate /that.feedMax + sameness;
 			} else {
-				q = -10000;
+				result = that.ip.calcOffset(that.basis, imgRef);
+				if (result && result.hasOwnProperty("match")) {
+					q = (feedRate/that.feedMax)/10 + Number(result.match) 
+						- (result.dx*result.dx +result.dy*result.dy)/10;
+				} else {
+					q = -10000;
+				}
 			}
 			quality += q;
 			that.logger.trace("evaluate(",feedRate,") result:",result, " q:", q);
