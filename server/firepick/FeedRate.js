@@ -16,33 +16,38 @@ Logger = require("./Logger");
 
         XYZCamera.isInterfaceOf(xyzCam);
         that.xyzCam = xyzCam;
-        should(feedMax).be.a.Number;
-        should(feedMin).be.a.Number;
-        should(feedMin).be.below(feedMax);
-		should(feedMin).be.above(0);
-        that.feedMin = feedMin;
-        that.feedMax = feedMax;
+        that.feedMin = feedMin || 1000;
+        that.feedMax = feedMax || 20000;
+        that.feedMax.should.be.a.Number;
+        that.feedMin.should.be.a.Number;
+        that.feedMin.should.be.below(that.feedMax);
+		that.feedMin.should.be.above(0);
 
 		// Options
         options = options || {};
         that.nPlaces = options.nPlaces || 0;
         that.nPlaces.should.not.be.below(0);
-		that.zMax = options.zMax || 0;
-		that.xHome = options.xHome || 0;
-		that.xFar = options.xFar || 75;
-		that.yHome = options.yHome || 0;
-		that.yFar = options.yFar || 75;
-		that.pathIterations = options.pathIterations || 5;
-		that.pathSteps = options.pathSteps || 4;
+		that.xBasis = options.xBasis == null ? 0 : options.xBasis;
+		that.yBasis = options.yBasis == null ? 0 : options.yBasis;
+		that.zBasis = options.zBasis == null ? -50 : options.zBasis;
+		that.xFar = options.xFar == null ? 80 : options.xFar;
+		that.yFar = options.yFar == null ? 80 : options.yFar;
+		that.zFar = options.zFar == null ? 0 : options.zFar;
+		that.pathIterations = options.pathIterations || 6;
+		that.pathIterations.should.be.above(0);
+		that.pathMinSteps = options.pathMinSteps || 3;
+		that.pathMinSteps.should.be.above(0);
 		that.ip = options.imageProcessor || new ImageProcessor(options);
 		that.scale = options.scale || 60; // mm/s
-		that.maxPSNR = 50;
-		var basis = options.basis || {
-			x:options.xHome == null ? 0 : options.xHome,
-			y:options.yHome == null ? 0 : options.yHome,
-			z:options.zMin == null ? -50 : options.zMin,
-		};
-		that.basis = ImageRef.copy(basis);
+		that.maxPSNR = options.maxPSNR || 50;
+		that.minPSNR = options.minPSNR || 24;
+		that.maxPSNR.should.be.above(that.minPSNR);
+		that.minPSNR.should.be.above(0);
+		that.basis = ImageRef.copy({
+			x:that.xBasis,
+			y:that.yBasis,
+			z:that.xBasis,
+		});
 		that.logger = options.logger || new Logger(options);
 
 		that.samples = {};
@@ -62,7 +67,7 @@ Logger = require("./Logger");
 		var N = that.pathSteps+i;
 		var xStep = (that.xFar-that.basis.x)/N;
 		var yStep = (that.yFar-that.basis.y)/N;
-		var zStep = (that.zMax-that.basis.z)/N;
+		var zStep = (that.zFar-that.basis.z)/N;
 		for (var i=1; i<=N; i++) {
 			that.xyzCam.moveTo({
 				x:that.basis.x + i*xStep,
@@ -198,6 +203,22 @@ Logger = require("./Logger");
 		logLevel:"trace",
 		imageProcessor: new ImageProcessor(),
 		basis:basis,
+	});
+	it("should have default options", function() {
+		var frdefault = new firepick.FeedRate(xyzCam);
+		frdefault.should.have.properties({
+			xBasis:0,			// basis reference image x
+			yBasis:0,			// basis reference image y
+			zBasis:-50,			// basis reference image z
+			xFar:80,			// farthest test path x
+			yFar:80,			// farthest test path y
+			zFar:0,				// farthest test path z
+			pathIterations: 6,	// number of paths tested per feedrate
+			pathMinSteps: 3,	// minimum number of steps per test path
+			maxPSNR: 50,		// maximum power signal-to-noise ration
+			minPSNR: 24,		// minimum acceptable PSNR ratio
+			scale: 60,			// minimum difference between testing feedrates
+		});
 	});
     it("maxFeedRate() should calculate the maximum feed rate", function() {
         this.timeout(25*60000);
