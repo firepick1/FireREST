@@ -65,15 +65,15 @@ Logger = require("./Logger");
 		for (var i=0; i<N; i++) {
 			that.xyzCam.moveTo({
 				x:(i+1)*xStep+that.xHome,
-				y:that.yHome,
+			//	y:that.yHome,
 				z:that.zMin + i*zStep
 			}); 
 		}
 		for (var i=0; i<N; i++) {
 			that.xyzCam.moveTo({
-				x:N*xStep+that.xHome,
+				//x:N*xStep+that.xHome,
 				y:(i+1)*yStep+that.yHome,
-				z:that.zMin + N*zStep
+				//z:that.zMin + (N-1)*zStep
 			}); 
 		}
 		that.xyzCam.moveTo(that.basis);
