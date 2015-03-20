@@ -38,9 +38,9 @@ Logger = require("./Logger");
 		that.scale = options.scale || 60; // mm/s
 		that.maxPSNR = 50;
 		var basis = options.basis || {
-			x:options.xHome == null ? 0 || options.xHome,
-			y:options.yHome == null ? 0 || options.yHome,
-			z:options.zMin == null ? -50 || options.zMin,
+			x:options.xHome == null ? 0 : options.xHome,
+			y:options.yHome == null ? 0 : options.yHome,
+			z:options.zMin == null ? -50 : options.zMin,
 		};
 		that.basis = ImageRef.copy(basis);
 		that.logger = options.logger || new Logger(options);
