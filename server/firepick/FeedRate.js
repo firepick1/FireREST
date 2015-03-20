@@ -27,7 +27,6 @@ Logger = require("./Logger");
         options = options || {};
         that.nPlaces = options.nPlaces || 0;
         that.nPlaces.should.not.be.below(0);
-		that.zMin = options.zMin || -50;
 		that.zMax = options.zMax || 0;
 		that.xHome = options.xHome || 0;
 		that.xFar = options.xFar || 75;
@@ -39,9 +38,9 @@ Logger = require("./Logger");
 		that.scale = options.scale || 60; // mm/s
 		that.maxPSNR = 50;
 		var basis = options.basis || {
-			x:that.xHome,
-			y:that.yHome,
-			z:that.zMin,
+			x:options.xHome == null ? 0 || options.xHome,
+			y:options.yHome == null ? 0 || options.yHome,
+			z:options.zMin == null ? -50 || options.zMin,
 		};
 		that.basis = ImageRef.copy(basis);
 		that.logger = options.logger || new Logger(options);
@@ -58,12 +57,12 @@ Logger = require("./Logger");
 		nPlaces.should.be.equal(1);
 		return Util.roundN(value, nPlaces); // reporting precision
 	};
-	FeedRate.prototype.testPathA = function() {
+	FeedRate.prototype.testPathA = function(i) {
 		var that = this;
-		var N = that.pathSteps;
-		var zStep = (that.zMax-that.basis.z)/N;
+		var N = that.pathSteps+i;
 		var xStep = (that.xFar-that.basis.x)/N;
 		var yStep = (that.yFar-that.basis.y)/N;
+		var zStep = (that.zMax-that.basis.z)/N;
 		for (var i=1; i<=N; i++) {
 			that.xyzCam.moveTo({
 				x:that.basis.x + i*xStep,
@@ -90,7 +89,7 @@ Logger = require("./Logger");
 		var quality = 0;
 		var result;
 		for (var i = 0; i < that.pathIterations; i++) {
-			that.testPathA();
+			that.testPathA(i);
 			var imgRef = that.xyzCam.capture("feedrate"+i, feedRate);
 			var q;
 			result = that.ip.PSNR(that.basis, imgRef);
