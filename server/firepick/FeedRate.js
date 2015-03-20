@@ -27,10 +27,21 @@ Logger = require("./Logger");
         options = options || {};
         that.nPlaces = options.nPlaces || 0;
         that.nPlaces.should.not.be.below(0);
+		that.zMin = options.zMin || -50;
+		that.zMax = options.zMax || 0;
+		that.xHome = options.xHome || 0;
+		that.xFar = options.xFar || 75;
+		that.yHome = options.yHome || 0;
+		that.yFar = options.yFar || 75;
 		that.ip = options.imageProcessor || new ImageProcessor(options);
 		that.scale = options.scale || 60; // mm/s
 		that.maxPSNR = 50;
-		that.basis = ImageRef.copy(options.basis || {x:0,y:0,z:0});
+		that.basis = options.basis || {
+			x:that.xHome,
+			y:that.yHome,
+			z:that.zMin,
+		};
+		that.basis = ImageRef.copy(that.basis);
 		that.logger = options.logger || new Logger(options);
 
 		that.samples = {};
@@ -45,6 +56,28 @@ Logger = require("./Logger");
 		nPlaces.should.be.equal(1);
 		return Util.roundN(value, nPlaces); // reporting precision
 	};
+	FeedRate.prototype.traverse = function() {
+		var that = this;
+		var N = 5;
+		var zStep = (that.zMax-that.zMin)/N;
+		var xStep = (that.xFar-that.xHome)/N;
+		var yStep = (that.yFar-that.yHome)/N;
+		for (var i=0; i<N; i++) {
+			that.xyzCam.moveTo({
+				x:(i+1)*xStep+that.xHome,
+				y:that.yHome,
+				z:that.zMin + i*zStep
+			}); 
+		}
+		for (var i=0; i<N; i++) {
+			that.xyzCam.moveTo({
+				x:N*xStep+that.xHome,
+				y:(i+1)*yStep+that.yHome,
+				z:that.zMin + N*zStep
+			}); 
+		}
+		that.xyzCam.moveTo(that.basis);
+	};
 	FeedRate.prototype.evaluate = function(feedRate) {
 		var that = this;
 		if (that.samples[feedRate] != null) {
@@ -58,33 +91,14 @@ Logger = require("./Logger");
 		var quality = 0;
 		var result;
 		for (var i = 0; i < 5; i++) {
-			that.xyzCam.moveTo({x:10,y:0,z:that.basis.z}); 
-			that.xyzCam.moveTo({x:20,y:0,z:that.basis.z+5});
-			that.xyzCam.moveTo({x:30,y:0,z:that.basis.z+10});
-			that.xyzCam.moveTo({x:40,y:0,z:that.basis.z+15});
-			that.xyzCam.moveTo({x:50,y:0,z:that.basis.z+20});
-			that.xyzCam.moveTo({x:50,y:10,z:that.basis.z});
-			that.xyzCam.moveTo({x:50,y:20,z:that.basis.z});
-			that.xyzCam.moveTo({x:50,y:30,z:that.basis.z});
-			that.xyzCam.moveTo({x:50,y:40,z:that.basis.z});
-			that.xyzCam.moveTo({x:50,y:50,z:that.basis.z});
-			that.xyzCam.moveTo(that.basis);
-			var imgRef = that.xyzCam.capture("feedrate", feedRate);
+			that.traverse();
+			var imgRef = that.xyzCam.capture("feedrate"+i, feedRate);
 			var q;
-			if (true) {
-				result = that.ip.PSNR(that.basis, imgRef);
-				var psnr = result.PSNR;
-				var sameness = psnr === "SAME" ? that.maxPSNR : Math.min(that.maxPSNR, (psnr || 0));
-				q = feedRate /that.feedMax + sameness;
-			} else {
-				result = that.ip.calcOffset(that.basis, imgRef);
-				if (result && result.hasOwnProperty("match")) {
-					q = (feedRate/that.feedMax)/10 + Number(result.match) 
-						- (result.dx*result.dx +result.dy*result.dy)/10;
-				} else {
-					q = -10000;
-				}
-			}
+			result = that.ip.PSNR(that.basis, imgRef);
+			var psnr = result.PSNR;
+			var sameness = psnr === "SAME" ? that.maxPSNR : Math.min(that.maxPSNR, (psnr || 0));
+			q = feedRate /that.feedMax + sameness;
+			result.offset = that.ip.calcOffset(that.basis, imgRef);
 			quality += q;
 			that.logger.trace("evaluate(",feedRate,") result:",result, " q:", q);
 		}
@@ -180,7 +194,7 @@ Logger = require("./Logger");
     var xyzCam = useMock ? mockXYZCam : fpd;
     var feedRate = new firepick.FeedRate(xyzCam, 
 		useMock ? 1000 : 1000, useMock ? 10000 : 25000 , {
-		logLevel:"debug",
+		logLevel:"trace",
 		imageProcessor: new ImageProcessor(),
 		basis:basis,
 	});
