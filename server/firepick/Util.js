@@ -6,6 +6,7 @@ var should = require("should"),
     var that = {};
     var id = 0;
     that.id = id++;
+	var fibSequence = [0,1];
 
     function Util(solver, options) {
         this.id = id++;
@@ -36,6 +37,16 @@ var should = require("should"),
 		}
 		return result;
     };
+	Util.fibonacci = function(n) {
+		while (fibSequence.length <= n) {
+			fibSequence.push(
+				fibSequence[fibSequence.length-2]+
+				fibSequence[fibSequence.length-1]);
+		}
+		if (n < fibSequence.length) {
+			return fibSequence[n];
+		}
+	};
 	Util.lagrange = function(x,pts) {
 		should.exist(pts, "expected lagrange(x,[{x,y},...])");
 		pts.length.should.be.equal(3); // for now...
@@ -148,13 +159,13 @@ var should = require("should"),
 	var epsilon = 0.000001;
 	it("lagrange(x,pts) should compute the Lagrange polynomial for 3 points", function() {
 		var pts = [{x:1,y:fx(1)},{x:3,y:fx(3)},{x:5,y:fx(5)}];
-		should(Util.lagrange(1,pts)).be.within(6-epsilon,6+epsilon);
-		should(Util.lagrange(3,pts)).be.within(18-epsilon,18+epsilon);
-		should(Util.lagrange(2,pts)).be.within(11-epsilon,11+epsilon);
+		should(firepick.Util.lagrange(1,pts)).be.within(6-epsilon,6+epsilon);
+		should(firepick.Util.lagrange(3,pts)).be.within(18-epsilon,18+epsilon);
+		should(firepick.Util.lagrange(2,pts)).be.within(11-epsilon,11+epsilon);
 	});
 	it("polyFit(pts) should calculate the polynomial coefficients for 3 points", function() {
 		var pts = [{x:1,y:fx(1)},{x:3,y:fx(3)},{x:5,y:fx(5)}];
-		var abc = Util.polyFit(pts);
+		var abc = firepick.Util.polyFit(pts);
 		should(abc.length).equal(3);
 		should(abc[0]).be.equal(1);
 		should(abc[1]).be.equal(2);
@@ -162,9 +173,19 @@ var should = require("should"),
 	});
 	it("criticalPoints(pts) calculates critical points for a 3 data point polynomial", function() {
 		var pts = [{x:1,y:fx(1)},{x:3,y:fx(3)},{x:5,y:fx(5)}];
-		var crit = Util.criticalPoints(pts);
+		var crit = firepick.Util.criticalPoints(pts);
 		crit.should.be.within(-1-epsilon,-1+epsilon);
-		Util.lagrange(crit+epsilon,pts).should.be.above(Util.lagrange(crit,pts));
-		Util.lagrange(crit-epsilon,pts).should.be.above(Util.lagrange(crit,pts));
+		firepick.Util.lagrange(crit+epsilon,pts).should.be.above(firepick.Util.lagrange(crit,pts));
+		firepick.Util.lagrange(crit-epsilon,pts).should.be.above(firepick.Util.lagrange(crit,pts));
+	});
+	it("fibonacci(n) should return the nth Fibonacci number", function(){
+		firepick.Util.fibonacci(0).should.be.equal(0);
+		firepick.Util.fibonacci(1).should.be.equal(1);
+		firepick.Util.fibonacci(2).should.be.equal(1);
+		firepick.Util.fibonacci(3).should.be.equal(2);
+		firepick.Util.fibonacci(4).should.be.equal(3);
+		firepick.Util.fibonacci(5).should.be.equal(5);
+		firepick.Util.fibonacci(6).should.be.equal(8);
+		firepick.Util.fibonacci(7).should.be.equal(13);
 	});
 })

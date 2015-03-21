@@ -29,9 +29,9 @@ Logger = require("./Logger");
         that.nPlaces.should.not.be.below(0);
 		that.xBasis = options.xBasis == null ? 0 : options.xBasis;
 		that.yBasis = options.yBasis == null ? 0 : options.yBasis;
-		that.zBasis = options.zBasis == null ? -50 : options.zBasis;
-		that.xFar = options.xFar == null ? 80 : options.xFar;
-		that.yFar = options.yFar == null ? 80 : options.yFar;
+		that.zBasis = options.zBasis == null ? -64 : options.zBasis;
+		that.xFar = options.xFar == null ? 64 : options.xFar;
+		that.yFar = options.yFar == null ? 64 : options.yFar;
 		that.zFar = options.zFar == null ? 0 : options.zFar;
 		that.pathIterations = options.pathIterations || 6;
 		that.pathIterations.should.be.above(0);
@@ -81,6 +81,29 @@ Logger = require("./Logger");
 		}
 		that.xyzCam.moveTo(that.basis);
 	};
+	FeedRate.prototype.testPathB = function(i) {
+		var that = this;
+		var N = Util.fibonacci(i+2);
+		var dx = (that.xFar-that.basis.x)/N;
+		var dy = (that.yFar-that.basis.y)/N;
+		var dz = (that.zFar-that.basis.z)/N;
+		var nSteps = Math.max(that.pathMinSteps,5);
+		var xStep = dx/nSteps;
+		var yStep = dy/nSteps;
+		var zStep = dz/nSteps;
+		for (var i=1; i<=nSteps; i++) {
+			that.xyzCam.moveTo({
+				x:that.basis.x + i*xStep,
+				z:that.basis.z + i*zStep
+			}); 
+		}
+		for (var i=1; i<=nSteps; i++) {
+			that.xyzCam.moveTo({
+				y:that.basis.y + i*yStep,
+			}); 
+		}
+		that.xyzCam.moveTo(that.basis);
+	};
 	FeedRate.prototype.evaluate = function(feedRate) {
 		var that = this;
 		if (that.samples[feedRate] != null) {
@@ -94,7 +117,7 @@ Logger = require("./Logger");
 		var quality = 0;
 		var result;
 		for (var i = 0; i < that.pathIterations; i++) {
-			that.testPathA(i);
+			that.testPathB(i);
 			var imgRef = that.xyzCam.capture("feedrate"+i, feedRate);
 			var q;
 			result = that.ip.PSNR(that.basis, imgRef);
@@ -153,7 +176,7 @@ var mock = {};
 (function(mock) {
 	function MockXYZCamera(options) {
 		var that = this;
-		var basis = options.basis || {x:0,y:0,z:-50};
+		var basis = options.basis || {x:0,y:0,z:-32};
 		that.xyzCam = new XYZCamera(options);
 		that.basis = ImageRef.copy(basis);
 		that.goodImage = ImageRef.copy(basis).setPath("test/XP005_Z0X0Y0@1#1.jpg");
@@ -201,7 +224,7 @@ var mock = {};
 	logger = new Logger({logLevel:logLevel});
     var fpd = new FPD();
     var useMock = fpd.health() < 1;
-	var basis = {x:0,y:0,z:-40};
+	var basis = {x:0,y:0,z:-64};
     var mockXYZCam = new mock.MockXYZCamera({
 		basis:basis,
 		logger:logger,
@@ -218,9 +241,9 @@ var mock = {};
 		frdefault.should.have.properties({
 			xBasis:0,			// basis reference image x
 			yBasis:0,			// basis reference image y
-			zBasis:-50,			// basis reference image z
-			xFar:80,			// farthest test path x
-			yFar:80,			// farthest test path y
+			zBasis:-64,			// basis reference image z
+			xFar:64,			// farthest test path x
+			yFar:64,			// farthest test path y
 			zFar:0,				// farthest test path z
 			pathIterations: 6,	// number of paths tested per feedrate
 			pathMinSteps: 3,	// minimum number of steps per test path
