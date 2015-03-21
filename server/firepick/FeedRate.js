@@ -104,6 +104,25 @@ Logger = require("./Logger");
 		}
 		that.xyzCam.moveTo(that.basis);
 	};
+	FeedRate.prototype.testPathC = function(i) {
+		var that = this;
+		var N = Util.fibonacci(that.pathMinSteps+i);
+		var xStep = (that.xFar-that.basis.x)/N;
+		var yStep = (that.yFar-that.basis.y)/N;
+		var zStep = (that.zFar-that.basis.z)/N;
+		for (var i=1; i<=N; i++) {
+			that.xyzCam.moveTo({
+				x:that.basis.x + i*xStep,
+				z:that.basis.z + i*zStep
+			}); 
+		}
+		for (var i=1; i<=N; i++) {
+			that.xyzCam.moveTo({
+				y:that.basis.y + i*yStep,
+			}); 
+		}
+		that.xyzCam.moveTo(that.basis);
+	};
 	FeedRate.prototype.evaluate = function(feedRate) {
 		var that = this;
 		if (that.samples[feedRate] != null) {
@@ -117,7 +136,7 @@ Logger = require("./Logger");
 		var quality = 0;
 		var result;
 		for (var i = 0; i < that.pathIterations; i++) {
-			that.testPathB(i);
+			that.testPathC(i);
 			var imgRef = that.xyzCam.capture("feedrate"+i, feedRate);
 			var q;
 			result = that.ip.PSNR(that.basis, imgRef);
