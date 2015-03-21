@@ -46,7 +46,7 @@ Logger = require("./Logger");
 		that.basis = ImageRef.copy({
 			x:that.xBasis,
 			y:that.yBasis,
-			z:that.xBasis,
+			z:that.zBasis,
 		});
 		that.logger = options.logger || new Logger(options);
 
