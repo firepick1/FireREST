@@ -1,0 +1,11 @@
+[
+	{"op":"matchTemplate",
+		"name":"result",
+		"template":"{{template}}",
+		"corr":"{{corr}}",
+		"threshold":"{{threshold}}",
+		"method":"{{method}}",
+		"angle":"{{angle }}",
+		"output":"{{output}}"
+	}
+]
