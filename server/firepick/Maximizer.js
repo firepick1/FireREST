@@ -65,10 +65,10 @@ Logger = require("./Logger");
 				}
 			}
 			for (var i = 0; i < rejects.length; i++) {
-				if (xMax < rejects[i] &&  rejects[i] < that.xHigh) {
+				if (that.pinHigh === false && xMax < rejects[i] &&  rejects[i] < that.xHigh) {
 					that.xHigh = rejects[i];
 				}
-				if (that.xLow < rejects[i] && rejects[i] < xMin) {
+				if (that.pinLow === false && that.xLow < rejects[i] && rejects[i] < xMin) {
 					that.xLow = rejects[i];
 				}
 			}
