@@ -29,9 +29,9 @@ Logger = require("./Logger");
         that.nPlaces.should.not.be.below(0);
 		that.xBasis = options.xBasis == null ? 0 : options.xBasis;
 		that.yBasis = options.yBasis == null ? 0 : options.yBasis;
-		that.zBasis = options.zBasis == null ? -64 : options.zBasis;
-		that.xFar = options.xFar == null ? 64 : options.xFar;
-		that.yFar = options.yFar == null ? 64 : options.yFar;
+		that.zBasis = options.zBasis == null ? -50 : options.zBasis;
+		that.xFar = options.xFar == null ? 90 : options.xFar;
+		that.yFar = options.yFar == null ? 90 : options.yFar;
 		that.zFar = options.zFar == null ? 0 : options.zFar;
 		that.pathIterations = options.pathIterations || 6;
 		that.pathIterations.should.be.above(0);
@@ -106,7 +106,11 @@ Logger = require("./Logger");
 	};
 	FeedRate.prototype.testPathC = function(i) {
 		var that = this;
-		var N = Util.fibonacci(that.pathMinSteps+i);
+		that.fibStart = that.fibStart || 2;
+		while (Util.fibonacci(that.fibStart) < that.pathMinSteps) {
+			that.fibStart++;
+		}
+		var N = Util.fibonacci(that.fibStart+i);
 		var xStep = (that.xFar-that.basis.x)/N;
 		var yStep = (that.yFar-that.basis.y)/N;
 		var zStep = (that.zFar-that.basis.z)/N;
@@ -243,7 +247,7 @@ var mock = {};
 	logger = new Logger({logLevel:logLevel});
     var fpd = new FPD();
     var useMock = fpd.health() < 1;
-	var basis = {x:0,y:0,z:-64};
+	var basis = {x:0,y:0,z:-50};
     var mockXYZCam = new mock.MockXYZCamera({
 		basis:basis,
 		logger:logger,
@@ -260,9 +264,9 @@ var mock = {};
 		frdefault.should.have.properties({
 			xBasis:0,			// basis reference image x
 			yBasis:0,			// basis reference image y
-			zBasis:-64,			// basis reference image z
-			xFar:64,			// farthest test path x
-			yFar:64,			// farthest test path y
+			zBasis:-50,			// basis reference image z
+			xFar:90,			// farthest test path x
+			yFar:90,			// farthest test path y
 			zFar:0,				// farthest test path z
 			pathIterations: 6,	// number of paths tested per feedrate
 			pathMinSteps: 3,	// minimum number of steps per test path
