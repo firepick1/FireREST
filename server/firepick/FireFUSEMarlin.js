@@ -3,15 +3,17 @@ var should = require("should"),
     firepick = firepick || {};
 firepick.XYZPositioner = require("./XYZPositioner");
 var fs = require('fs');
+Logger = require("./Logger");
 
 var firefuse_path = "/dev/firefuse/sync/cnc/marlin/gcode.fire";
 //var firefuse_path = "/tmp/Marlin";
 
 (function(firepick) {
-    function FireFUSEMarlin(path, options) {
+    function FireFUSEMarlin(options) {
 		var that = this;
-        that.path = path || firefuse_path;
 		options = options || {};
+        that.path = options.path || firefuse_path;
+		that.logger = options.logger || new Logger(options);
         var writer = function(data) {
             throw new Error("FireFUSEMarlin is unavailable");
         }
@@ -27,7 +29,7 @@ var firefuse_path = "/dev/firefuse/sync/cnc/marlin/gcode.fire";
             };
         } catch (err) {
             if (err.code != "ENOENT") {
-                console.log(err);
+                that.logger.warn("FireFUSEMarlin(", that.path, ") could not open for write: ", err);
             }
             that.err = err;
         }
@@ -80,7 +82,7 @@ var firefuse_path = "/dev/firefuse/sync/cnc/marlin/gcode.fire";
         }));
         should.exist(ffm, "FireFUSEMarlin");
         should.doesNotThrow((function() {
-            ffm_bad = new firepick.FireFUSEMarlin("no/such/path")
+            ffm_bad = new firepick.FireFUSEMarlin({path:"no/such/path"})
         }), "no/such/path");
     });
     it("should have Marlin path", function() {
