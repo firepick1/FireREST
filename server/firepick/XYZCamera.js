@@ -11,6 +11,8 @@ Logger = require("./Logger");
         var that = this;
 		var mock = that;
         options = options || {};
+		that.logger = options.logger || new Logger(options);
+		that.logger.info("XYZCamera logLevel:" + that.logger.logLevel, " options:", options);
 		that.$xyz = options.xyz || mock;
 		that.$camera = options.camera || mock;
         that.mockImages = {};
@@ -23,7 +25,6 @@ Logger = require("./Logger");
             that.zMax = Math.max(that.zMax || imgRef.z, imgRef.z);
         }
 		that.setFeedRate(options.feedRate || that.$xyz.feedRate || 1000);
-		that.logger = options.logger || new Logger(options.logLevel);
         return that;
     };
 
@@ -60,6 +61,7 @@ Logger = require("./Logger");
             that.position.y = xyz.y == null ? that.position.y : xyz.y;
             that.position.z = xyz.z == null ? that.position.z : xyz.z;
         }
+		that.logger.trace("moveTo(", that.position, ")");
         return that;
     };
     XYZCamera.prototype.getXYZ = function() { // mock

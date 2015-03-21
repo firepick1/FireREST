@@ -64,7 +64,7 @@ Logger = require("./Logger");
 	};
 	FeedRate.prototype.testPathA = function(i) {
 		var that = this;
-		var N = that.pathSteps+i;
+		var N = that.pathMinSteps+i;
 		var xStep = (that.xFar-that.basis.x)/N;
 		var yStep = (that.yFar-that.basis.y)/N;
 		var zStep = (that.zFar-that.basis.z)/N;
@@ -105,7 +105,7 @@ Logger = require("./Logger");
 			if (result.offset["0"] && result.offset["0"].match) {
 				quality += q; // ignore samples with no offset
 			}
-			that.logger.trace("evaluate(",feedRate,") result:",result, " q:", q);
+			that.logger.debug("evaluate(",feedRate,") result:",result, " q:", q);
 		}
 		that.logger.debug("evaluate(",feedRate,") result:",result, " quality:", quality);
 		that.samples[feedRate] = quality;
@@ -145,62 +145,67 @@ Logger = require("./Logger");
     module.exports = firepick.FeedRate = FeedRate;
 })(firepick || (firepick = {}));
 
+var mock = {};
+(function(mock) {
+	function MockXYZCamera(options) {
+		var that = this;
+		var basis = options.basis || {x:0,y:0,z:-50};
+		that.xyzCam = new XYZCamera(options);
+		that.basis = ImageRef.copy(basis);
+		that.goodImage = ImageRef.copy(basis).setPath("test/XP005_Z0X0Y0@1#1.jpg");
+		that.badImage = ImageRef.copy(basis).setPath("test/XP005_Z5X0Y0@1#1.jpg");
+		return that;
+	};
+
+	/////////////// INSTANCE ////////////
+	MockXYZCamera.prototype.capture = function(tag, version) {
+		var that = this;
+		if (that.xyzCam.feedRate > 6000) {
+			return that.badImage;
+		}
+		return that.goodImage;
+	};
+	MockXYZCamera.prototype.setFeedRate = function(feedRate) {
+		var that = this;
+		that.xyzCam.setFeedRate(feedRate);
+		return that;
+	};
+	MockXYZCamera.prototype.origin = function() {
+		var that = this;
+		that.xyzCam.origin;
+		return that;
+	};
+	MockXYZCamera.prototype.moveTo = function(x,y,z) {
+		var that = this;
+		that.xyzCam.moveTo(x,y,z);
+		return that;
+	};
+	MockXYZCamera.prototype.getXYZ = function() {
+		var that = this;
+		return that.xyzCam.getXYZ();
+	};
+	MockXYZCamera.prototype.imageRef = function(ref) {
+		var that = this;
+		return that.xyzCam.imageRef(ref);
+	};
+
+	mock.MockXYZCamera = MockXYZCamera;
+})(mock);
+
 (typeof describe === 'function') && describe("firepick.FeedRate", function() {
-	var mock = {};
-	logger = new Logger();
-	(function(mock) {
-		function MockXYZCamera(basis) {
-			var that = this;
-			that.xyzCam = new XYZCamera();
-			that.basis = ImageRef.copy(basis);
-			that.goodImage = ImageRef.copy(basis).setPath("test/XP005_Z0X0Y0@1#1.jpg");
-			that.badImage = ImageRef.copy(basis).setPath("test/XP005_Z5X0Y0@1#1.jpg");
-			return that;
-		};
-
-		/////////////// INSTANCE ////////////
-		MockXYZCamera.prototype.capture = function(tag, version) {
-			var that = this;
-			if (that.xyzCam.feedRate > 6000) {
-				return that.badImage;
-			}
-			return that.goodImage;
-		};
-		MockXYZCamera.prototype.setFeedRate = function(feedRate) {
-			var that = this;
-			that.xyzCam.setFeedRate(feedRate);
-			return that;
-		};
-		MockXYZCamera.prototype.origin = function() {
-			var that = this;
-			that.xyzCam.origin;
-			return that;
-		};
-		MockXYZCamera.prototype.moveTo = function(x,y,z) {
-			var that = this;
-			that.xyzCam.moveTo(x,y,z);
-			return that;
-		};
-		MockXYZCamera.prototype.getXYZ = function() {
-			var that = this;
-			return that.xyzCam.getXYZ();
-		};
-		MockXYZCamera.prototype.imageRef = function(ref) {
-			var that = this;
-			return that.xyzCam.imageRef(ref);
-		};
-
-		mock.MockXYZCamera = MockXYZCamera;
-	})(mock);
-
+	var logLevel = "debug";
+	logger = new Logger({logLevel:logLevel});
     var fpd = new FPD();
     var useMock = fpd.health() < 1;
 	var basis = {x:0,y:0,z:-40};
-    var mockXYZCam = new mock.MockXYZCamera({basis:basis});
+    var mockXYZCam = new mock.MockXYZCamera({
+		basis:basis,
+		logger:logger,
+	});
     var xyzCam = useMock ? mockXYZCam : fpd;
     var feedRate = new firepick.FeedRate(xyzCam, 
 		useMock ? 1000 : 1000, useMock ? 10000 : 25000 , {
-		logLevel:"trace",
+		logLevel:logLevel,
 		imageProcessor: new ImageProcessor(),
 		basis:basis,
 	});
@@ -227,7 +232,7 @@ Logger = require("./Logger");
         var result = feedRate.maxFeedRate();
 		should(result.feedRate).within(1000, 20000);
         if (useMock) {
-            should(result.feedRate).within(5820, 6000);
+            should(result.feedRate).within(5500, 6000);
         }
     });
 });

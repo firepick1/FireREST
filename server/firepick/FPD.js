@@ -5,29 +5,31 @@ var os = require("os"),
     fs = require("fs"),
     child_process = require("child_process"),
     path = require("path");
-firepick.XYZPositioner = require("./XYZPositioner");
-firepick.Camera = require("./Camera");
-firepick.ImageRef = require("./ImageRef");
-firepick.ImageStore = require("./ImageStore");
-firepick.ImageProcessor = require("./ImageProcessor");
-firepick.FireFUSECamera = require("./FireFUSECamera");
-firepick.FireFUSEMarlin = require("./FireFUSEMarlin");
-firepick.FPDModel = require("./FPDModel");
-firepick.XYZCamera = require("./XYZCamera");
+XYZPositioner = require("./XYZPositioner");
+Camera = require("./Camera");
+ImageRef = require("./ImageRef");
+ImageStore = require("./ImageStore");
+ImageProcessor = require("./ImageProcessor");
+FireFUSECamera = require("./FireFUSECamera");
+FireFUSEMarlin = require("./FireFUSEMarlin");
+FPDModel = require("./FPDModel");
+XYZCamera = require("./XYZCamera");
+Logger = require("./Logger");
 
 (function(firepick) {
     function FPD(options) {
         var that = this;
         options = options || {};
-        that.$xyz = options.xyz || new firepick.FireFUSEMarlin();
-        that.$camera = options.camera || new firepick.FireFUSECamera();
-        that.$imgStore = options.imgStore || new firepick.ImageStore(
+		that.logger = options.logger || new Logger(options);
+        that.$xyz = options.xyz || new FireFUSEMarlin(options);
+        that.$camera = options.camera || new FireFUSECamera();
+        that.$imgStore = options.imgStore || new ImageStore(
             that.$camera, {
                 prefix: "FPD",
                 suffix: ".jpg"
             }
         );
-        that.$imgProc = options.imgProc || new firepick.ImageProcessor(that.$imgStore);
+        that.$imgProc = options.imgProc || new ImageProcessor(that.$imgStore);
 		that.setFeedRate(options.feedRate || that.$xyz.feedRate);
         return that;
     };
@@ -154,8 +156,8 @@ firepick.XYZCamera = require("./XYZCamera");
 (typeof describe === 'function') && describe("firepick.FPD", function() {
     var fpd = new firepick.FPD();
     var fpdMock = new firepick.FPD({
-        xyz: new firepick.XYZPositioner(),
-        camera: new firepick.Camera([
+        xyz: new XYZPositioner(),
+        camera: new Camera([
             "test/camX0Y0Z0a.jpg",
             "test/camX0Y0Z0b.jpg",
             "test/camX1Y0Z0.jpg",
@@ -174,8 +176,8 @@ firepick.XYZCamera = require("./XYZCamera");
         fpd.imageProcessor().health().should.equal(1);
         should(fpd.health()).equal(1);
     });
-    should.exist(firepick.XYZCamera.validate);
-    firepick.XYZCamera.validate(fpd);
+    should.exist(XYZCamera.validate);
+    XYZCamera.validate(fpd);
     firepick.FPD.validate(fpd);
 
 })
