@@ -31,6 +31,14 @@ Logger = require("./Logger");
         );
         that.$imgProc = options.imgProc || new ImageProcessor(that.$imgStore);
 		that.setFeedRate(options.feedRate || that.$xyz.feedRate);
+		if (that.health() < 1) {
+			that.logger.warn("FPD health:{",
+				"camera:", that.$camera.health(), ",",
+				"imgStore:", that.$imgStore.health(), ",",
+				"imgProc:", that.$imgProc.health(), ",",
+				"xyz:", that.$xyz.health(), "}"
+			);
+		}
         return that;
     };
     //////////// PRIVATE ////////////////
