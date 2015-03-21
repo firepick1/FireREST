@@ -103,11 +103,15 @@ Logger = require("./Logger");
 			q = feedRate /that.feedMax + sameness;
 			result.offset = that.ip.calcOffset(that.basis, imgRef);
 			if (result.offset["0"] && result.offset["0"].match) {
+				that.logger.debug("evaluate(",feedRate,") result:",result, " q:", q);
 				quality += q; // ignore samples with no offset
+			} else {
+				quality = 0;
+				that.logger.debug("evaluate(",feedRate,") result:",result, " FEEDRATE REJECTED");
+				break;
 			}
-			that.logger.debug("evaluate(",feedRate,") result:",result, " q:", q);
 		}
-		that.logger.debug("evaluate(",feedRate,") result:",result, " quality:", quality);
+		that.logger.debug("evaluate(",feedRate,") quality:", quality);
 		that.samples[feedRate] = quality;
 		return quality;
 	};
