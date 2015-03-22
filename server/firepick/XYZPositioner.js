@@ -19,7 +19,7 @@ function isNumeric(obj) {
         return that;
     }
     XYZPositioner.validate = function(xyzPositioner) {
-        describe("XYZPositioner validate(" + xyzPositioner.constructor.name + ")", function() {
+        describe("XYZPositioner.validate(" + xyzPositioner.constructor.name + "):", function() {
             should.exist(xyzPositioner);
             it("should define XYZPositioner methods", function() {
                 should(xyzPositioner).have.properties([ 
@@ -67,25 +67,23 @@ function isNumeric(obj) {
                         z: 3
                     }, xyzPositioner.getXYZ());
                 });
-                it("should move along a path [{x:1},{y:2},{z:3}]", function() {
+                it("move([{x:1},{y:2},{z:3}]) should follow a path", function() {
                     this.timeout(5000);
                     xyzPositioner.move({
                         x: 0,
                         y: 0,
                         z: 0
                     });
-                    should.equal(xyzPositioner, xyzPositioner.move([{
-                        x: 1
-                    }, {
-                        y: 2
-                    }, {
-                        z: 3
-                    }]));
-                    should.deepEqual({
+					var moves = [];
+					moves.push({x:1});
+					moves.push({y:2});
+					moves.push({z:3});
+                    should.equal(xyzPositioner.move(moves), xyzPositioner);
+                    should.deepEqual(xyzPositioner.getXYZ(), {
                         x: 1,
                         y: 2,
                         z: 3
-                    }, xyzPositioner.getXYZ());
+                    });
                 });
             }
         });

@@ -191,6 +191,22 @@ Logger = require("./Logger");
 		return result;
     };
 
+	///////////////// CLASS //////////////////
+	FeedRate.interpolate = function(vin, vout, t) {
+		var v012 = vin * (
+				Util.bernstein(5,0,t) +
+				Util.bernstein(5,1,t) +
+				Util.bernstein(5,2,t)
+			);
+		var v345 = vout * (
+				Util.bernstein(5,3,t) +
+				Util.bernstein(5,4,t) +
+				Util.bernstein(5,5,t)
+			);
+
+		return (v012 + v345)/6;
+	};
+
     console.log("LOADED	: firepick.FeedRate");
     module.exports = firepick.FeedRate = FeedRate;
 })(firepick || (firepick = {}));
@@ -243,7 +259,7 @@ var mock = {};
 })(mock);
 
 (typeof describe === 'function') && describe("firepick.FeedRate", function() {
-	var logLevel = "debug";
+	var logLevel = "info";
 	logger = new Logger({logLevel:logLevel});
     var fpd = new FPD();
     var useMock = fpd.health() < 1;
@@ -259,6 +275,19 @@ var mock = {};
 		imageProcessor: new ImageProcessor(),
 		basis:basis,
 	});
+	it("should interpolate", function() {
+		firepick.FeedRate.interpolate(0,100,0).should.equal(0);
+		firepick.FeedRate.interpolate(0,100,0.1).should.within(1,2);
+		firepick.FeedRate.interpolate(0,100,0.2).should.within(6,7);
+		firepick.FeedRate.interpolate(0,100,0.4).should.within(21,22);
+		firepick.FeedRate.interpolate(0,100,0.5).should.within(32,33);
+		firepick.FeedRate.interpolate(0,100,0.6).should.within(44,45);
+		firepick.FeedRate.interpolate(0,100,0.7).should.within(57,58);
+		firepick.FeedRate.interpolate(0,100,0.8).should.within(70,71);
+		firepick.FeedRate.interpolate(0,100,0.9).should.within(85,86);
+		firepick.FeedRate.interpolate(0,100,1).should.equal(100);
+	});
+	return;
 	it("should have default options", function() {
 		var frdefault = new firepick.FeedRate(xyzCam);
 		frdefault.should.have.properties({

@@ -7,6 +7,7 @@ var should = require("should"),
     var id = 0;
     that.id = id++;
 	var fibSequence = [0,1];
+	var pascal = {0:[1]};
 
     function Util(solver, options) {
         this.id = id++;
@@ -23,9 +24,40 @@ var should = require("should"),
     Util.prototype.id = function() {
         return id;
     }
+
+	///////////////// CLASS //////////
+	Util.bernstein = function(n,k,t) {
+		var result = Util.choose(n,k);
+		result.should.not.NaN;
+		var t1 = (1-t);
+		for (var i = 1; i < n-k; i++) {
+			result = result*t1;
+		}
+		result.should.not.NaN;
+		for (var i = 1; i < k; i++) {
+			result = result*t;
+		}
+		result.should.not.NaN;
+		return result;
+	};
+	Util.choose = function(n,k) {
+		if (pascal[n] == null) {
+			for (var i = 1; i <= n; i++) {
+				if (pascal[i] == null) {
+					var pascalPrev = pascal[i-1];
+					pascal[i] = [1];
+					for (var j = 1; j < i; j++) {
+						pascal[i].push(pascalPrev[j-1]+pascalPrev[j]);
+					}
+					pascal[i].push(1);
+				}
+			}
+		}
+		return pascal[n][k];
+	};
     Util.id = function() {
         return id;
-    }
+    };
     Util.roundN = function(value, places) {
 		places = places || 0;
 		var result;
@@ -187,5 +219,42 @@ var should = require("should"),
 		firepick.Util.fibonacci(5).should.be.equal(5);
 		firepick.Util.fibonacci(6).should.be.equal(8);
 		firepick.Util.fibonacci(7).should.be.equal(13);
+	});
+	it("choose(n,k) should return binomial coefficient", function() {
+		Util.choose(4,4).should.equal(1);
+		Util.choose(0,0).should.equal(1);
+		Util.choose(1,0).should.equal(1);
+		Util.choose(1,1).should.equal(1);
+		Util.choose(2,0).should.equal(1);
+		Util.choose(2,1).should.equal(2);
+		Util.choose(2,2).should.equal(1);
+		Util.choose(3,0).should.equal(1);
+		Util.choose(3,1).should.equal(3);
+		Util.choose(3,2).should.equal(3);
+		Util.choose(3,3).should.equal(1);
+		Util.choose(4,0).should.equal(1);
+		Util.choose(4,1).should.equal(4);
+		Util.choose(4,2).should.equal(6);
+		Util.choose(4,3).should.equal(4);
+	});
+	it("bernstein(n,k,t) should return Bernstein coefficient", function() {
+		Util.bernstein(5,5,0).should.equal(0);
+		Util.bernstein(5,5,0.5).should.equal(0.0625);
+		Util.bernstein(5,5,1).should.equal(1);
+		Util.bernstein(5,0,0).should.equal(1);
+		Util.bernstein(5,0,0.5).should.equal(0.0625);
+		Util.bernstein(5,0,1).should.equal(0);
+		Util.bernstein(5,1,0).should.equal(5);
+		Util.bernstein(5,1,0.5).should.equal(0.625);
+		Util.bernstein(5,1,1).should.equal(0);
+		Util.bernstein(5,2,0).should.equal(0);
+		Util.bernstein(5,2,0.5).should.equal(1.25);
+		Util.bernstein(5,2,1).should.equal(0);
+		Util.bernstein(5,3,0).should.equal(0);
+		Util.bernstein(5,3,0.5).should.equal(1.25);
+		Util.bernstein(5,3,1).should.equal(0);
+		Util.bernstein(5,4,0).should.equal(0);
+		Util.bernstein(5,4,0.5).should.equal(0.625);
+		Util.bernstein(5,4,1).should.equal(5);
 	});
 })

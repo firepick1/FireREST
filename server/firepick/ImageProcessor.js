@@ -36,7 +36,8 @@ Logger = require("./Logger");
 		var that = this;
         var jout = that.firesight_cmd(imgRef1.path, "calcOffset.json",
             "-Dtemplate=" + imgRef2.path);
-        return jout.result.channels;
+        return jout.result.channels && jout.result.channels['0'] ?
+			jout.result.channels : null;
     };
     ImageProcessor.prototype.meanStdDev = function(imgRef) {
 		var that = this;
@@ -87,14 +88,17 @@ Logger = require("./Logger");
             describe("validating calcOffset", function() {
                 it("should show zero offset for two images at same location", function() {
                     var result = ip.calcOffset(ref000a, ref000b);
-                    should.equal(result.dx, 0);
-                    should.equal(result.dy, 0);
+					should.exist(result);
+					should.exist(result[0]);
+                    should.equal(result[0].dx, 0);
+                    should.equal(result[0].dy, 0);
                 });
                 it("should show non-zero offset for two images at different location", function() {
                     var result = ip.calcOffset(ref000a, ref100);
-                    //console.log(JSON.stringify(result));
-                    should(result.dx * result.dx).above(10);
-                    should(result.dy * result.dy).below(5);
+					should.exist(result);
+					should.exist(result[0]);
+                    should(result[0].dx * result[0].dx).above(10);
+                    should(result[0].dy * result[0].dy).below(5);
                 });
                 it("should return nothing for dissimilar images", function() {
                     var result = ip.calcOffset(ref000a, refDuck);
