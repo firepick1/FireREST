@@ -39,7 +39,7 @@ var firefuse_path = "/dev/firefuse/cv/1/camera.jpg";
     module.exports = firepick.FireFUSECamera = FireFUSECamera;
 })(firepick || (firepick = {}));
 
-(typeof describe === 'function') && describe("firepick.FireFUSECamera test", function() {
+(typeof describe === 'function') && describe("firepick.FireFUSECamera", function() {
     var camera = new firepick.FireFUSECamera();
     var cam_bad = new firepick.FireFUSECamera("no/such/path");
     firepick.Camera.validate(camera);

@@ -1,6 +1,7 @@
 var should = require("should"),
     module = module || {},
     firepick = firepick || {};
+var Logger = require("./Logger");
 
 (function(firepick) {
     var that = {};

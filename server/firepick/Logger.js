@@ -1,7 +1,6 @@
 var should = require("should"),
     module = module || {},
     firepick = firepick || {};
-Util = require("./Util");
 
 (function(firepick) {
     function Logger(options) {
@@ -27,7 +26,7 @@ Util = require("./Util");
 			if (typeof args[i] ==="object") {
 				msg += JSON.stringify(args[i]);
 			} else if (typeof args[i] === "number") {
-				msg += Util.roundN(args[i], that.nPlaces);
+				msg += that.roundN(args[i]);
 			} else {
 				msg += args[i];
 			}
@@ -74,6 +73,16 @@ Util = require("./Util");
 			that.write("TRACE	: " + that.message(arguments));
 		}
 	};
+    Logger.prototype.round = function(value) {
+		var result;
+		if (that.nPlaces > 0) {
+			result = +(Math.round(value + "e+" + that.nPlaces) + "e-" + that.nPlaces);
+		}
+		if (isNaN(result)) {
+			result = Math.round(value);
+		}
+		return result;
+    };
 
 	////////////// CLASS /////////////////
 	Logger.logger = new Logger({
