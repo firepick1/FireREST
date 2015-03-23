@@ -75,7 +75,12 @@ Util = require("./Util");
 		}
 	};
 
-    console.log("LOADED	: firepick.Logger");
+	////////////// CLASS /////////////////
+	Logger.logger = new Logger({
+		logLevel:"warn"
+	});
+
+    Logger.logger.info("loaded firepick.Logger");
     module.exports = firepick.Logger = Logger;
 })(firepick || (firepick = {}));
 

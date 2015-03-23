@@ -124,7 +124,7 @@ firepick.DeltaCalculator = require("./DeltaCalculator");
         });
     };
 
-    console.log("LOADED	: firepick.FPDModel");
+    Logger.logger.info("loaded firepick.FPDModel");
     module.exports = firepick.FPDModel = FPDModel;
 })(firepick || (firepick = {}));
 

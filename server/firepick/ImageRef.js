@@ -146,7 +146,7 @@ temp.track();
         return that;
     };
 
-    console.log("LOADED	: firepick.ImageRef");
+    Logger.logger.info("loaded firepick.ImageRef");
     module.exports = firepick.ImageRef = ImageRef;
 })(firepick || (firepick = {}));
 

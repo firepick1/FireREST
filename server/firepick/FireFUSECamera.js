@@ -32,9 +32,9 @@ var firefuse_path = "/dev/firefuse/cv/1/camera.jpg";
 
     try {
         fs.statSync(firefuse_path);
-        console.log("LOADED	: firepick.FireFUSECamera is available");
+        Logger.logger.info("firepick.FireFUSECamera is available");
     } catch (err) {
-        console.log("ERROR	: firepick.FireFUSECamera is not available");
+        Logger.logger.warn("firepick.FireFUSECamera is not available");
     }
     module.exports = firepick.FireFUSECamera = FireFUSECamera;
 })(firepick || (firepick = {}));

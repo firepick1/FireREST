@@ -12,7 +12,6 @@ Logger = require("./Logger");
 		var mock = that;
         options = options || {};
 		that.logger = options.logger || new Logger(options);
-		that.logger.info("XYZCamera logLevel:" + that.logger.logLevel, " options:", options);
 		that.$xyz = options.xyz || mock;
 		that.$camera = options.camera || mock;
         that.mockImages = {};
@@ -325,7 +324,7 @@ Logger = require("./Logger");
         "test/XP005_Z-110X0Y0@1#1.jpg",
     ];
 
-    console.log("LOADED	: firepick.XYZCamera");
+    Logger.logger.info("loaded firepick.XYZCamera");
     module.exports = firepick.XYZCamera = XYZCamera;
 })(firepick || (firepick = {}));
 

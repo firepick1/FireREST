@@ -14,7 +14,7 @@ var XYZPositioner = require("./XYZPositioner.js");
         return this;
     }
 
-    console.log("LOADED	: firepick.Calibrate");
+    Logger.logger.info("loaded firepick.Calibrate");
     module.exports = firepick.Calibrate = Calibrate;
 })(firepick || (firepick = {}));
 

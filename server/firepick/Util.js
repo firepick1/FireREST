@@ -26,34 +26,40 @@ var should = require("should"),
     }
 
 	///////////////// CLASS //////////
-	Util.bernstein = function(n,k,t) {
-		var result = Util.choose(n,k);
-		result.should.not.NaN;
-		var t1 = (1-t);
-		for (var i = 1; i < n-k; i++) {
-			result = result*t1;
-		}
-		result.should.not.NaN;
-		for (var i = 1; i < k; i++) {
-			result = result*t;
-		}
-		result.should.not.NaN;
-		return result;
-	};
 	Util.choose = function(n,k) {
+		//k.should.equal(Math.round(k));
 		if (pascal[n] == null) {
+			n.should.be.above(0);
+			k.should.not.be.above(n);
+			n.should.equal(Math.round(n));
 			for (var i = 1; i <= n; i++) {
 				if (pascal[i] == null) {
 					var pascalPrev = pascal[i-1];
-					pascal[i] = [1];
+					var pascalNew = [1];
+					pascal[i] = pascalNew;
 					for (var j = 1; j < i; j++) {
-						pascal[i].push(pascalPrev[j-1]+pascalPrev[j]);
+						pascalNew.push(pascalPrev[j-1]+pascalPrev[j]);
+						pascalNew[pascalNew.length-1].should.not.be.NaN;
 					}
-					pascal[i].push(1);
+					pascalNew.push(1);
 				}
 			}
+			pascal[n].length.should.equal(n+1);
 		}
-		return pascal[n][k];
+		//console.log("n:",n," k:", k, " ", JSON.stringify(pascal[n]));
+		var result = pascal[n][k];
+		if (result == null) {
+			n.should.not.be.below(0);
+			k.should.not.be.below(0);
+			k.should.not.be.above(n);
+			n.should.be.Number;
+			n.should.not.be.NaN;
+			k.should.be.Number;
+			k.should.not.be.NaN;
+			n.should.equal(Math.round(n));
+			k.should.equal(Math.round(k));
+		}
+		return result;
 	};
     Util.id = function() {
         return id;
@@ -144,7 +150,7 @@ var should = require("should"),
 		}
 	}
 
-    console.log("LOADED	: firepick.Util");
+    Logger.logger.info("loaded firepick.Util");
     module.exports = firepick.Util = Util;
 })(firepick || (firepick = {}));
 
@@ -237,24 +243,15 @@ var should = require("should"),
 		Util.choose(4,2).should.equal(6);
 		Util.choose(4,3).should.equal(4);
 	});
-	it("bernstein(n,k,t) should return Bernstein coefficient", function() {
-		Util.bernstein(5,5,0).should.equal(0);
-		Util.bernstein(5,5,0.5).should.equal(0.0625);
-		Util.bernstein(5,5,1).should.equal(1);
-		Util.bernstein(5,0,0).should.equal(1);
-		Util.bernstein(5,0,0.5).should.equal(0.0625);
-		Util.bernstein(5,0,1).should.equal(0);
-		Util.bernstein(5,1,0).should.equal(5);
-		Util.bernstein(5,1,0.5).should.equal(0.625);
-		Util.bernstein(5,1,1).should.equal(0);
-		Util.bernstein(5,2,0).should.equal(0);
-		Util.bernstein(5,2,0.5).should.equal(1.25);
-		Util.bernstein(5,2,1).should.equal(0);
-		Util.bernstein(5,3,0).should.equal(0);
-		Util.bernstein(5,3,0.5).should.equal(1.25);
-		Util.bernstein(5,3,1).should.equal(0);
-		Util.bernstein(5,4,0).should.equal(0);
-		Util.bernstein(5,4,0.5).should.equal(0.625);
-		Util.bernstein(5,4,1).should.equal(5);
+	it("choose(n,k) should only accept valid arguments", function() {
+		should.ok(function(){try {
+			Util.choose(-1,0)
+		}catch(ex){return ex;} return false;}());
+		should.ok(function(){try {
+			Util.choose(0,-1)
+		}catch(ex){return ex;} return false;}());
+		should.ok(function(){try {
+			Util.choose(5,1.5);
+		}catch(ex){return ex;} return false;}());
 	});
 })

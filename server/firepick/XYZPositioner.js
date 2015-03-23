@@ -174,7 +174,7 @@ function isNumeric(obj) {
         return 1;
     }
 
-    console.log("LOADED	: firepick.XYZPositioner");
+    Logger.logger.info("loaded firepick.XYZPositioner");
     module.exports = firepick.XYZPositioner = XYZPositioner;
 })(firepick || (firepick = {}));
 

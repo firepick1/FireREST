@@ -97,7 +97,7 @@ Logger = require("./Logger");
         should(result).be.within(minValue, maxValue);
         return result;
     }
-    console.log("LOADED	: firepick.Evolve");
+    Logger.logger.info("loaded firepick.Evolve");
     module.exports = firepick.Evolve = Evolve;
 })(firepick || (firepick = {}));
 

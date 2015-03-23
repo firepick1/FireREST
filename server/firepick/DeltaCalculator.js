@@ -1,6 +1,7 @@
 var should = require("should"),
     module = module || {},
     firepick = firepick || {};
+Logger = require("./Logger");
 
 (function(firepick) {
     var sqrt3 = Math.sqrt(3.0);
@@ -20,6 +21,7 @@ var should = require("should"),
         this.re = options.re || 232; // effector arm length
         this.rf = options.rf || 112; // base arm length
         this.dz = options.dz || 0;
+		this.logger = options.logger || new Logger(options);
         return this;
     };
     DeltaCalculator.prototype.calcXYZ = function(angles) {
@@ -168,21 +170,14 @@ var should = require("should"),
         });
     };
 
-    console.log("LOADED	: firepick.DeltaCalculator");
+    Logger.logger.info("loaded firepick.DeltaCalculator");
     module.exports = firepick.DeltaCalculator = DeltaCalculator;
 })(firepick || (firepick = {}));
 
-(typeof describe === 'function') && describe("firepick.DeltaCalculator test", function() {
-    firepick.DeltaCalculator.validate(new firepick.DeltaCalculator());
-    var ok = true;
-    try {
-        console.log("DeltaCalculatorTest() BEGIN");
+(typeof describe === 'function') && describe("firepick.DeltaCalculator", function() {
+	DeltaCalculator = firepick.DeltaCalculator;
+    DeltaCalculator.validate(new firepick.DeltaCalculator());
+	it("should have default options", function() {
         var dm = new firepick.DeltaCalculator();
-
-        console.log("DeltaCalculatorTest() PASS");
-    } catch (ex) {
-        console.log("ERROR	: " + ex);
-        console.log(ex.stack);
-        ok = false;
-    }
+    });
 });

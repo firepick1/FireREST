@@ -156,7 +156,7 @@ function isNumeric(obj) {
         });
     };
 
-    console.log("LOADED	: firepick.ImageStore");
+    Logger.logger.info("loaded firepick.ImageStore");
     module.exports = firepick.ImageStore = ImageStore;
 })(firepick || (firepick = {}));
 

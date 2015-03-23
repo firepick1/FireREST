@@ -9,8 +9,11 @@ FPD = require("./FPD");
 Util = require("./Util");
 Maximizer = require("./Maximizer");
 Logger = require("./Logger");
+Bernstein = require("./Bernstein");
 
 (function(firepick) {
+	var b5 = new Bernstein(5);
+	var b6 = new Bernstein(6);
     function FeedRate(xyzCam, feedMin, feedMax, options) {
         var that = this;
 
@@ -192,22 +195,8 @@ Logger = require("./Logger");
     };
 
 	///////////////// CLASS //////////////////
-	FeedRate.interpolate = function(vin, vout, t) {
-		var v012 = vin * (
-				Util.bernstein(5,0,t) +
-				Util.bernstein(5,1,t) +
-				Util.bernstein(5,2,t)
-			);
-		var v345 = vout * (
-				Util.bernstein(5,3,t) +
-				Util.bernstein(5,4,t) +
-				Util.bernstein(5,5,t)
-			);
 
-		return (v012 + v345)/6;
-	};
-
-    console.log("LOADED	: firepick.FeedRate");
+    Logger.logger.info("loaded firepick.FeedRate");
     module.exports = firepick.FeedRate = FeedRate;
 })(firepick || (firepick = {}));
 
@@ -259,6 +248,7 @@ var mock = {};
 })(mock);
 
 (typeof describe === 'function') && describe("firepick.FeedRate", function() {
+	var FeedRate = firepick.FeedRate;
 	var logLevel = "info";
 	logger = new Logger({logLevel:logLevel});
     var fpd = new FPD();
@@ -269,27 +259,15 @@ var mock = {};
 		logger:logger,
 	});
     var xyzCam = useMock ? mockXYZCam : fpd;
-    var feedRate = new firepick.FeedRate(xyzCam, 
+    var feedRate = new FeedRate(xyzCam, 
 		useMock ? 1000 : 1000, useMock ? 10000 : 25000 , {
 		logLevel:logLevel,
 		imageProcessor: new ImageProcessor(),
 		basis:basis,
 	});
-	it("should interpolate", function() {
-		firepick.FeedRate.interpolate(0,100,0).should.equal(0);
-		firepick.FeedRate.interpolate(0,100,0.1).should.within(1,2);
-		firepick.FeedRate.interpolate(0,100,0.2).should.within(6,7);
-		firepick.FeedRate.interpolate(0,100,0.4).should.within(21,22);
-		firepick.FeedRate.interpolate(0,100,0.5).should.within(32,33);
-		firepick.FeedRate.interpolate(0,100,0.6).should.within(44,45);
-		firepick.FeedRate.interpolate(0,100,0.7).should.within(57,58);
-		firepick.FeedRate.interpolate(0,100,0.8).should.within(70,71);
-		firepick.FeedRate.interpolate(0,100,0.9).should.within(85,86);
-		firepick.FeedRate.interpolate(0,100,1).should.equal(100);
-	});
 	return;
 	it("should have default options", function() {
-		var frdefault = new firepick.FeedRate(xyzCam);
+		var frdefault = new FeedRate(xyzCam);
 		frdefault.should.have.properties({
 			xBasis:0,			// basis reference image x
 			yBasis:0,			// basis reference image y

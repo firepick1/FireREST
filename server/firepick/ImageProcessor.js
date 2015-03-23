@@ -142,7 +142,7 @@ Logger = require("./Logger");
         return true;
     };
 
-    console.log("LOADED	: firepick.ImageProcessor");
+    Logger.logger.info("loaded firepick.ImageProcessor");
     module.exports = firepick.ImageProcessor = ImageProcessor;
 })(firepick || (firepick = {}));
 

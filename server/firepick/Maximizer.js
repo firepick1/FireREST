@@ -195,7 +195,7 @@ Logger = require("./Logger");
         return result;
     };
 
-    console.log("LOADED	: firepick.Maximizer");
+    Logger.logger.info("loaded firepick.Maximizer");
     module.exports = firepick.Maximizer = Maximizer;
 })(firepick || (firepick = {}));
 

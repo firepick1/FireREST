@@ -157,7 +157,7 @@ Logger = require("./Logger");
 		return result;
 	};
 
-    console.log("LOADED	: firepick.Focus");
+    Logger.logger.info("loaded firepick.Focus");
     module.exports = firepick.Focus = Focus;
 })(firepick || (firepick = {}));
 

@@ -71,7 +71,7 @@ temp.track();
         return this;
     }
 
-    console.log("LOADED	: firepick.Camera");
+    Logger.logger.info("loaded firepick.Camera");
     module.exports = firepick.Camera = Camera;
 })(firepick || (firepick = {}));
 

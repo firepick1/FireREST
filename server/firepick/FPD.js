@@ -5,6 +5,7 @@ var os = require("os"),
     fs = require("fs"),
     child_process = require("child_process"),
     path = require("path");
+Logger = require("./Logger");
 XYZPositioner = require("./XYZPositioner");
 Camera = require("./Camera");
 ImageRef = require("./ImageRef");
@@ -14,7 +15,6 @@ FireFUSECamera = require("./FireFUSECamera");
 FireFUSEMarlin = require("./FireFUSEMarlin");
 FPDModel = require("./FPDModel");
 XYZCamera = require("./XYZCamera");
-Logger = require("./Logger");
 
 (function(firepick) {
     function FPD(options) {
@@ -32,7 +32,7 @@ Logger = require("./Logger");
         that.$imgProc = options.imgProc || new ImageProcessor(that.$imgStore);
 		that.setFeedRate(options.feedRate || that.$xyz.feedRate);
 		if (that.health() < 1) {
-			that.logger.warn("FPD health:{",
+			that.logger.debug("FPD health:{",
 				"camera:", that.$camera.health(), ",",
 				"imgStore:", that.$imgStore.health(), ",",
 				"imgProc:", that.$imgProc.health(), ",",
@@ -157,7 +157,7 @@ Logger = require("./Logger");
         return true;
     };
 
-    console.log("LOADED	: firepick.FPD");
+    Logger.logger.info("firepick.FPD");
     module.exports = firepick.FPD = FPD;
 })(firepick || (firepick = {}));
 
@@ -175,7 +175,7 @@ Logger = require("./Logger");
     });
     if (fpd.health() < 1) {
         fpd = fpdMock;
-        console.log("STATUS	: FirePick Delta is unavailable. Using mock data");
+        Logger.logger.warn("FirePick Delta is unavailable. Using mock data");
     }
     it("health() should be 1", function() {
         fpd.xyzPositioner().health().should.equal(1);
