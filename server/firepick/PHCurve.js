@@ -5,7 +5,7 @@ Logger = require("./Logger");
 Bernstein = require("./Bernstein");
 
 (function(firepick) {
-    function PHCurve(n,options) {
+    function PHCurve(n,pts,options) {
 		var that = this;
 		options = options || {};
 		should.exist(n);
@@ -13,8 +13,21 @@ Bernstein = require("./Bernstein");
 		n.should.be.equal(5); // currently only support quintics
 		that.n = n;
 		that.n2 = Math.ceil(n/2);
+		pts.should.be.Array;
+		pts.length.should.be.above(2);
+		that.pts = pts;
 		that.bn = new Bernstein(n);
 		that.bn1 = new Bernstein(n+1);
+		that.bn_1 = new Bernstein(n-1);
+		var u = [0,0,0];
+		var v = [0,0,0];
+		that.sigmak = [
+			u[0]*u[0] + v[0]*v[0],
+			u[0]*u[1] + v[0]*v[1],
+			2/3*(u[1]*u[1] + v[1]*v[1]) + 1/3*(u[0]*u[2]+v[0]*v[2]),
+			u[1]*u[2]+v[1]*v[2],
+			u[2]*u[2]+v[2]*v[2],
+		];
 		that.logger = options.logger || new Logger(options);
 		return that;
     };
@@ -53,6 +66,28 @@ Bernstein = require("./Bernstein");
 		}
 		return T * sum;
 	};
+	PHCurve.prototype.xyi = function(i,t) {
+		var sum = 0;
+		var t1 = 1-t;
+		var tk = [1];
+		var t1k = [1];
+		for (var k=1; k<=n; k++) {
+			tk.push(t*tk[k-1]);
+			t1k.splice(0, 0, t1*t1k[0]);
+		}
+		for (var k=0; k<=5; k++) {
+			sum += that.p[i][k] * Util.choose(5,k) * t1k[k] * tk[k];
+		}
+
+		return sum;
+	};
+	PHCurve.prototype.sigmat = function(t) {
+		var sum = 0;
+		for (var k=0; k < n; k++) {
+			sum += sigmak[k] * that.bn_1(t);
+		}
+		return sum;
+	};
 
 	///////////////// CLASS //////////
 
@@ -63,12 +98,19 @@ Bernstein = require("./Bernstein");
 
 (typeof describe === 'function') && describe("firepick.PHCurve", function() {
 	var PHCurve = firepick.PHCurve;
-	it("new PHCurve(5) should create a 5-degree PHCurve instance", function() {
-		var b5 = new PHCurve(5);
+	var pts = [
+		{x:0,y:0},
+		{x:1,y:0},
+		{x:2,y:1},
+		{x:3,y:1},
+		{x:4,y:1},
+	];
+	it("new PHCurve(5,[pts]) should create a 5-degree PHCurve instance", function() {
+		var b5 = new PHCurve(5,pts);
 		b5.should.have.properties({n:5,n2:3});
 	});
 	it("V(vin,vout,t) should interpolate velocity on interval t:[0,1]", function() {
-		var b5 = new PHCurve(5);
+		var b5 = new PHCurve(5,pts);
 		b5.V(-100,100,0).should.equal(-100);
 		b5.V(-100,100,0.1).should.within(-84,-83);
 		b5.V(-100,100,0.2).should.within(-65,-64);
@@ -82,7 +124,7 @@ Bernstein = require("./Bernstein");
 		b5.V(-100,100,1).should.equal(100);
 	});
 	it("F(vin,vout,t) should interpolate V integral on interval t:[0,1]", function() {
-		var b5 = new PHCurve(5);
+		var b5 = new PHCurve(5,pts);
 		b5.F(-100,100,0).should.equal(-100);
 		b5.F(-100,100,0.1).should.within(-111,-110);
 		b5.F(-100,100,0.2).should.within(-122,-121);

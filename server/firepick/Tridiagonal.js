@@ -2,6 +2,7 @@ var should = require("should"),
     module = module || {},
     firepick = firepick || {};
 Logger = require("./Logger");
+Complex = require("./Complex");
 
 (function(firepick) {
     var that = {};
@@ -47,6 +48,36 @@ Logger = require("./Logger");
 		}
 		return x;
 	};
+	Tridiagonal.prototype.solveComplex = function(a,b,c,d) {
+		var that = this;
+		var N = that.n;
+
+		a.length.should.equal(N);
+		b.length.should.equal(N);
+		c.length.should.equal(N);
+		d.length.should.equal(N);
+
+		if (that.cprime == null) {
+			that.cprime = [];
+			for (var i=0; i < N; i++) {
+				that.cprime.push(Complex.c0);
+			}
+		}
+	 
+		that.cprime[0] = c[0].div(b[0]);
+		var x = [d[0].div(b[0])];
+	 
+		for (var i=1; i < N; i++) {
+			var m = b[i].minus(a[i].times(that.cprime[i-1])).recip();
+			that.cprime[i] = c[i].times(m);
+			x.push(d[i].minus(a[i].times(x[i-1])).times(m));
+		}
+	 
+		for (var i=N-1; i-- > 0; ) {
+			x[i] = x[i].minus(that.cprime[i].times(x[i+1]));
+		}
+		return x;
+	};
 
     Logger.logger.info("loaded firepick.Tridiagonal");
     module.exports = firepick.Tridiagonal = Tridiagonal;
@@ -66,5 +97,23 @@ Logger = require("./Logger");
 	 	var d = [5,  5, 10, 23];
 		var x = tr4.solve(a,b,c,d);
 		should.deepEqual(x, [2,3,5,7]);
+	});
+	it("solveComplex(a,b,c,d) should solve complex tridiagonal [abc][x]=[d]", function() {
+		var tr4 = new Tridiagonal(4);
+		var c0 = Complex.c0;
+		var c_1 = new Complex(-1);
+		var c2 = new Complex(2);
+		var c3 = new Complex(3);
+		var c4 = new Complex(4);
+		var c5 = new Complex(5);
+		var c7 = new Complex(7);
+		var c10 = new Complex(10);
+		var c23 = new Complex(23);
+		var a = [c0, c_1, c_1, c_1];
+		var b = [c4, c4, c4, c4];
+		var c = [c_1, c_1, c_1, c0];
+	 	var d = [c5, c5, c10, c23];
+		var x = tr4.solveComplex(a,b,c,d);
+		should.deepEqual(x, [c2,c3,c5,c7]);
 	});
 })
