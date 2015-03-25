@@ -51,6 +51,7 @@ Complex = require("./Complex");
 	Tridiagonal.prototype.solveComplex = function(a,b,c,d) {
 		var that = this;
 		var N = that.n;
+		var c0 = new Complex();
 
 		a.length.should.equal(N);
 		b.length.should.equal(N);
@@ -60,7 +61,7 @@ Complex = require("./Complex");
 		if (that.cprime == null) {
 			that.cprime = [];
 			for (var i=0; i < N; i++) {
-				that.cprime.push(Complex.c0);
+				that.cprime.push(c0);
 			}
 		}
 	 
@@ -100,7 +101,7 @@ Complex = require("./Complex");
 	});
 	it("solveComplex(a,b,c,d) should solve complex tridiagonal [abc][x]=[d]", function() {
 		var tr4 = new Tridiagonal(4);
-		var c0 = Complex.c0;
+		var c0 = new Complex();
 		var c_1 = new Complex(-1);
 		var c2 = new Complex(2);
 		var c3 = new Complex(3);

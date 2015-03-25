@@ -16,6 +16,12 @@ var should = require("should"),
 		var that = this;
 		return Math.sqrt(that.re*that.re + that.im * that.im);
     };
+	Complex.prototype.add = function(c2) {
+		var that = this;
+		that.re += c2.re;
+		that.im += c2.im;
+		return that;
+	};
 	Complex.prototype.plus = function(c2) {
 		var that = this;
 		return new Complex(that.re+c2.re, that.im+c2.im);
@@ -47,10 +53,20 @@ var should = require("should"),
 	};
 
 	//////////////// CLASS ////////////
-	Complex.c0 = new Complex(0,0);
-	Complex.c11 = new Complex(1,1);
-	Complex.c01 = new Complex(0,1);
-	Complex.c10 = new Complex(1,0);
+	Complex.times = function(a,b) {
+		if (a instanceof Complex) {
+			if (b instanceof Complex) {
+				return a.times(b);
+			}
+			return new Complex(a.re*b, a.im*b);
+		} else {
+			if (b instanceof Complex) {
+				return new Complex(a*b.re, a*b.im);
+			} else {
+				return new Complex(a * b);
+			}
+		}
+	};
 
     Logger.logger.info("loaded firepick.Complex");
     module.exports = firepick.Complex = Complex;
@@ -85,12 +101,6 @@ var should = require("should"),
 		should.deepEqual(c13.times(c24),new Complex(1*2-3*4,1*4+3*2));
 		should.deepEqual(c24.times(c13),new Complex(1*2-3*4,1*4+3*2));
 	});
-	it("should have predefined complex numbers", function() {
-		should.deepEqual(Complex.c0, new Complex(0,0));
-		should.deepEqual(Complex.c11, new Complex(1,1));
-		should.deepEqual(Complex.c01, new Complex(0,1));
-		should.deepEqual(Complex.c10, new Complex(1,0));
-	});
 	it("conj() should return the complex conjugate", function() {
 		should.deepEqual(new Complex(1,2).conj(), new Complex(1,-2));
 	});
@@ -109,5 +119,24 @@ var should = require("should"),
 		var result = c13.div(c24);
 		result.re.should.be.within(0.7,0.7);
 		result.im.should.be.within(0.1,0.1);
+	});
+	it("Complex.times(a,b) should handle real and complex numbers", function() {
+		var c36 = [
+			Complex.times(3, new Complex(1,2)),
+			Complex.times(new Complex(1,2), 3),
+			Complex.times(new Complex(3), new Complex(1,2)),
+			Complex.times(new Complex(1,2), new Complex(3)),
+		];
+		for (var i = 0; i < c36.length; i++) {
+			c36[i].re.should.equal(3);
+			c36[i].im.should.equal(6);
+		}
+	});
+	it("add(c) should sum up a complex number", function() {
+		var sum = new Complex();
+		var c12 = new Complex(1,2);
+		should.deepEqual(sum.add(c12), new Complex(1,2));
+		should.deepEqual(sum.add(c12), new Complex(2,4));
+		should.deepEqual(sum.add(c12), new Complex(3,6));
 	});
 })

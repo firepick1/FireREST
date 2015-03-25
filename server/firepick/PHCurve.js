@@ -13,7 +13,8 @@ Bernstein = require("./Bernstein");
 		that.degree2 = Math.ceil(that.degree/2);
 		pts.should.be.Array;
 		pts.length.should.be.above(2);
-		that.pts = pts;
+		that.N = pts.length-1;
+		that.q = pts;
 		that.bn = new Bernstein(that.degree);
 		that.bn1 = new Bernstein(that.degree+1);
 		that.bn_1 = new Bernstein(that.degree-1);
@@ -31,6 +32,68 @@ Bernstein = require("./Bernstein");
     };
 
     ///////////////// INSTANCE ///////////////
+	PHCurve.prototype.rt = function(T) {
+		var that = this;
+		T.should.not.be.below(0);
+		T.should.not.be.above(1);
+		var TN = T * that.N;
+		var i = Math.ceil(TN);
+		return that.rit(i,TN-i+1);
+	};
+	PHCurve.prototype.rit = function(i,t) {
+		var that = this;
+		i.should.not.be.below(0);
+		i.should.not.be.above(that.N);
+		t.should.not.be.below(0);
+		t.should.not.be.above(1);
+		var sum = new Complex();
+		var t1 = 1-t;
+		var tk = [1];
+		var t1k = [1];
+		for (var k=1; k<=that.degree; k++) {
+			tk.push(t*tk[k-1]);
+			t1k.splice(0, 0, t1*t1k[0]);
+		}
+		for (var k=0; k<=5; k++) {
+			sum.add(
+				Complex.times(
+					that.pik(i,k),
+					Util.choose(5,k) * t1[k] * t[k]
+				)
+			);
+		}
+		return sum;
+	};
+	PHCurve.prototype.wij = function(i,j) {
+		var that = this;
+		switch (j) {
+		case 0:return Complex.times(1/2,that.z[i-1].plus(that.z[i]));
+		case 1:return that.z[i];
+		case 2:return Complex.times(1/2,that.z[i].plus(that.z[i+1]));
+		default: should.fail("wij j:"+j);
+		}
+	};
+	PHCurve.prototype.pik = function(i,k) {
+		var that = this;
+		i.should.be.above(0);
+		i.should.not.be.above(that.N);
+
+		switch (k) {
+		case 0: return that.q[i-1];
+		case 1: return that.pik(i,0)
+			.plus(Complex.times(1/5,that.wij(i,0).times(that.wij(i,0))));
+		case 2: return that.pik(i,1)
+			.plus(Complex.times(1/5,that.wij(i,0).times(that.wij(i,1))));
+		case 3: return that.pik(i,2)
+			.plus(Complex.times(2/15,that.wij(i,1).times(that.wij(i,1))))
+			.plus(Complex.times(1/15,that.wij(i,0).times(that.wij(i,2))));
+		case 4: return that.pik(i,3)
+			.plus(Complex.times(1/5,that.wij(i,1).times(that.wij(i,2))));
+		case 5: return that.pik(i,4)
+			.plus(Complex.times(1/5,that.wij(i,2).times(that.wij(i,2))));
+		default: should.fail("invalid k:" + k);
+		}
+	};
 	PHCurve.prototype.Vk = function(vin,vout,k) {
 		var that = this;
 		return k < that.degree2 ? vin : vout;
