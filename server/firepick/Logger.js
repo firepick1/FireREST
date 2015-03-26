@@ -24,7 +24,33 @@ var should = require("should"),
 		var msg = "";
 		for (var i=0; i < args.length; i++) {
 			if (typeof args[i] ==="object") {
-				msg += JSON.stringify(args[i]);
+				if (args[i] instanceof Array) {
+					msg += "[";
+					var nPrev = 0;
+					for (var k in args[i]) {
+						if (args[i].hasOwnProperty(k)) {
+							if (nPrev) {
+								msg += ", ";
+							}
+							msg += that.message([args[i][k]]);
+							nPrev++;
+						}
+					}
+					msg += "]";
+				} else {
+					msg += "{";
+					var nPrev = 0;
+					for (var k in args[i]) {
+						if (args[i].hasOwnProperty(k)) {
+							if (nPrev) {
+								msg += ", ";
+							}
+							msg += k + ":" + that.message([args[i][k]]);
+							nPrev++;
+						}
+					}
+					msg += "}";
+				}
 			} else if (typeof args[i] === "number") {
 				msg += that.round(args[i]);
 			} else {
@@ -155,9 +181,9 @@ var should = require("should"),
 		var logger = new firepick.Logger({logLevel:"warn", write:write});
 		logger.logWarn.should.equal(true);
 		logger.warn("W1", {a:1});
-		should.equal(actual, "WARN	: W1{\"a\":1}");
+		should.equal(actual, "WARN	: W1{a:1}");
 		logger.info("W2");
-		should.equal(actual, "WARN	: W1{\"a\":1}");
+		should.equal(actual, "WARN	: W1{a:1}");
 	});
 	it("error(msg) should log to a custom writer", function() {
 		var logger = new firepick.Logger({logLevel:"error", write:write});

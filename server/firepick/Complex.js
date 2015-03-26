@@ -70,6 +70,37 @@ var should = require("should"),
 		epsilon.should.be.Number;
 		return modulus <= epsilon;
 	};
+	Complex.prototype.stringify = function(nPlaces) {
+		var that = this;
+		var s = "";
+		nPlaces = nPlaces == null ? 0 : nPlaces;
+		var re = Util.roundN(that.re, nPlaces);
+		var im = Util.roundN(that.im, nPlaces);
+		if (im) {
+			if (im < 0) {
+				if (re) {
+					s += re;
+				}
+				if (im === -1) {
+					s += "-";
+				} else {
+					s += im;
+				}
+			} else {
+				if (re) {
+					s += re;
+					s += "+";
+				}
+				if (that.im !== 1) {
+					s += im;
+				}
+			}
+			s += "i";
+		} else {
+			s += re;
+		}
+		return s;
+	};
 
 	//////////////// CLASS ////////////
 	Complex.from = function(xy) {
@@ -240,5 +271,20 @@ var should = require("should"),
 		var c11 = new Complex(1,1);
 		new Complex(1.07,1.07).isNear(c11,0.1).should.equal(true);
 		new Complex(1.08,1.08).isNear(c11,0.1).should.equal(false);
+	});
+	it("c1.stringify(nPlaces) should return a terse string", function() {
+		new Complex().stringify().should.equal("0");
+		new Complex(1).stringify().should.equal("1");
+		new Complex(0,1).stringify().should.equal("i");
+		new Complex(0,-1).stringify().should.equal("-i");
+		new Complex(0,2).stringify().should.equal("2i");
+		new Complex(0,-2).stringify().should.equal("-2i");
+		new Complex(1,1).stringify().should.equal("1+i");
+		new Complex(1,-1).stringify().should.equal("1-i");
+		new Complex(1,2).stringify().should.equal("1+2i");
+		new Complex(1,-2).stringify().should.equal("1-2i");
+		new Complex(1.2345,-5.6789).stringify(1).should.equal("1.2-5.7i");
+		new Complex(0.99,-0.99).stringify(1).should.equal("1-i");
+		new Complex(0.99,-0.99).stringify(2).should.equal("0.99-0.99i");
 	});
 })
