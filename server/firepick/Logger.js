@@ -26,7 +26,7 @@ var should = require("should"),
 			if (typeof args[i] ==="object") {
 				msg += JSON.stringify(args[i]);
 			} else if (typeof args[i] === "number") {
-				msg += that.roundN(args[i]);
+				msg += that.round(args[i]);
 			} else {
 				msg += args[i];
 			}
@@ -74,6 +74,7 @@ var should = require("should"),
 		}
 	};
     Logger.prototype.round = function(value) {
+		var that = this;
 		var result;
 		if (that.nPlaces > 0) {
 			result = +(Math.round(value + "e+" + that.nPlaces) + "e-" + that.nPlaces);
