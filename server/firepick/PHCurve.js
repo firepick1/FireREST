@@ -289,6 +289,14 @@ Bernstein = require("./Bernstein");
 		i.should.be.above(0);
 		i.should.not.be.above(that.N);
 		var sum = new Complex();
+		sum.add(Complex.times(3,  that.z[i-1],that.z[i-1]));
+		sum.add(Complex.times(27, that.z[i],  that.z[i]));
+		sum.add(Complex.times(3,  that.z[i+1],that.z[i+1]));
+		sum.add(Complex.times(	  that.z[i-1],that.z[i+1]));
+		sum.add(Complex.times(13, that.z[i-1],that.z[i]));
+		sum.add(Complex.times(13, that.z[i],  that.z[i+1]));
+		sum.add(Complex.times(-60,that.q[i],  that.q[i-1]));
+		return sum;
 	};
 
 	///////////////// CLASS //////////
