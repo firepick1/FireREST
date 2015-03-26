@@ -284,6 +284,12 @@ Bernstein = require("./Bernstein");
 		}
 		return sum;
 	};
+	PHCurve.prototype.fi = function(i) {
+		var that = this;
+		i.should.be.above(0);
+		i.should.not.be.above(that.N);
+		var sum = new Complex();
+	};
 
 	///////////////// CLASS //////////
 

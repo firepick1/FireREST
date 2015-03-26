@@ -85,16 +85,32 @@ var should = require("should"),
 		return new Complex(xy);
 	};
 	Complex.times = function(a,b) {
-		return Complex.from(a).times(Complex.from(b));
+		var result = Complex.from(a).times(Complex.from(b));
+		for (var i=2; i < arguments.length; i++) {
+			result = result.times(Complex.from(arguments[i]));
+		}
+		return result;
 	};
 	Complex.minus = function(a,b) {
-		return Complex.from(a).minus(Complex.from(b));
+		var result = Complex.from(a).minus(Complex.from(b));
+		for (var i=2; i < arguments.length; i++) {
+			result = result.minus(Complex.from(arguments[i]));
+		}
+		return result;
 	};
 	Complex.plus = function(a,b) {
-		return Complex.from(a).plus(Complex.from(b));
+		var result = Complex.from(a).plus(Complex.from(b));
+		for (var i=2; i < arguments.length; i++) {
+			result = result.plus(Complex.from(arguments[i]));
+		}
+		return result;
 	};
 	Complex.div = function(a,b) {
-		return Complex.from(a).div(Complex.from(b));
+		var result = Complex.from(a).div(Complex.from(b));
+		for (var i=2; i < arguments.length; i++) {
+			result = result.div(Complex.from(arguments[i]));
+		}
+		return result;
 	};
 
     Logger.logger.info("loaded firepick.Complex");
@@ -149,16 +165,57 @@ var should = require("should"),
 		result.re.should.be.within(0.7,0.7);
 		result.im.should.be.within(0.1,0.1);
 	});
-	it("Complex.times(a,b) should handle real and complex numbers", function() {
-		var c36 = [
+	it("Complex.plus(a,b,...) should handle real and complex numbers", function() {
+		var c = [
+			Complex.plus(3, new Complex(1,2)),
+			Complex.plus(new Complex(1,2), 3),
+			Complex.plus(new Complex(3), new Complex(1,2)),
+			Complex.plus(new Complex(1,2), new Complex(3)),
+			Complex.plus(1,-1,new Complex(1,2), new Complex(3)),
+		];
+		for (var i = 0; i < c.length; i++) {
+			c[i].re.should.equal(4,i);
+			c[i].im.should.equal(2,i);
+		}
+	});
+	it("Complex.minus(a,b,...) should handle real and complex numbers", function() {
+		var c = [
+			Complex.minus(3, new Complex(1,2)),
+			Complex.minus(new Complex(3,-2), 1),
+			Complex.minus(new Complex(3), new Complex(1,2)),
+			Complex.minus(new Complex(3,-2), new Complex(1)),
+			Complex.minus(1,1,new Complex(-3,2), new Complex(1)),
+		];
+		for (var i = 0; i < c.length; i++) {
+			var msg = JSON.stringify(c[i]) + " i:" + i;
+			should.equal(c[i].re, 2, msg);
+			should.equal(c[i].im, -2, msg);
+		}
+	});
+	it("Complex.times(a,b,...) should handle real and complex numbers", function() {
+		var c = [
 			Complex.times(3, new Complex(1,2)),
 			Complex.times(new Complex(1,2), 3),
 			Complex.times(new Complex(3), new Complex(1,2)),
 			Complex.times(new Complex(1,2), new Complex(3)),
+			Complex.times(2,.5,new Complex(1,2), new Complex(3)),
 		];
-		for (var i = 0; i < c36.length; i++) {
-			c36[i].re.should.equal(3);
-			c36[i].im.should.equal(6);
+		for (var i = 0; i < c.length; i++) {
+			c[i].re.should.equal(3,i);
+			c[i].im.should.equal(6,i);
+		}
+	});
+	it("Complex.div(a,b,...) should handle real and complex numbers", function() {
+		var c = [
+			Complex.div(32, new Complex(4)),
+			Complex.div(new Complex(32), 4),
+			Complex.div(new Complex(32), new Complex(4,0)),
+			Complex.div(new Complex(32,0), new Complex(4)),
+			Complex.div(32,1,2,2),
+		];
+		for (var i = 0; i < c.length; i++) {
+			c[i].re.should.equal(8,i);
+			c[i].im.should.equal(0,i);
 		}
 	});
 	it("c1.add(c2) should increment a complex number", function() {
