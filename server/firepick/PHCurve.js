@@ -12,6 +12,8 @@ Tridiagonal = require("./Tridiagonal");
 		that.logger = options.logger || new Logger(options);
 		that.degree = 5;	// only support quintics
 		that.degree2 = Math.ceil(that.degree/2);
+		that.dzMax = options.dzMax || 0.00001;
+		that.iterationsMax = options.iterationsMax || 50;
 		pts.should.be.Array;
 		pts.length.should.be.above(1);
 		initz(that,pts);
@@ -75,10 +77,15 @@ Tridiagonal = require("./Tridiagonal");
 	};
 
     ///////////////// INSTANCE ///////////////
-	PHCurve.prototype.newtonRaphson = function(iterations) {
+	PHCurve.prototype.newtonRaphson = function(options) {
 		var that = this;
-		iterations = iterations || 1;
-		while (iterations--) {
+		var loop = true;
+		var iteration = 1;
+		options = options || {};
+		var iterationsMax = options.iterationMax || that.iterationsMax;
+		var logLevel = that.logger.logLevel;
+		that.logger.setLevel(options.logLevel || logLevel);
+		for (; loop && iteration<=iterationsMax; iteration++) {
 			var a = [];
 			var b = [];
 			var c = [];
@@ -96,16 +103,25 @@ Tridiagonal = require("./Tridiagonal");
 			that.logger.trace("c:", c);
 			that.logger.trace("d:", d);
 			var tri = new Tridiagonal(that.N);
-			var z = tri.solveComplex(a,b,c,d);
-			if (z[0].re < 0) {
-				for (var i=0; i < z.length; i++) {
-					z[i] = z[i].minus();
-				}
+			var dz = tri.solveComplex(a,b,c,d);
+			that.logger.trace("dz:", dz);
+			loop = false;
+			for (var i=0; i < dz.length; i++) {
+				loop = loop || dz[i].modulus() > that.dzMax;
+				that.z[i+1].add(dz[i]);
 			}
-			z.splice(0, 0, that.z[0]);
-			that.logger.trace("z:", z);
-			that.z = z;
 		}
+		var result = null;
+		if (loop) {
+			that.logger.warn("newtonRaphson exceeded iterationsMax:", that.iterationsMax);
+		} else {
+			that.logger.debug("newtonRaphson converged iterations:", iteration-1);
+			result = iteration-1;
+		}
+		that.logger.debug("z:", that.z);
+		that.dumpJacobian();
+		that.logger.setLevel(logLevel);
+		return result;
 	};
 	PHCurve.prototype.r = function(T) {
 		var that = this;
@@ -115,52 +131,12 @@ Tridiagonal = require("./Tridiagonal");
 		var i = Math.ceil(TN) || 1;
 		return that.rit(i,TN-i+1);
 	};
-	//PHCurve.prototype.r1t = function(t) {
-		//var that = this;
-		//var sum = new Complex();
-		//var tk = [];
-		//var t1k = [];
-		//powert(t,tk,t1k,3);
-		//that.logger.trace("r1t(", t, ")");
-		//for (var k=0; k<=3; k++) {
-			//var re = Util.choose(3,k) * t1k[k] * tk[k];
-			//var c = Complex.times(that.p1k(k), re);
-			//sum.add(c);
-			//that.logger.trace("r1t k:", k, " re:", re, 
-				//" c:", c, " sum:", sum, " p1k:", 
-				//that.p1k(k),
-			//" choose:", Util.choose(3,k));
-		//}
-		//return sum;
-	//};
-	//PHCurve.prototype.rNt = function(t) {
-		//var that = this;
-		//var sum = new Complex();
-		//var tk = [];
-		//var t1k = [];
-		//powert(t,tk,t1k,3);
-		//that.logger.trace("rNt(", t, ")");
-		//for (var k=0; k<=3; k++) {
-			//var re = Util.choose(3,k) * t1k[k] * tk[k];
-			//var c = Complex.times(that.pNk(k), re);
-			//sum.add(c);
-			//that.logger.trace("rNt k:", k, " re:", re, " c:", c, " sum:", sum, " pNk:", that.pNk(k), " choose:", Util.choose(3,k));
-		//}
-		//that.logger.trace("rNt:", sum);
-		//return sum;
-	//};
 	PHCurve.prototype.rit = function(i,t) {
 		var that = this;
 		i.should.not.be.below(0);
 		i.should.not.be.above(that.N);
 		t.should.not.be.below(0);
 		t.should.not.be.above(1);
-		if (i === 1) {
-			//return that.r1t(t);
-		}
-		if (i === that.N) {
-			//return that.rNt(t);
-		}
 		that.logger.trace("rit(", i, ",", t, ")");
 		var sum = new Complex();
 		var tk = [];
@@ -216,34 +192,6 @@ Tridiagonal = require("./Tridiagonal");
 		default: should.fail("wij j:"+j);
 		}
 	};
-	//PHCurve.prototype.p1k = function(k) {
-		//var that = this;
-//
-		//switch (k) {
-		//case 0: return that.q[0];
-		//case 1: return that.p1k(0)
-			//.plus(Complex.times(1/3,that.w1j(0).times(that.w1j(0))));
-		//case 2: return that.p1k(1)
-			//.plus(Complex.times(1/3,that.w1j(0).times(that.w1j(1))));
-		//case 3: return that.p1k(2)
-			//.plus(Complex.times(1/3,that.w1j(1).times(that.w1j(1))));
-		//default: should.fail("invalid k:" + k);
-		//}
-	//};
-	//PHCurve.prototype.pNk = function(k) {
-		//var that = this;
-//
-		//switch (k) {
-		//case 0: return that.q[that.N-1];
-		//case 1: return that.pNk(0)
-			//.plus(Complex.times(1/3,that.wNj(0).times(that.wNj(0))));
-		//case 2: return that.pNk(1)
-			//.plus(Complex.times(1/3,that.wNj(0).times(that.wNj(1))));
-		//case 3: return that.pNk(2)
-			//.plus(Complex.times(1/3,that.wNj(1).times(that.wNj(1))));
-		//default: should.fail("invalid k:" + k);
-		//}
-	//};
 	PHCurve.prototype.pik = function(i,k) {
 		var that = this;
 		i.should.be.above(0);
@@ -537,7 +485,7 @@ Tridiagonal = require("./Tridiagonal");
 		shouldEqualT(ph.r(0.9), new Complex(4.6,2.8));
 		shouldEqualT(ph.r(1), new Complex(5,3));
 	});
-	it("Mij(i,j) should be Jacobian[i,j]", function() {
+	it("newtonRaphson(options) should solve PHCurve z coefficients", function() {
 		var ph = new PHCurve([
 			{x:1,y:1},
 			{x:2,y:1.5},
@@ -548,15 +496,13 @@ Tridiagonal = require("./Tridiagonal");
 		shouldEqualT(ph.r(0), new Complex(1,1));
 		shouldEqualT(ph.r(1), new Complex(5.014,3.007));
 		ph.dumpJacobian();
-		for (var i=0; i < 60; i++) {
-			ph.newtonRaphson();
-			logger.debug(i, " ph.z:", ph.z);
-		}
-		logger.debug("ph.r(0):", ph.r(0), " ph.r(0.5):", ph.r(0.5), " ph.r(1):", ph.r(1));
-		ph.newtonRaphson();
-		logger.debug("ph.z:", ph.z);
-		logger.debug("ph.r(0):", ph.r(0), " ph.r(0.5):", ph.r(0.5), " ph.r(1):", ph.r(1));
+		ph.newtonRaphson().should.equal(4);
+		ph.newtonRaphson().should.equal(1);
 		shouldEqualT(ph.r(0), new Complex(1,1));
-//		shouldEqualT(ph.r(1), new Complex(5.014,3.007));
+		shouldEqualT(ph.r(0.1), new Complex(1.172,1.086));
+		shouldEqualT(ph.r(0.5), new Complex(3,2));
+		shouldEqualT(ph.r(0.6), new Complex(3.629,2.314));
+		shouldEqualT(ph.r(0.9), new Complex(4.828,2.914));
+		shouldEqualT(ph.r(1), new Complex(5,3));
 	});
 })
