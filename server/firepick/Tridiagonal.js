@@ -69,7 +69,17 @@ Complex = require("./Complex");
 		var x = [d[0].div(b[0])];
 	 
 		for (var i=1; i < N; i++) {
-			var m = b[i].minus(a[i].times(that.cprime[i-1])).recip();
+			a[i].should.instanceof(Complex, "i:"+i);
+			b[i].should.instanceof(Complex, "i:"+i);
+			c[i].should.instanceof(Complex, "i:"+i);
+			d[i].should.instanceof(Complex, "i:"+i);
+			should.exist(a[i]);
+			should.exist(b[i]);
+			should.exist(c[i]);
+			var m = Complex.div(1,
+				b[i].minus(
+					a[i].times(
+						that.cprime[i-1])));
 			that.cprime[i] = c[i].times(m);
 			x.push(d[i].minus(a[i].times(x[i-1])).times(m));
 		}

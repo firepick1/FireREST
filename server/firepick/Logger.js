@@ -24,7 +24,9 @@ var should = require("should"),
 		var msg = "";
 		for (var i=0; i < args.length; i++) {
 			if (typeof args[i] ==="object") {
-				if (args[i] instanceof Array) {
+				if (args[i]["stringify"] != null) {
+					msg += args[i].stringify({nPlaces:that.nPlaces});
+				} else if (args[i] instanceof Array) {
 					msg += "[";
 					var nPrev = 0;
 					for (var k in args[i]) {

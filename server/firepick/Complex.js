@@ -39,6 +39,9 @@ var should = require("should"),
 	};
 	Complex.prototype.minus = function(c2) {
 		var that = this;
+		if (c2 == null) {
+			return new Complex(-that.re, -that.im);
+		}
 		return new Complex(that.re-c2.re, that.im-c2.im);
 	};
 	Complex.prototype.times = function(c2) {
@@ -70,15 +73,16 @@ var should = require("should"),
 		epsilon.should.be.Number;
 		return modulus <= epsilon;
 	};
-	Complex.prototype.stringify = function(nPlaces) {
+	Complex.prototype.stringify = function(options) {
 		var that = this;
 		var s = "";
-		nPlaces = nPlaces == null ? 0 : nPlaces;
+		options = options || {};
+		nPlaces = options.nPlaces == null ? 0 : options.nPlaces;
 		var re = Util.roundN(that.re, nPlaces);
 		var im = Util.roundN(that.im, nPlaces);
 		if (im) {
 			if (im < 0) {
-				if (re) {
+				if (re !== 0) {
 					s += re;
 				}
 				if (im === -1) {
@@ -87,11 +91,11 @@ var should = require("should"),
 					s += im;
 				}
 			} else {
-				if (re) {
+				if (re !== 0) {
 					s += re;
 					s += "+";
 				}
-				if (that.im !== 1) {
+				if (im !== 1) {
 					s += im;
 				}
 			}
@@ -123,6 +127,9 @@ var should = require("should"),
 		return result;
 	};
 	Complex.minus = function(a,b) {
+		if (b == null) {
+			return Complex.from(a).minus();
+		}
 		var result = Complex.from(a).minus(Complex.from(b));
 		for (var i=2; i < arguments.length; i++) {
 			result = result.minus(Complex.from(arguments[i]));
@@ -170,6 +177,7 @@ var should = require("should"),
 		var c24 = new Complex(2,4);
 		should.deepEqual(c13.minus(c24),new Complex(-1,-1));
 		should.deepEqual(c24.minus(c13),new Complex(1,1));
+		should.deepEqual(c13.minus(),new Complex(-1,-3));
 	});
 	it("c1.times(c2) should return the complex product", function() {
 		var c13 = new Complex(1,3);
@@ -222,6 +230,10 @@ var should = require("should"),
 			should.equal(c[i].re, 2, msg);
 			should.equal(c[i].im, -2, msg);
 		}
+		Complex.minus(3).stringify().should.equal("-3");
+		Complex.minus(new Complex(3)).stringify().should.equal("-3");
+		Complex.minus(new Complex(0,3)).stringify().should.equal("-3i");
+		Complex.minus(new Complex(2,3)).stringify().should.equal("-2-3i");
 	});
 	it("Complex.times(a,b,...) should handle real and complex numbers", function() {
 		var c = [
@@ -272,7 +284,7 @@ var should = require("should"),
 		new Complex(1.07,1.07).isNear(c11,0.1).should.equal(true);
 		new Complex(1.08,1.08).isNear(c11,0.1).should.equal(false);
 	});
-	it("c1.stringify(nPlaces) should return a terse string", function() {
+	it("c1.stringify({nPlaces:2}) should return a terse string", function() {
 		new Complex().stringify().should.equal("0");
 		new Complex(1).stringify().should.equal("1");
 		new Complex(0,1).stringify().should.equal("i");
@@ -283,8 +295,11 @@ var should = require("should"),
 		new Complex(1,-1).stringify().should.equal("1-i");
 		new Complex(1,2).stringify().should.equal("1+2i");
 		new Complex(1,-2).stringify().should.equal("1-2i");
-		new Complex(1.2345,-5.6789).stringify(1).should.equal("1.2-5.7i");
-		new Complex(0.99,-0.99).stringify(1).should.equal("1-i");
-		new Complex(0.99,-0.99).stringify(2).should.equal("0.99-0.99i");
+		new Complex(1.2345,-5.6789).stringify({nPlaces:1}).should.equal("1.2-5.7i");
+		new Complex(0.99,0.99).stringify({nPlaces:1}).should.equal("1+i");
+		new Complex(0.99,-0.99).stringify({nPlaces:1}).should.equal("1-i");
+		new Complex(0.99,-0.99).stringify({nPlaces:2}).should.equal("0.99-0.99i");
+		new Complex().should.have.properties(["stringify"]);
+		should(1.).not.have.properties(["stringify"]);
 	});
 })

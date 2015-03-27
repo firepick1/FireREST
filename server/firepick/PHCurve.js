@@ -3,6 +3,7 @@ var should = require("should"),
     firepick = firepick || {};
 Logger = require("./Logger");
 Bernstein = require("./Bernstein");
+Tridiagonal = require("./Tridiagonal");
 
 (function(firepick) {
     function PHCurve(pts,options) {
@@ -31,31 +32,33 @@ Bernstein = require("./Bernstein");
     };
 
 	function initz(that,pts) {
-		var z = ["zinvalid"];
+		var z = ["z0"];
 		var q = [];
 		if (pts.length === 2) { // interpolate
 			pts = [
 				pts[0],
 				Complex.times(1/2,
-					Complex.from(pts[0])
-					.plus(Complex.from(pts[1]))),
+					Complex.plus(pts[0],pts[1])),
 				pts[1],
 			];
 		}
-		var dpt = Complex.div(
-			Complex.minus(pts[pts.length-1], pts[0]),
-			pts.length-1
-		);
-		var zi = dpt.sqrt();
 		for (var i=0; i < pts.length; i++) {
 			q.push(Complex.from(pts[i]));
 			if (i > 0) {
-				//z.push(q[i].minus(q[i-1]).sqrt());	// linear starting condition
-				z.push(zi);	// linear starting condition
+				z.push(q[i].minus(q[i-1]).sqrt());	// linear starting condition
 			}
 		}
 		that.logger.trace("z:", z);
 		that.logger.trace("q:", q);
+		for (var i=2; i < q.length; i++) {
+			var modq1 = q[i].minus(q[i-1]).modulus();
+			var modq2 = q[i-1].minus(q[i-2]).modulus();
+			var ratio = modq1 / modq2;
+			if (ratio < 1/2 || 2 < ratio) {
+				that.logger.warn("uneven point spacing ratio:", ratio, 
+					" q[", i, "]:", q[i], " q:", q);
+			}
+		}
 		that.z = z;
 		that.q = q;
 	};
@@ -72,6 +75,38 @@ Bernstein = require("./Bernstein");
 	};
 
     ///////////////// INSTANCE ///////////////
+	PHCurve.prototype.newtonRaphson = function(iterations) {
+		var that = this;
+		iterations = iterations || 1;
+		while (iterations--) {
+			var a = [];
+			var b = [];
+			var c = [];
+			var d = [];
+			var N = that.N;
+			var c0 = new Complex();
+			for (var i=1; i <= N; i++) {
+				a.push(i === 1 ? c0 : that.Mij(i,i-1));
+				b.push(that.Mij(i,i));
+				c.push(i === N ? c0 : that.Mij(i,i+1));
+				d.push(Complex.minus(that.fi(i)));
+			}
+			that.logger.trace("a:", a);
+			that.logger.trace("b:", b);
+			that.logger.trace("c:", c);
+			that.logger.trace("d:", d);
+			var tri = new Tridiagonal(that.N);
+			var z = tri.solveComplex(a,b,c,d);
+			if (z[0].re < 0) {
+				for (var i=0; i < z.length; i++) {
+					z[i] = z[i].minus();
+				}
+			}
+			z.splice(0, 0, that.z[0]);
+			that.logger.trace("z:", z);
+			that.z = z;
+		}
+	};
 	PHCurve.prototype.r = function(T) {
 		var that = this;
 		T.should.not.be.below(0);
@@ -80,40 +115,40 @@ Bernstein = require("./Bernstein");
 		var i = Math.ceil(TN) || 1;
 		return that.rit(i,TN-i+1);
 	};
-	PHCurve.prototype.r1t = function(t) {
-		var that = this;
-		var sum = new Complex();
-		var tk = [];
-		var t1k = [];
-		powert(t,tk,t1k,3);
-		that.logger.trace("r1t(", t, ")");
-		for (var k=0; k<=3; k++) {
-			var re = Util.choose(3,k) * t1k[k] * tk[k];
-			var c = Complex.times(that.p1k(k), re);
-			sum.add(c);
-			that.logger.trace("r1t k:", k, " re:", re, 
-				" c:", c, " sum:", sum, " p1k:", 
-				that.p1k(k),
-			" choose:", Util.choose(3,k));
-		}
-		return sum;
-	};
-	PHCurve.prototype.rNt = function(t) {
-		var that = this;
-		var sum = new Complex();
-		var tk = [];
-		var t1k = [];
-		powert(t,tk,t1k,3);
-		that.logger.trace("rNt(", t, ")");
-		for (var k=0; k<=3; k++) {
-			var re = Util.choose(3,k) * t1k[k] * tk[k];
-			var c = Complex.times(that.pNk(k), re);
-			sum.add(c);
-			that.logger.trace("rNt k:", k, " re:", re, " c:", c, " sum:", sum, " pNk:", that.pNk(k), " choose:", Util.choose(3,k));
-		}
-		that.logger.trace("rNt:", sum);
-		return sum;
-	};
+	//PHCurve.prototype.r1t = function(t) {
+		//var that = this;
+		//var sum = new Complex();
+		//var tk = [];
+		//var t1k = [];
+		//powert(t,tk,t1k,3);
+		//that.logger.trace("r1t(", t, ")");
+		//for (var k=0; k<=3; k++) {
+			//var re = Util.choose(3,k) * t1k[k] * tk[k];
+			//var c = Complex.times(that.p1k(k), re);
+			//sum.add(c);
+			//that.logger.trace("r1t k:", k, " re:", re, 
+				//" c:", c, " sum:", sum, " p1k:", 
+				//that.p1k(k),
+			//" choose:", Util.choose(3,k));
+		//}
+		//return sum;
+	//};
+	//PHCurve.prototype.rNt = function(t) {
+		//var that = this;
+		//var sum = new Complex();
+		//var tk = [];
+		//var t1k = [];
+		//powert(t,tk,t1k,3);
+		//that.logger.trace("rNt(", t, ")");
+		//for (var k=0; k<=3; k++) {
+			//var re = Util.choose(3,k) * t1k[k] * tk[k];
+			//var c = Complex.times(that.pNk(k), re);
+			//sum.add(c);
+			//that.logger.trace("rNt k:", k, " re:", re, " c:", c, " sum:", sum, " pNk:", that.pNk(k), " choose:", Util.choose(3,k));
+		//}
+		//that.logger.trace("rNt:", sum);
+		//return sum;
+	//};
 	PHCurve.prototype.rit = function(i,t) {
 		var that = this;
 		i.should.not.be.below(0);
@@ -121,10 +156,10 @@ Bernstein = require("./Bernstein");
 		t.should.not.be.below(0);
 		t.should.not.be.above(1);
 		if (i === 1) {
-			return that.r1t(t);
+			//return that.r1t(t);
 		}
 		if (i === that.N) {
-			return that.rNt(t);
+			//return that.rNt(t);
 		}
 		that.logger.trace("rit(", i, ",", t, ")");
 		var sum = new Complex();
@@ -163,6 +198,12 @@ Bernstein = require("./Bernstein");
 	};
 	PHCurve.prototype.wij = function(i,j) {
 		var that = this;
+		if (i === 1) {
+			return that.w1j(j);
+		}
+		if (i === that.N) {
+			return that.wNj(j);
+		}
 		var zi = that.z[i];
 		i.should.not.be.below(1);
 		i.should.not.be.above(that.N);
@@ -175,40 +216,40 @@ Bernstein = require("./Bernstein");
 		default: should.fail("wij j:"+j);
 		}
 	};
-	PHCurve.prototype.p1k = function(k) {
-		var that = this;
-
-		switch (k) {
-		case 0: return that.q[0];
-		case 1: return that.p1k(0)
-			.plus(Complex.times(1/3,that.w1j(0).times(that.w1j(0))));
-		case 2: return that.p1k(1)
-			.plus(Complex.times(1/3,that.w1j(0).times(that.w1j(1))));
-		case 3: return that.p1k(2)
-			.plus(Complex.times(1/3,that.w1j(1).times(that.w1j(1))));
-		default: should.fail("invalid k:" + k);
-		}
-	};
-	PHCurve.prototype.pNk = function(k) {
-		var that = this;
-
-		switch (k) {
-		case 0: return that.q[that.N-1];
-		case 1: return that.pNk(0)
-			.plus(Complex.times(1/3,that.wNj(0).times(that.wNj(0))));
-		case 2: return that.pNk(1)
-			.plus(Complex.times(1/3,that.wNj(0).times(that.wNj(1))));
-		case 3: return that.pNk(2)
-			.plus(Complex.times(1/3,that.wNj(1).times(that.wNj(1))));
-		default: should.fail("invalid k:" + k);
-		}
-	};
+	//PHCurve.prototype.p1k = function(k) {
+		//var that = this;
+//
+		//switch (k) {
+		//case 0: return that.q[0];
+		//case 1: return that.p1k(0)
+			//.plus(Complex.times(1/3,that.w1j(0).times(that.w1j(0))));
+		//case 2: return that.p1k(1)
+			//.plus(Complex.times(1/3,that.w1j(0).times(that.w1j(1))));
+		//case 3: return that.p1k(2)
+			//.plus(Complex.times(1/3,that.w1j(1).times(that.w1j(1))));
+		//default: should.fail("invalid k:" + k);
+		//}
+	//};
+	//PHCurve.prototype.pNk = function(k) {
+		//var that = this;
+//
+		//switch (k) {
+		//case 0: return that.q[that.N-1];
+		//case 1: return that.pNk(0)
+			//.plus(Complex.times(1/3,that.wNj(0).times(that.wNj(0))));
+		//case 2: return that.pNk(1)
+			//.plus(Complex.times(1/3,that.wNj(0).times(that.wNj(1))));
+		//case 3: return that.pNk(2)
+			//.plus(Complex.times(1/3,that.wNj(1).times(that.wNj(1))));
+		//default: should.fail("invalid k:" + k);
+		//}
+	//};
 	PHCurve.prototype.pik = function(i,k) {
 		var that = this;
 		i.should.be.above(0);
 		i.should.not.be.above(that.N);
 		if (i === 1) {
-			return that.p1k(k);
+			//return that.p1k(k);
 		}
 
 		switch (k) {
@@ -286,33 +327,35 @@ Bernstein = require("./Bernstein");
 	};
 	PHCurve.prototype.fi = function(i) {
 		var that = this;
+		var N = that.N;
 		i.should.be.above(0);
-		i.should.not.be.above(that.N);
+		i.should.not.be.above(N);
 		var sum = new Complex();
+		var q = that.q;
+		var z = that.z;
 		if (i === 1) {
-			var z1 = that.z[1];
-			var z2 = that.z[2];
+			var z1 = z[1];
+			var z2 = z[2];
 			sum.add(Complex.times(13, z1, z1));
 			sum.add(Complex.times(    z2, z2));
 			sum.add(Complex.times(-2, z1, z2));
-			sum.add(Complex.times(-12,that.q[1],that.q[0]));
-		} else if (i === that.N) {
-			var N = that.N;
+			sum.add(Complex.times(-12,q[1].minus(q[0])));
+		} else if (i === N) {
 			var N1 = N - 1;
-			var zN = that.z[N];
-			var zN1 = that.z[N1];
+			var zN = z[N];
+			var zN1 = z[N1];
 			sum.add(Complex.times(13, zN, zN));
 			sum.add(Complex.times(    zN1,zN1));
 			sum.add(Complex.times(-2, zN, zN1));
-			sum.add(Complex.times(-12,that.q[N],that.q[N1]));
+			sum.add(Complex.times(-12,q[N].minus(q[N1])));
 		} else {
-			sum.add(Complex.times(3,  that.z[i-1],that.z[i-1]));
-			sum.add(Complex.times(27, that.z[i],  that.z[i]));
-			sum.add(Complex.times(3,  that.z[i+1],that.z[i+1]));
-			sum.add(Complex.times(	  that.z[i-1],that.z[i+1]));
-			sum.add(Complex.times(13, that.z[i-1],that.z[i]));
-			sum.add(Complex.times(13, that.z[i],  that.z[i+1]));
-			sum.add(Complex.times(-60,that.q[i],  that.q[i-1]));
+			sum.add(Complex.times(3,  z[i-1],z[i-1]));
+			sum.add(Complex.times(27, z[i],  z[i]));
+			sum.add(Complex.times(3,  z[i+1],z[i+1]));
+			sum.add(Complex.times(	  z[i-1],z[i+1]));
+			sum.add(Complex.times(13, z[i-1],z[i]));
+			sum.add(Complex.times(13, z[i],  z[i+1]));
+			sum.add(Complex.times(-60,q[i].minus(q[i-1])));
 		}
 		return sum;
 	};
@@ -369,7 +412,6 @@ Bernstein = require("./Bernstein");
 		var that = this;
 		var N = that.N;
 		nPlaces = nPlaces || 0;
-		that.logger.debug("Jacobian");
 		for (var i=1; i <= N; i++) {
 			var row = "|\t";
 			for (var j=1; j <= N; j++) {
@@ -377,7 +419,7 @@ Bernstein = require("./Bernstein");
 				row += mij.stringify(nPlaces);
 				row += "\t";
 			}
-			row += "| = | ";
+			row += "| = - | ";
 			row += that.fi(i).stringify(nPlaces);
 			row += "\t|";
 			that.logger.debug(row);
@@ -392,20 +434,25 @@ Bernstein = require("./Bernstein");
 
 
 (typeof describe === 'function') && describe("firepick.PHCurve", function() {
-	var logger = new Logger({logLevel:"debug"});
+	var logger = new Logger({
+		nPlaces:1,
+		logLevel:"debug"
+	});
 	var PHCurve = firepick.PHCurve;
 	var pts = [
 		{x:0,y:0},
 		{x:1,y:0},
 		{x:2,y:1},
 		{x:3,y:1},
-		{x:4,y:1},
-	];
-	function shouldEqualT(c1,c2,epsilon) {
-		epsilon = epsilon || 0.001;
+		{x:4,y:1}, 
+	]; 
+	function shouldEqualT(c1,c2,epsilon) { 
+		epsilon = epsilon || 0.001; 
 		c1.should.instanceof(Complex);
 		c2.should.instanceof(Complex);
-		c1.isNear(c2, epsilon).should.equal(true, JSON.stringify(c1));
+		c1.isNear(c2, epsilon).should.equal(true, 
+			"expected:" + c2.stringify({nPlaces:3}) +
+			" actual:" + c1.stringify({nPlaces:3}));
 	};
 	it("new PHCurve(5,[pts]) should create a 5-degree PHCurve instance", function() {
 		var ph5 = new PHCurve(pts);
@@ -463,11 +510,11 @@ Bernstein = require("./Bernstein");
 			{x:5,y:3},
 		],{logger:logger});
 		should.deepEqual(ph.r(0), new Complex(1,1));
-		shouldEqualT(ph.r(0.1), new Complex(1.4, 1.2));
-		shouldEqualT(ph.r(0.5), new Complex(2.667, 1.833));
-		shouldEqualT(ph.r(0.6), new Complex(3.067, 2.033));
-		shouldEqualT(ph.r(0.9), new Complex(4.933, 2.967));
-		//shouldEqualT(ph.r(1), new Complex(5,3));
+		shouldEqualT(ph.r(0.1), new Complex(1.2197, 1.1098));
+		shouldEqualT(ph.r(0.5), new Complex(2.815, 1.907));
+		shouldEqualT(ph.r(0.6), new Complex(3.320, 2.160));
+		shouldEqualT(ph.r(0.9), new Complex(4.795, 2.897));
+		shouldEqualT(ph.r(1), new Complex(5.014,3.007));
 	});
 	it("new PHCurve([p1,p2]).r(t) should interpolate a 5-point straight line", function() {
 		var ph = new PHCurve([
@@ -498,6 +545,18 @@ Bernstein = require("./Bernstein");
 			{x:5,y:3},
 		],{logger:logger});
 		logger.debug("ph.z:", ph.z);
+		shouldEqualT(ph.r(0), new Complex(1,1));
+		shouldEqualT(ph.r(1), new Complex(5.014,3.007));
 		ph.dumpJacobian();
+		for (var i=0; i < 60; i++) {
+			ph.newtonRaphson();
+			logger.debug(i, " ph.z:", ph.z);
+		}
+		logger.debug("ph.r(0):", ph.r(0), " ph.r(0.5):", ph.r(0.5), " ph.r(1):", ph.r(1));
+		ph.newtonRaphson();
+		logger.debug("ph.z:", ph.z);
+		logger.debug("ph.r(0):", ph.r(0), " ph.r(0.5):", ph.r(0.5), " ph.r(1):", ph.r(1));
+		shouldEqualT(ph.r(0), new Complex(1,1));
+//		shouldEqualT(ph.r(1), new Complex(5.014,3.007));
 	});
 })
