@@ -384,7 +384,7 @@ Tridiagonal = require("./Tridiagonal");
 (typeof describe === 'function') && describe("firepick.PHCurve", function() {
 	var logger = new Logger({
 		nPlaces:1,
-		logLevel:"debug"
+		logLevel:"info"
 	});
 	var PHCurve = firepick.PHCurve;
 	var pts = [
