@@ -77,6 +77,43 @@ Tridiagonal = require("./Tridiagonal");
 	};
 
     ///////////////// INSTANCE ///////////////
+	PHCurve.prototype.sigma = function(Tau) { // parametric speed
+		var that = this;
+		return that.rprime(Tau).modulus();
+	};
+	PHCurve.prototype.rprime = function(Tau) { // hodograph
+		var that = this;
+		Tau.should.not.be.below(0);
+		Tau.should.not.be.above(1);
+		var TN = Tau * that.N;
+		var i = Math.ceil(TN) || 1;
+		return that.riprime(i,TN-i+1);
+	};
+	PHCurve.prototype.riprime = function(i,tau) { // segment hodograph
+		var that = this;
+		var sum = new Complex();
+		var t1 = 1-tau;
+		var z = that.z;
+		var N = that.N;
+		if (i === 1) {
+			var z1 = z[1];
+			var z2 = z[2];
+			sum.add(Complex.times(1/2*t1*t1, Complex.times(3,z1).minus(z2)));
+			sum.add(Complex.times(2*t1*tau, z1));
+			sum.add(Complex.times(1/2*tau*tau, z1.plus(z2)));
+		} else if (i === N) {
+			var zN = z[N];
+			var zN1 = z[N-1];
+			sum.add(Complex.times(1/2*t1*t1, zN.plus(zN1)));
+			sum.add(Complex.times(2*t1*tau, zN));
+			sum.add(Complex.times(1/2*tau*tau, Complex.times(3,zN).minus(zN1)));
+		} else {
+			sum.add(Complex.times(1/2*t1*t1, z[i-1].plus(z[i])));
+			sum.add(Complex.times(2*t1*tau, z[i]));
+			sum.add(Complex.times(1/2*tau*tau, z[i].plus(z[i+1])));
+		}
+		return sum.times(sum);
+	};
 	PHCurve.prototype.solvez = function(options) {
 		var that = this;
 		var loop = true;
@@ -522,5 +559,11 @@ Tridiagonal = require("./Tridiagonal");
 		shouldEqualT(ph.r(0.98), new Complex(0.98,1.078));
 		shouldEqualT(ph.r(0.99), new Complex(0.99,1.04));
 		shouldEqualT(ph.r(1), new Complex(1,1));
+		logger.info("rprime(0):", ph.rprime(0));
+		logger.info("rprime(0.5):", ph.rprime(0.5));
+		logger.info("rprime(1):", ph.rprime(1));
+		logger.info("sigma(0):", ph.sigma(0));
+		logger.info("sigma(0.5):", ph.sigma(0.5));
+		logger.info("sigma(1):", ph.sigma(1));
 	});
 })
