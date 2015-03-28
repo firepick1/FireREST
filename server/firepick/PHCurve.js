@@ -450,20 +450,6 @@ Tridiagonal = require("./Tridiagonal");
 		shouldEqualT(ph.r(0.9), new Complex(4.6,2.8));
 		shouldEqualT(ph.r(1), new Complex(5,3));
 	});
-	it("new PHCurve([p1,p2]).r(t) should interpolate a 4-point straight line", function() {
-		var ph = new PHCurve([
-			{x:1,y:1},
-			{x:2,y:1.5},
-			{x:4,y:2.5},
-			{x:5,y:3},
-		],{logger:logger});
-		should.deepEqual(ph.r(0), new Complex(1,1));
-		shouldEqualT(ph.r(0.1), new Complex(1.2197, 1.1098));
-		shouldEqualT(ph.r(0.5), new Complex(2.815, 1.907));
-		shouldEqualT(ph.r(0.6), new Complex(3.320, 2.160));
-		shouldEqualT(ph.r(0.9), new Complex(4.795, 2.897));
-		shouldEqualT(ph.r(1), new Complex(5.014,3.007));
-	});
 	it("new PHCurve([p1,p2]).r(t) should interpolate a 5-point straight line", function() {
 		var ph = new PHCurve([
 			{x:1,y:1},
@@ -488,14 +474,18 @@ Tridiagonal = require("./Tridiagonal");
 	it("newtonRaphson(options) should solve PHCurve z coefficients", function() {
 		var ph = new PHCurve([
 			{x:1,y:1},
-			{x:2,y:1.5},
-			{x:4,y:2.5},
+			{x:2,y:1.5}, // irregular spacing
+			{x:4,y:2.5}, // irregular spacing
 			{x:5,y:3},
 		],{logger:logger});
 		logger.debug("ph.z:", ph.z);
 		shouldEqualT(ph.r(0), new Complex(1,1));
+		shouldEqualT(ph.r(0.1), new Complex(1.2197, 1.1098));
+		shouldEqualT(ph.r(0.5), new Complex(2.815, 1.907));
+		shouldEqualT(ph.r(0.6), new Complex(3.320, 2.160));
+		shouldEqualT(ph.r(0.9), new Complex(4.795, 2.897));
 		shouldEqualT(ph.r(1), new Complex(5.014,3.007));
-		ph.dumpJacobian();
+
 		ph.newtonRaphson().should.equal(4);
 		ph.newtonRaphson().should.equal(1);
 		shouldEqualT(ph.r(0), new Complex(1,1));
@@ -504,5 +494,32 @@ Tridiagonal = require("./Tridiagonal");
 		shouldEqualT(ph.r(0.6), new Complex(3.629,2.314));
 		shouldEqualT(ph.r(0.9), new Complex(4.828,2.914));
 		shouldEqualT(ph.r(1), new Complex(5,3));
+	});
+	it("newtonRaphson() should solve interpolate a 3-point curve", function() {
+		var ph = new PHCurve([
+			{x:-1,y:1},
+			{x:0,y:2},
+			{x:1,y:1},
+		],{logger:logger});
+		logger.debug("ph.z:", ph.z);
+		ph.newtonRaphson().should.equal(3);
+		ph.newtonRaphson().should.equal(1);
+		shouldEqualT(ph.r(0), new Complex(-1,1));
+		shouldEqualT(ph.r(0.01), new Complex(-0.99,1.04));
+		shouldEqualT(ph.r(0.02), new Complex(-0.98,1.078));
+		shouldEqualT(ph.r(0.05), new Complex(-0.945,1.19));
+		shouldEqualT(ph.r(0.1), new Complex(-0.876,1.36));
+		shouldEqualT(ph.r(0.2), new Complex(-0.701,1.64));
+		shouldEqualT(ph.r(0.3), new Complex(-0.489,1.84));
+		shouldEqualT(ph.r(0.4), new Complex(-0.25,1.96));
+		shouldEqualT(ph.r(0.5), new Complex(0,2));
+		shouldEqualT(ph.r(0.6), new Complex(0.25,1.96));
+		shouldEqualT(ph.r(0.7), new Complex(0.489,1.84));
+		shouldEqualT(ph.r(0.8), new Complex(0.701,1.64));
+		shouldEqualT(ph.r(0.9), new Complex(0.876,1.36));
+		shouldEqualT(ph.r(0.95), new Complex(0.945,1.19));
+		shouldEqualT(ph.r(0.98), new Complex(0.98,1.078));
+		shouldEqualT(ph.r(0.99), new Complex(0.99,1.04));
+		shouldEqualT(ph.r(1), new Complex(1,1));
 	});
 })
