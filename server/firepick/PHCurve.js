@@ -66,18 +66,18 @@ Tridiagonal = require("./Tridiagonal");
 	};
 
 	/////////////// PRIVATE ////////////////
-	function powert(t,tk,t1k,K) {
-		var t1 = 1 - t;
+	function powert(tau,tk,t1k,K) {
+		var t1 = 1 - tau;
 		tk.push(1);
 		t1k.push(1);
 		for (var k=1; k<=K; k++) {
-			tk.push(t*tk[k-1]);
+			tk.push(tau*tk[k-1]);
 			t1k.splice(0, 0, t1*t1k[0]);
 		}
 	};
 
     ///////////////// INSTANCE ///////////////
-	PHCurve.prototype.newtonRaphson = function(options) {
+	PHCurve.prototype.solvez = function(options) {
 		var that = this;
 		var loop = true;
 		var iteration = 1;
@@ -86,6 +86,7 @@ Tridiagonal = require("./Tridiagonal");
 		var logLevel = that.logger.logLevel;
 		that.logger.setLevel(options.logLevel || logLevel);
 		for (; loop && iteration<=iterationsMax; iteration++) {
+			// Newton-Raphson
 			var a = [];
 			var b = [];
 			var c = [];
@@ -113,9 +114,9 @@ Tridiagonal = require("./Tridiagonal");
 		}
 		var result = null;
 		if (loop) {
-			that.logger.warn("newtonRaphson exceeded iterationsMax:", that.iterationsMax);
+			that.logger.warn("solvez exceeded iterationsMax:", that.iterationsMax);
 		} else {
-			that.logger.debug("newtonRaphson converged iterations:", iteration-1);
+			that.logger.debug("solvez converged iterations:", iteration-1);
 			result = iteration-1;
 		}
 		that.logger.debug("z:", that.z);
@@ -123,25 +124,25 @@ Tridiagonal = require("./Tridiagonal");
 		that.logger.setLevel(logLevel);
 		return result;
 	};
-	PHCurve.prototype.r = function(T) {
+	PHCurve.prototype.r = function(Tau) {
 		var that = this;
-		T.should.not.be.below(0);
-		T.should.not.be.above(1);
-		var TN = T * that.N;
+		Tau.should.not.be.below(0);
+		Tau.should.not.be.above(1);
+		var TN = Tau * that.N;
 		var i = Math.ceil(TN) || 1;
 		return that.rit(i,TN-i+1);
 	};
-	PHCurve.prototype.rit = function(i,t) {
+	PHCurve.prototype.rit = function(i,tau) {
 		var that = this;
 		i.should.not.be.below(0);
 		i.should.not.be.above(that.N);
-		t.should.not.be.below(0);
-		t.should.not.be.above(1);
-		that.logger.trace("rit(", i, ",", t, ")");
+		tau.should.not.be.below(0);
+		tau.should.not.be.above(1);
+		that.logger.trace("rit(", i, ",", tau, ")");
 		var sum = new Complex();
 		var tk = [];
 		var t1k = [];
-		powert(t,tk,t1k,5);
+		powert(tau,tk,t1k,5);
 		for (var k=0; k<=5; k++) {
 			var re = Util.choose(5,k) * t1k[k] * tk[k];
 			var c = Complex.times(that.pik(i,k), re);
@@ -434,7 +435,7 @@ Tridiagonal = require("./Tridiagonal");
 		ph5.F(-100,100,0.9).should.within(-111,-110);
 		ph5.F(-100,100,1).should.equal(-100);
 	});
-	it("new PHCurve([p1,p2]).r(t) should interpolate a 2-point straight line", function() {
+	it("new PHCurve([p1,p2]).r(tau) should interpolate a 2-point straight line", function() {
 		var ph = new PHCurve([
 			{x:1,y:1},
 			{x:5,y:3},
@@ -450,7 +451,7 @@ Tridiagonal = require("./Tridiagonal");
 		shouldEqualT(ph.r(0.9), new Complex(4.6,2.8));
 		shouldEqualT(ph.r(1), new Complex(5,3));
 	});
-	it("new PHCurve([p1,p2]).r(t) should interpolate a 5-point straight line", function() {
+	it("new PHCurve([p1,p2]).r(tau) should interpolate a 5-point straight line", function() {
 		var ph = new PHCurve([
 			{x:1,y:1},
 			{x:2,y:1.5},
@@ -471,7 +472,7 @@ Tridiagonal = require("./Tridiagonal");
 		shouldEqualT(ph.r(0.9), new Complex(4.6,2.8));
 		shouldEqualT(ph.r(1), new Complex(5,3));
 	});
-	it("newtonRaphson(options) should solve PHCurve z coefficients", function() {
+	it("solvez(options) should calculate PHCurve z coefficients", function() {
 		var ph = new PHCurve([
 			{x:1,y:1},
 			{x:2,y:1.5}, // irregular spacing
@@ -486,8 +487,8 @@ Tridiagonal = require("./Tridiagonal");
 		shouldEqualT(ph.r(0.9), new Complex(4.795, 2.897));
 		shouldEqualT(ph.r(1), new Complex(5.014,3.007));
 
-		ph.newtonRaphson().should.equal(4);
-		ph.newtonRaphson().should.equal(1);
+		ph.solvez().should.equal(4);
+		ph.solvez().should.equal(1);
 		shouldEqualT(ph.r(0), new Complex(1,1));
 		shouldEqualT(ph.r(0.1), new Complex(1.172,1.086));
 		shouldEqualT(ph.r(0.5), new Complex(3,2));
@@ -495,15 +496,15 @@ Tridiagonal = require("./Tridiagonal");
 		shouldEqualT(ph.r(0.9), new Complex(4.828,2.914));
 		shouldEqualT(ph.r(1), new Complex(5,3));
 	});
-	it("newtonRaphson() should solve interpolate a 3-point curve", function() {
+	it("solvez() should solve interpolate a 3-point curve", function() {
 		var ph = new PHCurve([
 			{x:-1,y:1},
 			{x:0,y:2},
 			{x:1,y:1},
 		],{logger:logger});
 		logger.debug("ph.z:", ph.z);
-		ph.newtonRaphson().should.equal(3);
-		ph.newtonRaphson().should.equal(1);
+		ph.solvez().should.equal(3);
+		ph.solvez().should.equal(1);
 		shouldEqualT(ph.r(0), new Complex(-1,1));
 		shouldEqualT(ph.r(0.01), new Complex(-0.99,1.04));
 		shouldEqualT(ph.r(0.02), new Complex(-0.98,1.078));
