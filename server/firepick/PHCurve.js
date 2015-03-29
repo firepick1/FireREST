@@ -20,15 +20,6 @@ Tridiagonal = require("./Tridiagonal");
 		pts.length.should.be.above(1);
 		initz(that,pts);
 		that.N = that.q.length-1;
-		var u = [0,0,0];
-		var v = [0,0,0];
-		that.sigmak = [
-			u[0]*u[0] + v[0]*v[0],
-			u[0]*u[1] + v[0]*v[1],
-			2/3*(u[1]*u[1] + v[1]*v[1]) + 1/3*(u[0]*u[2]+v[0]*v[2]),
-			u[1]*u[2]+v[1]*v[2],
-			u[2]*u[2]+v[2]*v[2],
-		];
 		return that;
     };
 
@@ -127,7 +118,7 @@ Tridiagonal = require("./Tridiagonal");
 		default: should.fail("invalid j:" + j);
 		}
 	};
-	PHCurve.prototype.sigma = function(Tau) { // parametric speed
+	PHCurve.prototype.sigma = function(Tau) { // curve parametric speed
 		var that = this;
 		return that.rprime(Tau).modulus();
 	};
@@ -137,9 +128,9 @@ Tridiagonal = require("./Tridiagonal");
 		Tau.should.not.be.above(1);
 		var TN = Tau * that.N;
 		var i = Math.ceil(TN) || 1;
-		return that.riprime(i,TN-i+1);
+		return that.ritprime(i,TN-i+1);
 	};
-	PHCurve.prototype.riprime = function(i,tau) { // segment hodograph
+	PHCurve.prototype.ritprime = function(i,tau) { // segment hodograph
 		var that = this;
 		var sum = new Complex();
 		var t1 = 1-tau;
@@ -284,9 +275,6 @@ Tridiagonal = require("./Tridiagonal");
 		var that = this;
 		i.should.be.above(0);
 		i.should.not.be.above(that.N);
-		if (i === 1) {
-			//return that.p1k(k);
-		}
 
 		switch (k) {
 		case 0: return that.q[i-1];
@@ -303,14 +291,6 @@ Tridiagonal = require("./Tridiagonal");
 			.plus(Complex.times(1/5,that.wij(i,2).times(that.wij(i,2))));
 		default: should.fail("invalid k:" + k);
 		}
-	};
-	PHCurve.prototype.sigmat = function(t) {
-		var that = this;
-		var sum = 0;
-		for (var k=0; k < that.degree; k++) {
-			sum += sigmak[k] * that.bn_1(t);
-		}
-		return sum;
 	};
 	PHCurve.prototype.fi = function(i) {
 		var that = this;
@@ -543,15 +523,30 @@ Tridiagonal = require("./Tridiagonal");
 		shouldEqualT(ph.r(0.98), new Complex(0.98,1.078));
 		shouldEqualT(ph.r(0.99), new Complex(0.99,1.04));
 		shouldEqualT(ph.r(1), new Complex(1,1));
-
+	});
+	it("s(tau) should return arc length for tau:[0,1] ", function() {
+		var ph = new PHCurve([
+			{x:-1,y:1},
+			{x:0,y:2},
+			{x:1,y:1},
+		],{logger:logger});
+		should.exist(ph.solvez());
 		ph.s(0).should.equal(0);
 		ph.s(0.5).should.within(1.527,1.528);
 		ph.s(1).should.within(3.055,3.056);
-		logger.info("rprime(0):", ph.rprime(0));
-		logger.info("rprime(0.5):", ph.rprime(0.5));
-		logger.info("rprime(1):", ph.rprime(1));
-		logger.info("sigma(0):", ph.sigma(0));
-		logger.info("sigma(0.5):", ph.sigma(0.5));
-		logger.info("sigma(1):", ph.sigma(1));
+	});
+	it("sigma(tau) should return parametric speed for tau:[0,1]", function() {
+		var ph = new PHCurve([
+			{x:-1,y:1},
+			{x:0,y:2},
+			{x:1,y:1},
+		],{logger:logger});
+		should.exist(ph.solvez());
+		var epsilon = 0.001;
+		ph.sigma(0).should.within(2.055-epsilon,2.055+epsilon);
+		ph.sigma(0.3).should.within(1.390-epsilon,1.390+epsilon);
+		ph.sigma(0.5).should.within(1.264-epsilon,1.264+epsilon);
+		ph.sigma(0.7).should.within(ph.sigma(0.3)-epsilon, ph.sigma(0.3)+epsilon);
+		ph.sigma(1).should.within(ph.sigma(0)-epsilon,ph.sigma(0)+epsilon);
 	});
 })
