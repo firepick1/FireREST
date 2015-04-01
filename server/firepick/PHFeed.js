@@ -15,40 +15,68 @@ PHCurve = require("./PHCurve");
 		var that = this;
 		should.exist(phcurve, "expected PHCurve");
 		options = options || {};
-		that.T = options.T || 1; // seconds from 0-maxV
-		that.maxV = options.maxV || 60*10000; // mm/min
+		that.maxV = options.maxV || 100; // maximum mm/s
 		that.logger = options.logger || new Logger(options);
 		that.ph = phcurve;
+		that.S = that.ph.s(1);
+		var Tmax = that.S*2 / that.maxV;
+		that.Tmax = options.Tmax ? Math.max(options.Tmax, Tmax) : Tmax; 
 		return that;
     };
 
 	/////////////// PRIVATE ////////////////
 
-    ///////////////// INSTANCE API ///////////////
-	PHFeed.prototype.V = function(vin, vout, tau) {
+	///////////////// INSTANCE API ///////////////
+	PHFeed.prototype.V = function(tau, vin, vout) { // feed rate (scalar)
 		var that = this;
+		var args = that.argsF(vin, vout);
 		var sum = 0;
 		for (var k=0; k <= degree; k++) {
 			that.logger.trace("V() k:", k, " tau:", tau,
-				" Vk(k):", that.Vk(vin,vout,k), 
+				" Vk(k):", that.Vk(args.vi,args.vo,k), 
 				" coefficient(k,tau):", bn.coefficient(k,tau));
-			sum += that.Vk(vin,vout,k) * bn.coefficient(k,tau);
+			sum += that.Vk(args.vi,args.vo,k) * bn.coefficient(k,tau);
 		}
 		return sum;
 	};
-	PHFeed.prototype.F = function(vin, vout, tau, T) {
+	PHFeed.prototype.F = function(tau, vin, vout, tTotal) { // distance traveled (scalar)
 		var that = this;
+		var args = that.argsF(vin, vout, tTotal);
 		var sum = 0;
 		for (var k=0; k <= degree+1; k++) {
-			that.logger.debug("F() k:", k, " tau:", tau,
-				" Fk(k):", that.Fk(vin,vout,k), 
+			that.logger.trace("F() k:", k, " tau:", tau,
+				" Fk(k):", that.Fk(args.vi,args.vo,k), 
 				" coefficient(k,tau):", bn1.coefficient(k,tau));
-			sum += that.Fk(vin,vout,k) * bn1.coefficient(k,tau);
+			sum += that.Fk(args.vi,args.vo,k) * bn1.coefficient(k,tau);
 		}
-		return sum*T;
+		return sum*args.T;
 	};
 
 	///////////// INSTANCE OTHER ////////////////
+	PHFeed.prototype.argsF = function(vin, vout, tTotal) {
+		var that = this;
+		var vi = Math.min(that.maxV, vin) || 0;
+		vi.should.not.be.below(0);
+		var vo;
+		if (vout == null) {
+			vo = vi ? vi : that.maxV;
+		} else {
+			vo = Math.min(that.maxV, vout);
+		}
+		vo.should.not.be.below(0);
+		var dv = Math.abs(vo-vi);
+		var tS = dv ? that.S * 2/ dv : that.S / vi;
+		var minT = dv ? Math.max(that.Tmax * dv/that.maxV) : tS;
+		var T = Math.max(tS, tTotal == null ? minT : Math.max(tTotal, minT));
+		that.logger.trace("argsF() T:",T, " S:", that.S, " vo:", vo, 
+			" tS:", tS, " Tmax:", that.Tmax, " minT:", minT);
+		T.should.not.be.below(0);
+		if (vo != vi && T < that.tMax * dv / that.maxV) {
+			vo = that.maxV * T / that.tMax + vi; 
+		}
+
+		return {vi:vi,vo:vo,T:T};
+	}
 	PHFeed.prototype.Vk = function(vin,vout,k) {
 		var that = this;
 		switch (k) {
@@ -108,40 +136,109 @@ PHCurve = require("./PHCurve");
 			"expected:" + c2.stringify({nPlaces:3}) +
 			" actual:" + c1.stringify({nPlaces:3}));
 	};
-	it("new PHFeed(ph,[pts]) should create a PHFeed for a PHCurve", function() {
-		var phf = new PHFeed(phstep);
-		phf.should.have.properties({
-			T:1 // time to reach max velocity
-		});
-	});
-	it("V(vin,vout,tau) should interpolate velocity on interval tau:[0,1]", function() {
-		var phf = new PHFeed(phstep,{logger:logger});
-		phf.V(-100,100,0).should.equal(-100);
-		phf.V(-100,100,0.1).should.within(-98.29,-98.28);
-		phf.V(-100,100,0.2).should.within(-88.42,-88.41);
-		phf.V(-100,100,0.3).should.within(-67.39,-67.38);
-		phf.V(-100,100,0.4).should.within(-36.52,-36.51);
-		phf.V(-100,100,0.5).should.within(0,0);
-		phf.V(-100,100,0.6).should.within(36.51,36.52);
-		phf.V(-100,100,0.7).should.within(67.38,67.39);
-		phf.V(-100,100,0.8).should.within(88.41,88.42);
-		phf.V(-100,100,0.9).should.within(98.28,98.29);
-		phf.V(-100,100,1).should.equal(100);
-	});
-	it("Fvt(vin,vout,tau) should interpolate V integral on interval tau:[0,1]", function() {
+	it("new PHFeed(ph,options) should create a PHFeed for a PHCurve", function() {
 		var phline = new PHCurve([
 			{x:1,y:1},
 			{x:5,y:4},
 		]);
-		var phf = new PHFeed(phline,{logger:logger});
+		var phfDefault = new PHFeed(phline);
+		var S = phline.s(1);
+		S.should.equal(5);
+		var default_maxV = 100;
+		var Tmax = S * 2 / default_maxV;
+		phfDefault.should.have.properties({
+			Tmax:Tmax,	// seconds to reach max velocity
+			maxV:default_maxV,	// maximum velocity (mm/s)
+		});
+		var options = {Tmax:Tmax, maxV: default_maxV};
+		new PHFeed(phline,options).should.have.properties(phfDefault);
+	});
+	it("argsF(vin,vout,tTotal) should return default values", function() {
+		var phline = new PHCurve([
+			{x:1,y:1},
+			{x:5,y:4},
+		]);
+		var phf1 = new PHFeed(phline,{maxV:1000,Tmax:1});
+		phf1.argsF(1,50,1.1).should.have.properties({vi:1,vo:50,T:1.1});
+		phf1.argsF().should.have.properties({vi:0,vo:1000,T:1});
+		phf1.argsF(0).should.have.properties({vi:0,vo:1000,T:1});
+		phf1.argsF(0,1000).should.have.properties({vi:0,vo:1000,T:1});
+		phf1.argsF(0,9999).should.have.properties({vi:0,vo:1000,T:1});
+		phf1.argsF(0,500).should.have.properties({vi:0,vo:500,T:0.5});
+		phf1.argsF(0,1000,0.001).should.have.properties({vi:0,vo:1000,T:1});
+		phf1.argsF(0,10).should.have.properties({vi:0,vo:10,T:1});
+		phf1.argsF(500,500).should.have.properties({vi:500,vo:500,T:0.01});
+		phf1.argsF(5000,5000).should.have.properties({vi:1000,vo:1000,T:0.005});
+		phf1.argsF(500).should.have.properties({vi:500,vo:500,T:0.01});
+		phf1.argsF(5000).should.have.properties({vi:1000,vo:1000,T:0.005});
+		phf1.argsF(1000,0).should.have.properties({vi:1000,vo:0,T:1});
+
+		var phf2 = new PHFeed(phline,{maxV:1000,Tmax:2});
+		phf2.argsF(1,2,3).should.have.properties({vi:1,vo:2,T:10});
+		phf2.argsF().should.have.properties({vi:0,vo:1000,T:2});
+		phf2.argsF(0).should.have.properties({vi:0,vo:1000,T:2});
+		phf2.argsF(0,1000).should.have.properties({vi:0,vo:1000,T:2});
+	});
+
+	it("V(vin,vout,tau) should interpolate takeoff velocity for tau:[0,1]", function() {
+		var phf = new PHFeed(phstep,{logger:logger});
+		phf.V(0.0, 0, 100).should.equal(0);
+		phf.V(0.1, 0, 100).should.within(0.85, 0.86);
+		phf.V(0.2, 0, 100).should.within(5.79, 5.80);
+		phf.V(0.3, 0, 100).should.within(16.30, 16.31);
+		phf.V(0.4, 0, 100).should.within(31.74, 31.75);
+		phf.V(0.5, 0, 100).should.within(50, 50);
+		phf.V(0.6, 0, 100).should.within(68.25, 68.26);
+		phf.V(0.7, 0, 100).should.within(83.69, 83.70);
+		phf.V(0.8, 0, 100).should.within(94.20, 94.21);
+		phf.V(0.9, 0, 100).should.within(99.14, 99.15);
+		phf.V(1.0, 0, 100).should.equal(100);
+	});
+	it("V(vin,vout,tau) should interpolate stopping velocity for tau:[0,1]", function() {
+		var phf = new PHFeed(phstep,{logger:logger});
+		phf.V(0.0, 100, 0).should.equal(100);
+		phf.V(0.1, 100, 0).should.within(99.14, 99.15);
+		phf.V(0.9, 100, 0).should.within(0.85, 0.86);
+		phf.V(1.0, 100, 0).should.equal(0);
+	});
+	it("V(vin,vout,tau) should interpolate constant velocity for tau:[0,1]", function() {
+		var phf = new PHFeed(phstep,{logger:logger});
+		phf.V(0.0, 100).should.equal(100);
+		phf.V(0.5, 100).should.equal(100);
+		phf.V(1.0, 100).should.equal(100);
+	});
+	it("V(vin,vout,tau) should interpolate velocity change for tau:[0,1]", function() {
+		var phf = new PHFeed(phstep,{logger:logger});
+		phf.V(0.0, 50, 100).should.equal(50);
+		phf.V(0.5, 50, 100).should.equal(75);
+		phf.V(1.0, 50, 100).should.equal(100);
+		phf.V(0.0, 100, 50).should.equal(100);
+		phf.V(0.5, 100, 50).should.equal(75);
+		phf.V(1.0, 100, 50).should.equal(50);
+	});
+	it("Fvt(vin,vout,tau) should interpolate distance traveled for tau:[0,1]", function() {
+		var phline = new PHCurve([
+			{x:1,y:1},
+			{x:5,y:4},
+		]);
+		var phf = new PHFeed(phline,{
+			maxV:1000,
+			logger:logger
+		});
 		var S = phline.s(1);
 		S.should.equal(5);
 		var vin = 0;
 		var vout = 10;
-		var T = 2/vout;
-		phf.F(vin,vout,0,T).should.equal(0);
-		//phf.F(vin,vout,0.5,T).should.within(0.156,0.157);
-		//phf.F(vin,vout,0.6,T).should.within(0.274,0.275);
-		//phf.F(vin,vout,1,T).should.equal(vout*T/2);
+		phf.F(0.0,vin,vout).should.equal(0);
+		phf.F(0.1,vin,vout).should.within(0.002,0.003);
+		phf.F(0.2,vin,vout).should.within(0.031,0.033);
+		phf.F(0.3,vin,vout).should.within(0.136,0.137);
+		phf.F(0.4,vin,vout).should.within(0.373,0.374);
+		phf.F(0.5,vin,vout).should.within(0.781,0.782);
+		phf.F(0.6,vin,vout).should.within(1.373,1.374);
+		phf.F(0.7,vin,vout).should.within(2.136,2.137);
+		phf.F(0.8,vin,vout).should.within(3.031,3.032);
+		phf.F(0.9,vin,vout).should.within(4.002,4.003);
+		phf.F(1.0,vin,vout).should.equal(S);
 	});
 })
