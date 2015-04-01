@@ -225,7 +225,8 @@ Tridiagonal = require("./Tridiagonal");
 			var re = Util.choose(5,k) * t1k[k] * tk[k];
 			var c = Complex.times(that.pik(i,k), re);
 			sum.add(c);
-			that.logger.trace("rit k:", k, " re:", re, " c:", c, " sum:", sum, " pik:", that.pik(i,k), " choose:", Util.choose(5,k));
+			that.logger.trace("rit k:", k, " re:", re, " c:", c, " sum:", sum, 
+				" pik:", that.pik(i,k), " choose:", Util.choose(5,k));
 		}
 		return sum;
 	};
