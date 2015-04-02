@@ -15,12 +15,36 @@ PHCurve = require("./PHCurve");
 		var that = this;
 		should.exist(phcurve, "expected PHCurve");
 		options = options || {};
-		that.maxV = options.maxV || 100; // maximum mm/s
+		var maxV = options.maxV || 100; // maximum mm/s
 		that.logger = options.logger || new Logger(options);
 		that.ph = phcurve;
 		that.S = that.ph.s(1);
-		var Tmax = that.S*2 / that.maxV;
-		that.Tmax = options.Tmax ? Math.max(options.Tmax, Tmax) : Tmax; 
+		var tS = that.S*2 / maxV;
+		that.tAccel = options.tAccel ? Math.max(options.tAccel, tS/2) : tS/2; 
+		that.tDecel = that.tAccel;
+		var vS = that.S / that.tAccel;
+		if (vS > maxV) {
+			that.maxV = maxV;
+			that.sAccel = (that.tAccel * maxV)/2;
+			that.sDecel = that.sAccel;
+			that.sCruise = that.S - that.sAccel - that.sDecel;
+		} else {
+			that.maxV = vS;
+			that.sAccel = (that.tAccel * vS)/2;
+			that.sDecel = that.sAccel;
+			that.sScruise = 0;
+		}
+		that.logger.trace("PHFeed() maxV:", that.maxV, 
+			" maxV:", maxV, 
+			" S:", that.S, 
+			" sAccel:", that.sAccel,
+			" sDecel:", that.sDecel,
+			" sCruise:", that.sCruise,
+			" tCruise:", that.tCruise
+			);
+		that.maxV = maxV;
+		that.tCruise = that.sScruise / that.maxV;
+
 		return that;
     };
 
@@ -55,7 +79,7 @@ PHCurve = require("./PHCurve");
 	///////////// INSTANCE OTHER ////////////////
 	PHFeed.prototype.argsF = function(vin, vout, tTotal) {
 		var that = this;
-		var vi = Math.min(that.maxV, vin) || 0;
+		var vi = vin == null ? 0 : Math.min(that.maxV, vin);
 		vi.should.not.be.below(0);
 		var vo;
 		if (vout == null) {
@@ -66,13 +90,13 @@ PHCurve = require("./PHCurve");
 		vo.should.not.be.below(0);
 		var dv = Math.abs(vo-vi);
 		var tS = dv ? that.S * 2/ dv : that.S / vi;
-		var minT = dv ? Math.max(that.Tmax * dv/that.maxV) : tS;
+		var minT = dv ? Math.max(that.tAccel * dv/that.maxV) : tS;
 		var T = Math.max(tS, tTotal == null ? minT : Math.max(tTotal, minT));
-		that.logger.trace("argsF() T:",T, " S:", that.S, " vo:", vo, 
-			" tS:", tS, " Tmax:", that.Tmax, " minT:", minT);
+		that.logger.trace("argsF() T:",T, " S:", that.S, " vi:", vi, " vo:", vo, 
+			" tS:", tS, " tAccel:", that.tAccel, " minT:", minT, " dv:", dv, " maxV:", that.maxV);
 		T.should.not.be.below(0);
-		if (vo != vi && T < that.tMax * dv / that.maxV) {
-			vo = that.maxV * T / that.tMax + vi; 
+		if (vo != vi && T < that.tAccel * dv / that.maxV) {
+			vo = that.maxV * T / that.tAccel + vi; 
 		}
 
 		return {vi:vi,vo:vo,T:T};
@@ -145,12 +169,12 @@ PHCurve = require("./PHCurve");
 		var S = phline.s(1);
 		S.should.equal(5);
 		var default_maxV = 100;
-		var Tmax = S * 2 / default_maxV;
+		var tAccel = S / default_maxV;
 		phfDefault.should.have.properties({
-			Tmax:Tmax,	// seconds to reach max velocity
+			tAccel:tAccel,	// seconds to reach max velocity
 			maxV:default_maxV,	// maximum velocity (mm/s)
 		});
-		var options = {Tmax:Tmax, maxV: default_maxV};
+		var options = {tAccel:tAccel, maxV: default_maxV};
 		new PHFeed(phline,options).should.have.properties(phfDefault);
 	});
 	it("argsF(vin,vout,tTotal) should return default values", function() {
@@ -158,8 +182,8 @@ PHCurve = require("./PHCurve");
 			{x:1,y:1},
 			{x:5,y:4},
 		]);
-		var phf1 = new PHFeed(phline,{maxV:1000,Tmax:1});
-		phf1.argsF(1,50,1.1).should.have.properties({vi:1,vo:50,T:1.1});
+		var phf1 = new PHFeed(phline,{maxV:1000,tAccel:1});
+		phf1.argsF(1,10,2).should.have.properties({vi:1,vo:10,T:2});
 		phf1.argsF().should.have.properties({vi:0,vo:1000,T:1});
 		phf1.argsF(0).should.have.properties({vi:0,vo:1000,T:1});
 		phf1.argsF(0,1000).should.have.properties({vi:0,vo:1000,T:1});
@@ -173,7 +197,7 @@ PHCurve = require("./PHCurve");
 		phf1.argsF(5000).should.have.properties({vi:1000,vo:1000,T:0.005});
 		phf1.argsF(1000,0).should.have.properties({vi:1000,vo:0,T:1});
 
-		var phf2 = new PHFeed(phline,{maxV:1000,Tmax:2});
+		var phf2 = new PHFeed(phline,{maxV:1000,tAccel:2});
 		phf2.argsF(1,2,3).should.have.properties({vi:1,vo:2,T:10});
 		phf2.argsF().should.have.properties({vi:0,vo:1000,T:2});
 		phf2.argsF(0).should.have.properties({vi:0,vo:1000,T:2});
