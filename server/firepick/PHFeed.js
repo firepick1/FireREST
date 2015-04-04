@@ -110,54 +110,30 @@ PHCurve = require("./PHCurve");
 	///////////////// INSTANCE API ///////////////
 	PHFeed.prototype.Vtvv = function(tau, vIn, vOut) { // feed rate (scalar)
 		var that = this;
-		var args = that.argsF(vIn, vOut);
+		vIn.should.not.be.below(0);
+		vOut.should.not.be.below(0);
 		var sum = 0;
 		for (var k=0; k <= degree; k++) {
 			that.logger.trace("Vtvv() k:", k, " tau:", tau,
-				" Vk(k):", that.Vk(args.vi,args.vo,k), 
+				" Vk(k):", that.Vk(vIn,vOut,k), 
 				" coefficient(k,tau):", bn.coefficient(k,tau));
-			sum += that.Vk(args.vi,args.vo,k) * bn.coefficient(k,tau);
+			sum += that.Vk(vIn,vOut,k) * bn.coefficient(k,tau);
 		}
 		return sum;
 	};
-	PHFeed.prototype.F = function(tau, vIn, vOut, tTotal) { // distance traveled (scalar)
+	PHFeed.prototype.FtvvT = function(tau, vIn, vOut, tTotal) { // distance traveled (scalar)
 		var that = this;
-		var args = that.argsF(vIn, vOut, tTotal);
 		var sum = 0;
 		for (var k=0; k <= degree+1; k++) {
-			that.logger.trace("F() k:", k, " tau:", tau,
-				" Fk(k):", that.Fk(args.vi,args.vo,k), 
+			that.logger.trace("FtvvT() k:", k, " tau:", tau,
+				" Fk(k):", that.Fk(vIn,vOut,k), 
 				" coefficient(k,tau):", bn1.coefficient(k,tau));
-			sum += that.Fk(args.vi,args.vo,k) * bn1.coefficient(k,tau);
+			sum += that.Fk(vIn,vOut,k) * bn1.coefficient(k,tau);
 		}
-		return sum*args.T;
+		return sum*tTotal;
 	};
 
 	///////////// INSTANCE OTHER ////////////////
-	PHFeed.prototype.argsF = function(vIn, vOut, tTotal) {
-		var that = this;
-		var vi = vIn == null ? 0 : Math.min(that.vCruise, vIn);
-		vi.should.not.be.below(0);
-		var vo;
-		if (vOut == null) {
-			vo = vi ? vi : that.vCruise;
-		} else {
-			vo = Math.min(that.vCruise, vOut);
-		}
-		vo.should.not.be.below(0);
-		var dv = Math.abs(vo-vi);
-		var tS = dv ? that.S * 2/ dv : that.S / vi;
-		var minT = dv ? Math.max(that.tAccel * dv/that.vCruise) : tS;
-		var T = Math.max(tS, tTotal == null ? minT : Math.max(tTotal, minT));
-		that.logger.trace("argsF() T:",T, " S:", that.S, " vi:", vi, " vo:", vo, 
-			" tS:", tS, " tAccel:", that.tAccel, " minT:", minT, " dv:", dv, " vCruise:", that.vCruise);
-		T.should.not.be.below(0);
-		if (vo != vi && T < that.tAccel * dv / that.vCruise) {
-			vo = that.vCruise * T / that.tAccel + vi; 
-		}
-
-		return {vi:vi,vo:vo,T:T};
-	}
 	PHFeed.prototype.Vk = function(vIn,vOut,k) {
 		var that = this;
 		switch (k) {
@@ -177,15 +153,6 @@ PHCurve = require("./PHCurve");
 			sum += that.Vk(vIn,vOut,j);
 		}
 		return sum/(1+degree);
-	};
-	PHFeed.prototype.Fvt = function(vIn, vOut, tau) {
-		var that = this;
-		var sum = 0;
-		var n1 = degree+1;
-		for (var k=0; k <= n1; k++) {
-			sum += that.Fk(vIn,vOut,k) * bn1.coefficient(k,tau);
-		}
-		return that.T * sum;
 	};
 
 	///////////////// CLASS //////////
@@ -220,29 +187,6 @@ PHCurve = require("./PHCurve");
 			"expected:" + c2.stringify({nPlaces:3}) +
 			" actual:" + c1.stringify({nPlaces:3}));
 	};
-	it("argsF(vIn,vOut,tTotal) should return default values", function() {
-		//var phf1 = new PHFeed(phline,{vCruise:1000,tAccel:1});
-		//phf1.argsF(1,10,2).should.have.properties({vi:1,vo:10,T:2});
-		//phf1.argsF().should.have.properties({vi:0,vo:1000,T:1});
-		//phf1.argsF(0).should.have.properties({vi:0,vo:1000,T:1});
-		//phf1.argsF(0,1000).should.have.properties({vi:0,vo:1000,T:1});
-		//phf1.argsF(0,9999).should.have.properties({vi:0,vo:1000,T:1});
-		//phf1.argsF(0,500).should.have.properties({vi:0,vo:500,T:0.5});
-		//phf1.argsF(0,1000,0.001).should.have.properties({vi:0,vo:1000,T:1});
-		//phf1.argsF(0,10).should.have.properties({vi:0,vo:10,T:1});
-		//phf1.argsF(500,500).should.have.properties({vi:500,vo:500,T:0.01});
-		//phf1.argsF(5000,5000).should.have.properties({vi:1000,vo:1000,T:0.005});
-		//phf1.argsF(500).should.have.properties({vi:500,vo:500,T:0.01});
-		//phf1.argsF(5000).should.have.properties({vi:1000,vo:1000,T:0.005});
-		//phf1.argsF(1000,0).should.have.properties({vi:1000,vo:0,T:1});
-
-		//var phf2 = new PHFeed(phline,{vCruise:1000,tAccel:2});
-		//
-		//phf2.argsF(1,2,3).should.have.properties({vi:1,vo:2,T:10});
-		//phf2.argsF().should.have.properties({vi:0,vo:1000,T:2});
-		//phf2.argsF(0).should.have.properties({vi:0,vo:1000,T:2});
-		//phf2.argsF(0,1000).should.have.properties({vi:0,vo:1000,T:2});
-	});
 	it("PHFeed(ph,{vIn:v,vCruise:v}) should maintain constant feedrate", function() {
 		var phf = new PHFeed(phline,{vIn:5,vCruise:5});
 		phf.should.have.properties({
@@ -375,9 +319,9 @@ PHCurve = require("./PHCurve");
 	});
 	it("Vtvv(vIn,vOut,tau) should interpolate constant velocity for tau:[0,1]", function() {
 		var phf = new PHFeed(phstep,{logger:logger});
-		phf.Vtvv(0.0, 100).should.equal(100);
-		phf.Vtvv(0.5, 100).should.equal(100);
-		phf.Vtvv(1.0, 100).should.equal(100);
+		phf.Vtvv(0.0, 100, 100).should.equal(100);
+		phf.Vtvv(0.5, 100, 100).should.equal(100);
+		phf.Vtvv(1.0, 100, 100).should.equal(100);
 	});
 	it("Vtvv(vIn,vOut,tau) should interpolate velocity change for tau:[0,1]", function() {
 		var phf = new PHFeed(phstep,{logger:logger});
@@ -388,25 +332,25 @@ PHCurve = require("./PHCurve");
 		phf.Vtvv(0.5, 100, 50).should.equal(75);
 		phf.Vtvv(1.0, 100, 50).should.equal(50);
 	});
-	it("Fvt(vIn,vOut,tau) should interpolate distance traveled for tau:[0,1]", function() {
+	it("FtvvT(tau,vIn,vOut,T) should interpolate distance traveled for tau:[0,1]", function() {
 		var phf = new PHFeed(phline,{
-			maxV:1000,
 			logger:logger
 		});
 		var S = phline.s(1);
 		S.should.equal(5);
 		var vIn = 0;
 		var vOut = 10;
-		phf.F(0.0,vIn,vOut).should.equal(0);
-		phf.F(0.1,vIn,vOut).should.within(0.002,0.003);
-		phf.F(0.2,vIn,vOut).should.within(0.031,0.033);
-		phf.F(0.3,vIn,vOut).should.within(0.136,0.137);
-		phf.F(0.4,vIn,vOut).should.within(0.373,0.374);
-		phf.F(0.5,vIn,vOut).should.within(0.781,0.782);
-		phf.F(0.6,vIn,vOut).should.within(1.373,1.374);
-		phf.F(0.7,vIn,vOut).should.within(2.136,2.137);
-		phf.F(0.8,vIn,vOut).should.within(3.031,3.032);
-		phf.F(0.9,vIn,vOut).should.within(4.002,4.003);
-		phf.F(1.0,vIn,vOut).should.equal(S);
+		var T = 1;
+		phf.FtvvT(0.0,vIn,vOut,T).should.equal(0);
+		phf.FtvvT(0.1,vIn,vOut,T).should.within(0.002,0.003);
+		phf.FtvvT(0.2,vIn,vOut,T).should.within(0.031,0.033);
+		phf.FtvvT(0.3,vIn,vOut,T).should.within(0.136,0.137);
+		phf.FtvvT(0.4,vIn,vOut,T).should.within(0.373,0.374);
+		phf.FtvvT(0.5,vIn,vOut,T).should.within(0.781,0.782);
+		phf.FtvvT(0.6,vIn,vOut,T).should.within(1.373,1.374);
+		phf.FtvvT(0.7,vIn,vOut,T).should.within(2.136,2.137);
+		phf.FtvvT(0.8,vIn,vOut,T).should.within(3.031,3.032);
+		phf.FtvvT(0.9,vIn,vOut,T).should.within(4.002,4.003);
+		phf.FtvvT(1.0,vIn,vOut,T).should.equal(S);
 	});
 })
