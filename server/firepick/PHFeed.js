@@ -20,7 +20,7 @@ PHCurve = require("./PHCurve");
 		options = options || {};
 		that.logger = options.logger || new Logger(options);
 		that.vMax = options.vMax || 100; 		// maximum velocity
-		that.tvMax = options.tvMax || 1;		// time to reach maximum velocity
+		that.tvMax = options.tvMax || 0.01;		// time to reach maximum velocity
 		that.vIn = options.vIn || 0; 			// input velocity
 		var vCruise = options.vCruise || that.vMax;	// cruising velocity	
 		that.vOut = options.vOut == null ? that.vIn : options.vOut; 	// output velocity
@@ -29,6 +29,7 @@ PHCurve = require("./PHCurve");
 		vCruise.should.not.below(0);
 
 		var sAccel = that.vMax * that.tvMax/2;
+		var sRatio = 1;
 		if (that.vIn === vCruise && vCruise === that.vOut) {
 			that.logger.info("CASE1 vIn:", that.vIn, " vCruise:", vCruise, " vOut:", that.vOut);
 			that.tAccel = 0;
@@ -39,11 +40,8 @@ PHCurve = require("./PHCurve");
 			that.tCruise = that.sCruise / that.vCruise;
 		} else if (that.vIn !== vCruise && vCruise === that.vOut) {
 			if (sAccel > that.S) {
-				var t1 = that.tvMax;
-				var v1 = that.vMax;
-				var sRatio = that.S / sAccel;
-				that.tvMax = Math.sqrt(sRatio * t1*t1*t1/v1);
-				that.vMax *= that.tvMax/t1;
+				sRatio = that.S / sAccel;
+				that.vMax *= sRatio;
 				sAccel = that.S;
 			}
 			that.sAccel = sAccel;
@@ -60,11 +58,8 @@ PHCurve = require("./PHCurve");
 			);
 		} else if (that.vIn === vCruise && vCruise !== that.vOut) {
 			if (sAccel > that.S) {
-				var t1 = that.tvMax;
-				var v1 = that.vMax;
-				var sRatio = that.S / sAccel;
-				that.tvMax = Math.sqrt(sRatio * t1*t1*t1/v1);
-				that.vMax *= that.tvMax/t1;
+				sRatio = that.S / sAccel;
+				that.vMax *= sRatio;
 				sAccel = that.S;
 			}
 			that.sDecel = sAccel;
@@ -77,37 +72,33 @@ PHCurve = require("./PHCurve");
 			that.logger.info("CASE3 vIn:", that.vIn, " vCruise:", vCruise, " vOut:", that.vOut);
 		} else if (that.vIn !== vCruise && vCruise !== that.vOut) {
 			that.logger.info("CASE4 vIn:", that.vIn, " vCruise:", vCruise, " vOut:", that.vOut);
-			var tS = that.S*2 / vCruise;
-			that.tAccel = options.tAccel ? Math.max(options.tAccel, tS/2) : tS/2; 
-			var vS = that.S / that.tAccel;
-			if (vS > vCruise) {
-				that.vCruise = vCruise;
-				that.sAccel = (that.tAccel * vCruise)/2;
-				that.sDecel = that.sAccel;
-				that.sCruise = that.S - that.sAccel - that.sDecel;
-			} else {
-				that.vCruise = vS;
-				that.sAccel = (that.tAccel * vS)/2;
-				that.sDecel = that.sAccel;
-				that.sScruise = 0;
+			if (sAccel > that.S/2) {
+				sRatio = (that.S /2) / sAccel;
+				that.vMax *= sRatio;
+				sAccel = that.S/2;
 			}
-			var vCruiseNew = that.vCruise;
-			//that.vCruise = vCruise;
-			that.tCruise = that.sScruise / that.vCruise;
+			that.vCruise = that.vMax;
+			that.sAccel = sAccel;
+			that.tAccel = that.tvMax;
+			that.sDecel = sAccel;
+			that.tDecel = that.tvMax;
+			that.sCruise = that.S - 2*sAccel;
+			that.tCruise = that.sCruise / that.vCruise;
 		}
 		that.tDecel = that.tDecel == null ? that.tAccel : that.tDecel;
 		that.tS = that.tAccel + that.tCruise + that.tDecel;
 
 		that.logger.info("PHFeed()",
 			" S:", that.S, 
-			" vS:", vS,
+			" sRatio:", sRatio,
+			" vMax:", that.vMax,
+			" tvMax:", ""+that.tvMax,
 			" sAccel:", that.sAccel,
 			" sDecel:", that.sDecel,
 			" sCruise:", that.sCruise,
 			" tCruise:", that.tCruise,
 			" vIn:", that.vIn,
-			" vCruiseNew:", vCruiseNew,
-			" vCruiseOld:", vCruise, 
+			" vCruise:", that.vCruise, 
 			" vOut:", that.vOut,
 			"");
 
@@ -229,20 +220,6 @@ PHCurve = require("./PHCurve");
 			"expected:" + c2.stringify({nPlaces:3}) +
 			" actual:" + c1.stringify({nPlaces:3}));
 	};
-	it("new PHFeed(ph,options) should create a PHFeed for a PHCurve", function() {
-		var phfDefault = new PHFeed(phline);
-		var S = phline.s(1);
-		S.should.equal(5);
-		var default_vCruise = 100;
-		var vMax = default_vCruise;
-		phfDefault.vCruise.should.equal(default_vCruise);
-		phfDefault.should.have.properties({
-			vMax: vMax,
-			vCruise:default_vCruise,	// maximum velocity (mm/s)
-		});
-		var options = {vMax:vMax, vCruise: default_vCruise};
-		new PHFeed(phline,options).should.have.properties(phfDefault);
-	});
 	it("argsF(vIn,vOut,tTotal) should return default values", function() {
 		//var phf1 = new PHFeed(phline,{vCruise:1000,tAccel:1});
 		//phf1.argsF(1,10,2).should.have.properties({vi:1,vo:10,T:2});
@@ -268,10 +245,9 @@ PHCurve = require("./PHCurve");
 	});
 	it("PHFeed(ph,{vIn:v,vCruise:v}) should maintain constant feedrate", function() {
 		var phf = new PHFeed(phline,{vIn:5,vCruise:5});
-		phf.vCruise.should.equal(5);
 		phf.should.have.properties({
 			vMax:100,	// OPTION: maximum velocity (default: 100)
-			tvMax:1,	// OPTION: time to reach vMax (default: 1)
+			tvMax:0.01,	// OPTION: time to reach vMax (default: 0.01)
 			vIn:5,		// OPTION: input velocity  (default: 0)
 			vCruise:5,	// OPTION: cruise velocity (default: vMax)
 			vOut:5,		// OPTION: output velocity (default: vIn)
@@ -288,10 +264,10 @@ PHCurve = require("./PHCurve");
 		var vMax = 200;		// maximum velocity mm/s
 		var tvMax = 0.01; 	// seconds from rest to vMax
 		var S = phline.s(1);
-		var phf = new PHFeed(phline,{vOut:vMax, vMax:vMax,tvMax:0.01});
+		var phf = new PHFeed(phline,{vOut:vMax, vMax:vMax,tvMax:tvMax});
 		phf.should.have.properties({
 			vMax:vMax,		// OPTION: maximum velocity (default: 100)
-			tvMax:tvMax,	// OPTION: time to reach vMax (default: 1)
+			tvMax:tvMax,	// OPTION: time to reach vMax (default: 0.01)
 			vIn:0,			// OPTION: input velocity  (default: 0)
 			vCruise:vMax,	// OPTION: cruise velocity (default: vMax)
 			vOut:vMax,		// OPTION: output velocity (default: vIn)
@@ -304,26 +280,75 @@ PHCurve = require("./PHCurve");
 			tS:0.05,		// OUTPUT: total traversal time
 		});
 	});
-	it("TESTTEST PHFeed(ph,{vIn:vMax,vOut:0}) should decelerate maximally", function() {
+	it("PHFeed(ph,{vMax:v,tvMax:t}) should from rest to rest ASAP", function() {
 		var vMax = 200;		// maximum velocity mm/s
 		var tvMax = 0.01; 	// seconds from rest to vMax
 		var S = phline.s(1);
-		var phf = new PHFeed(phline,{vIn:vMax,vOut:0, vMax:vMax,tvMax:0.01});
-		phf.vOut.should.equal(0);
-		phf.sCruise.should.equal(4);
+		var sAccel = 1;
+		var sCruise = S - 2*sAccel;
+		var tCruise = sCruise/vMax;
+		var tS = tvMax + tCruise + tvMax;
+		var phf = new PHFeed(phline,{vMax:vMax,tvMax:tvMax});
 		phf.should.have.properties({
 			vMax:vMax,		// OPTION: maximum velocity (default: 100)
-			tvMax:tvMax,	// OPTION: time to reach vMax (default: 1)
-			vIn:vMax,		// OPTION: input velocity  (default: 0)
+			tvMax:tvMax,	// OPTION: time to reach vMax (default: 0.01)
+			vIn:0,			// OPTION: input velocity  (default: 0)
 			vCruise:vMax,	// OPTION: cruise velocity (default: vMax)
 			vOut:0,			// OPTION: output velocity (default: vIn)
-			tAccel:0,		// OUTPUT: initial acceleration time
-			sAccel:0,		// OUTPUT: initial acceleration distance
-			tCruise:2*(S-1)/vMax,	// OUTPUT: cruise time
-			sCruise:4,		// OUTPUT: cruise distance
+			tAccel:tvMax,	// OUTPUT: initial acceleration time
+			sAccel:sAccel,	// OUTPUT: initial acceleration distance
+			tCruise:tCruise,// OUTPUT: cruise time
+			sCruise:sCruise,// OUTPUT: cruise distance
+			tDecel:tvMax,	// OUTPUT: ending deceleration time
+			sDecel:sAccel,	// OUTPUT: ending deceleration distance
+			tS:tS			// OUTPUT: total traversal time
+		});
+	});
+	it("PHFeed(ph,{vMax:v,tvMax:t}) should clip vMax", function() {
+		var vMax = (0.025/0.026)*200;		// maximum velocity mm/s
+		var tvMax = 0.026; 	// seconds from rest to vMax
+		var S = phline.s(1);
+		var sAccel = 2.5;
+		var sCruise = S - 2*sAccel;
+		var tCruise = sCruise/vMax;
+		var tS = tvMax + tCruise + tvMax;
+		var phf = new PHFeed(phline,{vMax:200,tvMax:tvMax});
+		var epsilon = 0.0000001;
+		phf.vMax.should.within(vMax-epsilon,vMax+epsilon);
+		phf.vCruise.should.within(vMax-epsilon,vMax+epsilon);
+		phf.should.have.properties({
+			tvMax:tvMax,	// OPTION: time to reach vMax (default: 0.01)
+			vIn:0,			// OPTION: input velocity  (default: 0)
+			vOut:0,			// OPTION: output velocity (default: vIn)
+			tAccel:tvMax,	// OUTPUT: initial acceleration time
+			sAccel:sAccel,	// OUTPUT: initial acceleration distance
+			tCruise:tCruise,// OUTPUT: cruise time
+			sCruise:sCruise,// OUTPUT: cruise distance
+			tDecel:tvMax,	// OUTPUT: ending deceleration time
+			sDecel:sAccel,	// OUTPUT: ending deceleration distance
+			tS:tS			// OUTPUT: total traversal time
+		});
+	});
+	it("PHFeed(ph,{vIn:vMax,vOut:0}) should decelerate maximally", function() {
+		var vMax = 200;		// maximum velocity mm/s
+		var tvMax = 0.01; 	// seconds from rest to vMax
+		var S = phline.s(1);
+		var tCruise = 2 * (S-1)/vMax;
+		var phf = new PHFeed(phline,{vIn:vMax,vOut:0, vMax:vMax,tvMax:0.01});
+		phf.sCruise.should.equal(4);
+		phf.should.have.properties({
+			vMax:vMax,			// OPTION: maximum velocity (default: 100)
+			tvMax:tvMax,		// OPTION: time to reach vMax (default: 0.01)
+			vIn:vMax,			// OPTION: input velocity  (default: 0)
+			vCruise:vMax,		// OPTION: cruise velocity (default: vMax)
+			vOut:0,				// OPTION: output velocity (default: vIn)
+			tAccel:0,			// OUTPUT: initial acceleration time
+			sAccel:0,			// OUTPUT: initial acceleration distance
+			tCruise:tCruise,	// OUTPUT: cruise time
+			sCruise:4,			// OUTPUT: cruise distance
 			tDecel:tvMax,		// OUTPUT: ending deceleration time
-			sDecel:1,		// OUTPUT: ending deceleration distance
-			tS:0.05,		// OUTPUT: total traversal time
+			sDecel:1,			// OUTPUT: ending deceleration distance
+			tS:0.05,			// OUTPUT: total traversal time
 		});
 	});
 
