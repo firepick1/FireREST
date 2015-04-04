@@ -108,12 +108,12 @@ PHCurve = require("./PHCurve");
 	/////////////// PRIVATE ////////////////
 
 	///////////////// INSTANCE API ///////////////
-	PHFeed.prototype.V = function(tau, vIn, vOut) { // feed rate (scalar)
+	PHFeed.prototype.Vtvv = function(tau, vIn, vOut) { // feed rate (scalar)
 		var that = this;
 		var args = that.argsF(vIn, vOut);
 		var sum = 0;
 		for (var k=0; k <= degree; k++) {
-			that.logger.trace("V() k:", k, " tau:", tau,
+			that.logger.trace("Vtvv() k:", k, " tau:", tau,
 				" Vk(k):", that.Vk(args.vi,args.vo,k), 
 				" coefficient(k,tau):", bn.coefficient(k,tau));
 			sum += that.Vk(args.vi,args.vo,k) * bn.coefficient(k,tau);
@@ -352,41 +352,41 @@ PHCurve = require("./PHCurve");
 		});
 	});
 
-	it("V(vIn,vOut,tau) should interpolate takeoff velocity for tau:[0,1]", function() {
+	it("Vtvv(vIn,vOut,tau) should interpolate takeoff velocity for tau:[0,1]", function() {
 		var phf = new PHFeed(phstep,{logger:logger});
-		phf.V(0.0, 0, 100).should.equal(0);
-		phf.V(0.1, 0, 100).should.within(0.85, 0.86);
-		phf.V(0.2, 0, 100).should.within(5.79, 5.80);
-		phf.V(0.3, 0, 100).should.within(16.30, 16.31);
-		phf.V(0.4, 0, 100).should.within(31.74, 31.75);
-		phf.V(0.5, 0, 100).should.within(50, 50);
-		phf.V(0.6, 0, 100).should.within(68.25, 68.26);
-		phf.V(0.7, 0, 100).should.within(83.69, 83.70);
-		phf.V(0.8, 0, 100).should.within(94.20, 94.21);
-		phf.V(0.9, 0, 100).should.within(99.14, 99.15);
-		phf.V(1.0, 0, 100).should.equal(100);
+		phf.Vtvv(0.0, 0, 100).should.equal(0);
+		phf.Vtvv(0.1, 0, 100).should.within(0.85, 0.86);
+		phf.Vtvv(0.2, 0, 100).should.within(5.79, 5.80);
+		phf.Vtvv(0.3, 0, 100).should.within(16.30, 16.31);
+		phf.Vtvv(0.4, 0, 100).should.within(31.74, 31.75);
+		phf.Vtvv(0.5, 0, 100).should.within(50, 50);
+		phf.Vtvv(0.6, 0, 100).should.within(68.25, 68.26);
+		phf.Vtvv(0.7, 0, 100).should.within(83.69, 83.70);
+		phf.Vtvv(0.8, 0, 100).should.within(94.20, 94.21);
+		phf.Vtvv(0.9, 0, 100).should.within(99.14, 99.15);
+		phf.Vtvv(1.0, 0, 100).should.equal(100);
 	});
-	it("V(vIn,vOut,tau) should interpolate stopping velocity for tau:[0,1]", function() {
+	it("Vtvv(vIn,vOut,tau) should interpolate stopping velocity for tau:[0,1]", function() {
 		var phf = new PHFeed(phstep,{logger:logger});
-		phf.V(0.0, 100, 0).should.equal(100);
-		phf.V(0.1, 100, 0).should.within(99.14, 99.15);
-		phf.V(0.9, 100, 0).should.within(0.85, 0.86);
-		phf.V(1.0, 100, 0).should.equal(0);
+		phf.Vtvv(0.0, 100, 0).should.equal(100);
+		phf.Vtvv(0.1, 100, 0).should.within(99.14, 99.15);
+		phf.Vtvv(0.9, 100, 0).should.within(0.85, 0.86);
+		phf.Vtvv(1.0, 100, 0).should.equal(0);
 	});
-	it("V(vIn,vOut,tau) should interpolate constant velocity for tau:[0,1]", function() {
+	it("Vtvv(vIn,vOut,tau) should interpolate constant velocity for tau:[0,1]", function() {
 		var phf = new PHFeed(phstep,{logger:logger});
-		phf.V(0.0, 100).should.equal(100);
-		phf.V(0.5, 100).should.equal(100);
-		phf.V(1.0, 100).should.equal(100);
+		phf.Vtvv(0.0, 100).should.equal(100);
+		phf.Vtvv(0.5, 100).should.equal(100);
+		phf.Vtvv(1.0, 100).should.equal(100);
 	});
-	it("V(vIn,vOut,tau) should interpolate velocity change for tau:[0,1]", function() {
+	it("Vtvv(vIn,vOut,tau) should interpolate velocity change for tau:[0,1]", function() {
 		var phf = new PHFeed(phstep,{logger:logger});
-		phf.V(0.0, 50, 100).should.equal(50);
-		phf.V(0.5, 50, 100).should.equal(75);
-		phf.V(1.0, 50, 100).should.equal(100);
-		phf.V(0.0, 100, 50).should.equal(100);
-		phf.V(0.5, 100, 50).should.equal(75);
-		phf.V(1.0, 100, 50).should.equal(50);
+		phf.Vtvv(0.0, 50, 100).should.equal(50);
+		phf.Vtvv(0.5, 50, 100).should.equal(75);
+		phf.Vtvv(1.0, 50, 100).should.equal(100);
+		phf.Vtvv(0.0, 100, 50).should.equal(100);
+		phf.Vtvv(0.5, 100, 50).should.equal(75);
+		phf.Vtvv(1.0, 100, 50).should.equal(50);
 	});
 	it("Fvt(vIn,vOut,tau) should interpolate distance traveled for tau:[0,1]", function() {
 		var phf = new PHFeed(phline,{
