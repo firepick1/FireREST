@@ -23,17 +23,17 @@ Logger = require("./Logger");
 
 	///////////////// CLASS //////////
 	Bernstein.coefficient = function(n,k,t) {
+		n.should.not.below(0);
+		k.should.within(0,n);
+		t.should.be.within(0,1);
 		var result = Util.choose(n,k);
-		result.should.not.NaN;
 		var t1 = (1-t);
 		for (var i = 0; i < n-k; i++) {
 			result = result*t1;
 		}
-		result.should.not.NaN;
 		for (var i = 0; i < k; i++) {
 			result = result*t;
 		}
-		result.should.not.NaN;
 		return result;
 	};
 
