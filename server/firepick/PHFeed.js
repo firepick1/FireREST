@@ -106,38 +106,47 @@ PHCurve = require("./PHCurve");
     };
 
 	/////////////// PRIVATE ////////////////
-
-	///////////////// INSTANCE API ///////////////
-	PHFeed.prototype.F = function(tau) {
+	PHFeed.prototype.argsF = function(tau) {
 		var that = this;
 		tau.should.be.within(0,1);
-		var vIn, vCruise, vOut, T, t, s;
+		var vIn, vCruise, vOut, T, t, s, phase;
 		if (tau <= that.tAccel/that.tS) { 
 			vIn = that.vIn;
 			vOut = that.vCruise;
 			T = that.tAccel; 
 			t = tau ? (tau*that.tS) / that.tAccel : 0;
 			s = 0;
-			that.logger.debug("F(accel) tau:", tau, " vIn:", vIn, 
-				" vOut:", vOut, " T:", T, " s:", s, " t:", t);
+			phase = "accel";
 		} else if (tau <= (that.tAccel+that.tCruise)/that.tS) {
 			vIn = that.vCruise;
 			vOut = that.vCruise;
 			T = that.tCruise;
 			t = (tau*that.tS - that.tAccel) / that.tCruise;
 			s = that.sAccel;
-			that.logger.debug("F(cruise) tau:", tau, " vIn:", vIn, 
-				" vOut:", vOut, " T:", T, " s:", s, " t:", t);
+			phase = "cruise";
 		} else {
 			vIn = that.vCruise;
 			vOut = that.vOut;
 			T = that.tDecel;
 			t = tau === 1 ? 1 : (tau*that.tS-that.tAccel-that.tCruise)/that.tDecel;
 			s = that.sAccel + that.sCruise;
-			that.logger.debug("F(decel) tau:", tau, " vIn:", vIn, 
-				" vOut:", vOut, " T:", T, " s:", s, " t:", t);
+			phase = "decel";
 		}
-		return PHFeed.FtvvT(t, vIn, vOut, T) + s;
+		var result = {vIn:vIn,vOut:vOut,T:T,t:t,s:s,phase:phase};
+		that.logger.info("argsF():",result);
+		return result;
+	};
+
+	///////////////// INSTANCE API ///////////////
+	PHFeed.prototype.V = function(tau) {
+		var that = this;
+		var args = that.argsF(tau);
+		return PHFeed.Vtvv(args.t, args.vIn, args.vOut);
+	};
+	PHFeed.prototype.F = function(tau) {
+		var that = this;
+		var args = that.argsF(tau);
+		return PHFeed.FtvvT(args.t, args.vIn, args.vOut, args.T) + args.s;
 	};
 
 	///////////////// CLASS //////////
@@ -325,7 +334,6 @@ PHCurve = require("./PHCurve");
 			tS:tS,			// OUTPUT: total traversal time
 		});
 	});
-
 	it("Vtvv(vIn,vOut,tau) should interpolate takeoff velocity for tau:[0,1]", function() {
 		PHFeed.Vtvv(0.0, 0, 100).should.equal(0);
 		PHFeed.Vtvv(0.1, 0, 100).should.within(0.85, 0.86);
@@ -374,7 +382,7 @@ PHCurve = require("./PHCurve");
 		PHFeed.FtvvT(0.9,vIn,vOut,T).should.within(4.002,4.003);
 		PHFeed.FtvvT(1.0,vIn,vOut,T).should.equal(T*vOut/2);
 	});
-	it("TESTTEST F(tau) should return arc length traversed for tau:[0,1]", function() {
+	it("F(tau) should return arc length traversed for tau:[0,1]", function() {
 		var phfVV0 = new PHFeed(phline, {vIn:100, vCruise:100, vOut:0, vMax:100, tvMax:0.01});
 		phfVV0.F(0).should.equal(0);
 		phfVV0.F(0.1).should.within(0.55-epsilon,0.55+epsilon);
@@ -383,14 +391,12 @@ PHCurve = require("./PHCurve");
 		phfVV0.F(0.6).should.within(3.30-epsilon,3.30+epsilon);
 		phfVV0.F(0.9).should.within(4.894,4.895);
 		phfVV0.F(1).should.equal(5);
-
 		var phf0VV = new PHFeed(phline, {vIn:0, vCruise:100, vOut:100, vMax:100, tvMax:0.01});
 		phf0VV.F(0).should.equal(0);
 		phf0VV.F(0.4).should.within(1.70-epsilon,1.70+epsilon);
 		phf0VV.F(0.5).should.within(2.25-epsilon,2.25+epsilon);
 		phf0VV.F(0.6).should.within(2.80-epsilon,2.80+epsilon);
 		phf0VV.F(1).should.equal(5);
-
 		var phf0V0 = new PHFeed(phline, {vIn:0, vCruise:100, vOut:0, vMax:100, tvMax:0.01});
 		phf0V0.F(0).should.equal(0);
 		phf0V0.F(0.1).should.within(0.137,0.138);
@@ -403,5 +409,33 @@ PHCurve = require("./PHCurve");
 		phf0V0.F(0.8).should.within(4.300,4.301);
 		phf0V0.F(0.9).should.within(4.862,4.863);
 		phf0V0.F(1).should.equal(5);
+	});
+	it("TESTTEST V(tau) should return feedrate for tau:[0,1]", function() {
+		var phfVV0 = new PHFeed(phline, {vIn:200, vCruise:200, vOut:0, vMax:200, tvMax:0.01});
+		phfVV0.V(0).should.equal(200);
+		phfVV0.V(0.1).should.equal(200);
+		phfVV0.V(0.4).should.equal(200);
+		phfVV0.V(0.5).should.equal(200);
+		phfVV0.V(0.6).should.equal(200);
+		phfVV0.V(0.9).should.within(32.61,32.62);
+		phfVV0.V(0.95).should.within(5.32,5.33);
+		phfVV0.V(1).should.equal(0);
+		var phf0VV = new PHFeed(phline, {vIn:0, vCruise:200, vOut:200, vMax:200, tvMax:0.01});
+		phf0VV.V(0).should.equal(0);
+		phf0VV.V(0.1).should.within( 32.61, 32.62);
+		phf0VV.V(0.2).should.within(136.51,136.52);
+		phf0VV.V(0.3).should.within(198.28,198.29);
+		phf0VV.V(0.4).should.within(200-epsilon,200+epsilon);
+		phf0VV.V(0.5).should.within(200-epsilon,200+epsilon);
+		phf0VV.V(0.6).should.equal(200);
+		phf0VV.V(1).should.equal(200);
+		var phf0V0 = new PHFeed(phline, {vIn:0, vCruise:200, vOut:0, vMax:200, tvMax:0.01});
+		phf0V0.V(0).should.equal(0);
+		phf0V0.V(0.1).should.within( 47.03, 47.04);
+		phf0V0.V(0.4).should.within(200-epsilon,200+epsilon);
+		phf0V0.V(0.5).should.equal(200);
+		phf0V0.V(0.6).should.within(200-epsilon,200+epsilon);
+		phf0V0.V(0.9).should.within( 47.03, 47.04);
+		phf0V0.V(1).should.equal(0);
 	});
 })
