@@ -31,7 +31,7 @@ PHCurve = require("./PHCurve");
 		var sAccel = that.vMax * that.tvMax/2;
 		var sRatio = 1;
 		if (that.vIn === vCruise && vCruise === that.vOut) {
-			that.logger.info("CASE1 vIn:", that.vIn, " vCruise:", vCruise, " vOut:", that.vOut);
+			that.logger.debug("CASE1 vIn:", that.vIn, " vCruise:", vCruise, " vOut:", that.vOut);
 			that.tAccel = 0;
 			that.vCruise = vCruise;
 			that.sAccel = that.tAccel * Math.abs(vCruise-that.vIn)/2;
@@ -49,7 +49,7 @@ PHCurve = require("./PHCurve");
 			that.sCruise = that.S - that.sAccel;
 			that.sDecel = 0;
 			that.tDecel = 0;
-			that.logger.info("CASE2 vIn:", that.vIn, " vCruise:", vCruise, " vOut:", that.vOut
+			that.logger.debug("CASE2 vIn:", that.vIn, " vCruise:", vCruise, " vOut:", that.vOut
 				, " tvMax:", that.tvMax
 				, " vMax:", that.vMax
 				, " sAccel:", sAccel
@@ -66,9 +66,9 @@ PHCurve = require("./PHCurve");
 			that.sCruise = that.S - that.sDecel;
 			that.sAccel = 0;
 			that.tAccel = 0;
-			that.logger.info("CASE3 vIn:", that.vIn, " vCruise:", vCruise, " vOut:", that.vOut);
+			that.logger.debug("CASE3 vIn:", that.vIn, " vCruise:", vCruise, " vOut:", that.vOut);
 		} else if (that.vIn !== vCruise && vCruise !== that.vOut) {
-			that.logger.info("CASE4 vIn:", that.vIn, " vCruise:", vCruise, " vOut:", that.vOut);
+			that.logger.debug("CASE4 vIn:", that.vIn, " vCruise:", vCruise, " vOut:", that.vOut);
 			if (sAccel > that.S/2) {
 				sRatio = (that.S /2) / sAccel;
 				that.vMax *= sRatio;
@@ -87,7 +87,7 @@ PHCurve = require("./PHCurve");
 		that.tauAccel = that.tAccel/that.tS;
 		that.tauDecel = 1 - that.tDecel/that.tS;
 
-		that.logger.info("PHFeed()",
+		that.logger.debug("PHFeed()",
 			" S:", that.S, 
 			" sRatio:", sRatio,
 			" tS:", that.tS,
