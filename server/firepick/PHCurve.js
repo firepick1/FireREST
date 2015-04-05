@@ -56,37 +56,37 @@ Tridiagonal = require("./Tridiagonal");
 	};
 
 	/////////////// PRIVATE ////////////////
-	function powert(tau,tk,t1k,K) {
-		var t1 = 1 - tau;
+	function powert(p,tk,t1k,K) {
+		var p1 = 1 - p;
 		tk.push(1);
 		t1k.push(1);
 		for (var k=1; k<=K; k++) {
-			tk.push(tau*tk[k-1]);
-			t1k.splice(0, 0, t1*t1k[0]);
+			tk.push(p*tk[k-1]);
+			t1k.splice(0, 0, p1*t1k[0]);
 		}
 	};
 
     ///////////////// INSTANCE ///////////////
-	PHCurve.prototype.s = function(Tau) { // arc length 
+	PHCurve.prototype.s = function(p) { // arc length 
 		var that = this;
-		Tau.should.not.be.below(0);
-		Tau.should.not.be.above(1);
-		var TN = Tau * that.N;
-		var i = Math.ceil(TN) || 1;
+		p.should.not.be.below(0);
+		p.should.not.be.above(1);
+		var PN = p * that.N;
+		var i = Math.ceil(PN) || 1;
 		var sum = 0;
 		for (var iSeg=1; iSeg < i; iSeg++) {
 			sum += that.sit(iSeg, 1);
 		}
-		sum += that.sit(i, TN-i+1);
+		sum += that.sit(i, PN-i+1);
 		return sum;
 	};
-	PHCurve.prototype.sit = function(i, tau) { // arc length 
+	PHCurve.prototype.sit = function(i, p) { // arc length 
 		var that = this;
 		var sum = 0;
 		for (var k=0; k <= that.degree; k++) {
-			var b5c = b5.coefficient(k, tau);
+			var b5c = b5.coefficient(k, p);
 			sum += that.sik(i,k) * b5c;
-			that.logger.trace("sit k:", k, " sum:", sum, " b5c:", b5c, " tau:", tau);
+			that.logger.trace("sit k:", k, " sum:", sum, " b5c:", b5c, " p:", p);
 		}
 		return sum;
 	};
@@ -118,40 +118,40 @@ Tridiagonal = require("./Tridiagonal");
 		default: should.fail("invalid j:" + j);
 		}
 	};
-	PHCurve.prototype.sigma = function(Tau) { // curve parametric speed
+	PHCurve.prototype.sigma = function(p) { // curve parametric speed
 		var that = this;
-		return that.rprime(Tau).modulus();
+		return that.rprime(p).modulus();
 	};
-	PHCurve.prototype.rprime = function(Tau) { // hodograph
+	PHCurve.prototype.rprime = function(p) { // hodograph
 		var that = this;
-		Tau.should.not.be.below(0);
-		Tau.should.not.be.above(1);
-		var TN = Tau * that.N;
-		var i = Math.ceil(TN) || 1;
-		return that.ritprime(i,TN-i+1);
+		p.should.not.be.below(0);
+		p.should.not.be.above(1);
+		var PN = p * that.N;
+		var i = Math.ceil(PN) || 1;
+		return that.ritprime(i,PN-i+1);
 	};
-	PHCurve.prototype.ritprime = function(i,tau) { // segment hodograph
+	PHCurve.prototype.ritprime = function(i,p) { // segment hodograph
 		var that = this;
 		var sum = new Complex();
-		var t1 = 1-tau;
+		var p1 = 1-p;
 		var z = that.z;
 		var N = that.N;
 		if (i === 1) {
 			var z1 = z[1];
 			var z2 = z[2];
-			sum.add(Complex.times(1/2*t1*t1, Complex.times(3,z1).minus(z2)));
-			sum.add(Complex.times(2*t1*tau, z1));
-			sum.add(Complex.times(1/2*tau*tau, z1.plus(z2)));
+			sum.add(Complex.times(1/2*p1*p1, Complex.times(3,z1).minus(z2)));
+			sum.add(Complex.times(2*p1*p, z1));
+			sum.add(Complex.times(1/2*p*p, z1.plus(z2)));
 		} else if (i === N) {
 			var zN = z[N];
 			var zN1 = z[N-1];
-			sum.add(Complex.times(1/2*t1*t1, zN.plus(zN1)));
-			sum.add(Complex.times(2*t1*tau, zN));
-			sum.add(Complex.times(1/2*tau*tau, Complex.times(3,zN).minus(zN1)));
+			sum.add(Complex.times(1/2*p1*p1, zN.plus(zN1)));
+			sum.add(Complex.times(2*p1*p, zN));
+			sum.add(Complex.times(1/2*p*p, Complex.times(3,zN).minus(zN1)));
 		} else {
-			sum.add(Complex.times(1/2*t1*t1, z[i-1].plus(z[i])));
-			sum.add(Complex.times(2*t1*tau, z[i]));
-			sum.add(Complex.times(1/2*tau*tau, z[i].plus(z[i+1])));
+			sum.add(Complex.times(1/2*p1*p1, z[i-1].plus(z[i])));
+			sum.add(Complex.times(2*p1*p, z[i]));
+			sum.add(Complex.times(1/2*p*p, z[i].plus(z[i+1])));
 		}
 		return sum.times(sum);
 	};
@@ -202,25 +202,25 @@ Tridiagonal = require("./Tridiagonal");
 		that.logger.setLevel(logLevel);
 		return result;
 	};
-	PHCurve.prototype.r = function(Tau) {
+	PHCurve.prototype.r = function(p) {
 		var that = this;
-		Tau.should.not.be.below(0);
-		Tau.should.not.be.above(1);
-		var TN = Tau * that.N;
-		var i = Math.ceil(TN) || 1;
-		return that.rit(i,TN-i+1);
+		p.should.not.be.below(0);
+		p.should.not.be.above(1);
+		var PN = p * that.N;
+		var i = Math.ceil(PN) || 1;
+		return that.rit(i,PN-i+1);
 	};
-	PHCurve.prototype.rit = function(i,tau) {
+	PHCurve.prototype.rit = function(i,p) {
 		var that = this;
 		i.should.not.be.below(0);
 		i.should.not.be.above(that.N);
-		tau.should.not.be.below(0);
-		tau.should.not.be.above(1);
-		that.logger.trace("rit(", i, ",", tau, ")");
+		p.should.not.be.below(0);
+		p.should.not.be.above(1);
+		that.logger.trace("rit(", i, ",", p, ")");
 		var sum = new Complex();
 		var tk = [];
 		var t1k = [];
-		powert(tau,tk,t1k,5);
+		powert(p,tk,t1k,5);
 		for (var k=0; k<=5; k++) {
 			var re = Util.choose(5,k) * t1k[k] * tk[k];
 			var c = Complex.times(that.pik(i,k), re);
@@ -426,7 +426,7 @@ Tridiagonal = require("./Tridiagonal");
 		var ph5 = new PHCurve(pts);
 		ph5.should.have.properties({degree:5,degree2:3});
 	});
-	it("new PHCurve([p1,p2]).r(tau) should interpolate a 2-point straight line", function() {
+	it("new PHCurve([p1,p2]).r(p) should interpolate a 2-point straight line", function() {
 		var ph = new PHCurve([
 			{x:1,y:1},
 			{x:5,y:3},
@@ -445,7 +445,7 @@ Tridiagonal = require("./Tridiagonal");
 		ph.s(0.5).should.within(2.23606,2.23607);
 		ph.s(1).should.equal(Math.sqrt(20));
 	});
-	it("new PHCurve([p1,p2]).r(tau) should interpolate a 5-point straight line", function() {
+	it("new PHCurve([p1,p2]).r(p) should interpolate a 5-point straight line", function() {
 		var ph = new PHCurve([
 			{x:1,y:1},
 			{x:2,y:1.5},
@@ -525,18 +525,45 @@ Tridiagonal = require("./Tridiagonal");
 		shouldEqualT(ph.r(0.99), new Complex(0.99,1.04));
 		shouldEqualT(ph.r(1), new Complex(1,1));
 	});
-	it("s(tau) should return arc length for tau:[0,1] ", function() {
+	it("s(p) should be monotone returning arc length for p:[0,1] ", function() {
+		var ph = new PHCurve([
+			{x:1,y:1},
+			{x:5,y:4},
+		],{logger:logger});
+		should.exist(ph.solvez());
+		var epsilon = 0.0000000001;
+		ph.s(0+epsilon).should.above(ph.s(0));
+		ph.s(0.1+epsilon).should.above(ph.s(0.1));
+		ph.s(0.2+epsilon).should.above(ph.s(0.2));
+		ph.s(0.3+epsilon).should.above(ph.s(0.3));
+		ph.s(0.4+epsilon).should.above(ph.s(0.4));
+		ph.s(0.5+epsilon).should.above(ph.s(0.5));
+		ph.s(0.6+epsilon).should.above(ph.s(0.6));
+		ph.s(0.7+epsilon).should.above(ph.s(0.7));
+		ph.s(0.8+epsilon).should.above(ph.s(0.8));
+		ph.s(0.9+epsilon).should.above(ph.s(0.9));
+		ph.s(1-epsilon).should.above(ph.s(1-2*epsilon));
+		ph.s(0).should.equal(0);
+		ph.s(0.1).should.within(0.499,0.500);
+		ph.s(0.5).should.within(2.5,2.5);
+		ph.s(0.9).should.within(4.499,4.500);
+		ph.s(1).should.within(5,5);
+	});
+	it("TESTTESTrprime(p) should return velocity vector for p:[0,1]", function() {
 		var ph = new PHCurve([
 			{x:-1,y:1},
 			{x:0,y:2},
 			{x:1,y:1},
 		],{logger:logger});
 		should.exist(ph.solvez());
-		ph.s(0).should.equal(0);
-		ph.s(0.5).should.within(1.527,1.528);
-		ph.s(1).should.within(3.055,3.056);
+		var epsilon = 0.001;
+		shouldEqualT(ph.rprime(0), new Complex(0.472,2.000), epsilon);
+		shouldEqualT(ph.rprime(0.25), new Complex(1.066,1.000), epsilon);
+		shouldEqualT(ph.rprime(0.5), new Complex(1.264,0.000), epsilon);
+		shouldEqualT(ph.rprime(0.75), new Complex(1.066,-1.000), epsilon);
+		shouldEqualT(ph.rprime(1), new Complex(0.472,-2.000), epsilon);
 	});
-	it("sigma(tau) should return parametric speed for tau:[0,1]", function() {
+	it("sigma(p) should return parametric speed for p:[0,1]", function() {
 		var ph = new PHCurve([
 			{x:-1,y:1},
 			{x:0,y:2},

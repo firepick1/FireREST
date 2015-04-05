@@ -133,11 +133,42 @@ PHCurve = require("./PHCurve");
 			phase = "decel";
 		}
 		var result = {vIn:vIn,vOut:vOut,T:T,t:t,s:s,phase:phase};
-		that.logger.info("argsF():",result);
+		that.logger.debug("argsF():",result);
 		return result;
 	};
 
 	///////////////// INSTANCE API ///////////////
+	PHFeed.prototype.interpolate = function(n) {
+		var that = this;
+		n.should.be.above(1);
+		var result = [];
+		return result;
+	};
+	PHFeed.prototype.Ekt = function(Ekprevt, tau) {
+		var that = this;
+		var dE;
+		var Ekr = Ekprevt;
+		var ph = that.ph;
+		var F = that.F(tau);
+		var places=6;
+
+		for (var r=0; r<10; r++) {
+			var s = ph.s(Ekr);
+			var sigma = ph.sigma(Ekr);
+			var fs = F - s;
+			dE = (F - s)/sigma;
+			Ekr = Math.min(1,Math.max(0,Ekr + dE));
+			that.logger.info("Ekt() r:", r, " tau:", tau, 
+				" F:", ""+Util.roundN(F,places), 
+				" fs:", fs,
+				" dE:", ""+dE,
+				" Ekr:", ""+Ekr,
+				" s:", ""+Util.roundN(s,places),
+				" sigma:", sigma);
+		}
+
+		return Ekr;
+	};
 	PHFeed.prototype.V = function(tau) {
 		var that = this;
 		var args = that.argsF(tau);
@@ -410,7 +441,7 @@ PHCurve = require("./PHCurve");
 		phf0V0.F(0.9).should.within(4.862,4.863);
 		phf0V0.F(1).should.equal(5);
 	});
-	it("TESTTEST V(tau) should return feedrate for tau:[0,1]", function() {
+	it("V(tau) should return feedrate for tau:[0,1]", function() {
 		var phfVV0 = new PHFeed(phline, {vIn:200, vCruise:200, vOut:0, vMax:200, tvMax:0.01});
 		phfVV0.V(0).should.equal(200);
 		phfVV0.V(0.1).should.equal(200);
@@ -437,5 +468,18 @@ PHCurve = require("./PHCurve");
 		phf0V0.V(0.6).should.within(200-epsilon,200+epsilon);
 		phf0V0.V(0.9).should.within( 47.03, 47.04);
 		phf0V0.V(1).should.equal(0);
+	});
+	it("TESTTEST", function() {
+		var phf = new PHFeed(phline, {vIn:0, vCruise:200, vOut:0, vMax:200, tvMax:0.01});
+		var n = 5;
+		var dt = 0.1;
+		var Ek = 0;
+		var t = 0;
+		(Ek = phf.Ekt(Ek,0.0)).should.within(0.0,0.1);
+		(Ek = phf.Ekt(Ek,0.1)).should.within(0.0,0.1);
+		//(Ek = phf.Ekt(Ek,0.2)).should.within(0.152,0.153);
+		//(Ek = phf.Ekt(Ek,0.3)).should.within(0.287,0.288);
+		//(Ek = phf.Ekt(Ek,0.4)).should.within(0.432,0.433);
+		//(Ek = phf.Ekt(Ek,0.5)).should.within(0.1,0.9);
 	});
 })
