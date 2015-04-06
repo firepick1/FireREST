@@ -2,7 +2,7 @@ var should = require("should"),
     module = module || {},
     firepick;
 Logger = require("./Logger");
-FeedRate = require("./FeedRate");
+FeedRateCalibrater = require("./FeedRateCalibrater");
 XYZPositioner = require("./XYZPositioner");
 Util = require("./Util");
 
@@ -73,7 +73,7 @@ Util = require("./Util");
 
 		for (var i=1; i <= n; i++) {
 			var t = i/n;
-			var vi = FeedRate.interpolate(v1,v2,t);
+			var vi = FeedRateCalibrater.interpolate(v1,v2,t);
 			var p = {};
 		}
 

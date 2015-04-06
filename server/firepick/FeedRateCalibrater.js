@@ -9,12 +9,9 @@ FPD = require("./FPD");
 Util = require("./Util");
 Maximizer = require("./Maximizer");
 Logger = require("./Logger");
-Bernstein = require("./Bernstein");
 
 (function(firepick) {
-	var b5 = new Bernstein(5);
-	var b6 = new Bernstein(6);
-    function FeedRate(xyzCam, feedMin, feedMax, options) {
+    function FeedRateCalibrater(xyzCam, feedMin, feedMax, options) {
         var that = this;
 
         XYZCamera.isInterfaceOf(xyzCam);
@@ -59,13 +56,13 @@ Bernstein = require("./Bernstein");
     };
 
     /////////////// INSTANCE ////////////
-	FeedRate.prototype.round = function(value) { 
+	FeedRateCalibrater.prototype.round = function(value) { 
         var that = this;
 		var nPlaces = that.nPlaces + 1;
 		nPlaces.should.be.equal(1);
 		return Util.roundN(value, nPlaces); // reporting precision
 	};
-	FeedRate.prototype.testPathA = function(i) {
+	FeedRateCalibrater.prototype.testPathA = function(i) {
 		var that = this;
 		var N = that.pathMinSteps+i;
 		var xStep = (that.xFar-that.basis.x)/N;
@@ -84,7 +81,7 @@ Bernstein = require("./Bernstein");
 		}
 		that.xyzCam.moveTo(that.basis);
 	};
-	FeedRate.prototype.testPathB = function(i) {
+	FeedRateCalibrater.prototype.testPathB = function(i) {
 		var that = this;
 		var N = Util.fibonacci(i+2);
 		var dx = (that.xFar-that.basis.x)/N;
@@ -107,7 +104,7 @@ Bernstein = require("./Bernstein");
 		}
 		that.xyzCam.moveTo(that.basis);
 	};
-	FeedRate.prototype.testPathC = function(i) {
+	FeedRateCalibrater.prototype.testPathC = function(i) {
 		var that = this;
 		that.fibStart = that.fibStart || 2;
 		while (Util.fibonacci(that.fibStart) < that.pathMinSteps) {
@@ -130,7 +127,7 @@ Bernstein = require("./Bernstein");
 		}
 		that.xyzCam.moveTo(that.basis);
 	};
-	FeedRate.prototype.evaluate = function(feedRate) {
+	FeedRateCalibrater.prototype.evaluate = function(feedRate) {
 		var that = this;
 		if (that.samples[feedRate] != null) {
 			return that.samples[feedRate];
@@ -164,7 +161,7 @@ Bernstein = require("./Bernstein");
 		that.samples[feedRate] = quality;
 		return quality;
 	};
-    FeedRate.prototype.maxFeedRate = function() {
+    FeedRateCalibrater.prototype.maxFeedRate = function() {
         var that = this;
 		var captureOld = that.captureCount;
 		var fitness = {evaluate:function(feedRate) {
@@ -196,8 +193,8 @@ Bernstein = require("./Bernstein");
 
 	///////////////// CLASS //////////////////
 
-    Logger.logger.info("loaded firepick.FeedRate");
-    module.exports = firepick.FeedRate = FeedRate;
+    Logger.logger.info("loaded firepick.FeedRateCalibrater");
+    module.exports = firepick.FeedRateCalibrater = FeedRateCalibrater;
 })(firepick || (firepick = {}));
 
 var mock = {};
@@ -247,27 +244,20 @@ var mock = {};
 	mock.MockXYZCamera = MockXYZCamera;
 })(mock);
 
-(typeof describe === 'function') && describe("firepick.FeedRate", function() {
-	var FeedRate = firepick.FeedRate;
+(typeof describe === 'function') && describe("firepick.FeedRateCalibrater", function() {
+	var FeedRateCalibrater = firepick.FeedRateCalibrater;
 	var logLevel = "info";
 	logger = new Logger({logLevel:logLevel});
     var fpd = new FPD();
-    var useMock = fpd.health() < 1;
+    var useMock = true; // fpd.health() < 1;
 	var basis = {x:0,y:0,z:-50};
     var mockXYZCam = new mock.MockXYZCamera({
 		basis:basis,
 		logger:logger,
 	});
     var xyzCam = useMock ? mockXYZCam : fpd;
-    var feedRate = new FeedRate(xyzCam, 
-		useMock ? 1000 : 1000, useMock ? 10000 : 25000 , {
-		logLevel:logLevel,
-		imageProcessor: new ImageProcessor(),
-		basis:basis,
-	});
-	return;
 	it("should have default options", function() {
-		var frdefault = new FeedRate(xyzCam);
+		var frdefault = new FeedRateCalibrater(xyzCam);
 		frdefault.should.have.properties({
 			xBasis:0,			// basis reference image x
 			yBasis:0,			// basis reference image y
@@ -284,12 +274,19 @@ var mock = {};
 	});
     it("maxFeedRate() should calculate the maximum feed rate", function() {
         this.timeout(25*60000);
+		var fr = new FeedRateCalibrater(xyzCam, 
+			useMock ? 1000 : 1000, useMock ? 10000 : 25000 , {
+			logLevel:logLevel,
+			imageProcessor: new ImageProcessor(),
+			basis:basis,
+			pathIterations: 1,	// faster unit test
+		});
 		var epsilon = 0.6;
-        var captureOld = feedRate.captureCount;
-        var result = feedRate.maxFeedRate();
+        var captureOld = fr.captureCount;
+        var result = fr.maxFeedRate();
 		should(result.feedRate).within(1000, 20000);
         if (useMock) {
-            should(result.feedRate).within(5500, 6000);
+            should(result.feedRate).within(5200, 6000);
         }
     });
 });
