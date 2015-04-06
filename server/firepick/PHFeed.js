@@ -162,7 +162,7 @@ PHCurve = require("./PHCurve");
 				V:that.V(tau),
 				s:s,
 			};
-			that.logger.info("row:", row);
+			that.logger.debug("row:", row);
 			result.push(row);
 			Eprev = E;
 			sprev = s;
@@ -183,7 +183,7 @@ PHCurve = require("./PHCurve");
 			var fs = F - s;
 			dE = (F - s)/sigma;
 			Ekr = Math.min(1,Math.max(0,Ekr + dE));
-			that.logger.info("Ekt() r:", r, " tau:", tau, 
+			that.logger.debug("Ekt() r:", r, " tau:", tau, 
 				" F:", ""+Util.roundN(F,places), 
 				" fs:", fs,
 				" dE:", ""+dE,
