@@ -27,6 +27,8 @@ PHCurve = require("./PHCurve");
 		that.vIn.should.not.below(0);
 		that.vOut.should.not.below(0);
 		vCruise.should.not.below(0);
+		that.epsilon = options.epsilon || 0.0000001;
+		that.iterations = options.iterations || 10;
 
 		var sAccel = that.vMax * that.tvMax/2;
 		var sRatio = 1;
@@ -138,10 +140,33 @@ PHCurve = require("./PHCurve");
 	};
 
 	///////////////// INSTANCE API ///////////////
-	PHFeed.prototype.interpolate = function(n) {
+	PHFeed.prototype.interpolate = function(options) {
 		var that = this;
+		options = options || {};
+		var epsilon = options.epsilon || 0.001;
+		var n = options.n || 5;
 		n.should.be.above(1);
 		var result = [];
+		var Eprev = 0;
+		var sprev = 0;
+		var dt = that.tS/n;
+		for (var i=1; i<=n; i++) {
+			var tau = i/n;
+			var E = that.Ekt(Eprev, tau);
+			var s = that.ph.s(E);
+			var dsdt = (s-sprev)/dt;
+			var row = {
+				t:tau*that.tS,
+				r:that.ph.r(E),
+				dsdt:dsdt,
+				V:that.V(tau),
+				s:s,
+			};
+			that.logger.info("row:", row);
+			result.push(row);
+			Eprev = E;
+			sprev = s;
+		}
 		return result;
 	};
 	PHFeed.prototype.Ekt = function(Ekprevt, tau) {
@@ -152,7 +177,7 @@ PHCurve = require("./PHCurve");
 		var F = that.F(tau);
 		var places=6;
 
-		for (var r=0; r<10; r++) {
+		for (var r=0; r<that.iterations; r++) {
 			var s = ph.s(Ekr);
 			var sigma = ph.sigma(Ekr);
 			var fs = F - s;
@@ -165,6 +190,9 @@ PHCurve = require("./PHCurve");
 				" Ekr:", ""+Ekr,
 				" s:", ""+Util.roundN(s,places),
 				" sigma:", sigma);
+			if (Math.abs(dE) < that.epsilon) {
+				break;
+			}
 		}
 
 		return Ekr;
@@ -469,17 +497,57 @@ PHCurve = require("./PHCurve");
 		phf0V0.V(0.9).should.within( 47.03, 47.04);
 		phf0V0.V(1).should.equal(0);
 	});
-	it("TESTTEST", function() {
+	it("Ekt(Eprev,tau) should compute parametric p for normalized time tau", function() {
 		var phf = new PHFeed(phline, {vIn:0, vCruise:200, vOut:0, vMax:200, tvMax:0.01});
 		var n = 5;
 		var dt = 0.1;
-		var Ek = 0;
+		var E0 = 0;
 		var t = 0;
-		(Ek = phf.Ekt(Ek,0.0)).should.within(0.0,0.1);
-		(Ek = phf.Ekt(Ek,0.1)).should.within(0.0,0.1);
-		//(Ek = phf.Ekt(Ek,0.2)).should.within(0.152,0.153);
-		//(Ek = phf.Ekt(Ek,0.3)).should.within(0.287,0.288);
-		//(Ek = phf.Ekt(Ek,0.4)).should.within(0.432,0.433);
-		//(Ek = phf.Ekt(Ek,0.5)).should.within(0.1,0.9);
+		var E1 = phf.Ekt(E0,0.1);
+		E1.should.within(0.0,0.1);
+		var E2 = phf.Ekt(E1,0.2);
+		E2.should.within(0.0854, 0.0855);
+		var E3 = phf.Ekt(E2,0.3);
+		E3.should.within(0.2200, 0.2201);
+		var E4 = phf.Ekt(E3,0.4);
+		E4.should.within(0.3600, 0.3601);
+		var E5 = phf.Ekt(E4,0.5);
+		E5.should.within(0.5000, 0.5001);
+		var E6 = phf.Ekt(E5,0.6);
+		E6.should.within(0.6399, 0.6400);
+		var E7 = phf.Ekt(E6,0.7);
+		E7.should.within(0.7800, 0.7801);
+		var E8 = phf.Ekt(E7,0.8);
+		E8.should.within(0.9145, 0.9146);
+		var E9 = phf.Ekt(E8,0.9);
+		E9.should.within(0.9905, 0.9906);
+		var E10 = phf.Ekt(E9,1.0);
+		E10.should.within(1-epsilon,1);
+		phf.Ekt(E0,0).should.equal(0);
+	});
+	it("interpolate(options) should interpolate {t,tau,E,s,V,F,r} for n time intervals", function() {
+		var phf = new PHFeed(phline, {vIn:0, vCruise:200, vOut:0, vMax:200, tvMax:0.01});
+		var N = 9;
+		var rows = phf.interpolate({n:N});
+		rows.length.should.equal(N);
+		for (var i=1; i<N; i++) {
+			var r0 = rows[i-1];
+			var r1 = rows[i];
+			r1.t.should.be.above(r0.t); // monotonic
+			r1.r.modulus().should.be.above(r0.r.modulus()); // monotonic
+			r1.s.should.be.above(r0.s); // monotonic
+			r1.dsdt.should.be.within(0,200+epsilon);
+		}
+		// termination
+		rows[N-1].s.should.equal(5);
+		rows[N-1].t.should.equal(phf.tS);
+		shouldEqualT(rows[N-1].r, new Complex(5,4),epsilon);
+		// acceleration
+		rows[0].dsdt.should.below(rows[1].dsdt);
+		rows[1].dsdt.should.below(rows[2].dsdt);
+		// symmetric acceleration/deceleration
+		var places=7;
+		Util.roundN(rows[0].dsdt,places).should.equal(Util.roundN(rows[N-1].dsdt,places));
+		Util.roundN(rows[1].dsdt,places).should.equal(Util.roundN(rows[N-2].dsdt,places));
 	});
 })

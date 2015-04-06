@@ -128,7 +128,7 @@ Tridiagonal = require("./Tridiagonal");
 		p.should.not.be.above(1);
 		var PN = p * that.N;
 		var i = Math.ceil(PN) || 1;
-		return that.ritprime(i,PN-i+1);
+		return Complex.times(that.N,that.ritprime(i,PN-i+1));
 	};
 	PHCurve.prototype.ritprime = function(i,p) { // segment hodograph
 		var that = this;
@@ -549,7 +549,7 @@ Tridiagonal = require("./Tridiagonal");
 		ph.s(0.9).should.within(4.499,4.500);
 		ph.s(1).should.within(5,5);
 	});
-	it("TESTTESTrprime(p) should return velocity vector for p:[0,1]", function() {
+	it("rprime(p) should return velocity vector for p:[0,1]", function() {
 		var ph = new PHCurve([
 			{x:-1,y:1},
 			{x:0,y:2},
@@ -557,11 +557,11 @@ Tridiagonal = require("./Tridiagonal");
 		],{logger:logger});
 		should.exist(ph.solvez());
 		var epsilon = 0.001;
-		shouldEqualT(ph.rprime(0), new Complex(0.472,2.000), epsilon);
-		shouldEqualT(ph.rprime(0.25), new Complex(1.066,1.000), epsilon);
-		shouldEqualT(ph.rprime(0.5), new Complex(1.264,0.000), epsilon);
-		shouldEqualT(ph.rprime(0.75), new Complex(1.066,-1.000), epsilon);
-		shouldEqualT(ph.rprime(1), new Complex(0.472,-2.000), epsilon);
+		shouldEqualT(ph.rprime(0), new Complex(0.945,4.000), epsilon);
+		shouldEqualT(ph.rprime(0.25), new Complex(2.132,2.000), epsilon);
+		shouldEqualT(ph.rprime(0.5), new Complex(2.528,0.000), epsilon);
+		shouldEqualT(ph.rprime(0.75), new Complex(2.132,-2.000), epsilon);
+		shouldEqualT(ph.rprime(1), new Complex(0.945,-4.000), epsilon);
 	});
 	it("sigma(p) should return parametric speed for p:[0,1]", function() {
 		var ph = new PHCurve([
@@ -571,10 +571,25 @@ Tridiagonal = require("./Tridiagonal");
 		],{logger:logger});
 		should.exist(ph.solvez());
 		var epsilon = 0.001;
-		ph.sigma(0).should.within(2.055-epsilon,2.055+epsilon);
-		ph.sigma(0.3).should.within(1.390-epsilon,1.390+epsilon);
-		ph.sigma(0.5).should.within(1.264-epsilon,1.264+epsilon);
-		ph.sigma(0.7).should.within(ph.sigma(0.3)-epsilon, ph.sigma(0.3)+epsilon);
-		ph.sigma(1).should.within(ph.sigma(0)-epsilon,ph.sigma(0)+epsilon);
+		ph.sigma(0).should.within(4.110,4.111);
+		ph.sigma(0.3).should.within(2.780,2.781);
+		ph.sigma(0.5).should.within(2.527,2.528);
+		ph.sigma(0.7).should.within(2.780,2.781);
+		ph.sigma(1.0).should.within(4.110,4.111);
+	});
+	it("sigma(p) should be independent of the number of points", function() {
+		var ph2 = new PHCurve([
+			{x:1,y:1},
+			{x:5,y:4},
+		],{logger:logger});
+		var epsilon = 0.0000001;
+		ph2.sigma(0).should.within(5-epsilon,5+epsilon);
+		var ph3 = new PHCurve([
+			{x:1,y:1},
+			{x:1+4/3,y:2},
+			{x:1+8/3,y:3},
+			{x:5,y:4},
+		],{logger:logger});
+		ph3.sigma(0).should.within(5-epsilon,5+epsilon);
 	});
 })
