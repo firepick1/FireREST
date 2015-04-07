@@ -41,7 +41,7 @@ Complex = require("./Complex");
 		that.zFar = options.zFar == null ? 0 : options.zFar;
 		that.minInterpolate = options.minInterpolate || 5;
 		that.maxInterpolate = options.maxInterpolate || 200;
-		that.pathIterations = options.pathIterations || 6;
+		that.pathIterations = options.pathIterations || 3;
 		that.pathIterations.should.be.above(0);
 		that.ip = options.imageProcessor || new ImageProcessor(options);
 		that.feedRateResolution = options.feedRateResolution || 60; // mm/s
@@ -253,35 +253,24 @@ var mock = {};
 			feedMax:20000,			// maximum feed rate
 			minInterpolate:5,		// minimum interpolation segments per PHCurve
 			maxInterpolate:200,		// maximum interpolation segments per PHCurve
-			pathIterations: 6,		// number of paths tested per feed rate
+			pathIterations: 3,		// number of paths tested per feed rate
 			maxPSNR: 50,			// maximum power signal-to-noise ration
 			minPSNR: 24,			// minimum acceptable PSNR ratio
 			feedRateResolution: 60,	// minimum difference between testing feed rates
 		});
 	});
 	it("TESTTESTevaluate(feedRate) should return the quality of a feed rate", function() {
-		var N = 3;
-		var phc = new PHCalibrater(xyzCam, {
-			pathIterations: N,
-			logger:logger,
-		});
+		var phc = new PHCalibrater(xyzCam, { logger:logger, });
 		this.timeout(25*60000);
 		phc.evaluate(4400).should.within(24,50+1);
 	});
-	return;
     it("maxFeedRate() should calculate the maximum feed rate", function() {
-		var phc = new PHCalibrater(xyzCam, {
-			feedMin:useMock ? 1000 : 1000, 
-			feedMax:useMock ? 10000 : 25000,
-			logger:logger,
-		});
+		var phc = new PHCalibrater(xyzCam, { logger:logger, });
         this.timeout(25*60000);
-		var epsilon = 0.6;
-        var captureOld = phc.captureCount;
         var result = phc.maxFeedRate();
 		should(result.feedRate).within(1000, 20000);
         if (useMock) {
-            should(result.feedRate).within(5500, 6000);
+            should(result.feedRate).within(4000, 4400);
         }
     });
 });
