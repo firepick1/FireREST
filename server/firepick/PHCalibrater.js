@@ -305,7 +305,8 @@ var mock = {};
 
 (typeof describe === 'function') && describe("firepick.PHCalibrater", function() {
 	var PHCalibrater = firepick.PHCalibrater;
-	logger = new Logger({logLevel:"debug"});
+	var nPlaces = 3;
+	logger = new Logger({logLevel:"debug", nPlaces:nPlaces});
     var fpd = new FPD();
     var useMock = fpd.health() < 1;
     var mockXYZCam = new mock.MockXYZCamera({
@@ -338,7 +339,7 @@ var mock = {};
 		phc.feedRateQuality(4400).should.within(24,50+1);
 	});
     it("calibrateFeedRate() should find the maximum feed rate", function() {
-		var phc = new PHCalibrater(xyzCam, { logger:logger, });
+		var phc = new PHCalibrater(xyzCam, { logger:logger});
         this.timeout(25*60000);
         var result = phc.calibrateFeedRate();
 		should(result.feedRate).within(1000, 20000);
@@ -348,7 +349,7 @@ var mock = {};
     });
 	if(!useMock) {
     it("TESTTESTcalibrate_tvMax() should find the minimum acceleration time", function() {
-		var phc = new PHCalibrater(xyzCam, { logger:logger, feedMin:10450, nPlaces:3});
+		var phc = new PHCalibrater(xyzCam, { logger:logger, feedMin:10450});
         this.timeout(25*60000);
         var result = phc.calibrate_tvMax();
 		should(result.tvMax).within(0.001, 1);
