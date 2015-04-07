@@ -15,20 +15,20 @@ Complex = require("./Complex");
 
 (function(firepick) {
 	var SECONDS_PER_MINUTE = 60;
-    function PHCalibrater(xyzCam, feedMin, feedMax, options) {
+    function PHCalibrater(xyzCam, options) {
         var that = this;
 
         XYZCamera.isInterfaceOf(xyzCam);
         that.xyzCam = xyzCam;
-        that.feedMin = feedMin || 1000;
-        that.feedMax = feedMax || 20000;
+
+		// Options
+        options = options || {};
+        that.feedMin = options.feedMin || 1000;
+        that.feedMax = options.feedMax || 20000;
         that.feedMax.should.be.a.Number;
         that.feedMin.should.be.a.Number;
         that.feedMin.should.be.below(that.feedMax);
 		that.feedMin.should.be.above(0);
-
-		// Options
-        options = options || {};
 		that.nInterpolate = options.nInterpolate || 9;
 		that.nInterpolate.should.be.above(1);
         that.nPlaces = options.nPlaces || 0;
@@ -41,10 +41,8 @@ Complex = require("./Complex");
 		that.zFar = options.zFar == null ? 0 : options.zFar;
 		that.pathIterations = options.pathIterations || 6;
 		that.pathIterations.should.be.above(0);
-		that.pathMinSteps = options.pathMinSteps || 3;
-		that.pathMinSteps.should.be.above(0);
 		that.ip = options.imageProcessor || new ImageProcessor(options);
-		that.scale = options.scale || 60; // mm/s
+		that.feedRateResolution = options.feedRateResolution || 60; // mm/s
 		that.maxPSNR = options.maxPSNR || 50;
 		that.minPSNR = options.minPSNR || 24;
 		that.maxPSNR.should.be.above(that.minPSNR);
@@ -144,7 +142,7 @@ Complex = require("./Complex");
         var that = this;
 		var captureOld = that.captureCount;
 		var fitness = {evaluate:function(feedRate) {
-			return that.evaluate(feedRate*that.scale);
+			return that.evaluate(feedRate*that.feedRateResolution);
 		}};
 		var solver = new Maximizer(fitness, {
 			nPlaces: that.nPlaces,
@@ -153,8 +151,8 @@ Complex = require("./Complex");
 			pinLow: true,
 		});
 		that.samples = {};
-        var rawResult = solver.solve(that.feedMin/that.scale, that.feedMax/that.scale);
-		var feedRate = rawResult.xBest * that.scale;
+        var rawResult = solver.solve(that.feedMin/that.feedRateResolution, that.feedMax/that.feedRateResolution);
+		var feedRate = rawResult.xBest * that.feedRateResolution;
 		var result = {
 			feedRate: feedRate,
 			status: rawResult.status,
@@ -180,7 +178,7 @@ var mock = {};
 (function(mock) {
 	function MockXYZCamera(options) {
 		var that = this;
-		var basis = options.basis || {x:0,y:0,z:-32};
+		var basis = options.basis || {x:0,y:0,z:-50};
 		that.xyzCam = new XYZCamera(options);
 		that.basis = ImageRef.copy(basis);
 		that.goodImage = ImageRef.copy(basis).setPath("test/XP005_Z0X0Y0@1#1.jpg");
@@ -230,43 +228,41 @@ var mock = {};
 
 (typeof describe === 'function') && describe("firepick.PHCalibrater", function() {
 	var PHCalibrater = firepick.PHCalibrater;
-	var logLevel = "info";
+	var logLevel = "debug";
 	logger = new Logger({logLevel:logLevel});
     var fpd = new FPD();
     var useMock = fpd.health() < 1;
-	var basis = {x:0,y:0,z:-50};
     var mockXYZCam = new mock.MockXYZCamera({
-		basis:basis,
 		logger:logger,
 	});
 	XYZCamera.isInterfaceOf(mockXYZCam);
     var xyzCam = useMock ? mockXYZCam : fpd;
-    var phc = new PHCalibrater(xyzCam, 
-		useMock ? 1000 : 1000, useMock ? 10000 : 25000 , {
-		logLevel:logLevel,
-		imageProcessor: new ImageProcessor(),
-		basis:basis,
+    var phc = new PHCalibrater(xyzCam, {
+		feedMin:useMock ? 1000 : 1000, 
+		feedMax:useMock ? 10000 : 25000,
+		logger:logger,
 	});
 	it("should have default options", function() {
 		var phc = new PHCalibrater(xyzCam);
 		phc.should.have.properties({
-			xBasis:0,			// basis reference image x
-			yBasis:0,			// basis reference image y
-			zBasis:-50,			// basis reference image z
-			xFar:90,			// farthest test path x
-			yFar:90,			// farthest test path y
-			zFar:0,				// farthest test path z
-			pathIterations: 6,	// number of paths tested per feed rate
-			pathMinSteps: 3,	// minimum number of steps per test path
-			maxPSNR: 50,		// maximum power signal-to-noise ration
-			minPSNR: 24,		// minimum acceptable PSNR ratio
-			scale: 60,			// minimum difference between testing feed rates
+			xBasis:0,				// basis reference image x
+			yBasis:0,				// basis reference image y
+			zBasis:-50,				// basis reference image z
+			xFar:90,				// farthest test path x
+			yFar:90,				// farthest test path y
+			zFar:0,					// farthest test path z
+			pathIterations: 6,		// number of paths tested per feed rate
+			maxPSNR: 50,			// maximum power signal-to-noise ration
+			minPSNR: 24,			// minimum acceptable PSNR ratio
+			feedRateResolution: 60,	// minimum difference between testing feed rates
 		});
 	});
 	it("TESTTESTevaluate(feedRate) should return the quality of a feed rate", function() {
+		var phc = new PHCalibrater(xyzCam, {
+			pathIterations: 2,
+		});
 		this.timeout(25*60000);
-		phc.evaluate(5000).should.equal(303);
-		phc.evaluate(6000).should.equal(303.6);
+		phc.evaluate(6000).should.within(100,500);
 	});
 	return;
     it("maxFeedRate() should calculate the maximum feed rate", function() {

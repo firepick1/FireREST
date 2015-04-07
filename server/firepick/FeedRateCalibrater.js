@@ -11,20 +11,20 @@ Maximizer = require("./Maximizer");
 Logger = require("./Logger");
 
 (function(firepick) {
-    function FeedRateCalibrater(xyzCam, feedMin, feedMax, options) {
+    function FeedRateCalibrater(xyzCam, options) {
         var that = this;
 
         XYZCamera.isInterfaceOf(xyzCam);
         that.xyzCam = xyzCam;
-        that.feedMin = feedMin || 1000;
-        that.feedMax = feedMax || 20000;
+
+		// Options
+        options = options || {};
+        that.feedMin = options.feedMin || 1000;
+        that.feedMax = options.feedMax || 20000;
         that.feedMax.should.be.a.Number;
         that.feedMin.should.be.a.Number;
         that.feedMin.should.be.below(that.feedMax);
 		that.feedMin.should.be.above(0);
-
-		// Options
-        options = options || {};
         that.nPlaces = options.nPlaces || 0;
         that.nPlaces.should.not.be.below(0);
 		that.xBasis = options.xBasis == null ? 0 : options.xBasis;
@@ -38,7 +38,7 @@ Logger = require("./Logger");
 		that.pathMinSteps = options.pathMinSteps || 3;
 		that.pathMinSteps.should.be.above(0);
 		that.ip = options.imageProcessor || new ImageProcessor(options);
-		that.scale = options.scale || 60; // mm/s
+		that.resolution = options.resolution || 60; // mm/s
 		that.maxPSNR = options.maxPSNR || 50;
 		that.minPSNR = options.minPSNR || 24;
 		that.maxPSNR.should.be.above(that.minPSNR);
@@ -165,7 +165,7 @@ Logger = require("./Logger");
         var that = this;
 		var captureOld = that.captureCount;
 		var fitness = {evaluate:function(feedRate) {
-			return that.evaluate(feedRate*that.scale);
+			return that.evaluate(feedRate*that.resolution);
 		}};
 		var solver = new Maximizer(fitness, {
 			nPlaces: that.nPlaces,
@@ -174,8 +174,8 @@ Logger = require("./Logger");
 			pinLow: true,
 		});
 		that.samples = {};
-        var rawResult = solver.solve(that.feedMin/that.scale, that.feedMax/that.scale);
-		var feedRate = rawResult.xBest * that.scale;
+        var rawResult = solver.solve(that.feedMin/that.resolution, that.feedMax/that.resolution);
+		var feedRate = rawResult.xBest * that.resolution;
 		var result = {
 			feedRate: feedRate,
 			status: rawResult.status,
@@ -201,7 +201,7 @@ var mock = {};
 (function(mock) {
 	function MockXYZCamera(options) {
 		var that = this;
-		var basis = options.basis || {x:0,y:0,z:-32};
+		var basis = options.basis || {x:0,y:0,z:-50};
 		that.xyzCam = new XYZCamera(options);
 		that.basis = ImageRef.copy(basis);
 		that.goodImage = ImageRef.copy(basis).setPath("test/XP005_Z0X0Y0@1#1.jpg");
@@ -250,9 +250,7 @@ var mock = {};
 	logger = new Logger({logLevel:logLevel});
     var fpd = new FPD();
     var useMock = true; // fpd.health() < 1;
-	var basis = {x:0,y:0,z:-50};
     var mockXYZCam = new mock.MockXYZCamera({
-		basis:basis,
 		logger:logger,
 	});
     var xyzCam = useMock ? mockXYZCam : fpd;
@@ -269,16 +267,16 @@ var mock = {};
 			pathMinSteps: 3,	// minimum number of steps per test path
 			maxPSNR: 50,		// maximum power signal-to-noise ration
 			minPSNR: 24,		// minimum acceptable PSNR ratio
-			scale: 60,			// minimum difference between testing feedrates
+			resolution: 60,		// minimum difference between testing feedrates
 		});
 	});
     it("maxFeedRate() should calculate the maximum feed rate", function() {
         this.timeout(25*60000);
-		var fr = new FeedRateCalibrater(xyzCam, 
-			useMock ? 1000 : 1000, useMock ? 10000 : 25000 , {
+		var fr = new FeedRateCalibrater(xyzCam, {
+			feedMin:useMock ? 1000 : 1000, 
+			feedMax:useMock ? 10000 : 25000,
 			logLevel:logLevel,
 			imageProcessor: new ImageProcessor(),
-			basis:basis,
 			pathIterations: 1,	// faster unit test
 		});
 		var epsilon = 0.6;
