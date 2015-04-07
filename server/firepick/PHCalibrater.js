@@ -39,6 +39,8 @@ Complex = require("./Complex");
 		that.xFar = options.xFar == null ? 90 : options.xFar;
 		that.yFar = options.yFar == null ? 90 : options.yFar;
 		that.zFar = options.zFar == null ? 0 : options.zFar;
+		that.minInterpolate = options.minInterpolate || 5;
+		that.maxInterpolate = options.maxInterpolate || 200;
 		that.pathIterations = options.pathIterations || 6;
 		that.pathIterations.should.be.above(0);
 		that.ip = options.imageProcessor || new ImageProcessor(options);
@@ -92,7 +94,7 @@ Complex = require("./Complex");
 				y:row.r.im,
 				feedRate: row.dsdt*SECONDS_PER_MINUTE,
 			});
-			that.logger.debug("path[", i, "] ", path[i]);
+			that.logger.trace("path[", i, "] ", path[i]);
 		}
 		that.xyzCam.move(path);
 		return null;
@@ -134,6 +136,7 @@ Complex = require("./Complex");
 				break;
 			}
 		}
+		quality = quality/that.pathIterations;
 		that.logger.debug("evaluate(",feedRate,") quality:", quality);
 		that.samples[feedRate] = quality;
 		return quality;
@@ -180,6 +183,7 @@ var mock = {};
 		var that = this;
 		var basis = options.basis || {x:0,y:0,z:-50};
 		that.xyzCam = new XYZCamera(options);
+		that.goodRate = options.goodRate || 4400;
 		that.basis = ImageRef.copy(basis);
 		that.goodImage = ImageRef.copy(basis).setPath("test/XP005_Z0X0Y0@1#1.jpg");
 		that.badImage = ImageRef.copy(basis).setPath("test/XP005_Z5X0Y0@1#1.jpg");
@@ -189,7 +193,7 @@ var mock = {};
 	/////////////// INSTANCE ////////////
 	MockXYZCamera.prototype.capture = function(tag, version) {
 		var that = this;
-		if (that.xyzCam.feedRate > 6000) {
+		if (that.xyzCam.feedRate > that.goodRate) {
 			return that.badImage;
 		}
 		return that.goodImage;
@@ -228,8 +232,7 @@ var mock = {};
 
 (typeof describe === 'function') && describe("firepick.PHCalibrater", function() {
 	var PHCalibrater = firepick.PHCalibrater;
-	var logLevel = "debug";
-	logger = new Logger({logLevel:logLevel});
+	logger = new Logger({logLevel:"debug"});
     var fpd = new FPD();
     var useMock = fpd.health() < 1;
     var mockXYZCam = new mock.MockXYZCamera({
@@ -237,11 +240,6 @@ var mock = {};
 	});
 	XYZCamera.isInterfaceOf(mockXYZCam);
     var xyzCam = useMock ? mockXYZCam : fpd;
-    var phc = new PHCalibrater(xyzCam, {
-		feedMin:useMock ? 1000 : 1000, 
-		feedMax:useMock ? 10000 : 25000,
-		logger:logger,
-	});
 	it("should have default options", function() {
 		var phc = new PHCalibrater(xyzCam);
 		phc.should.have.properties({
@@ -251,6 +249,10 @@ var mock = {};
 			xFar:90,				// farthest test path x
 			yFar:90,				// farthest test path y
 			zFar:0,					// farthest test path z
+			feedMin:1000,			// minimum feed rate
+			feedMax:20000,			// maximum feed rate
+			minInterpolate:5,		// minimum interpolation segments per PHCurve
+			maxInterpolate:200,		// maximum interpolation segments per PHCurve
 			pathIterations: 6,		// number of paths tested per feed rate
 			maxPSNR: 50,			// maximum power signal-to-noise ration
 			minPSNR: 24,			// minimum acceptable PSNR ratio
@@ -258,14 +260,21 @@ var mock = {};
 		});
 	});
 	it("TESTTESTevaluate(feedRate) should return the quality of a feed rate", function() {
+		var N = 3;
 		var phc = new PHCalibrater(xyzCam, {
-			pathIterations: 2,
+			pathIterations: N,
+			logger:logger,
 		});
 		this.timeout(25*60000);
-		phc.evaluate(6000).should.within(100,500);
+		phc.evaluate(4400).should.within(24,50+1);
 	});
 	return;
     it("maxFeedRate() should calculate the maximum feed rate", function() {
+		var phc = new PHCalibrater(xyzCam, {
+			feedMin:useMock ? 1000 : 1000, 
+			feedMax:useMock ? 10000 : 25000,
+			logger:logger,
+		});
         this.timeout(25*60000);
 		var epsilon = 0.6;
         var captureOld = phc.captureCount;

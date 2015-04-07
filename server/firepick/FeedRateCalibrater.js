@@ -263,6 +263,8 @@ var mock = {};
 			xFar:90,			// farthest test path x
 			yFar:90,			// farthest test path y
 			zFar:0,				// farthest test path z
+			feedMin:1000,		// minimum feed rate
+			feedMax:20000,		// maximum feed rate
 			pathIterations: 6,	// number of paths tested per feedrate
 			pathMinSteps: 3,	// minimum number of steps per test path
 			maxPSNR: 50,		// maximum power signal-to-noise ration
