@@ -30,7 +30,7 @@ var SECONDS_PER_MINUTE = 60;
         that.feedMin.should.be.a.Number;
         that.feedMin.should.be.below(that.feedMax);
 		that.feedMin.should.be.above(0);
-		that.nInterpolate = options.nInterpolate || 9;
+		that.nInterpolate = options.nInterpolate || 5;
 		that.nInterpolate.should.be.above(1);
         that.nPlaces = options.nPlaces || 0;
         that.nPlaces.should.not.be.below(0);
@@ -46,7 +46,7 @@ var SECONDS_PER_MINUTE = 60;
 		that.pathIterations.should.be.above(0);
 		that.ip = options.imageProcessor || new ImageProcessor(options);
 		that.feedRateResolution = options.feedRateResolution || 60; // mm/s
-		that.tvMaxPlaces = options.tvMaxPlaces || 2; // seconds precision
+		that.tvMaxPlaces = options.tvMaxPlaces || 3; // seconds precision
 		that.maxPSNR = options.maxPSNR || 50;
 		that.minPSNR = options.minPSNR || 24;
 		that.maxPSNR.should.be.above(that.minPSNR);
@@ -351,9 +351,9 @@ var mock = {};
 		var phc = new PHCalibrater(xyzCam, { logger:logger, feedMin:10450});
         this.timeout(25*60000);
         var result = phc.calibrate_tvMax();
-		should(result.tvMax).within(0.01, 1);
+		should(result.tvMax).within(0.001, 1);
         if (useMock) {
-            should(result.tvMax).within(0.01, 1);
+            should(result.tvMax).within(0.001, 1);
         }
     });
 	}
