@@ -45,6 +45,13 @@ Logger = require("./Logger");
         var that = this;
         return that.moveTo(ref000);
     };
+    XYZCamera.prototype.move = function(path) { // mock
+		var that = this;
+		for (var i=0; i < path.length; i++) {
+			that.moveTo(path[i]);
+		}
+		return that;
+	};
     XYZCamera.prototype.moveTo = function(xyz) { // mock
         var that = this;
         should.exist(xyz);
@@ -154,6 +161,15 @@ Logger = require("./Logger");
                 y: 2,
                 z: 3
             }).should.equal(xyzCam);
+            var xyz = xyzCam.getXYZ();
+            should(xyz).have.properties({
+                x: 1,
+                y: 2,
+                z: 3
+            });
+        });
+        it("should move([{x:1},{y:2},{z:3}])", function() {
+            xyzCam.origin().move([{x:1},{y:2},{z:3}]).should.equal(xyzCam);
             var xyz = xyzCam.getXYZ();
             should(xyz).have.properties({
                 x: 1,

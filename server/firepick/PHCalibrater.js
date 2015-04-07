@@ -86,21 +86,17 @@ Complex = require("./Complex");
 		var that = this;
 		var N = that.nInterpolate;
 		var rows = phf.interpolate({n:N});
+		var path = [];
 		for (var i=0; i < rows.length; i++) {
 			var row = rows[i];
-			that.xyzCam.setFeedRate(row.dsdt*SECONDS_PER_MINUTE);
-			if (i+1 === rows.length) {
-				that.xyzCam.moveTo({ // sync
-					x:row.r.re,
-					z:row.r.im,
-				}); 
-			} else {
-				that.xyzCam.moveTo({
-					x:row.r.re,
-					z:row.r.im,
-				}); 
-			}
+			path.push({
+				x:row.r.re,
+				y:row.r.im,
+				feedRate: row.dsdt*SECONDS_PER_MINUTE,
+			});
+			that.logger.debug("path[", i, "] ", path[i]);
 		}
+		that.xyzCam.move(path);
 		return null;
 	};
 	PHCalibrater.prototype.testPath = function(i,feedRate) {
@@ -210,6 +206,11 @@ var mock = {};
 		that.xyzCam.origin;
 		return that;
 	};
+	MockXYZCamera.prototype.move = function(path) {
+		var that = this;
+		that.xyzCam.move(path);
+		return that;
+	};
 	MockXYZCamera.prototype.moveTo = function(x,y,z) {
 		var that = this;
 		that.xyzCam.moveTo(x,y,z);
@@ -229,7 +230,7 @@ var mock = {};
 
 (typeof describe === 'function') && describe("firepick.PHCalibrater", function() {
 	var PHCalibrater = firepick.PHCalibrater;
-	var logLevel = "debug";
+	var logLevel = "info";
 	logger = new Logger({logLevel:logLevel});
     var fpd = new FPD();
     var useMock = fpd.health() < 1;
@@ -262,7 +263,12 @@ var mock = {};
 			scale: 60,			// minimum difference between testing feed rates
 		});
 	});
-	return; // TBD
+	it("TESTTESTevaluate(feedRate) should return the quality of a feed rate", function() {
+		this.timeout(25*60000);
+		phc.evaluate(5000).should.equal(303);
+		phc.evaluate(6000).should.equal(303.6);
+	});
+	return;
     it("maxFeedRate() should calculate the maximum feed rate", function() {
         this.timeout(25*60000);
 		var epsilon = 0.6;
