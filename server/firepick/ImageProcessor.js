@@ -26,7 +26,7 @@ Logger = require("./Logger");
         }
         var out = child_process.execSync(cmd);
         var jout = JSON.parse(out.toString());
-		that.logger.debug(cmd, " => ", jout);
+		that.logger.trace(cmd, " => ", jout);
         return jout;
     };
     ImageProcessor.prototype.health = function() {
