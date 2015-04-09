@@ -306,7 +306,10 @@ var mock = {};
 (typeof describe === 'function') && describe("firepick.PHCalibrater", function() {
 	var PHCalibrater = firepick.PHCalibrater;
 	var nPlaces = 3;
-	logger = new Logger({logLevel:"debug", nPlaces:nPlaces});
+	logger = new Logger({
+		logLevel:"info", 
+		nPlaces:nPlaces
+	});
     var fpd = new FPD();
     var useMock = fpd.health() < 1;
     var mockXYZCam = new mock.MockXYZCamera({
