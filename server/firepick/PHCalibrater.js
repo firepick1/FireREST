@@ -9,7 +9,8 @@ FPD = require("./FPD");
 Util = require("./Util");
 Maximizer = require("./Maximizer");
 Logger = require("./Logger");
-PHCurve = require("./PHCurve");
+PHFactory = require("./PHFactory");
+PH5Curve = require("./PH5Curve");
 PHFeed = require("./PHFeed");
 Complex = require("./Complex");
 
@@ -59,15 +60,15 @@ var SECONDS_PER_MINUTE = 60;
 		that.logger = options.logger || new Logger(options);
 
 		that.phpath = [
-			new PHCurve([
+			new PHFactory([
 				new Complex(0,0),
 				new Complex(that.xFar, that.yFar),
 			]),
-			new PHCurve([
+			new PHFactory([
 				new Complex(that.xFar, that.yFar),
 				new Complex(-that.xFar, -that.yFar),
 			]),
-			new PHCurve([
+			new PHFactory([
 				new Complex(-that.xFar, -that.yFar),
 				new Complex(0,0),
 			]),

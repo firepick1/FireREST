@@ -4,17 +4,19 @@ var should = require("should"),
 Logger = require("./Logger");
 Bernstein = require("./Bernstein");
 Tridiagonal = require("./Tridiagonal");
-PHCurve = require("./PHCurve");
+PHFactory = require("./PHFactory");
+PH5Curve = require("./PH5Curve");
+
 
 (function(firepick) {
 	var degree = 5;
 	var bn = new Bernstein(5);
 	var bn1 = new Bernstein(6);
 
-    function PHFeed(phcurve,options) {
+    function PHFeed(ph5,options) {
 		var that = this;
-		should.exist(phcurve, "expected PHCurve");
-		that.ph = phcurve;
+		should.exist(ph5, "expected PH5Curve");
+		that.ph = ph5;
 		that.S = that.ph.s(1);
 
 		options = options || {};
@@ -258,14 +260,14 @@ PHCurve = require("./PHCurve");
 	});
 	var epsilon = 0.000001;
 	var PHFeed = firepick.PHFeed;
-	var phstep = new PHCurve([
+	var phstep = new PHFactory([
 		{x:0,y:0},
 		{x:1,y:0},
 		{x:2,y:1},
 		{x:3,y:1},
 		{x:4,y:1}, 
 	]);
-	var phline = new PHCurve([
+	var phline = new PHFactory([
 		{x:1,y:1},
 		{x:5,y:4},
 	]);

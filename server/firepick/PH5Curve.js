@@ -3,6 +3,7 @@ var should = require("should"),
     firepick = firepick || {};
 Logger = require("./Logger");
 Bernstein = require("./Bernstein");
+PHFactory = require("./PHFactory");
 
 (function(firepick) {
 	var DEGREE = 5;
@@ -236,7 +237,7 @@ Bernstein = require("./Bernstein");
 			" actual:" + c1.stringify({nPlaces:3}));
 	};
 	it("s(p) should be monotone returning arc length for p:[0,1] ", function() {
-		var ph = new PHCurve([
+		var ph = new PHFactory([
 			{x:1,y:1},
 			{x:5,y:4},
 		],{logger:logger});
@@ -261,7 +262,7 @@ Bernstein = require("./Bernstein");
 		phi.s(1).should.within(5,5);
 	});
 	it("rprime(p) should return velocity vector for p:[0,1]", function() {
-		var ph = new PHCurve([
+		var ph = new PHFactory([
 			{x:-1,y:1},
 			{x:0,y:2},
 			{x:1,y:1},
@@ -276,7 +277,7 @@ Bernstein = require("./Bernstein");
 		shouldEqualT(phi.rprime(1), new Complex(0.945,-4.000), epsilon);
 	});
 	it("sigma(p) should return parametric speed for p:[0,1]", function() {
-		var ph = new PHCurve([
+		var ph = new PHFactory([
 			{x:-1,y:1},
 			{x:0,y:2},
 			{x:1,y:1},
