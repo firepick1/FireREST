@@ -28,8 +28,6 @@ firepick.DeltaCalculator = require("./DeltaCalculator");
             theta3: 0
         };
         this.xyz = this.dc.calcXYZ(this.angles);
-        this.dc.dz = -this.xyz.z;
-        this.xyz = this.dc.calcXYZ(this.angles);
         return this;
     };
 
