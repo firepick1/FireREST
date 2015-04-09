@@ -266,11 +266,11 @@ PH5Curve = require("./PH5Curve");
 		{x:2,y:1},
 		{x:3,y:1},
 		{x:4,y:1}, 
-	]);
+	]).quintic();
 	var phline = new PHFactory([
 		{x:1,y:1},
 		{x:5,y:4},
-	]);
+	]).quintic();
 	function shouldEqualT(c1,c2,epsilon) { 
 		epsilon = epsilon || 0.001; 
 		c1.should.instanceof(Complex);

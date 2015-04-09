@@ -63,15 +63,15 @@ var SECONDS_PER_MINUTE = 60;
 			new PHFactory([
 				new Complex(0,0),
 				new Complex(that.xFar, that.yFar),
-			]),
+			]).quintic(),
 			new PHFactory([
 				new Complex(that.xFar, that.yFar),
 				new Complex(-that.xFar, -that.yFar),
-			]),
+			]).quintic(),
 			new PHFactory([
 				new Complex(-that.xFar, -that.yFar),
 				new Complex(0,0),
-			]),
+			]).quintic(),
 		];
 		that.samples = {};
         that.captureCount = 0;

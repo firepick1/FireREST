@@ -9,17 +9,21 @@ PHFactory = require("./PHFactory");
 	var DEGREE = 5;
 	var b4 = new Bernstein(4);
 	var b5 = new Bernstein(5);
-    function PH5Curve(phz,options) {
+    function PH5Curve(phz,phq,options) {
 		var that = this;
+		phq.length.should.equal(phz.length);
 		options = options || {};
 		that.logger = options.logger || new Logger(options);
 		for (var i=1; i<phz.length; i++) {
 			that.logger.trace("phz[",i,"]:",phz[i]);
 			phz[i].re.should.be.Number;
 			phz[i].im.should.be.Number;
+			phq[i].re.should.be.Number;
+			phq[i].im.should.be.Number;
 		}
 		that.N = phz.length-1;
 		that.z = phz;
+		that.q = phq;
 		return that;
     };
 
@@ -242,7 +246,7 @@ PHFactory = require("./PHFactory");
 			{x:5,y:4},
 		],{logger:logger});
 		should.exist(ph.solvez());
-		var phi = new PH5Curve(ph.z);
+		var phi = new PH5Curve(ph.z,ph.q);
 		var epsilon = 0.0000000001;
 		phi.s(0+epsilon).should.above(phi.s(0));
 		phi.s(0.1+epsilon).should.above(phi.s(0.1));
@@ -268,7 +272,7 @@ PHFactory = require("./PHFactory");
 			{x:1,y:1},
 		],{logger:logger});
 		should.exist(ph.solvez());
-		var phi = new PH5Curve(ph.z);
+		var phi = new PH5Curve(ph.z,ph.q);
 		var epsilon = 0.001;
 		shouldEqualT(phi.rprime(0), new Complex(0.945,4.000), epsilon);
 		shouldEqualT(phi.rprime(0.25), new Complex(2.132,2.000), epsilon);
@@ -283,7 +287,7 @@ PHFactory = require("./PHFactory");
 			{x:1,y:1},
 		],{logger:logger});
 		ph.solvez();
-		var phi = new PH5Curve(ph.z);
+		var phi = new PH5Curve(ph.z,ph.q);
 		var epsilon = 0.001;
 		phi.sigma(0).should.within(4.110,4.111);
 		phi.sigma(0.3).should.within(2.780,2.781);
