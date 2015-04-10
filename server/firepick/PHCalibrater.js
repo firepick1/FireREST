@@ -342,15 +342,15 @@ var mock = {};
 		this.timeout(25*60000);
 		phc.feedRateQuality(4400).should.within(24,50+1);
 	});
-    it("calibrateFeedRate() should find the maximum feed rate", function() {
-		var phc = new PHCalibrater(xyzCam, { logger:logger});
-        this.timeout(25*60000);
-        var result = phc.calibrateFeedRate();
-		should(result.feedRate).within(1000, 20000);
-        if (useMock) {
-            should(result.feedRate).within(4000, 4400);
-        }
-    });
+    //it("calibrateFeedRate() should find the maximum feed rate", function() {
+		//var phc = new PHCalibrater(xyzCam, { logger:logger});
+        //this.timeout(25*60000);
+        //var result = phc.calibrateFeedRate();
+		//should(result.feedRate).within(1000, 20000);
+        //if (useMock) {
+            //should(result.feedRate).within(4000, 4400);
+        //}
+    //});
 	if(!useMock) {
     it("TESTTESTcalibrate_tvMax() should find the minimum acceleration time", function() {
 		var phc = new PHCalibrater(xyzCam, { logger:logger, feedMin:10450});

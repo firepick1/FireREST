@@ -142,19 +142,6 @@ PH5Curve = require("./PH5Curve");
 	};
 
 	///////////////// INSTANCE API ///////////////
-	PHFeed.prototype.syncTime = function(phfeed2) {
-		var that = this;
-		if (phfeed2.tS < that.tS) {
-			return phfeed2.syncTime(that);
-		}
-		var scale = phfeed2.tS/that.tS;
-		that.tAccel *= scale;
-		that.tCruise *= scale;
-		that.vCruise /= scale;
-		that.tDecel *= scale;
-		that.tS *= scale;
-		return that;
-	};
 	PHFeed.prototype.profile = function() {
 		var that = this;
 		return {
@@ -528,7 +515,7 @@ PH5Curve = require("./PH5Curve");
 		phf0V0.V(0.9).should.within( 47.03, 47.04);
 		phf0V0.V(1).should.equal(0);
 	});
-	it("TESTTESTEkt(Eprev,tau) should iteratively compute parametric Epsilon for normalized time tau", function() {
+	it("Ekt(Eprev,tau) should iteratively compute parametric Epsilon for normalized time tau", function() {
 		var phf = new PHFeed(phline, {vIn:0, vCruise:200, vOut:0, vMax:200, tvMax:0.01});
 		var E0 = 0;
 		var E1 = phf.Ekt(E0,0.1);
@@ -578,7 +565,7 @@ PH5Curve = require("./PH5Curve");
 		Util.roundN(rows[0].dsdt,places).should.equal(Util.roundN(rows[N-1].dsdt,places));
 		Util.roundN(rows[1].dsdt,places).should.equal(Util.roundN(rows[N-2].dsdt,places));
 	});
-	it("TESTTESTprofile(phfeed2) should return traversal information", function() {
+	it("profile(phfeed2) should return traversal information", function() {
 		var phf1 = new PHFeed(phline, {vIn:0, vCruise:200, vOut:0, vMax:200, tvMax:0.01});
 		phf1.profile().should.have.properties({
 			tAccel:0.01,	// acceleration time (seconds)
@@ -592,34 +579,5 @@ PH5Curve = require("./PH5Curve");
 			vCruise:200,	// cruise velocity
 			vOut:0,			// exit velocity
 		});
-	});
-	it("TESTTESTsyncTime(phfeed2) should match elapsed time of both feeds to slowest", function() {
-		var phf1 = new PHFeed(phline, {vIn:0, vCruise:200, vOut:0, vMax:200, tvMax:0.01});
-		var phf2 = new PHFeed(phstep, {vIn:0, vCruise:200, vOut:0, vMax:200, tvMax:0.01});
-		var phf2sync = new PHFeed(phstep, {vIn:0, vCruise:200, vOut:0, vMax:200, tvMax:0.01});
-		phf1.tS.should.within(0.035,0.036);
-		phf1.tAccel.should.within(0.01,0.01);
-		phf1.tCruise.should.within(0.015,0.015);
-		phf1.sCruise.should.within(3,3);
-		phf1.tDecel.should.within(0.01,0.01);
-		phf1.vCruise.should.within(200,200);
-		phf2.tS.should.within(0.032,0.033);
-		phf2.tAccel.should.within(0.01,0.01);
-		phf2.tCruise.should.within(0.012,0.013);
-		phf2.sCruise.should.within(2.542,2.543);
-		phf2.tDecel.should.within(0.01,0.01);
-		phf2.vCruise.should.within(200,200);
-
-		phf1.syncTime(phf2sync).should.equal(phf2sync);
-		phf1.tS.should.within(0.035,0.036);
-		phf2sync.tS.should.within(0.035,0.036);
-		phf2sync.tAccel.should.within(0.010,0.011);
-		phf2sync.tCruise.should.within(0.013,0.014);
-		phf2sync.vCruise.should.within(186.928,186.929);
-		phf2sync.tDecel.should.within(0.010,0.011);
-		phf2sync.Ekt(0,0).should.equal(phf2.Ekt(0,0));
-		phf2sync.Ekt(0,0.1).should.within(phf2.Ekt(0,0.1)-epsilon,phf2.Ekt(0,0.1)+epsilon);
-		phf2sync.Ekt(0,0.5).should.within(phf2.Ekt(0,0.5)-epsilon,phf2.Ekt(0,0.5)+epsilon);
-		phf2sync.Ekt(0,1).should.equal(phf2.Ekt(0,1));
 	});
 })

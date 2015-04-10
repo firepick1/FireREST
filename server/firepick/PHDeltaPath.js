@@ -31,11 +31,11 @@ DeltaCalculator = require("./DeltaCalculator");
 			yz.push(new Complex(xyz[i].y, xyz[i].z));
 		}
 		var xyPH = new PHFactory(xy).quintic();
-		that.logger.withPlaces(6).info("xyPH.z", xyPH.z);
+		//that.logger.withPlaces(6).info("xyPH.z", xyPH.z);
 		var xzPH = new PHFactory(xz).quintic();
-		that.logger.withPlaces(6).info("xzPH.z", xzPH.z);
+		//that.logger.withPlaces(6).info("xzPH.z", xzPH.z);
 		var yzPH = new PHFactory(yz).quintic();
-		that.logger.withPlaces(6).info("yzPH.z", yzPH.z);
+		//that.logger.withPlaces(6).info("yzPH.z", yzPH.z);
 		var xyzFeedOptions = {
 			vIn:that.vMax, 			// assume constant speed
 		};
@@ -69,19 +69,13 @@ DeltaCalculator = require("./DeltaCalculator");
 		};
 		var theta12PH = new PHFactory(theta12).quintic();
 		that.theta12PHF = new PHFeed(theta12PH, angleFeedOptions);
-		that.logger.withPlaces(6).info("theta12PHF profile:", that.theta12PHF.profile());
+		//that.logger.withPlaces(6).info("theta12PHF profile:", that.theta12PHF.profile());
 		var theta13PH = new PHFactory(theta13).quintic();
 		that.theta13PHF = new PHFeed(theta13PH, angleFeedOptions);
-		that.logger.withPlaces(6).info("theta13PHF profile:", that.theta13PHF.profile());
+		//that.logger.withPlaces(6).info("theta13PHF profile:", that.theta13PHF.profile());
 		var theta23PH = new PHFactory(theta23).quintic();
 		that.theta23PHF = new PHFeed(theta23PH, angleFeedOptions);
-		that.logger.withPlaces(6).info("theta23PHF profile:", that.theta23PHF.profile());
-		that.theta13PHF.syncTime(that.theta12PHF);
-		that.theta23PHF.syncTime(that.theta12PHF);
-		that.theta13PHF.syncTime(that.theta12PHF);
-		that.logger.withPlaces(6).info("theta12PHF sync profile:", that.theta12PHF.profile());
-		that.logger.withPlaces(6).info("theta13PHF sync profile:", that.theta13PHF.profile());
-		that.logger.withPlaces(6).info("theta23PHF sync profile:", that.theta23PHF.profile());
+		//that.logger.withPlaces(6).info("theta23PHF profile:", that.theta23PHF.profile());
 
 		return that;
     };
@@ -209,7 +203,6 @@ DeltaCalculator = require("./DeltaCalculator");
 		shouldPropertiesEqualT(xyz, {p:1, x:90, y:0, z:-50});
 	});
 	it("thetaIterate(tau,prev) should traverse path angles", function() {
-		this.timeout(50000);
 		var phd = new PHDeltaPath([ {x:0,y:0,z:-50},
 			{x:90,y:0,z:-50},
 		], {
@@ -264,8 +257,7 @@ DeltaCalculator = require("./DeltaCalculator");
 		xyz = phd.delta.calcXYZ(angles);
 		shouldPropertiesEqualT(xyz, {x:90, y:0, z:-50});
 	});
-	it("TESTTESTthetaIterate(tau,prev) should traverse path angles", function() {
-		this.timeout(50000);
+	it("thetaIterate(tau,prev) should traverse path angles", function() {
 		var phd = new PHDeltaPath([ {x:0,y:0,z:-50},
 			{x:90,y:0,z:-50},
 		], {
