@@ -499,7 +499,7 @@ PH5Curve = require("./PH5Curve");
 		phf0V0.V(0.9).should.within( 47.03, 47.04);
 		phf0V0.V(1).should.equal(0);
 	});
-	it("TESTTESTEkt(Eprev,tau) should compute parametric p for normalized time tau", function() {
+	it("TESTTESTEkt(Eprev,tau) should iteratively compute parametric Epsilon for normalized time tau", function() {
 		var phf = new PHFeed(phline, {vIn:0, vCruise:200, vOut:0, vMax:200, tvMax:0.01});
 		var E0 = 0;
 		var E1 = phf.Ekt(E0,0.1);
