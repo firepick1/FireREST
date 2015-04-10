@@ -19,6 +19,14 @@ var should = require("should"),
     };
 
     /////////////// INSTANCE ////////////
+	Logger.prototype.withPlaces = function(nPlaces) {
+		var that = this;
+		return new Logger({
+			nPlaces:	nPlaces, 
+			logLevel:	that.logLovel, 
+			write:		that.write,
+		});
+	};
 	Logger.prototype.message = function(args) {
 		var that = this;
 		var msg = "";
@@ -194,6 +202,13 @@ var should = require("should"),
 		should.equal(actual, "ERROR	: E1");
 		logger.warn("E2");
 		should.equal(actual, "ERROR	: E1");
+	});
+	it("withPlaces(nPlaces) should provide a new logger for given precision", function() {
+		var logger = new firepick.Logger({write:write});
+		logger.info({a:1.23456789});
+		should.equal(actual, "INFO	: {a:1.23}");
+		logger.withPlaces(5).info({a:1.23456789});
+		should.equal(actual, "INFO	: {a:1.23457}");
 	});
 
 });

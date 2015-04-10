@@ -192,15 +192,28 @@ Logger = require("./Logger");
 	});
 	it("calcAngles({...}) should calculate the thetas for a straight line", function() {
         var dc = new firepick.DeltaCalculator();
-		shouldEqualT({theta1:19.403,theta2:19.403,theta3:19.403}, dc.calcAngles({x:0,y:0,z:-50}));
-		shouldEqualT({theta1:19.553,theta2:14.119,theta3:24.683}, dc.calcAngles({x:10,y:0,z:-50}));
-		shouldEqualT({theta1:20.000,theta2: 8.858,theta3:29.938}, dc.calcAngles({x:20,y:0,z:-50}));
-		shouldEqualT({theta1:20.743,theta2: 3.657,theta3:35.155}, dc.calcAngles({x:30,y:0,z:-50}));
-		shouldEqualT({theta1:21.780,theta2:-1.436,theta3:40.325}, dc.calcAngles({x:40,y:0,z:-50}));
-		shouldEqualT({theta1:23.107,theta2:-6.366,theta3:45.448}, dc.calcAngles({x:50,y:0,z:-50}));
-		shouldEqualT({theta1:24.721,theta2:-11.073,theta3:50.524}, dc.calcAngles({x:60,y:0,z:-50}));
-		shouldEqualT({theta1:26.619,theta2:-15.488,theta3:55.559}, dc.calcAngles({x:70,y:0,z:-50}));
-		shouldEqualT({theta1:28.800,theta2:-19.547,theta3:60.563}, dc.calcAngles({x:80,y:0,z:-50}));
-		shouldEqualT({theta1:31.263,theta2:-23.191,theta3:65.546}, dc.calcAngles({x:90,y:0,z:-50}));
+		var xyz;
+		var angles;
+		var epsilon = 0.0000000000001;
+		shouldEqualT({theta1:19.403,theta2:19.403,theta3:19.403}, angles=dc.calcAngles(xyz={x:0,y:0,z:-50}));
+		shouldEqualT(dc.calcXYZ(angles),xyz,epsilon); // round trip
+		shouldEqualT({theta1:19.553,theta2:14.119,theta3:24.683}, angles=dc.calcAngles(xyz={x:10,y:0,z:-50}));
+		shouldEqualT(dc.calcXYZ(angles),xyz,epsilon); // round trip
+		shouldEqualT({theta1:20.000,theta2: 8.858,theta3:29.938}, angles=dc.calcAngles(xyz={x:20,y:0,z:-50}));
+		shouldEqualT(dc.calcXYZ(angles),xyz,epsilon); // round trip
+		shouldEqualT({theta1:20.743,theta2: 3.657,theta3:35.155}, angles=dc.calcAngles(xyz={x:30,y:0,z:-50}));
+		shouldEqualT(dc.calcXYZ(angles),xyz,epsilon); // round trip
+		shouldEqualT({theta1:21.780,theta2:-1.436,theta3:40.325}, angles=dc.calcAngles(xyz={x:40,y:0,z:-50}));
+		shouldEqualT(dc.calcXYZ(angles),xyz,epsilon); // round trip
+		shouldEqualT({theta1:23.107,theta2:-6.366,theta3:45.448}, angles=dc.calcAngles(xyz={x:50,y:0,z:-50}));
+		shouldEqualT(dc.calcXYZ(angles),xyz,epsilon); // round trip
+		shouldEqualT({theta1:24.721,theta2:-11.073,theta3:50.524}, angles=dc.calcAngles(xyz={x:60,y:0,z:-50}));
+		shouldEqualT(dc.calcXYZ(angles),xyz,epsilon); // round trip
+		shouldEqualT({theta1:26.619,theta2:-15.488,theta3:55.559}, angles=dc.calcAngles(xyz={x:70,y:0,z:-50}));
+		shouldEqualT(dc.calcXYZ(angles),xyz,epsilon); // round trip
+		shouldEqualT({theta1:28.800,theta2:-19.547,theta3:60.563}, angles=dc.calcAngles(xyz={x:80,y:0,z:-50}));
+		shouldEqualT(dc.calcXYZ(angles),xyz,epsilon); // round trip
+		shouldEqualT({theta1:31.263,theta2:-23.191,theta3:65.546}, angles=dc.calcAngles(xyz={x:90,y:0,z:-50}));
+		shouldEqualT(dc.calcXYZ(angles),xyz,epsilon); // round trip
 	});
 });

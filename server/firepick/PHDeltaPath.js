@@ -31,11 +31,11 @@ DeltaCalculator = require("./DeltaCalculator");
 			yz.push(new Complex(xyz[i].y, xyz[i].z));
 		}
 		var xyPH = new PHFactory(xy).quintic();
-		that.logger.info("xyPH.z", xyPH.z);
+		that.logger.withPlaces(6).info("xyPH.z", xyPH.z);
 		var xzPH = new PHFactory(xz).quintic();
-		that.logger.info("xzPH.z", xzPH.z);
+		that.logger.withPlaces(6).info("xzPH.z", xzPH.z);
 		var yzPH = new PHFactory(yz).quintic();
-		that.logger.info("yzPH.z", yzPH.z);
+		that.logger.withPlaces(6).info("yzPH.z", yzPH.z);
 		var xyzFeedOptions = {
 			vIn:that.vMax, 			// assume constant speed
 		};
@@ -69,15 +69,19 @@ DeltaCalculator = require("./DeltaCalculator");
 		};
 		var theta12PH = new PHFactory(theta12).quintic();
 		that.theta12PHF = new PHFeed(theta12PH, angleFeedOptions);
-		that.logger.info("theta12PHF.tS:", that.theta12PHF.tS);
+		that.logger.withPlaces(6).info("theta12PHF profile:", that.theta12PHF.profile());
 		var theta13PH = new PHFactory(theta13).quintic();
 		that.theta13PHF = new PHFeed(theta13PH, angleFeedOptions);
-		that.logger.info("theta13PHF.tS:", that.theta13PHF.tS);
+		that.logger.withPlaces(6).info("theta13PHF profile:", that.theta13PHF.profile());
 		var theta23PH = new PHFactory(theta23).quintic();
 		that.theta23PHF = new PHFeed(theta23PH, angleFeedOptions);
-		that.logger.info("theta23PHF.tS:", that.theta23PHF.tS);
-		that.tS = Math.max(that.theta12PHF.tS, that.theta12PHF.tS);
-		that.tS = Math.max(that.tS, that.theta23PHF.tS);
+		that.logger.withPlaces(6).info("theta23PHF profile:", that.theta23PHF.profile());
+		that.theta13PHF.syncTime(that.theta12PHF);
+		that.theta23PHF.syncTime(that.theta12PHF);
+		that.theta13PHF.syncTime(that.theta12PHF);
+		that.logger.withPlaces(6).info("theta12PHF sync profile:", that.theta12PHF.profile());
+		that.logger.withPlaces(6).info("theta13PHF sync profile:", that.theta13PHF.profile());
+		that.logger.withPlaces(6).info("theta23PHF sync profile:", that.theta23PHF.profile());
 
 		return that;
     };
@@ -119,7 +123,7 @@ DeltaCalculator = require("./DeltaCalculator");
 			tau.should.equal(0);
 			var c12 = that.theta12PHF.ph.r(0);
 			var c13 = that.theta13PHF.ph.r(0);
-			var c23 = that.theta23PHF.ph.r(0);
+			//var c23 = that.theta23PHF.ph.r(0);
 			c12.re.should.within(c13.re-epsilon,c13.re+epsilon);
 			return {tau:0, theta1:c12.re, theta2:c12.im, theta3:c13.im, E12:0, E13:0, E23:0};
 		}
@@ -127,11 +131,11 @@ DeltaCalculator = require("./DeltaCalculator");
 		prev.E13.should.within(0,1);
 		prev.E23.should.within(0,1);
 		var E12 = that.theta12PHF.Ekt(prev.E12, tau);
-		var E13 = that.theta13PHF.Ekt(prev.E13, tau);
-		var E23 = that.theta13PHF.Ekt(prev.E23, tau);
+		var E13 = E12; //that.theta13PHF.Ekt(prev.E13, tau);
+		var E23 = 0; //that.theta13PHF.Ekt(prev.E23, tau);
 		var c12 = that.theta12PHF.ph.r(E12);
 		var c13 = that.theta13PHF.ph.r(E13);
-		var c23 = that.theta23PHF.ph.r(E23);
+		//var c23 = that.theta23PHF.ph.r(E23);
 		var thetaEpsilon = 0.001;
 		//c12.re.should.within(c13.re-thetaEpsilon,c13.re+thetaEpsilon);
 		//c12.im.should.within(c23.re-thetaEpsilon,c23.re+thetaEpsilon);
@@ -174,12 +178,13 @@ DeltaCalculator = require("./DeltaCalculator");
 		phd.delta.dz.should.equal(phdOptions.delta.dz);	// OPTION: specify z-origin offset (default is -z@theta(0,0,0))
 		phd.N.should.equal(phdOptions.N);
 	});
-	it("xyzA0Iterate(p,prev) should traverse XYZ path at constant velocity for p:[0,1]", function() {
+	it("xyzA0Iterate(p,prev) should use constant V for synchronizing different PH curves", function() {
 		var phd = new PHDeltaPath([ {x:0,y:0,z:-50},
 			{x:90,y:0,z:-50},
 		], {
 			logger:logger,
 		});
+		// constant velocity provides synchronization data between separate PH curves
 		var xyz = phd.xyzA0Iterate();
 		shouldPropertiesEqualT(xyz, {p:0, x:0, y:0, z:-50});
 		xyz = phd.xyzA0Iterate(0.1, xyz);
@@ -203,10 +208,15 @@ DeltaCalculator = require("./DeltaCalculator");
 		xyz = phd.xyzA0Iterate(1, xyz);
 		shouldPropertiesEqualT(xyz, {p:1, x:90, y:0, z:-50});
 	});
-	it("TESTTESTthetaIterate(tau,prev) should traverse path angles for time tau:[0,1]", function() {
+	it("thetaIterate(tau,prev) should traverse path angles", function() {
+		this.timeout(50000);
 		var phd = new PHDeltaPath([ {x:0,y:0,z:-50},
 			{x:90,y:0,z:-50},
 		], {
+			vIn: 0,
+			vCruise: 200,
+			vOut: 0,
+			N:9,
 			logger:logger,
 		});
 		var angles = phd.thetaIterate();
@@ -214,52 +224,55 @@ DeltaCalculator = require("./DeltaCalculator");
 		var xyz = phd.delta.calcXYZ(angles);
 		shouldPropertiesEqualT(xyz, {x:0, y:0, z:-50});
 		angles = phd.thetaIterate(0.1, angles);
-		shouldPropertiesEqualT(angles, {tau:0.1, theta1:19.403, theta2:19.041, theta3:19.832});
+		shouldPropertiesEqualT(angles, {tau:0.1, theta1:19.403, theta2:19.041, theta3:19.766});
 		xyz = phd.delta.calcXYZ(angles);
-		shouldPropertiesEqualT(xyz, {x:0.749, y:-0.037, z:-50.067});
+		shouldPropertiesEqualT(xyz, {x:0.685, y:-0.001, z:-49.999});
 		angles = phd.thetaIterate(0.2, angles);
-		shouldPropertiesEqualT(angles, {tau:0.2, theta1:19.464, theta2:15.944, theta3:23.366});
+		shouldPropertiesEqualT(angles, {tau:0.2, theta1:19.465, theta2:15.944, theta3:22.859});
 		xyz = phd.delta.calcXYZ(angles);
-		shouldPropertiesEqualT(xyz, {x:7.058, y:-0.292, z:-50.5});
+		shouldPropertiesEqualT(xyz, {x: 6.543, y:-0.002, z:-49.998});
 		angles = phd.thetaIterate(0.3, angles);
-		shouldPropertiesEqualT(angles, {tau:0.3, theta1:19.883, theta2:9.944, theta3:29.818});
+		shouldPropertiesEqualT(angles, {tau:0.3, theta1:19.883, theta2:9.944, theta3:28.853});
 		xyz = phd.delta.calcXYZ(angles);
-		shouldPropertiesEqualT(xyz, {x:19.024, y:-0.587, z:-50.910});
+		shouldPropertiesEqualT(xyz, {x:17.929, y: 0.001, z:-50.001});
 		angles = phd.thetaIterate(0.4, angles);
-		shouldPropertiesEqualT(angles, {tau:0.4, theta1:20.769, theta2:3.514, theta3:36.553});
+		shouldPropertiesEqualT(angles, {tau:0.4, theta1:20.768, theta2:3.514, theta3:35.300});
 		xyz = phd.delta.calcXYZ(angles);
-		shouldPropertiesEqualT(xyz, {x:31.854, y:-0.813, z:-51.084});
+		shouldPropertiesEqualT(xyz, {x:30.280, y:-0.000, z:-50.000});
 		angles = phd.thetaIterate(0.5, angles);
-		shouldPropertiesEqualT(angles, {tau:0.5, theta1:22.121, theta2:-2.834, theta3:43.199});
+		shouldPropertiesEqualT(angles, {tau:0.5, theta1:22.122, theta2:-2.834, theta3:41.764});
 		xyz = phd.delta.calcXYZ(angles);
-		shouldPropertiesEqualT(xyz, {x:44.765, y:-0.997, z:-51.093});
+		shouldPropertiesEqualT(xyz, {x:42.798, y:-0.000, z:-50.000});
 		angles = phd.thetaIterate(0.6, angles);
-		shouldPropertiesEqualT(angles, {tau:0.6, theta1:23.982, theta2:-9.052, theta3:49.721});
+		shouldPropertiesEqualT(angles, {tau:0.6, theta1:23.982, theta2:-9.052, theta3:48.316});
 		xyz = phd.delta.calcXYZ(angles);
-		shouldPropertiesEqualT(xyz, {x:57.707, y:-1.041, z:-50.900});
+		shouldPropertiesEqualT(xyz, {x:55.639, y: 0.000, z:-50.000});
 		angles = phd.thetaIterate(0.7, angles);
-		shouldPropertiesEqualT(angles, {tau:0.7, theta1:26.418, theta2:-15.066, theta3:56.097});
+		shouldPropertiesEqualT(angles, {tau:0.7, theta1:26.419, theta2:-15.066, theta3:55.063});
 		xyz = phd.delta.calcXYZ(angles);
-		shouldPropertiesEqualT(xyz, {x:70.623, y:-0.821, z:-50.517});
+		shouldPropertiesEqualT(xyz, {x:69.011, y: 0.000, z:-50.000});
 		angles = phd.thetaIterate(0.8, angles);
-		shouldPropertiesEqualT(angles, {tau:0.8, theta1:29.298, theta2:-20.344, theta3:62.007});
+		shouldPropertiesEqualT(angles, {tau:0.8, theta1:29.293, theta2:-20.347, theta3:61.609});
 		xyz = phd.delta.calcXYZ(angles);
-		shouldPropertiesEqualT(xyz, {x:82.743, y:-0.332, z:-50.149});
+		shouldPropertiesEqualT(xyz, {x:82.098, y:-0.001, z:-50.000});
 		angles = phd.thetaIterate(0.9, angles);
-		shouldPropertiesEqualT(angles, {tau:0.9, theta1:31.045, theta2:-22.900, theta3:65.166});
+		shouldPropertiesEqualT(angles, {tau:0.9, theta1:31.044, theta2:-22.902, theta3:65.127});
 		xyz = phd.delta.calcXYZ(angles);
-		shouldPropertiesEqualT(xyz, {x:89.223, y:-0.033, z:-50.013});
+		shouldPropertiesEqualT(xyz, {x:89.159, y:-0.000, z:-50.000});
 		angles = phd.thetaIterate(1, angles);
 		shouldPropertiesEqualT(angles, {tau:1, theta1:31.263, theta2:-23.191, theta3:65.546});
 		xyz = phd.delta.calcXYZ(angles);
 		shouldPropertiesEqualT(xyz, {x:90, y:0, z:-50});
 	});
-	it("TESTTESTthetaIterate(tau,prev) should not require large N", function() {
+	it("TESTTESTthetaIterate(tau,prev) should traverse path angles", function() {
 		this.timeout(50000);
 		var phd = new PHDeltaPath([ {x:0,y:0,z:-50},
 			{x:90,y:0,z:-50},
 		], {
-			N:23,	// large N
+			vIn: 0,
+			vCruise: 200,
+			vOut: 0,
+			N:7,
 			logger:logger,
 		});
 		var angles = phd.thetaIterate();
@@ -267,41 +280,41 @@ DeltaCalculator = require("./DeltaCalculator");
 		var xyz = phd.delta.calcXYZ(angles);
 		shouldPropertiesEqualT(xyz, {x:0, y:0, z:-50});
 		angles = phd.thetaIterate(0.1, angles);
-		shouldPropertiesEqualT(angles, {tau:0.1, theta1:19.403, theta2:19.041, theta3:19.832});
+		shouldPropertiesEqualT(angles, {tau:0.1, theta1:19.403, theta2:19.041, theta3:19.766});
 		xyz = phd.delta.calcXYZ(angles);
-		shouldPropertiesEqualT(xyz, {x:0.749, y:-0.037, z:-50.067});
+		shouldPropertiesEqualT(xyz, {x:0.685, y:-0.001, z:-49.999});
 		angles = phd.thetaIterate(0.2, angles);
-		shouldPropertiesEqualT(angles, {tau:0.2, theta1:19.467, theta2:15.944, theta3:23.366});
+		shouldPropertiesEqualT(angles, {tau:0.2, theta1:19.465, theta2:15.944, theta3:22.859});
 		xyz = phd.delta.calcXYZ(angles);
-		shouldPropertiesEqualT(xyz, {x:7.058, y:-0.288, z:-50.504});
+		shouldPropertiesEqualT(xyz, {x: 6.542, y:-0.002, z:-49.996});
 		angles = phd.thetaIterate(0.3, angles);
-		shouldPropertiesEqualT(angles, {tau:0.3, theta1:19.883, theta2:9.944, theta3:29.818});
+		shouldPropertiesEqualT(angles, {tau:0.3, theta1:19.883, theta2:9.944, theta3:28.853});
 		xyz = phd.delta.calcXYZ(angles);
-		shouldPropertiesEqualT(xyz, {x:19.024, y:-0.587, z:-50.910});
+		shouldPropertiesEqualT(xyz, {x:17.929, y: 0.001, z:-50.001});
 		angles = phd.thetaIterate(0.4, angles);
-		shouldPropertiesEqualT(angles, {tau:0.4, theta1:20.768, theta2:3.514, theta3:36.553});
+		shouldPropertiesEqualT(angles, {tau:0.4, theta1:20.768, theta2:3.514, theta3:35.300});
 		xyz = phd.delta.calcXYZ(angles);
-		shouldPropertiesEqualT(xyz, {x:31.854, y:-0.815, z:-51.082});
+		shouldPropertiesEqualT(xyz, {x:30.280, y:-0.000, z:-50.000});
 		angles = phd.thetaIterate(0.5, angles);
-		shouldPropertiesEqualT(angles, {tau:0.5, theta1:22.122, theta2:-2.834, theta3:43.199});
+		shouldPropertiesEqualT(angles, {tau:0.5, theta1:22.122, theta2:-2.834, theta3:41.764});
 		xyz = phd.delta.calcXYZ(angles);
-		shouldPropertiesEqualT(xyz, {x:44.765, y:-0.995, z:-51.093});
+		shouldPropertiesEqualT(xyz, {x:42.798, y:-0.000, z:-50.000});
 		angles = phd.thetaIterate(0.6, angles);
-		shouldPropertiesEqualT(angles, {tau:0.6, theta1:23.982, theta2:-9.052, theta3:49.721});
+		shouldPropertiesEqualT(angles, {tau:0.6, theta1:23.982, theta2:-9.052, theta3:48.316});
 		xyz = phd.delta.calcXYZ(angles);
-		shouldPropertiesEqualT(xyz, {x:57.708, y:-1.041, z:-50.900});
+		shouldPropertiesEqualT(xyz, {x:55.639, y: 0.000, z:-50.000});
 		angles = phd.thetaIterate(0.7, angles);
-		shouldPropertiesEqualT(angles, {tau:0.7, theta1:26.419, theta2:-15.066, theta3:56.097});
+		shouldPropertiesEqualT(angles, {tau:0.7, theta1:26.419, theta2:-15.066, theta3:55.063});
 		xyz = phd.delta.calcXYZ(angles);
-		shouldPropertiesEqualT(xyz, {x:70.623, y:-0.820, z:-50.517});
+		shouldPropertiesEqualT(xyz, {x:69.010, y: 0.000, z:-50.000});
 		angles = phd.thetaIterate(0.8, angles);
-		shouldPropertiesEqualT(angles, {tau:0.8, theta1:29.294, theta2:-20.347, theta3:62.004});
+		shouldPropertiesEqualT(angles, {tau:0.8, theta1:29.295, theta2:-20.347, theta3:61.613});
 		xyz = phd.delta.calcXYZ(angles);
-		shouldPropertiesEqualT(xyz, {x:82.739, y:-0.335, z:-50.141});
+		shouldPropertiesEqualT(xyz, {x:82.103, y:-0.001, z:-50.004});
 		angles = phd.thetaIterate(0.9, angles);
-		shouldPropertiesEqualT(angles, {tau:0.9, theta1:31.044, theta2:-22.902, theta3:65.166});
+		shouldPropertiesEqualT(angles, {tau:0.9, theta1:31.045, theta2:-22.902, theta3:65.128});
 		xyz = phd.delta.calcXYZ(angles);
-		shouldPropertiesEqualT(xyz, {x:89.223, y:-0.035, z:-50.010});
+		shouldPropertiesEqualT(xyz, {x:89.161, y:-0.000, z:-50.001});
 		angles = phd.thetaIterate(1, angles);
 		shouldPropertiesEqualT(angles, {tau:1, theta1:31.263, theta2:-23.191, theta3:65.546});
 		xyz = phd.delta.calcXYZ(angles);

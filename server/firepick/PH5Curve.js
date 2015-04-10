@@ -44,12 +44,12 @@ PHFactory = require("./PHFactory");
 		p.should.not.be.below(0);
 		p.should.not.be.above(1);
 		var PN = p * that.N;
-		var i = Math.ceil(PN) || 1;
+		var iPN = Math.ceil(PN) || 1;
 		var sum = 0;
-		for (var iSeg=1; iSeg < i; iSeg++) {
+		for (var iSeg=1; iSeg < iPN; iSeg++) {
 			sum += that.sit(iSeg, 1);
 		}
-		sum += that.sit(i, PN-i+1);
+		sum += that.sit(iPN, PN-iPN+1);
 		return sum;
 	};
 	PH5Curve.prototype.sit = function(i, p) { // arc length 
