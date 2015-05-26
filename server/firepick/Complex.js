@@ -105,6 +105,12 @@ var should = require("should"),
 		}
 		return s;
 	};
+	Complex.prototype.shouldEqualT = function(expected, tolerance) {
+		var that = this;
+		tolerance = tolerance || 0.0000001;
+		that.re.should.within(expected.re-tolerance, expected.re+tolerance);
+		that.im.should.within(expected.im-tolerance, expected.im+tolerance);
+	}
 
 	//////////////// CLASS ////////////
 	Complex.from = function(xy) {

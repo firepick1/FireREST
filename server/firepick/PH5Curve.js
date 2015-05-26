@@ -240,7 +240,7 @@ PHFactory = require("./PHFactory");
 			"expected:" + c2.stringify({nPlaces:3}) +
 			" actual:" + c1.stringify({nPlaces:3}));
 	};
-	it("s(p) should be monotone returning arc length for p:[0,1] ", function() {
+	it("TESTTESTs(p) should be monotone returning arc length for p:[0,1] ", function() {
 		var ph = new PHFactory([
 			{x:1,y:1},
 			{x:5,y:4},
@@ -264,6 +264,14 @@ PHFactory = require("./PHFactory");
 		phi.s(0.5).should.within(2.5,2.5);
 		phi.s(0.9).should.within(4.499,4.500);
 		phi.s(1).should.within(5,5);
+		var ph2 = new PHFactory([
+			{x:-1,y:1},
+			{x:0,y:2},
+			{x:1,y:1},
+		],{logger:logger}).quintic();
+		ph2.s(0).should.within(0,0);
+		ph2.s(0.5).should.within(1.527,1.528);
+		ph2.s(1).should.within(3.055,3.056);
 	});
 	it("rprime(p) should return velocity vector for p:[0,1]", function() {
 		var ph = new PHFactory([
@@ -294,5 +302,21 @@ PHFactory = require("./PHFactory");
 		phi.sigma(0.5).should.within(2.527,2.528);
 		phi.sigma(0.7).should.within(2.780,2.781);
 		phi.sigma(1.0).should.within(4.110,4.111);
+	});
+	it("attributes z and p should completely determine a PH curve", function() {
+		var ph = new PHFactory([
+			{x:-1,y:1},
+			{x:0,y:2},
+			{x:1,y:1},
+		]).quintic();
+		ph.q.length.should.equal(3);
+		ph.z.length.should.equal(3);
+		logger.withPlaces(15).info("q:", ph.q);
+		logger.withPlaces(15).info("z:", ph.z);
+		var ph2 = new PH5Curve(ph.z,ph.q);
+		for (var i=0; i<=10; i++) {
+			var p = i/10;
+			shouldEqualT(ph.r(p), ph2.r(p), 0.0000000000000000001);
+		}
 	});
 })

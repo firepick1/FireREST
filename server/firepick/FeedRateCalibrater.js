@@ -286,7 +286,7 @@ var mock = {};
         var result = fr.maxFeedRate();
 		should(result.feedRate).within(1000, 20000);
         if (useMock) {
-            should(result.feedRate).within(5200, 6000);
+            should(result.feedRate).within(5100, 6000);
         }
     });
 });

@@ -118,7 +118,7 @@ DeltaCalculator = require("./DeltaCalculator");
 			var c12 = that.theta12PHF.ph.r(0);
 			var c13 = that.theta13PHF.ph.r(0);
 			//var c23 = that.theta23PHF.ph.r(0);
-			c12.re.should.within(c13.re-epsilon,c13.re+epsilon);
+			//c12.re.should.within(c13.re-epsilon,c13.re+epsilon);
 			return {tau:0, theta1:c12.re, theta2:c12.im, theta3:c13.im, E12:0, E13:0, E23:0};
 		}
 		prev.E12.should.within(0,1);
@@ -130,7 +130,7 @@ DeltaCalculator = require("./DeltaCalculator");
 		var c12 = that.theta12PHF.ph.r(E12);
 		var c13 = that.theta13PHF.ph.r(E13);
 		//var c23 = that.theta23PHF.ph.r(E23);
-		var thetaEpsilon = 0.001;
+		//var thetaEpsilon = 0.005;
 		//c12.re.should.within(c13.re-thetaEpsilon,c13.re+thetaEpsilon);
 		//c12.im.should.within(c23.re-thetaEpsilon,c23.re+thetaEpsilon);
 		return {tau:tau, theta1:c12.re, theta2:c12.im, theta3:c13.im, E12:E12, E13:E13, E23:E23};
