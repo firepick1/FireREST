@@ -651,30 +651,42 @@ PH5Curve = require("./PH5Curve");
 		});
 		function testScale(N,K) {
 			logger.info("testScale(N:",N,",K:",K,")");
-			var sK = Math.sqrt(K);
+			var sgnK = K < 0 ? -1 : 1;
+			var sK = Math.sqrt(Math.abs(K));
 			var ph_lineK = new PHFactory([
 				{x: 0,y:0},
 				{x: xMax/K,y:yMax/K},
 			]).quintic();
-			logger.withPlaces(9).info("z:", ph_lineK.z, " q:", ph_lineK.q);
+			logger.withPlaces(9).info("ph_lineK z:", ph_lineK.z, " q:", ph_lineK.q);
 			var phfK = new PHFeed(ph_lineK, {
 				logLevel: "info",
 				vIn:0, vOut:0, vMax:xMax*2, tvMax:0.5
 			});
 			var e = 0.000001;
 			logger.withPlaces(9).debug("phfK", phfK);
-			ph_lineK.z[1].re.should.within(ph_line.z[1].re/sK-e, ph_line.z[1].re/sK+e);
-			ph_lineK.z[1].im.should.within(ph_line.z[1].im/sK-e, ph_line.z[1].im/sK+e);
-			ph_lineK.z[2].re.should.within(ph_line.z[2].re/sK-e, ph_line.z[2].re/sK+e);
-			ph_lineK.z[2].im.should.within(ph_line.z[2].im/sK-e, ph_line.z[2].im/sK+e);
+			if (K>0) {
+				ph_lineK.z[1].re.should.within(ph_line.z[1].re/sK-e, ph_line.z[1].re/sK+e);
+				ph_lineK.z[1].im.should.within(ph_line.z[1].im/sK-e, ph_line.z[1].im/sK+e);
+				ph_lineK.z[2].re.should.within(ph_line.z[2].re/sK-e, ph_line.z[2].re/sK+e);
+				ph_lineK.z[2].im.should.within(ph_line.z[2].im/sK-e, ph_line.z[2].im/sK+e);
+			} else {
+				ph_lineK.z[1].re.should.equal(0);
+				ph_lineK.z[1].im.should.within(ph_line.z[1].re/sK-e, ph_line.z[1].re/sK+e);
+				ph_lineK.z[2].re.should.equal(0);
+				ph_lineK.z[2].im.should.within(ph_line.z[2].re/sK-e, ph_line.z[2].re/sK+e);
+			}
 			if (K>=1) {
 				phfK.profile().vCruise.should.equal(xMax/K*2);
 				phfK.profile().sCruise.should.equal(0);
 				phfK.profile().tCruise.should.equal(0);
-			} else if (K<=-1) {
-				phfK.profile().vCruise.should.equal(-xMax*2);
-				phfK.profile().sCruise.should.equal(xMax*K - sMax);
+			} else if (0 < K && K < 1) {
+				phfK.profile().vCruise.should.equal(xMax*2);
+				phfK.profile().sCruise.should.above(0);
 				phfK.profile().tCruise.should.above(0);
+			} else if (K<=-1) {
+				phfK.profile().vCruise.should.equal(xMax*2);
+				phfK.profile().sCruise.should.equal(0);
+				phfK.profile().tCruise.should.equal(0);
 			}
 			(phfK.profile().tAccel+phfK.profile().tDecel).should
 			.equal(phfK.profile().tS-phfK.profile().tCruise);
@@ -695,6 +707,6 @@ PH5Curve = require("./PH5Curve");
 		testScale(50,2);
 		testScale(50,0.5);
 		testScale(20,1);
-//		testScale(20,-1);
+		testScale(20,-1);
 	});
 })
