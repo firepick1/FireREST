@@ -35,23 +35,23 @@ PH5Curve = require("./PH5Curve");
 		that.iterations = options.iterations || 10;
 
 		var sMax = 0.5 * (that.vMax*that.tvMax); // distance required to reach vMax
-		var uc = "?";
+		that.uc = "?";
 		var sRatio;
 		if (that.vIn === that.vCruise && that.vCruise === that.vOut) {
-			uc = "A";
+			that.uc = "A";
 			that.sAccel = 0;
 			that.tAccel = 0;
 			that.sDecel = 0;
 			that.tDecel = 0;
 		} else if (that.vIn !== that.vCruise && that.vCruise === that.vOut) {
 			if (sMax > that.S) {
-				uc = "B1";
+				that.uc = "B1";
 				sRatio = that.S / sMax;
 				that.sAccel = that.S;
 				that.tAccel = that.tvMax * sRatio;
 				that.vCruise = that.vCruise * sRatio;
 			} else {
-				uc = "B2";
+				that.uc = "B2";
 				that.sAccel = sMax;
 				that.tAccel = that.tvMax;
 			}
@@ -59,13 +59,13 @@ PH5Curve = require("./PH5Curve");
 			that.tDecel = 0;
 		} else if (that.vIn === that.vCruise && that.vCruise !== that.vOut) {
 			if (sMax > that.S) {
-				uc = "C1";
+				that.uc = "C1";
 				sRatio = that.S / sMax;
 				that.vCruise = that.vCruise * sRatio;
 				that.sDecel = that.S;
 				that.tDecel = that.tvMax * sRatio;
 			} else {
-				uc = "C2";
+				that.uc = "C2";
 				that.sDecel = sMax;
 				that.tDecel = that.tvMax;
 			}
@@ -74,13 +74,13 @@ PH5Curve = require("./PH5Curve");
 		} else if (that.vIn !== that.vCruise && that.vCruise !== that.vOut) {
 			that.vIn.should.equal(that.vOut); // speed differential not supported
 			if (sMax > that.S/2) { // vCruise < vMax
-				uc = "D1";
+				that.uc = "D1";
 				that.sAccel = that.S/2;
 				sRatio = that.sAccel / sMax;
 				that.vCruise = (that.vCruise-that.vIn)*sRatio + that.vIn;
-				that.tAccel = (0.5*that.sAccel)/(that.vCruise-that.vIn);
+				that.tAccel = (2*that.sAccel)/(that.vCruise-that.vIn);
 			} else { // vCruise == vMax
-				uc = "D2";
+				that.uc = "D2";
 				that.vCruise = that.vMax;
 				that.sAccel = sMax;
 				that.tAccel = that.tvMax;
@@ -122,7 +122,7 @@ PH5Curve = require("./PH5Curve");
 		];
 
 		that.logger.debug("PHFeed()",
-			" uc:", uc,
+			" uc:", that.uc,
 			" S:", that.S, 
 			" sRatio:", sRatio,
 			" vMax:", that.vMax,
@@ -649,8 +649,8 @@ PH5Curve = require("./PH5Curve");
 			logLevel: "info",
 			vIn:0, vOut:0, vMax:xMax*2, tvMax:0.5
 		});
-		function testScale(N,K) {
-			logger.info("testScale(N:",N,",K:",K,")");
+		function testScale(N,K,uc) {
+			logger.info("testScale(N:",N,",K:",K,",uc:",uc,")");
 			var sgnK = K < 0 ? -1 : 1;
 			var sK = Math.sqrt(Math.abs(K));
 			var ph_lineK = new PHFactory([
@@ -662,6 +662,7 @@ PH5Curve = require("./PH5Curve");
 				logLevel: "info",
 				vIn:0, vOut:0, vMax:xMax*2, tvMax:0.5
 			});
+			phfK.uc.should.equal(uc);
 			var e = 0.000001;
 			logger.withPlaces(9).debug("phfK", phfK);
 			if (K>0) {
@@ -675,38 +676,37 @@ PH5Curve = require("./PH5Curve");
 				ph_lineK.z[2].re.should.equal(0);
 				ph_lineK.z[2].im.should.within(ph_line.z[2].re/sK-e, ph_line.z[2].re/sK+e);
 			}
-			if (K>=1) {
-				phfK.profile().vCruise.should.equal(xMax/K*2);
+			if (Math.abs(K)>=1) {
+				phfK.profile().vCruise.should.equal(Math.abs(xMax/K*2));
 				phfK.profile().sCruise.should.equal(0);
 				phfK.profile().tCruise.should.equal(0);
-			} else if (0 < K && K < 1) {
+			} else if (0 < Math.abs(K) && Math.abs(K) < 1) {
 				phfK.profile().vCruise.should.equal(xMax*2);
 				phfK.profile().sCruise.should.above(0);
 				phfK.profile().tCruise.should.above(0);
-			} else if (K<=-1) {
-				phfK.profile().vCruise.should.equal(xMax*2);
-				phfK.profile().sCruise.should.equal(0);
-				phfK.profile().tCruise.should.equal(0);
 			}
 			(phfK.profile().tAccel+phfK.profile().tDecel).should
 			.equal(phfK.profile().tS-phfK.profile().tCruise);
 			var E = 0;
 			var x = 0;
 			var v = 0;
+			var W = 3;
 			for (var i=0; i<=N; i++) {
 				E = phfK.Ekt(E, i/N);
 				xNew = ph_lineK.r(E).re;
 				vNew = xNew - x;
-				if (i < 5 || N-5 < i || N/2-5<i && i<N/2+5) {
+				if (i < W || N-W < i || N/2-W<i && i<N/2+W) {
 					logger.withPlaces(3).info(i, " E:", E, " xNew:", xNew, " vNew:", vNew, " dv:", (vNew-v));
 				}
 				x = xNew;
 				v = vNew;
 			}
 		}
-		testScale(50,2);
-		testScale(50,0.5);
-		testScale(20,1);
-		testScale(20,-1);
+		testScale(50, -0.5, "D2");
+		testScale(50, 0.5, "D2");
+		testScale(20, -1, "D2");
+		testScale(20, 1, "D2");
+		testScale(20, -2, "D1");
+		testScale(20, 2, "D1");
 	});
 })
