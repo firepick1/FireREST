@@ -377,18 +377,20 @@ PH5Curve = require("./PH5Curve");
 			tS:tS			// OUTPUT: total traversal time
 		});
 	});
-	it("PHFeed(ph,{vMax:v,tvMax:t}) should clip vMax", function() {
+	it("TESTTESTPHFeed(ph,{vMax:v,tvMax:t}) should clip vMax", function() {
 		var vMax = 100;
 		var tvMax = 1; // seconds from rest to vMax
 		var S = phline.s(1);
 		S.should.equal(5);
 		var sAccel = 2.5;
+		var sMax = tvMax * vMax * 0.5;
+		sMax.should.equal(50);
 		var sRatio = sAccel/(tvMax*vMax*0.5);
 		sRatio.should.equal(0.05);
 		var vCruise = vMax*sRatio;
 		vCruise.should.equal(5);
-		var tAccel = (sAccel*0.5) / vCruise;
-		tAccel.should.equal(0.25);
+		var tAccel = (2*sAccel) / vCruise;
+		tAccel.should.equal(1);
 		var sCruise = 0;
 		var tCruise = 0;
 		var tS = tAccel + tCruise + tAccel;
@@ -638,7 +640,7 @@ PH5Curve = require("./PH5Curve");
 		ph_arc.s(E).should.within(3.055, 3.056);
 		ph_arc.r(E).shouldEqualT(new Complex(1.000,1.000),0.001);
 	});
-	it("TESTTESTcoefficients scale in proportion to the sqrt of the distance ratio", function() {
+	it("coefficients scale in proportion to the sqrt of the distance ratio", function() {
 		var xMax = 400*16;
 		var yMax = 0;
 		var ph_line = new PHFactory([
