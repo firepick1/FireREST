@@ -46,7 +46,7 @@ PH5Curve = require("./PH5Curve");
 		} else if (that.vIn !== that.vCruise && that.vCruise === that.vOut) {
 			if (sMax > that.S) {
 				that.uc = "B1";
-				that.sRatio = that.S / sMax;
+				that.sRatio = Math.sqrt(that.S / sMax);
 				that.sAccel = that.S;
 				that.tAccel = that.tvMax * that.sRatio;
 				that.vCruise = that.vCruise * that.sRatio;
@@ -60,7 +60,7 @@ PH5Curve = require("./PH5Curve");
 		} else if (that.vIn === that.vCruise && that.vCruise !== that.vOut) {
 			if (sMax > that.S) {
 				that.uc = "C1";
-				that.sRatio = that.S / sMax;
+				that.sRatio = Math.sqrt(that.S / sMax);
 				that.vCruise = that.vCruise * that.sRatio;
 				that.sDecel = that.S;
 				that.tDecel = that.tvMax * that.sRatio;
