@@ -619,7 +619,7 @@ PH5Curve = require("./PH5Curve");
 		ph_arc.s(E).should.within(3.055, 3.056);
 		ph_arc.r(E).shouldEqualT(new Complex(1.000,1.000),0.001);
 	});
-	it("TESTTEST coefficients scale in proportion to the sqrt of the distance ratio", function() {
+	it("coefficients scale in proportion to the sqrt of the distance ratio", function() {
 		var xMax = 6400; // 400 steps * 16 microsteps
 		var yMax = 0;
 		var ph_line = new PHFactory([
@@ -660,9 +660,9 @@ PH5Curve = require("./PH5Curve");
 			logger.withPlaces(9).info("ph_lineK z:", ph_lineK.z, " q:", ph_lineK.q);
 			if (K>0) {
 				ph_lineK.z[1].re.should.within(ph_line.z[1].re/sK-e, ph_line.z[1].re/sK+e);
-				ph_lineK.z[1].im.should.within(ph_line.z[1].im/sK-e, ph_line.z[1].im/sK+e);
+				ph_lineK.z[1].im.should.equal(0);
 				ph_lineK.z[2].re.should.within(ph_line.z[2].re/sK-e, ph_line.z[2].re/sK+e);
-				ph_lineK.z[2].im.should.within(ph_line.z[2].im/sK-e, ph_line.z[2].im/sK+e);
+				ph_lineK.z[2].im.should.equal(0);
 			} else {
 				ph_lineK.z[1].re.should.equal(0);
 				ph_lineK.z[1].im.should.within(ph_line.z[1].re/sK-e, ph_line.z[1].re/sK+e);

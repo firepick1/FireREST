@@ -319,4 +319,32 @@ PHFactory = require("./PHFactory");
 			shouldEqualT(ph.r(p), ph2.r(p), 0.0000000000000000001);
 		}
 	});
+	it("TESTTESTlines can go in all directions ", function() {
+		function testxy(x,y) {
+			var ph = new PHFactory([
+				{x:0,y:0},
+				{x:x,y:y},
+			]).quintic();
+			logger.withPlaces(5).info("x:", x, " y:", y, " z:", ph.z);
+			shouldEqualT(ph.r(0), new Complex(), 0.00000001);
+			shouldEqualT(ph.r(0.5), new Complex(x/2,y/2), 0.00000001);
+			shouldEqualT(ph.r(1), new Complex(x,y), 0.00000001);
+		}
+		testxy(6400,0);
+		testxy(6400,1600);
+		testxy(6400,6400);
+		testxy(1600,6400);
+		testxy(0,6400);
+		testxy(-1600,6400);
+		testxy(-6400,6400);
+		testxy(-6400,1600);
+		testxy(-6400,0);
+		testxy(-6400,-1600);
+		testxy(-6400,-6400);
+		testxy(-1600,-6400);
+		testxy(0,-6400);
+		testxy(1600,-6400);
+		testxy(6400,-6400);
+		testxy(6400,-1600);
+	});
 })
