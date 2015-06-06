@@ -319,7 +319,7 @@ PHFactory = require("./PHFactory");
 			shouldEqualT(ph.r(p), ph2.r(p), 0.0000000000000000001);
 		}
 	});
-	it("TESTTESTlines can go in all directions ", function() {
+	it("lines can go in all directions ", function() {
 		function testxy(x,y) {
 			var ph = new PHFactory([
 				{x:0,y:0},

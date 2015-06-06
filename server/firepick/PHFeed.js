@@ -708,4 +708,25 @@ PH5Curve = require("./PH5Curve");
 		testScale(-2, "D1");
 		testScale(2, "D1");
 	});
+	it("TESTTESTlines can go in all directions ", function() {
+		function testxy(x,y) {
+			var ph = new PHFactory([
+				{x:0,y:0},
+				{x:x,y:y},
+			]).quintic();
+			logger.withPlaces(5).info("x:", x, " y:", y, " z:", ph.z);
+			shouldEqualT(ph.r(0), new Complex(), 0.00000001);
+			shouldEqualT(ph.r(0.5), new Complex(x/2,y/2), 0.00000001);
+			shouldEqualT(ph.r(1), new Complex(x,y), 0.00000001);
+			var phf = new PHFeed(ph, {
+				vMax:Math.max(Math.abs(x), Math.abs(y)),
+				tvMax:1,
+			});
+			phf.tS.should.equal(2);
+		}
+		testxy(-6400,0);
+		testxy(6400,0);
+		testxy(0,6400);
+		testxy(0,-6400);
+	});
 })
