@@ -708,7 +708,7 @@ PH5Curve = require("./PH5Curve");
 		testScale(-2, "D1");
 		testScale(2, "D1");
 	});
-	it("TESTTESTlines can go in all directions ", function() {
+	it("lines can go in all directions ", function() {
 		function testxy(x,y) {
 			var ph = new PHFactory([
 				{x:0,y:0},

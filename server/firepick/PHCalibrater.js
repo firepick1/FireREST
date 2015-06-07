@@ -352,7 +352,7 @@ var mock = {};
         //}
     //});
 	if(!useMock) {
-    it("TESTTESTcalibrate_tvMax() should find the minimum acceleration time", function() {
+    it("calibrate_tvMax() should find the minimum acceleration time", function() {
 		var phc = new PHCalibrater(xyzCam, { logger:logger, feedMin:10450});
         this.timeout(25*60000);
         var result = phc.calibrate_tvMax();

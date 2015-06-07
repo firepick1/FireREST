@@ -240,7 +240,7 @@ PHFactory = require("./PHFactory");
 			"expected:" + c2.stringify({nPlaces:3}) +
 			" actual:" + c1.stringify({nPlaces:3}));
 	};
-	it("TESTTESTs(p) should be monotone returning arc length for p:[0,1] ", function() {
+	it("s(p) should be monotone returning arc length for p:[0,1] ", function() {
 		var ph = new PHFactory([
 			{x:1,y:1},
 			{x:5,y:4},

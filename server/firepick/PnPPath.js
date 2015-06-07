@@ -93,7 +93,7 @@ PHFeed = require("./PHFeed");
 		logger = value;
 	}
 	PnPPath.getLogger = function() {
-		return logger;
+		return logger || new Logger();
 	}
 	PnPPath.cardinalDirection = function(pt, homeLocus) {
 		var dx = pt.x - homeLocus.x;
@@ -182,7 +182,7 @@ PHFeed = require("./PHFeed");
 			z:pt1.z
 		});
 	});
-	it("TESTTESTposition(1) should return last point", function() {
+	it("position(1) should return last point", function() {
 		var pnp = new PnPPath(pt1, pt2, {});
 
 		pnp.position(1).should.have.properties({
@@ -191,7 +191,7 @@ PHFeed = require("./PHFeed");
 			z:pt2.z
 		});
 	});
-	it('TESTTESTshould have option for setting takeoff tau', function() {
+	it('should have option for setting takeoff tau', function() {
 		new PnPPath(pt1,pt2,{}).should.have.properties({
 			tauTakeoff:0.1,
 		});
@@ -199,7 +199,7 @@ PHFeed = require("./PHFeed");
 			tauTakeoff:0.2,
 		});
 	});
-	it('TESTTESTshould have option for setting landing tau', function() {
+	it('should have option for setting landing tau', function() {
 		new PnPPath(pt1,pt2,{}).should.have.properties({
 			tauLanding:0.9,
 		});
@@ -207,7 +207,7 @@ PHFeed = require("./PHFeed");
 			tauLanding:0.8,
 		});
 	});
-	it('TESTTESTshould have option for cruise height', function() {
+	it('should have option for cruise height', function() {
 		new PnPPath(pt1,pt2,{}).should.have.properties({
 			hCruise:20,
 		});
@@ -215,7 +215,7 @@ PHFeed = require("./PHFeed");
 			hCruise:50,
 		});
 	});
-	it('TESTTESTshould have option for unrestricted travel locus', function() {
+	it('should have option for unrestricted travel locus', function() {
 		new PnPPath(pt1,pt2,{}).should.have.properties({
 			homeLocus:{x:0,y:0,r:70},
 		});
@@ -223,34 +223,34 @@ PHFeed = require("./PHFeed");
 			homeLocus:{x:0,y:0,r:30},
 		});
 	});
-	it('TESTTESTshould have property giving highest point of path', function() {
+	it('should have property giving highest point of path', function() {
 		new PnPPath(pt1,pt2,{}).should.have.properties({
 			apogee:{z:-30}
 		});
 	});
-	it('TESTTESTposition(0.5) should be the apogee', function() {
+	it('position(0.5) should be the apogee', function() {
 		var pnp = new PnPPath(pt1,pt2,{});
 		shouldPositionT(pnp.position(0.5), {z:-30});
 	});
-	it('TESTTESTposition(0.1) should be directly above pt1', function() {
+	it('position(0.1) should be directly above pt1', function() {
 		var pnp = new PnPPath(pt1,pt2);
 		var pos = pnp.position(0.1);
 		shouldPositionT(pos, {x:pt1.x, y:pt1.y});
 		pos.z.should.be.above(pt1.z);
 	});
-	it('TESTTESTposition(0.9) should be directly above pt2', function() {
+	it('position(0.9) should be directly above pt2', function() {
 		var pnp = new PnPPath(pt1,pt2,{});
 		var pos = pnp.position(0.9);
 		shouldPositionT(pos, {x:pt2.x, y:pt2.y});
 		pos.z.should.be.above(pt1.z);
 	});
-	it('TESTTESTcardinalDirection(pt,homeLocus) should give cardinal point as 0,1,2,3 for N,E,S,W', function() {
+	it('cardinalDirection(pt,homeLocus) should give cardinal point as 0,1,2,3 for N,E,S,W', function() {
 		PnPPath.cardinalDirection({x:50,y:90},{x:0,y:0}).should.equal(0);
 		PnPPath.cardinalDirection({x:100,y:90},{x:0,y:0}).should.equal(1);
 		PnPPath.cardinalDirection({x:100,y:90},{x:100,y:100}).should.equal(2);
 		PnPPath.cardinalDirection({x:100,y:90},{x:200,y:100}).should.equal(3);
 	});
-	it('TESTTESTftlDistance(pt1,pt2,homeLocus) should give distance to free travel locus', function() {
+	it('ftlDistance(pt1,pt2,homeLocus) should give distance to free travel locus', function() {
 		var d = PnPPath.ftlDistance({x:0,y:10},{x:10,y:0},{x:0,y:0});
 		should(d).within(7.071,7.072);
 		d = PnPPath.ftlDistance({x:10,y:0},{x:0,y:10},{x:0,y:0});
