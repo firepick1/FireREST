@@ -125,6 +125,16 @@ var should = require("should"),
 	Logger.logger = new Logger({
 		logLevel:"warn"
 	});
+	Logger.validate = function(value) {
+		should.exist(value);
+		value.trace.should.be.a.function;
+		value.debug.should.be.a.function;
+		value.info.should.be.a.function;
+		value.warn.should.be.a.function;
+		value.error.should.be.a.function;
+		value.round.should.be.a.function;
+		value.setLevel.should.be.a.function;
+	}
 
     Logger.logger.info("loaded firepick.Logger");
     module.exports = firepick.Logger = Logger;
@@ -145,6 +155,10 @@ var should = require("should"),
 		logger.logDebug.should.equal(false);
 		logger.logTrace.should.equal(false);
     });
+	it("Logger.validate(obj) should assert Logger-ness", function() {
+		var logger = new firepick.Logger();
+		Logger.validate(logger);
+	});
 	it("should have options", function() {
 		var logger = new firepick.Logger({logLevel:"debug"});
 		logger.should.have.properties(["logLevel", "write"]);
