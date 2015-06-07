@@ -35,7 +35,10 @@ PHFeed = require("./PHFeed");
 		that.tauTakeoff.should.within(0,0.5);
 		that.tauLanding.should.within(0.5,1);
 
-		that.apogee = PnPPath.calcApogee(that.pt1, that.pt2, that.homeLocus, that.hCruise);
+		that.apogee = {
+			z:Math.max(that.pt1.z,that.pt2.z) + that.hCruise,
+		};
+		that.waypointsXY = PnPPath.calcWaypointsXY(that.pt1, that.pt2, that.homeLocus, that.hCruise);
 		that.tauCruise = (that.tauLanding-that.tauTakeoff);
 		logger.debug("calculating PH5Curve for z");
 		var scale=10;
@@ -46,11 +49,16 @@ PHFeed = require("./PHFeed");
 			{x: that.pt2.z,y:dz},
 		]).quintic();
 		logger.debug("calculating PH5Curve for x,y");
-		that.phxy = new PHFactory([
-			{x: that.pt1.x,y:that.pt1.y},
-			{x: that.apogee.x, y:that.apogee.y},
-			{x: that.pt2.x,y:that.pt2.y},
-		]).quintic();
+		var xypts = [];
+		var N = that.waypointsXY.length;
+		for (var i=0; i<N; i++) {
+			xypts.push({
+				x:that.waypointsXY[i].x, 
+				y:that.waypointsXY[i].y,
+				z:that.phz.r(i/(N-1)).re
+			});
+		}
+		that.phxy = new PHFactory(xypts).quintic();
 
 		return that;
     };
@@ -84,6 +92,9 @@ PHFeed = require("./PHFeed");
 		should(value.info)
 		logger = value;
 	}
+	PnPPath.getLogger = function() {
+		return logger;
+	}
 	PnPPath.cardinalDirection = function(pt, homeLocus) {
 		var dx = pt.x - homeLocus.x;
 		var dy = pt.y - homeLocus.y;
@@ -93,25 +104,34 @@ PHFeed = require("./PHFeed");
 			return dy >= 0 ? 0 : 2; // north, south
 		}
 	}
-	PnPPath.calcApogee = function(pt1, pt2, homeLocus, hCruise) {
+	PnPPath.calcWaypointsXY = function(pt1, pt2, homeLocus, hCruise) {
 		var apogee = {
 			x:(pt1.x+pt2.x)/2,
 			y:(pt1.y+pt2.y)/2,
-			z:Math.max(pt1.z,pt2.z)+hCruise,
 		};
+		var waypointsXY = [];
+		waypointsXY.push({x:pt1.x,y:pt1.y});
 		var d = PnPPath.ftlDistance(pt1, pt2, homeLocus);
 		var cd1 = PnPPath.cardinalDirection(pt1, homeLocus);
 		var cd2 = PnPPath.cardinalDirection(pt2, homeLocus);
-		if (d > homeLocus.r && cd1 != cd2) {
-			var dx = apogee.x - homeLocus.x;
-			var dy = apogee.y - homeLocus.y;
-			var scale = homeLocus.r / Math.sqrt(dx*dx + dy*dy);
-			apogee.x = homeLocus.x + dx*scale;
-			apogee.y = homeLocus.y + dy*scale;
+		if (d <= homeLocus.r || cd1 == cd2) {
+			waypointsXY.push(apogee);
+		} else {
+			if (cd1 === 0 || cd1 === 2) {
+				waypointsXY.push({x:pt1.x, y:homeLocus.r});
+			} else {
+				waypointsXY.push({x:homeLocus.r, y:pt1.y});
+			}
+			if (cd2 === 0 || cd2 === 2) {
+				waypointsXY.push({x:pt2.x, y:homeLocus.r});
+			} else {
+				waypointsXY.push({x:homeLocus.r, y:pt2.y});
+			}
 		}
+		waypointsXY.push({x:pt2.x,y:pt2.y});
 
-		logger.debug("apogee:", apogee);
-		return apogee;
+		logger.debug("waypointsXY:", waypointsXY);
+		return waypointsXY;
 	}
 	PnPPath.ftlDistance = function(pt1, pt2, homeLocus) {
 		var dx = pt2.x - pt1.x;
@@ -205,12 +225,12 @@ PHFeed = require("./PHFeed");
 	});
 	it('TESTTESTshould have property giving highest point of path', function() {
 		new PnPPath(pt1,pt2,{}).should.have.properties({
-			apogee:{x:-40, y:20.5, z:-30}
+			apogee:{z:-30}
 		});
 	});
 	it('TESTTESTposition(0.5) should be the apogee', function() {
 		var pnp = new PnPPath(pt1,pt2,{});
-		shouldPositionT(pnp.position(0.5), {x:-40, y:20.5, z:-30});
+		shouldPositionT(pnp.position(0.5), {z:-30});
 	});
 	it('TESTTESTposition(0.1) should be directly above pt1', function() {
 		var pnp = new PnPPath(pt1,pt2);
@@ -243,6 +263,7 @@ PHFeed = require("./PHFeed");
 		should(d).within(7.071,7.072);	// offset locus
 	});
 	it('TESTTESTapogee should be within home locus', function() {
+		PnPPath.getLogger().setLevel("debug");
 		var pnp = new PnPPath({x:100,y:50,z:-30},{x:50,y:90,z:-40});
 		var pos = pnp.position(0.5);
 		var N = 20;
@@ -250,7 +271,7 @@ PHFeed = require("./PHFeed");
 			var tau = i/N;
 			logger.withPlaces(3).info("position(", tau, "):", pnp.position(tau));
 		}
-		shouldPositionT(pos, {x:51.173869,y:47.762278,z:-10});
+		shouldPositionT(pos, {x:57.749458,y:58.638295,z:-10});
 		pos.z.should.be.above(pt1.z);
 	});
 })
