@@ -114,7 +114,7 @@ PHFeed = require("./PHFeed");
 		var d = PnPPath.ftlDistance(pt1, pt2, homeLocus);
 		var cd1 = PnPPath.cardinalDirection(pt1, homeLocus);
 		var cd2 = PnPPath.cardinalDirection(pt2, homeLocus);
-		if (d <= homeLocus.r || cd1 == cd2) {
+		if (d <= homeLocus.r || cd1 == cd2 || ((cd1+cd2) & 1) == 0) {
 			waypointsXY.push(apogee);
 		} else {
 			if (cd1 === 0 || cd1 === 2) {
@@ -262,7 +262,7 @@ PHFeed = require("./PHFeed");
 		d = PnPPath.ftlDistance({x:5,y:17},{x:15,y:7},{x:5,y:7});
 		should(d).within(7.071,7.072);	// offset locus
 	});
-	it('TESTTESTapogee should be within home locus', function() {
+	it('TESTTESTcollision avoidance path should be non-linear', function() {
 		PnPPath.getLogger().setLevel("debug");
 		var pnp = new PnPPath({x:100,y:50,z:-30},{x:50,y:90,z:-40});
 		var pos = pnp.position(0.5);
@@ -272,6 +272,30 @@ PHFeed = require("./PHFeed");
 			logger.withPlaces(3).info("position(", tau, "):", pnp.position(tau));
 		}
 		shouldPositionT(pos, {x:57.749458,y:58.638295,z:-10});
+		pos.z.should.be.above(pt1.z);
+	});
+	it('TESTTESTopposing cardinal point paths should be linear', function() {
+		PnPPath.getLogger().setLevel("debug");
+		var pnp = new PnPPath({x:100,y:80,z:-30},{x:-90,y:80,z:-40});
+		var pos = pnp.position(0.5);
+		var N = 20;
+		for (var i=0; i<=N; i++) {
+			var tau = i/N;
+			logger.withPlaces(3).info("position(", tau, "):", pnp.position(tau));
+		}
+		shouldPositionT(pos, {x:5,y:80,z:-10});
+		pos.z.should.be.above(pt1.z);
+	});
+	it('TESTTESTidentical cardinal point paths should be linear', function() {
+		PnPPath.getLogger().setLevel("debug");
+		var pnp = new PnPPath({x:100,y:80,z:-30},{x:90,y:80,z:-40});
+		var pos = pnp.position(0.5);
+		var N = 20;
+		for (var i=0; i<=N; i++) {
+			var tau = i/N;
+			logger.withPlaces(3).info("position(", tau, "):", pnp.position(tau));
+		}
+		shouldPositionT(pos, {x:95,y:80,z:-10});
 		pos.z.should.be.above(pt1.z);
 	});
 })
