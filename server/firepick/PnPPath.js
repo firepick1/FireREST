@@ -7,10 +7,10 @@ Tridiagonal = require("./Tridiagonal");
 PHFactory = require("./PHFactory");
 PH5Curve = require("./PH5Curve");
 PHFeed = require("./PHFeed");
-
+DeltaCalculator = require("./DeltaCalculator");
 
 (function(firepick) {
-	var logger;
+	var logger = new Logger();
 
     function PnPPath(pt1,pt2,options) {
 		var that = this;
@@ -21,7 +21,6 @@ PHFeed = require("./PHFeed");
 		that.pt2 = pt2;
 
 		options = options || {};
-		logger = options.logger || logger || new Logger(options);
 		that.hCruise = options.hCruise == null ? 20 : options.hCruise;
 		that.tauTakeoff = options.tauTakeoff == null ? 0.1 : options.tauTakeoff;
 		that.tauLanding = options.tauLanding == null ? 0.9 : options.tauLanding;
@@ -38,7 +37,7 @@ PHFeed = require("./PHFeed");
 		that.apogee = {
 			z:Math.max(that.pt1.z,that.pt2.z) + that.hCruise,
 		};
-		that.waypointsXY = PnPPath.calcWaypointsXY(that.pt1, that.pt2, that.homeLocus, that.hCruise);
+		that.waypointsXY = PnPPath.waypointsXY(that.pt1, that.pt2, that.homeLocus, that.hCruise);
 		that.tauCruise = (that.tauLanding-that.tauTakeoff);
 		logger.debug("calculating PH5Curve for z");
 		var scale=10;
@@ -86,6 +85,18 @@ PHFeed = require("./PHFeed");
 
 		return {x:xy.re,y:xy.im,z:that.phz.r(tau).re};
 	};
+	PnPPath.prototype.waypointsDelta = function(deltaCalculator) {
+		var that = this;
+		var waypoints = [];
+		var N = Math.ceil(3/(2*that.tauTakeoff));
+		for (var i=0; i<=N; i++) {
+			var xyz = that.position(i/N);
+			var angles = deltaCalculator.calcAngles(xyz);
+			logger.debug("i:", i, " xyz:", xyz, " angles:", angles);
+			waypoints.push(angles);
+		}
+		return waypoints;
+	}
 
 	///////////////// CLASS //////////
 	PnPPath.setLogger = function(value) {
@@ -104,7 +115,19 @@ PHFeed = require("./PHFeed");
 			return dy >= 0 ? 0 : 2; // north, south
 		}
 	}
-	PnPPath.calcWaypointsXY = function(pt1, pt2, homeLocus, hCruise) {
+
+	PnPPath.ftlDistance = function(pt1, pt2, homeLocus) {
+		var dx = pt2.x - pt1.x;
+		var dy = pt2.y - pt1.y;
+		var numerator = Math.abs(
+			dy*homeLocus.x 
+			- dx*homeLocus.y 
+			+ pt2.x*pt1.y 
+			- pt2.y*pt1.x);
+		var denominator = Math.sqrt(dy*dy + dx*dx);
+		return numerator/denominator;
+	}
+	PnPPath.waypointsXY = function(pt1, pt2, homeLocus, hCruise) {
 		var apogee = {
 			x:(pt1.x+pt2.x)/2,
 			y:(pt1.y+pt2.y)/2,
@@ -133,17 +156,6 @@ PHFeed = require("./PHFeed");
 		logger.debug("waypointsXY:", waypointsXY);
 		return waypointsXY;
 	}
-	PnPPath.ftlDistance = function(pt1, pt2, homeLocus) {
-		var dx = pt2.x - pt1.x;
-		var dy = pt2.y - pt1.y;
-		var numerator = Math.abs(
-			dy*homeLocus.x 
-			- dx*homeLocus.y 
-			+ pt2.x*pt1.y 
-			- pt2.y*pt1.x);
-		var denominator = Math.sqrt(dy*dy + dx*dx);
-		return numerator/denominator;
-	}
 
 
     Logger.logger.info("loaded firepick.PnPPath");
@@ -154,7 +166,7 @@ PHFeed = require("./PHFeed");
 (typeof describe === 'function') && describe("firepick.PnPPath", function() {
 	var logger = new Logger({
 		nPlaces:1,
-		logLevel:"debug"
+		logLevel:"info"
 	});
 	var PnPPath = firepick.PnPPath;
 	var epsilon = 0.000001;
@@ -262,40 +274,51 @@ PHFeed = require("./PHFeed");
 		d = PnPPath.ftlDistance({x:5,y:17},{x:15,y:7},{x:5,y:7});
 		should(d).within(7.071,7.072);	// offset locus
 	});
-	it('TESTTESTcollision avoidance path should be non-linear', function() {
-		PnPPath.getLogger().setLevel("debug");
+	it('collision avoidance path should be non-linear', function() {
+		PnPPath.getLogger().setLevel("info");
 		var pnp = new PnPPath({x:100,y:50,z:-30},{x:50,y:90,z:-40});
 		var pos = pnp.position(0.5);
 		var N = 20;
 		for (var i=0; i<=N; i++) {
 			var tau = i/N;
-			logger.withPlaces(3).info("position(", tau, "):", pnp.position(tau));
+			logger.withPlaces(3).debug("position(", tau, "):", pnp.position(tau));
 		}
 		shouldPositionT(pos, {x:57.749458,y:58.638295,z:-10});
 		pos.z.should.be.above(pt1.z);
 	});
-	it('TESTTESTopposing cardinal point paths should be linear', function() {
-		PnPPath.getLogger().setLevel("debug");
+	it('opposing cardinal point paths should be linear', function() {
+		PnPPath.getLogger().setLevel("info");
 		var pnp = new PnPPath({x:100,y:80,z:-30},{x:-90,y:80,z:-40});
 		var pos = pnp.position(0.5);
 		var N = 20;
 		for (var i=0; i<=N; i++) {
 			var tau = i/N;
-			logger.withPlaces(3).info("position(", tau, "):", pnp.position(tau));
+			logger.withPlaces(3).debug("position(", tau, "):", pnp.position(tau));
 		}
 		shouldPositionT(pos, {x:5,y:80,z:-10});
 		pos.z.should.be.above(pt1.z);
 	});
-	it('TESTTESTidentical cardinal point paths should be linear', function() {
-		PnPPath.getLogger().setLevel("debug");
+	it('identical cardinal point paths should be linear', function() {
+		PnPPath.getLogger().setLevel("info");
 		var pnp = new PnPPath({x:100,y:80,z:-30},{x:90,y:80,z:-40});
 		var pos = pnp.position(0.5);
 		var N = 20;
 		for (var i=0; i<=N; i++) {
 			var tau = i/N;
-			logger.withPlaces(3).info("position(", tau, "):", pnp.position(tau));
+			logger.withPlaces(3).debug("position(", tau, "):", pnp.position(tau));
 		}
 		shouldPositionT(pos, {x:95,y:80,z:-10});
 		pos.z.should.be.above(pt1.z);
+	});
+	it('delta waypoints', function() {
+		PnPPath.getLogger().setLevel("info");
+		var pnp = new PnPPath({x:100,y:50,z:-60},{x:50,y:90,z:-70});
+		var dc = new DeltaCalculator();
+		var waypoints = pnp.waypointsDelta(dc);
+		var N = waypoints.length-1;
+		logger.debug("waypointsDelta:", N);
+		for (var i=0; i<=N; i++) {
+			logger.withPlaces(3).debug("waypointDelta[", i, "]:",waypoints[i]);
+		}
 	});
 })

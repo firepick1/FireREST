@@ -311,8 +311,8 @@ PHFactory = require("./PHFactory");
 		]).quintic();
 		ph.q.length.should.equal(3);
 		ph.z.length.should.equal(3);
-		logger.withPlaces(15).info("q:", ph.q);
-		logger.withPlaces(15).info("z:", ph.z);
+		logger.withPlaces(15).debug("q:", ph.q);
+		logger.withPlaces(15).debug("z:", ph.z);
 		var ph2 = new PH5Curve(ph.z,ph.q);
 		for (var i=0; i<=10; i++) {
 			var p = i/10;
@@ -325,7 +325,7 @@ PHFactory = require("./PHFactory");
 				{x:0,y:0},
 				{x:x,y:y},
 			]).quintic();
-			logger.withPlaces(5).info("x:", x, " y:", y, " z:", ph.z);
+			logger.withPlaces(5).debug("x:", x, " y:", y, " z:", ph.z);
 			shouldEqualT(ph.r(0), new Complex(), 0.00000001);
 			shouldEqualT(ph.r(0.5), new Complex(x/2,y/2), 0.00000001);
 			shouldEqualT(ph.r(1), new Complex(x,y), 0.00000001);

@@ -274,7 +274,7 @@ PH5Curve = require("./PH5Curve");
 (typeof describe === 'function') && describe("firepick.PHFeed", function() {
 	var logger = new Logger({
 		nPlaces:1,
-		logLevel:"debug"
+		logLevel:"info"
 	});
 	var epsilon = 0.000001;
 	var PHFeed = firepick.PHFeed;
@@ -583,7 +583,7 @@ PH5Curve = require("./PH5Curve");
 			{x: 1,y:1},
 		]).quintic();
 		var phf = new PHFeed(ph_arc,{
-			logLevel: "debug",
+			logLevel: "info",
 		});
 		var E = 0;
 		ph_arc.s(E).should.equal(0);
@@ -640,7 +640,7 @@ PH5Curve = require("./PH5Curve");
 				xNew = ph_lineK.r(E).re;
 				vNew = xNew - x;
 				if (i < W || N-W < i || N/2-W<i && i<N/2+W) {
-					logger.withPlaces(3).info(i, " E:", E, " xNew:", xNew, " vNew:", vNew, " dv:", (vNew-v));
+					logger.withPlaces(3).debug(i, " E:", E, " xNew:", xNew, " vNew:", vNew, " dv:", (vNew-v));
 				}
 				x = xNew;
 				v = vNew;
@@ -648,7 +648,7 @@ PH5Curve = require("./PH5Curve");
 		}
 		function testScale(K,uc) {
 			var N = 50;
-			logger.info("testScale(N:",N,",K:",K,",uc:",uc,")");
+			logger.debug("testScale(N:",N,",K:",K,",uc:",uc,")");
 			var sgnK = K < 0 ? -1 : 1;
 			var sK = Math.sqrt(Math.abs(K));
 			var xMaxK = xMax/K;
@@ -657,7 +657,7 @@ PH5Curve = require("./PH5Curve");
 				{x: 0,y:0},
 				{x: xMaxK,y:yMax/K},
 			]).quintic();
-			logger.withPlaces(9).info("ph_lineK z:", ph_lineK.z, " q:", ph_lineK.q);
+			logger.withPlaces(9).debug("ph_lineK z:", ph_lineK.z, " q:", ph_lineK.q);
 			if (K>0) {
 				ph_lineK.z[1].re.should.within(ph_line.z[1].re/sK-e, ph_line.z[1].re/sK+e);
 				ph_lineK.z[1].im.should.equal(0);
@@ -683,7 +683,7 @@ PH5Curve = require("./PH5Curve");
 			var sRatio = Math.sqrt(Math.min(sAccel,sMax)/sMax);
 			var vCruise = vMax * sRatio;
 			var tAccel = tvMax * sRatio;
-				logger.info("vCruise:", phfK.vCruise, " sAccel:", phfK.sAccel, " tAccel:", phfK.tAccel,
+				logger.debug("vCruise:", phfK.vCruise, " sAccel:", phfK.sAccel, " tAccel:", phfK.tAccel,
 					" sRatio:", phfK.sRatio, " sMax:", sMax);
 			if (Math.abs(K)>1) {
 				phfK.vCruise.should.within(vCruise-e,vCruise+e);
@@ -714,7 +714,7 @@ PH5Curve = require("./PH5Curve");
 				{x:0,y:0},
 				{x:x,y:y},
 			]).quintic();
-			logger.withPlaces(5).info("x:", x, " y:", y, " z:", ph.z);
+			logger.withPlaces(5).debug("x:", x, " y:", y, " z:", ph.z);
 			shouldEqualT(ph.r(0), new Complex(), 0.00000001);
 			shouldEqualT(ph.r(0.5), new Complex(x/2,y/2), 0.00000001);
 			shouldEqualT(ph.r(1), new Complex(x,y), 0.00000001);
