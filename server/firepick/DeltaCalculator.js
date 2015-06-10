@@ -18,10 +18,10 @@ Logger = require("./Logger");
     function DeltaCalculator(options) {
 		var that = this;
         options = options || {};
-        that.e = options.e || 115; // effector equilateral triangle side
-        that.f = options.f || 457.3; // base equilateral triangle side
-        that.re = options.re || 232; // effector arm length
-        that.rf = options.rf || 112; // base arm length
+        that.e = options.e || 131.636; // effector equilateral triangle side
+        that.f = options.f || 190.526; // base equilateral triangle side
+        that.re = options.re || 270.000; // effector arm length
+        that.rf = options.rf || 90.000; // base arm length
 		that.steps360 = options.steps360 == null ? 400 : options.steps360;
 		that.microsteps = options.microsteps == null ? 16 : options.microsteps;
 		that.gearRatio = options.gearRatio == null ? 150/16 : options.gearRatio;
@@ -178,12 +178,20 @@ Logger = require("./Logger");
 		}
 	}
 	it("has effector equilateral triangle side length option", function() {
-		new DeltaCalculator().e.should.equal(115);
+		new DeltaCalculator().e.should.equal(131.636);
 		new DeltaCalculator({e:120}).e.should.equal(120);
 	});
 	it("has upper base equilateral triangle side length option", function() {
-		new DeltaCalculator().f.should.equal(457.3);
+		new DeltaCalculator().f.should.equal(190.526);
 		new DeltaCalculator({f:120}).f.should.equal(120);
+	});
+	it("has effector arm length option", function() {
+		new DeltaCalculator().re.should.equal(270.000);
+		new DeltaCalculator({re:230}).re.should.equal(230);
+	});
+	it("has effector arm length option", function() {
+		new DeltaCalculator().rf.should.equal(90.000);
+		new DeltaCalculator({rf:114}).rf.should.equal(114);
 	});
 	it("has steps per revolution option", function() {
 		new DeltaCalculator().steps360.should.equal(400);
@@ -201,19 +209,11 @@ Logger = require("./Logger");
 		new DeltaCalculator().degreePulses.should.equal(500/3);
 		new DeltaCalculator({degreePulses:100}).degreePulses.should.equal(100);
 	});
-	it("has effector arm length option", function() {
-		new DeltaCalculator().re.should.equal(232);
-		new DeltaCalculator({re:230}).re.should.equal(230);
-	});
-	it("has effector arm length option", function() {
-		new DeltaCalculator().rf.should.equal(112);
-		new DeltaCalculator({rf:114}).rf.should.equal(114);
-	});
-	it("TESTTESThas home origin offset option", function() {
-		new DeltaCalculator().dz.should.within(96.859,96.860);
+	it("has home origin offset option", function() {
+		new DeltaCalculator().dz.should.within(247.893,247.894);
 		new DeltaCalculator({dz:100}).dz.should.equal(100);
 	});
-	it("TESTTESThas homing error options", function() {
+	it("has homing error options", function() {
 		new DeltaCalculator().eTheta1.should.equal(0);
 		new DeltaCalculator({eTheta1:3.1}).eTheta1.should.equal(3.1);
 		new DeltaCalculator().eTheta2.should.equal(0);
@@ -227,14 +227,14 @@ Logger = require("./Logger");
 	});
 	it("TESTTESTangles increase downwards as Z decreases", function() {
         var dc = new DeltaCalculator();
-		shouldEqualT(dc.calcXYZ({theta1:1, theta2:1, theta3:1}), {x:0,y:0,z:-1.992});
+		shouldEqualT(dc.calcXYZ({theta1:1, theta2:1, theta3:1}), {x:0,y:0,z:-1.5766});
 	});
 	it("TESTTESTcalcAngles() should compute angles from XYZ", function() {
         var dc = new DeltaCalculator();
 		shouldEqualT(dc.calcAngles({x:0,y:0,z:0}), {theta1:0, theta2:0, theta3:0});
-		shouldEqualT(dc.calcAngles({x:0,y:0,z:-1.992}), {theta1:1, theta2:1, theta3:1});
+		shouldEqualT(dc.calcAngles({x:0,y:0,z:-1.5766}), {theta1:1, theta2:1, theta3:1});
 	});
-	it("xyz(0,0,0) should be at theta(0,0,0)", function() {
+	it("TESTTESTxyz(0,0,0) should be at theta(0,0,0)", function() {
         var dc = new firepick.DeltaCalculator();
 		shouldEqualT(dc.calcXYZ({theta1:0, theta2:0, theta3:0}), {x:0,y:0,z:0});
 		shouldEqualT(dc.calcAngles({x:0,y:0,z:0}), {theta1:0, theta2:0, theta3:0});
@@ -243,17 +243,17 @@ Logger = require("./Logger");
         var dc = new firepick.DeltaCalculator();
 		var epsilon = 0.0000000000001;
 		var expected = [
-			{theta1:19.403,theta2:19.403,theta3:19.403},
-			{theta1:19.553,theta2:14.119,theta3:24.683},
-			{theta1:20.000,theta2: 8.858,theta3:29.938},
-			{theta1:20.743,theta2: 3.657,theta3:35.155},
-			{theta1:21.780,theta2:-1.436,theta3:40.325},
-			{theta1:23.107,theta2:-6.366,theta3:45.448},
-			{theta1:24.721,theta2:-11.073,theta3:50.524},
-			{theta1:26.619,theta2:-15.488,theta3:55.559},
-			{theta1:28.800,theta2:-19.547,theta3:60.563},
-			{theta1:31.263,theta2:-23.191,theta3:65.546},
-			{theta1:34.009,theta2:-26.372,theta3:70.524},
+			{theta1:30.082,theta2:30.082,theta3:30.082},
+			{theta1:30.202,theta2:28.223,theta3:32.151},
+			{theta1:30.562,theta2:26.575,theta3:34.426},
+			{theta1:31.163,theta2:25.143,theta3:36.905},
+			{theta1:32.012,theta2:23.929,theta3:39.588},
+			{theta1:33.112,theta2:22.937,theta3:42.474},
+			{theta1:34.475,theta2:22.171,theta3:45.563},
+			{theta1:36.111,theta2:21.635,theta3:48.861},
+			{theta1:38.037,theta2:21.334,theta3:52.372},
+			{theta1:40.276,theta2:21.277,theta3:56.107},
+			{theta1:42.859,theta2:21.470,theta3:60.082},
 		];
 
 		function testCalc(xyz,expectedAngles,dtheta) {
@@ -300,7 +300,7 @@ Logger = require("./Logger");
 	});
 	it("TESTTESTshould compensate for homing error", function() {
 		var dc0 = new DeltaCalculator({eTheta1:0, eTheta2:0, eTheta3:0});
-		var angles_x100 = {theta1:34.009, theta2:-26.372, theta3:70.524};
+		var angles_x100 = {theta1:42.859, theta2:21.470, theta3:60.082};
 		var xyz = {x:100,y:0,z:-50};
 		shouldEqualT(dc0.calcAngles(xyz), angles_x100);
 		var dc1 = new DeltaCalculator({eTheta1:1, eTheta2:1, eTheta3:1});
@@ -312,4 +312,34 @@ Logger = require("./Logger");
 			theta3:angles_x100.theta3 + 1,
 		});
 	});
+	it("TESTTESTshould compensate for homing error", function() {
+		var dc = new DeltaCalculator({ });
+		for (var theta = -60; theta <= 60; theta++) {
+			logger.info("theta:", theta, " xyz:",  dc.calcXYZ({
+				theta1:theta, theta2:theta, theta3:theta}));
+		}
+	});
 });
+/*
+#define DELTA_E         131.636 // End effector length
+#define DELTA_F         190.526 // Base length
+#define DELTA_RE        270.000 // Carbon rod length
+#define DELTA_RF         90.000 // Servo horn length
+//#define DELTA_Z_OFFSET  293.000 // Distance from delta 8mm rod/pulley to table/bed.
+
+//NOTE: For OpenPnP, set the zero to be about 25mm above the bed...
+#define DELTA_Z_OFFSET  268.000 // Distance from delta 8mm rod/pulley to table/bed.
+
+
+#define DELTA_EE_OFFS    15.000 // Ball joint plane to bottom of end effector surface
+//#define TOOL_OFFSET       0.000 // No offset
+//#define TOOL_OFFSET      40.000 // Distance between end effector ball joint plane and tip of tool (Z probe)
+#define TOOL_OFFSET      30.500 // Distance between end effector ball joint plane and tip of tool (PnP)
+#define Z_CALC_OFFSET  ((DELTA_Z_OFFSET - TOOL_OFFSET - DELTA_EE_OFFS) * -1.0)
+
+#define Z_HOME_ANGLE    -67.200 // This is the angle where the arms hit the endstop sensor
+#define Z_HOME_OFFS    (((DELTA_Z_OFFSET - TOOL_OFFSET - DELTA_EE_OFFS) - 182.002) - 0.5)
+                                // This is calculated from the above angle, after applying forward 
+                                // kinematics, and adding the Z calc offset to it.
+
+*/
