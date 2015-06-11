@@ -159,7 +159,7 @@ var should = require("should"),
 		var logger = new firepick.Logger();
 		Logger.validate(logger);
 	});
-	it("should have options", function() {
+	it("(TESTTEST) should have options", function() {
 		var logger = new firepick.Logger({logLevel:"debug"});
 		logger.should.have.properties(["logLevel", "write"]);
 		logger.logLevel.should.equal("debug");
