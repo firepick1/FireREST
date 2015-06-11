@@ -56,9 +56,9 @@ Logger = require("./Logger");
         angles.theta3.should.be.Number;
 
         var t = (that.f - that.e) * tan30 / 2;
-        var theta1 = (angles.theta1 - that.eTheta1) * dtr;
-        var theta2 = (angles.theta2 - that.eTheta2) * dtr;
-        var theta3 = (angles.theta3 - that.eTheta3) * dtr;
+        var theta1 = (angles.theta1 + that.eTheta1) * dtr;
+        var theta2 = (angles.theta2 + that.eTheta2) * dtr;
+        var theta3 = (angles.theta3 + that.eTheta3) * dtr;
         var y1 = -(t + that.rf * Math.cos(theta1));
         var z1 = -that.rf * Math.sin(theta1);
         var y2 = (t + that.rf * Math.cos(theta2)) * sin30;
@@ -147,9 +147,9 @@ Logger = require("./Logger");
             return null;
         }
         return {
-            theta1: theta1+that.eTheta1,
-            theta2: theta2+that.eTheta2,
-            theta3: theta3+that.eTheta3,
+            theta1: theta1-that.eTheta1,
+            theta2: theta2-that.eTheta2,
+            theta3: theta3-that.eTheta3,
         }
     };
 
@@ -221,84 +221,87 @@ Logger = require("./Logger");
 		new DeltaCalculator().eTheta3.should.equal(0);
 		new DeltaCalculator({eTheta3:3.1}).eTheta3.should.equal(3.1);
 	});
-	it("TESTTESTcalcXYZ() should compute XYZ from angles ", function() {
+	it("calcXYZ() should compute XYZ from angles ", function() {
         var dc = new DeltaCalculator();
 		shouldEqualT(dc.calcXYZ({theta1:0, theta2:0, theta3:0}), {x:0,y:0,z:0});
 	});
-	it("TESTTESTangles increase downwards as Z decreases", function() {
+	it("angles increase downwards as Z decreases", function() {
         var dc = new DeltaCalculator();
 		shouldEqualT(dc.calcXYZ({theta1:1, theta2:1, theta3:1}), {x:0,y:0,z:-1.5766});
 	});
-	it("TESTTESTcalcAngles() should compute angles from XYZ", function() {
+	it("calcAngles() should compute angles from XYZ", function() {
         var dc = new DeltaCalculator();
 		shouldEqualT(dc.calcAngles({x:0,y:0,z:0}), {theta1:0, theta2:0, theta3:0});
 		shouldEqualT(dc.calcAngles({x:0,y:0,z:-1.5766}), {theta1:1, theta2:1, theta3:1});
 	});
-	it("TESTTESTxyz(0,0,0) should be at theta(0,0,0)", function() {
+	it("xyz(0,0,0) should be at theta(0,0,0)", function() {
         var dc = new firepick.DeltaCalculator();
 		shouldEqualT(dc.calcXYZ({theta1:0, theta2:0, theta3:0}), {x:0,y:0,z:0});
 		shouldEqualT(dc.calcAngles({x:0,y:0,z:0}), {theta1:0, theta2:0, theta3:0});
 	});
-	it("TESTTESTlines in XYZ space map to curves in delta space", function() {
+	it("should generate thetaerr.csv", function() {
         var dc = new firepick.DeltaCalculator();
-		var epsilon = 0.0000000000001;
-		var expected = [
-			{theta1:30.082,theta2:30.082,theta3:30.082},
-			{theta1:30.202,theta2:28.223,theta3:32.151},
-			{theta1:30.562,theta2:26.575,theta3:34.426},
-			{theta1:31.163,theta2:25.143,theta3:36.905},
-			{theta1:32.012,theta2:23.929,theta3:39.588},
-			{theta1:33.112,theta2:22.937,theta3:42.474},
-			{theta1:34.475,theta2:22.171,theta3:45.563},
-			{theta1:36.111,theta2:21.635,theta3:48.861},
-			{theta1:38.037,theta2:21.334,theta3:52.372},
-			{theta1:40.276,theta2:21.277,theta3:56.107},
-			{theta1:42.859,theta2:21.470,theta3:60.082},
-		];
-
-		function testCalc(xyz,expectedAngles,dtheta) {
-			var angles = dc.calcAngles(xyz);
-			logger.debug("angles:", angles);
-			var theta_dtheta = {
-				theta1:angles.theta1+dtheta, 
-				theta2:angles.theta2+dtheta, 
-				theta3:angles.theta3+dtheta
-				};
-			var xyz_dtheta = dc.calcXYZ(theta_dtheta);
-			if (dtheta === 0) { // round trip
-				shouldEqualT(angles, expectedAngles);
-			} else {
-				logger.debug("dtheta:", dtheta, "error",
-					" x:", xyz_dtheta.x-xyz.x,
-					" y:", xyz_dtheta.y-xyz.y,
-					" z:", xyz_dtheta.z-xyz.z);
+		function testData(xyz) {
+			var v = [];
+			for (var dtheta=-2; dtheta<=2; dtheta++) {
+				var angles = dc.calcAngles(xyz);
+				var theta_dtheta = {
+					theta1:angles.theta1+dtheta, 
+					theta2:angles.theta2+dtheta, 
+					theta3:angles.theta3+dtheta
+					};
+				var xyz_dtheta = dc.calcXYZ(theta_dtheta);
+				v.push(xyz_dtheta.x - xyz.x);
+				v.push(xyz_dtheta.y - xyz.y);
+				v.push(xyz_dtheta.z - xyz.z);
 			}
+			logger.info(",", xyz.x, 
+				", ", v[0], ", ", v[1], ", ", v[2], ", ", v[3], ", ", v[4],
+				", ", v[5], ", ", v[6], ", ", v[7], ", ", v[8], ", ", v[9],
+				", ", v[10], ", ", v[11], ", ", v[12], ", ", v[13], ", ", v[14]);
 		}
-		testCalc({x:  0,y:0,z:-50}, expected[ 0], 0);
-		testCalc({x: 10,y:0,z:-50}, expected[ 1], 0);
-		testCalc({x: 20,y:0,z:-50}, expected[ 2], 0);
-		testCalc({x: 30,y:0,z:-50}, expected[ 3], 0);
-		testCalc({x: 40,y:0,z:-50}, expected[ 4], 0);
-		testCalc({x: 50,y:0,z:-50}, expected[ 5], 0);
-		testCalc({x: 60,y:0,z:-50}, expected[ 6], 0);
-		testCalc({x: 70,y:0,z:-50}, expected[ 7], 0);
-		testCalc({x: 80,y:0,z:-50}, expected[ 8], 0);
-		testCalc({x: 90,y:0,z:-50}, expected[ 9], 0);
-		testCalc({x:100,y:0,z:-50}, expected[10], 0);
-		for (var i=0; i<=10; i++) {
-			testCalc({x:i*10,y:0,z:-50}, expected[i], -2);
+		var line = ", x";
+		for (var dtheta=-2; dtheta<=2; dtheta++) {
+			line += ", xErr(" + dtheta + ")" +
+				", yErr(" + dtheta + ")" +
+				", zErr(" + dtheta + ")";
 		}
-		for (var i=0; i<=10; i++) {
-			testCalc({x:i*10,y:0,z:-50}, expected[i], -1);
-		}
-		for (var i=0; i<=10; i++) {
-			testCalc({x:i*10,y:0,z:-50}, expected[i], 1);
-		}
-		for (var i=0; i<=10; i++) {
-			testCalc({x:i*10,y:0,z:-50}, expected[i], 2);
+		logger.info(line);
+		for (var i=-10; i<=10; i++) {
+			testData({x:i*10,y:0,z:-70});
 		}
 	});
-	it("TESTTESTshould compensate for homing error", function() {
+	it("TESTTESTshould generate gearerror.csv", function() {
+		var dc = [
+			new DeltaCalculator({gearRatio:149/16}), // smaller
+			new DeltaCalculator({gearRatio:150/16}), // normal
+			new DeltaCalculator({gearRatio:151/16}), // larger
+		];
+		function testData(xyz) {
+			var v = [];
+			for (var i=0; i<3; i++) {
+				var angles = dc[1].calcAngles(xyz);
+				var xyz_gear = dc[i].calcXYZ(angles);
+				v.push(xyz_gear.x - xyz.x);
+				v.push(xyz_gear.y - xyz.y);
+				v.push(xyz_gear.z - xyz.z);
+			}
+			logger.info(",", xyz.x, 
+				", ", v[0], ", ", v[1], ", ", v[2], ", ", v[3], ", ", v[4],
+				", ", v[5], ", ", v[6], ", ", v[7], ", ", v[8]);
+		}
+		var line = ", x";
+		for (var dtheta=-2; dtheta<=2; dtheta++) {
+			line += ", xErr(" + dtheta + ")" +
+				", yErr(" + dtheta + ")" +
+				", zErr(" + dtheta + ")";
+		}
+		logger.info(line);
+		for (var i=-10; i<=10; i++) {
+			testData({x:i*10,y:0,z:-70});
+		}
+	});
+	it("TESTTESTeTheta1..3 should compensate for homing error", function() {
 		var dc0 = new DeltaCalculator({eTheta1:0, eTheta2:0, eTheta3:0});
 		var angles_x100 = {theta1:42.859, theta2:21.470, theta3:60.082};
 		var xyz = {x:100,y:0,z:-50};
@@ -307,17 +310,29 @@ Logger = require("./Logger");
 		dc1.eTheta1.should.equal(1);
 		dc1.dz.should.equal(dc0.dz);
 		shouldEqualT(dc1.calcAngles(xyz), {
-			theta1:angles_x100.theta1 + 1,
-			theta2:angles_x100.theta2 + 1,
-			theta3:angles_x100.theta3 + 1,
+			theta1:angles_x100.theta1 - 1,
+			theta2:angles_x100.theta2 - 1,
+			theta3:angles_x100.theta3 - 1,
 		});
+		shouldEqualT(dc1.calcXYZ(dc1.calcAngles(xyz)), xyz);
 	});
-	it("TESTTESTshould compensate for homing error", function() {
-		var dc = new DeltaCalculator({ });
-		for (var theta = -60; theta <= 60; theta++) {
-			logger.info("theta:", theta, " xyz:",  dc.calcXYZ({
-				theta1:theta, theta2:theta, theta3:theta}));
-		}
+	it("TESTTESThoming error should affect Y and Z", function() {
+		var dc = new DeltaCalculator();
+		var angles = [
+			dc.calcAngles({x:-100,y:0,z:-70}),
+			dc.calcAngles({x:0,y:0,z:-70}),
+			dc.calcAngles({x:100,y:0,z:-70})
+		];
+		var dc_minus1 = new DeltaCalculator({eTheta1:-1,eTheta2:-1,eTheta3:-1});
+		var dc_plus1 = new DeltaCalculator({eTheta1:1,eTheta2:1,eTheta3:1});
+
+		shouldEqualT(dc_minus1.calcXYZ(angles[0]),{x:-99.947,y:0.213,z:-68.745});
+		shouldEqualT(dc_minus1.calcXYZ(angles[1]),{x:0,y:0,z:-68.492});
+		shouldEqualT(dc_minus1.calcXYZ(angles[2]),{x:99.947,y:0.213,z:-68.745});
+
+		shouldEqualT(dc_plus1.calcXYZ(angles[0]),{x:-100.025,y:-0.218,z:-71.238});
+		shouldEqualT(dc_plus1.calcXYZ(angles[1]),{x:0,y:0,z:-71.491});
+		shouldEqualT(dc_plus1.calcXYZ(angles[2]),{x:100.025,y:-0.218,z:-71.238});
 	});
 });
 /*
