@@ -21,17 +21,11 @@ function isNumeric(obj) {
     XYZPositioner.validate = function(xyzPositioner) {
         describe("XYZPositioner.validate(" + xyzPositioner.constructor.name + "):", function() {
             should.exist(xyzPositioner);
-            it("should define XYZPositioner methods", function() {
-                should(xyzPositioner).have.properties([ 
-					"home", "getXYZ", "origin", "move", "health", "setFeedRate",
-					]);
-                xyzPositioner.home.should.be.Function;
-                xyzPositioner.getXYZ.should.be.Function;
-                xyzPositioner.origin.should.be.Function;
-                xyzPositioner.move.should.be.Function;
-                xyzPositioner.health.should.be.Function;
-                xyzPositioner.setFeedRate.should.be.Function;
-            });
+			xyzPositioner.home.should.be.Function;
+			xyzPositioner.getXYZ.should.be.Function;
+			xyzPositioner.move.should.be.Function;
+			xyzPositioner.origin.should.be.Function;
+			xyzPositioner.health.should.be.Function;
             if (xyzPositioner.health() === 0) {
                 it("should throw errors when not available", function() {
                     should.throws(function() {
