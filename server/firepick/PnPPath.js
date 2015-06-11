@@ -6,7 +6,6 @@ Bernstein = require("./Bernstein");
 Tridiagonal = require("./Tridiagonal");
 PHFactory = require("./PHFactory");
 PH5Curve = require("./PH5Curve");
-PHFeed = require("./PHFeed");
 DeltaCalculator = require("./DeltaCalculator");
 
 (function(firepick) {
@@ -85,7 +84,7 @@ DeltaCalculator = require("./DeltaCalculator");
 
 		return {x:xy.re,y:xy.im,z:that.phz.r(tau).re};
 	};
-	PnPPath.prototype.waypointsDelta = function(deltaCalculator) {
+	PnPPath.prototype.waypointAngles = function(deltaCalculator) {
 		var that = this;
 		var waypoints = [];
 		var N = Math.ceil(3/(2*that.tauTakeoff));
@@ -94,6 +93,18 @@ DeltaCalculator = require("./DeltaCalculator");
 			var angles = deltaCalculator.calcAngles(xyz);
 			logger.debug("i:", i, " xyz:", xyz, " angles:", angles);
 			waypoints.push(angles);
+		}
+		return waypoints;
+	}
+	PnPPath.prototype.waypointPulses = function(deltaCalculator) {
+		var that = this;
+		var waypoints = [];
+		var N = Math.ceil(3/(2*that.tauTakeoff));
+		for (var i=0; i<=N; i++) {
+			var xyz = that.position(i/N);
+			var pulses = deltaCalculator.calcPulses(xyz);
+			logger.debug("i:", i, " xyz:", xyz, " pulses:", pulses);
+			waypoints.push(pulses);
 		}
 		return waypoints;
 	}
@@ -203,37 +214,22 @@ DeltaCalculator = require("./DeltaCalculator");
 			z:pt2.z
 		});
 	});
-	it('should have option for setting takeoff tau', function() {
-		new PnPPath(pt1,pt2,{}).should.have.properties({
-			tauTakeoff:0.1,
-		});
-		new PnPPath(pt1,pt2,{tauTakeoff:0.2}).should.have.properties({
-			tauTakeoff:0.2,
-		});
+	it('TESTTESTshould have option for setting takeoff tau', function() {
+		new PnPPath(pt1,pt2,{}).tauTakeoff.should.equal(0.1);
+		new PnPPath(pt1,pt2,{tauTakeoff:0.2}).tauTakeoff.should.equal(0.2);
 	});
-	it('should have option for setting landing tau', function() {
-		new PnPPath(pt1,pt2,{}).should.have.properties({
-			tauLanding:0.9,
-		});
-		new PnPPath(pt1,pt2,{tauLanding:0.8}).should.have.properties({
-			tauLanding:0.8,
-		});
+	it('TESTTESTshould have option for setting landing tau', function() {
+		new PnPPath(pt1,pt2,{}).tauLanding.should.equal(0.9);
+		new PnPPath(pt1,pt2,{tauLanding:0.8}).tauLanding.should.equal(0.8);
 	});
-	it('should have option for cruise height', function() {
-		new PnPPath(pt1,pt2,{}).should.have.properties({
-			hCruise:20,
-		});
-		new PnPPath(pt1,pt2,{hCruise:50}).should.have.properties({
-			hCruise:50,
-		});
+	it('TESTTESTshould have option for cruise height', function() {
+		new PnPPath(pt1,pt2,{}).hCruise.should.equal(20);
+		new PnPPath(pt1,pt2,{hCruise:50}).hCruise.should.equal(50);
 	});
-	it('should have option for unrestricted travel locus', function() {
-		new PnPPath(pt1,pt2,{}).should.have.properties({
-			homeLocus:{x:0,y:0,r:70},
-		});
-		new PnPPath(pt1,pt2,{homeLocus:{r:30}}).should.have.properties({
-			homeLocus:{x:0,y:0,r:30},
-		});
+	it('TESTTESTshould have option for unrestricted travel locus', function() {
+		should.deepEqual(new PnPPath(pt1,pt2,{}).homeLocus, {x:0,y:0,r:70});
+		should.deepEqual(new PnPPath(pt1,pt2,{homeLocus:{r:30}}).homeLocus, 
+			{x:0,y:0,r:30});
 	});
 	it('should have property giving highest point of path', function() {
 		new PnPPath(pt1,pt2,{}).should.have.properties({
@@ -310,15 +306,26 @@ DeltaCalculator = require("./DeltaCalculator");
 		shouldPositionT(pos, {x:95,y:80,z:-10});
 		pos.z.should.be.above(pt1.z);
 	});
-	it('delta waypoints', function() {
+	it('waypointAngles() should give delta waypoint angles', function() {
 		PnPPath.getLogger().setLevel("info");
 		var pnp = new PnPPath({x:100,y:50,z:-60},{x:50,y:90,z:-70});
 		var dc = new DeltaCalculator();
-		var waypoints = pnp.waypointsDelta(dc);
+		var waypoints = pnp.waypointAngles(dc);
 		var N = waypoints.length-1;
-		logger.debug("waypointsDelta:", N);
+		logger.debug("waypointAngles:", N);
 		for (var i=0; i<=N; i++) {
-			logger.withPlaces(3).debug("waypointDelta[", i, "]:",waypoints[i]);
+			logger.withPlaces(3).debug("waypoint[", i, "]:",waypoints[i]);
+		}
+	});
+	it('waypointPulses() should give delta waypoint pulses', function() {
+		PnPPath.getLogger().setLevel("info");
+		var pnp = new PnPPath({x:100,y:50,z:-60},{x:50,y:90,z:-70});
+		var dc = new DeltaCalculator();
+		var waypoints = pnp.waypointPulses(dc);
+		var N = waypoints.length-1;
+		logger.debug("waypointPulses:", N);
+		for (var i=0; i<=N; i++) {
+			logger.withPlaces(3).debug("waypoint[", i, "]:",waypoints[i]);
 		}
 	});
 })

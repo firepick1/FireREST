@@ -25,6 +25,12 @@ XYZPositioner = require("./XYZPositioner");
 		that.delta.should.instanceof(DeltaCalculator);
 		that.write = options.write || consoleWriter;
 		that.position = options.position || {x:0,y:0,z:0};
+		that.hCruise = options.hCruise == null ? 20 : options.hCruise;
+		var revPulses = that.delta.steps360*that.delta.microsteps;
+		that.vMax = options.vMax || 2*revPulses;
+		that.vMax.should.above(0);
+		that.tvMax = options.tvMax || 0.4;
+		that.tvMax.should.above(0);
 
 		return that;
     };
@@ -87,6 +93,63 @@ XYZPositioner = require("./XYZPositioner");
 		that.move({x:0,y:0,z:0});
 		return that;
 	}
+	FireStep.prototype.jumpTo = function(xyz) {
+		var that = this;
+		var dst = {
+			x: xyz.x == null ? that.position.x : xyz.x,
+			y: xyz.y == null ? that.position.y : xyz.y,
+			z: xyz.z == null ? that.position.z : xyz.z,
+		};
+		var pnp = new PnPPath(that.position, dst, {
+			hCruise: that.hCruise
+		});
+		var waypoints = pnp.waypointPulses(that.delta);
+		var pts1 = [];
+		var pts2 = [];
+		var pts3 = [];
+		var dIm = 1000; 
+		for (var i=0; i<waypoints.length; i++) {
+			logger.info("waypoints[",i,"]:", waypoints[i]);
+			pts1.push({re:waypoints[i].p1, im:i*dIm});
+			pts2.push({re:waypoints[i].p2, im:i*dIm});
+			pts3.push({re:waypoints[i].p3, im:i*dIm});
+		}
+		var feedOpts = {vMax:that.vMax, tvMax:that.tvMax};
+		var ph1 = new PHFactory(pts1).quintic();
+		var ph2 = new PHFactory(pts2).quintic();
+		var ph3 = new PHFactory(pts3).quintic();
+		var ph = ph1.s(1) > ph2.s(1) ? ph1 : ph2;
+		ph = ph.s(1) > ph3.s(1) ? ph : ph3;
+		var phf = new PHFeed(ph, feedOpts);
+		var N = 128;
+		var E = phf.Ekt(0,0);
+		var posPulses = that.delta.calcPulses(that.position);
+		var r1Prev = posPulses.p1;
+		var r2Prev = posPulses.p2;
+		var r3Prev = posPulses.p3;
+		var v1 = 0;
+		var v2 = 0;
+		var v3 = 0;
+		for (var i=1; i<=N; i++) {
+			var tau = i/N;
+			E = phf.Ekt(E, tau);
+			var r1 = Math.round(ph1.r(E).re);
+			var r2 = Math.round(ph2.r(E).re);
+			var r3 = Math.round(ph3.r(E).re);
+			var dr1 = r1 - r1Prev;
+			var dr2 = r2 - r2Prev;
+			var dr3 = r3 - r3Prev;
+			var dv1 = dr1 - v1;
+			var dv2 = dr2 - v2;
+			var dv3 = dr3 - v3;
+			logger.info("i:", i, " tau:", tau, " r1:", r1, " r2:", r2, " r3:", r3,
+				" dv1:", dv1, " dv2:", dv2, " dv3:", dv3);
+			v1 += dv1;
+			v2 += dv2;
+			v3 += dv3;
+		}
+		return that;
+	}
 
 	///////////////// CLASS //////////
 	FireStep.setLogger = function(value) {
@@ -136,6 +199,18 @@ XYZPositioner = require("./XYZPositioner");
 		shouldEqualT(new FireStep().position, {x:0,y:0,z:0});
 		shouldEqualT(new FireStep({position:{x:1,y:2,z:3}}).position, {x:1,y:2,z:3});
 	});
+	it("TESTTESThas a cruise height (mm) option", function() {
+		new FireStep().hCruise.should.equal(20);
+		new FireStep({hCruise:21}).hCruise.should.equal(21);
+	});
+	it("TESTTESThas maximum velocity (pulses/second) option", function() {
+		new FireStep().vMax.should.equal(12800);
+		new FireStep({vMax:20000}).vMax.should.equal(20000);
+	});
+	it("TESTTESThas seconds to maximum velocity option", function() {
+		new FireStep().tvMax.should.equal(0.4);
+		new FireStep({tvMax:0.7}).tvMax.should.equal(0.7);
+	});
 	it("TESTTESThas a write() option", function() {
 		new FireStep().write.should.be.Function;
 		new FireStep({write:testWrite}).write("hello");
@@ -171,5 +246,13 @@ XYZPositioner = require("./XYZPositioner");
 	});
 	it("TESTTESTshould implement XYZPositioner", function() {
 		XYZPositioner.validate(new FireStep());
+	});
+	it("TESTTESTjumpTo() should traverse pick and place path", function() {
+		this.timeout(20000);
+		var fs = new FireStep({write:testWrite});
+		fs.move({x:100,y:0,z:-70});
+		testCmd(function(){ fs.jumpTo({x:-100,y:0,z:-80}); },
+			''
+		);
 	});
 })
