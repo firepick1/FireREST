@@ -13,6 +13,7 @@ XYZPositioner = require("./XYZPositioner");
 
 (function(firepick) {
 	var logger = new Logger();
+	var nullWriter = function(msg) {};
 
     function FireStep(options) {
 		var that = this;
@@ -23,7 +24,7 @@ XYZPositioner = require("./XYZPositioner");
 			microsteps: options.microsteps == null ? 16 : options.microsteps,
 		});
 		that.delta.should.instanceof(DeltaCalculator);
-		that.write = options.write || consoleWriter;
+		that.write = options.write || nullWriter;
 		that.position = options.position || {x:0,y:0,z:0};
 		that.hCruise = options.hCruise == null ? 20 : options.hCruise;
 		var revPulses = that.delta.steps360*that.delta.microsteps;
@@ -34,10 +35,6 @@ XYZPositioner = require("./XYZPositioner");
 
 		return that;
     };
-
-	var consoleWriter = function(msg) {
-		console.log(msg);
-	};
 
 	///////////////// INSTANCE API ///////////////
 	FireStep.prototype.health = function() {
@@ -74,7 +71,7 @@ XYZPositioner = require("./XYZPositioner");
 			y: xyz.y == null ? that.position.y : xyz.y,
 			z: xyz.z == null ? that.position.z : xyz.z,
 		};
-		var pulses = that.delta.calcPulses(xyz);
+		var pulses = that.delta.calcPulses(dst);
 		var cmd = {
 			mov:{
 				x:pulses.p1,
@@ -84,7 +81,7 @@ XYZPositioner = require("./XYZPositioner");
 		};
 		that.write(JSON.stringify(cmd));
 		that.write("\n");
-		that.position = xyz;
+		that.position = dst;
 		return that;
 	}
 	FireStep.prototype.origin = function() {
@@ -190,42 +187,42 @@ XYZPositioner = require("./XYZPositioner");
 			a[k].should.within(b[k]-tolerance, b[k]+tolerance, msg);
 		}
 	}
-	it("TESTTESThas a DeltaCalculator option", function() {
+	it("has a DeltaCalculator option", function() {
 		new FireStep().delta.should.instanceof(DeltaCalculator);
 		var dc = new DeltaCalculator();
 		new FireStep({delta:dc}).delta.should.equal(dc);
 	});
-	it("TESTTESThas position option", function() {
+	it("has position option", function() {
 		shouldEqualT(new FireStep().position, {x:0,y:0,z:0});
 		shouldEqualT(new FireStep({position:{x:1,y:2,z:3}}).position, {x:1,y:2,z:3});
 	});
-	it("TESTTESThas a cruise height (mm) option", function() {
+	it("has a cruise height (mm) option", function() {
 		new FireStep().hCruise.should.equal(20);
 		new FireStep({hCruise:21}).hCruise.should.equal(21);
 	});
-	it("TESTTESThas maximum velocity (pulses/second) option", function() {
+	it("has maximum velocity (pulses/second) option", function() {
 		new FireStep().vMax.should.equal(12800);
 		new FireStep({vMax:20000}).vMax.should.equal(20000);
 	});
-	it("TESTTESThas seconds to maximum velocity option", function() {
+	it("has seconds to maximum velocity option", function() {
 		new FireStep().tvMax.should.equal(0.4);
 		new FireStep({tvMax:0.7}).tvMax.should.equal(0.7);
 	});
-	it("TESTTESThas a write() option", function() {
+	it("has a write() option", function() {
 		new FireStep().write.should.be.Function;
 		new FireStep({write:testWrite}).write("hello");
 		testOut.should.equal("hello");
 	});
-	it("TESTTESTshould implement home()", function() {
+	it("should implement home()", function() {
 		var fs = new FireStep({write:testWrite});
 		testCmd(function(){ fs.home(); },'{"hom":{"x":-11200,"y":-11200,"z":-11200}}\n');
 		shouldEqualT(fs.position, fs.delta.calcXYZ(fs.delta.homeAngles));
 	});
-	it("TESTTESTshould implement getXYZ()", function() {
+	it("should implement getXYZ()", function() {
 		shouldEqualT(new FireStep().getXYZ(), {x:0,y:0,z:0});
 		shouldEqualT(new FireStep({position:{x:1,y:2,z:3}}).getXYZ(), {x:1,y:2,z:3});
 	});
-	it("TESTTESTshould implement move()", function() {
+	it("should implement move()", function() {
 		var fs = new FireStep({write:testWrite});
 		testCmd(function(){ fs.move({x:1,y:2,z:3}); },
 			'{"mov":{"x":-227,"y":-406,"z":-326}}\n'
@@ -236,7 +233,7 @@ XYZPositioner = require("./XYZPositioner");
 		);
 		shouldEqualT(new FireStep().getXYZ(), {x:0,y:0,z:0});
 	});
-	it("TESTTESTshould implement origin()", function() {
+	it("should implement origin()", function() {
 		var fs = new FireStep({write:testWrite});
 		testCmd(function(){ fs.origin(); },
 			'{"hom":{"x":-11200,"y":-11200,"z":-11200}}\n' +

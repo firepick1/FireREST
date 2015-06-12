@@ -19,68 +19,66 @@ function isNumeric(obj) {
         return that;
     }
     XYZPositioner.validate = function(xyzPositioner) {
-        describe("XYZPositioner.validate(" + xyzPositioner.constructor.name + "):", function() {
-            should.exist(xyzPositioner);
-			xyzPositioner.home.should.be.Function;
-			xyzPositioner.getXYZ.should.be.Function;
-			xyzPositioner.move.should.be.Function;
-			xyzPositioner.origin.should.be.Function;
-			xyzPositioner.health.should.be.Function;
-            if (xyzPositioner.health() === 0) {
-                it("should throw errors when not available", function() {
-                    should.throws(function() {
-                        xyzPositioner.home();
-                    });
-                    should.throws(function() {
-                        xyzPositioner.origin();
-                    });
-                    should.throws(function() {
-                        xyzPositioner.move();
-                    });
-                });
-            } else {
-                it("should move to origin", function() {
-                    this.timeout(5000);
-                    should.equal(xyzPositioner, xyzPositioner.origin());
-                    should.deepEqual({
-                        x: 0,
-                        y: 0,
-                        z: 0
-                    }, xyzPositioner.getXYZ());
-                });
-                it("should move to a single position {x:1,y:2,z:3}", function() {
-                    this.timeout(5000);
-                    should.equal(xyzPositioner, xyzPositioner.move({
-                        x: 1,
-                        y: 2,
-                        z: 3
-                    }));
-                    should.deepEqual({
-                        x: 1,
-                        y: 2,
-                        z: 3
-                    }, xyzPositioner.getXYZ());
-                });
-                it("move([{x:1},{y:2},{z:3}]) should follow a path", function() {
-                    this.timeout(5000);
-                    xyzPositioner.move({
-                        x: 0,
-                        y: 0,
-                        z: 0
-                    });
-					var moves = [];
-					moves.push({x:1});
-					moves.push({y:2});
-					moves.push({z:3});
-                    should.equal(xyzPositioner.move(moves), xyzPositioner);
-                    should.deepEqual(xyzPositioner.getXYZ(), {
-                        x: 1,
-                        y: 2,
-                        z: 3
-                    });
-                });
-            }
-        });
+		should.exist(xyzPositioner);
+		xyzPositioner.home.should.be.Function;
+		xyzPositioner.getXYZ.should.be.Function;
+		xyzPositioner.move.should.be.Function;
+		xyzPositioner.origin.should.be.Function;
+		xyzPositioner.health.should.be.Function;
+		if (xyzPositioner.health() === 0) {
+		//	it("should throw errors when not available", function() {
+				should.throws(function() {
+					xyzPositioner.home();
+				});
+				should.throws(function() {
+					xyzPositioner.origin();
+				});
+				should.throws(function() {
+					xyzPositioner.move();
+				});
+		//	});
+		} else {
+		//	it("should move to origin", function() {
+		//		this.timeout(5000);
+				should.equal(xyzPositioner, xyzPositioner.origin());
+				should.deepEqual({
+					x: 0,
+					y: 0,
+					z: 0
+				}, xyzPositioner.getXYZ());
+		//	});
+		//	it("should move to a single position {x:1,y:2,z:3}", function() {
+		//		this.timeout(5000);
+				should.equal(xyzPositioner, xyzPositioner.move({
+					x: 1,
+					y: 2,
+					z: 3
+				}));
+				should.deepEqual({
+					x: 1,
+					y: 2,
+					z: 3
+				}, xyzPositioner.getXYZ());
+		//	});
+		//	it("move([{x:1},{y:2},{z:3}]) should follow a path", function() {
+		//		this.timeout(5000);
+				xyzPositioner.move({
+					x: 0,
+					y: 0,
+					z: 0
+				});
+				var moves = [];
+				moves.push({x:1});
+				moves.push({y:2});
+				moves.push({z:3});
+				should.equal(xyzPositioner.move(moves), xyzPositioner);
+				should.deepEqual(xyzPositioner.getXYZ(), {
+					x: 1,
+					y: 2,
+					z: 3
+				});
+		//	});
+		}
         return true;
     }
     XYZPositioner.prototype.withWriter = function(writer) {

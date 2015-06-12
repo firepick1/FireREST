@@ -214,19 +214,19 @@ DeltaCalculator = require("./DeltaCalculator");
 			z:pt2.z
 		});
 	});
-	it('TESTTESTshould have option for setting takeoff tau', function() {
+	it('should have option for setting takeoff tau', function() {
 		new PnPPath(pt1,pt2,{}).tauTakeoff.should.equal(0.1);
 		new PnPPath(pt1,pt2,{tauTakeoff:0.2}).tauTakeoff.should.equal(0.2);
 	});
-	it('TESTTESTshould have option for setting landing tau', function() {
+	it('should have option for setting landing tau', function() {
 		new PnPPath(pt1,pt2,{}).tauLanding.should.equal(0.9);
 		new PnPPath(pt1,pt2,{tauLanding:0.8}).tauLanding.should.equal(0.8);
 	});
-	it('TESTTESTshould have option for cruise height', function() {
+	it('should have option for cruise height', function() {
 		new PnPPath(pt1,pt2,{}).hCruise.should.equal(20);
 		new PnPPath(pt1,pt2,{hCruise:50}).hCruise.should.equal(50);
 	});
-	it('TESTTESTshould have option for unrestricted travel locus', function() {
+	it('should have option for unrestricted travel locus', function() {
 		should.deepEqual(new PnPPath(pt1,pt2,{}).homeLocus, {x:0,y:0,r:70});
 		should.deepEqual(new PnPPath(pt1,pt2,{homeLocus:{r:30}}).homeLocus, 
 			{x:0,y:0,r:30});

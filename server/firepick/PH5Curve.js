@@ -9,6 +9,9 @@ PHFactory = require("./PHFactory");
 	var DEGREE = 5;
 	var b4 = new Bernstein(4);
 	var b5 = new Bernstein(5);
+	var tk_cache = [];
+	var t1k_cache = [];
+
     function PH5Curve(phz,phq,options) {
 		var that = this;
 		phq.length.should.equal(phz.length);
@@ -24,18 +27,29 @@ PHFactory = require("./PHFactory");
 		that.N = phz.length-1;
 		that.z = phz;
 		that.q = phq;
+		that.pik_cache = [];
+		that.wij_cache = [];
 		return that;
     };
 
 	/////////////// PRIVATE ////////////////
-	function powert(p,tk,t1k,K) {
+	function powertk(p,K) {
 		var p1 = 1 - p;
+		var tk = [];
 		tk.push(1);
-		t1k.push(1);
 		for (var k=1; k<=K; k++) {
 			tk.push(p*tk[k-1]);
+		}
+		return tk;
+	};
+	function powert1k(p,K) {
+		var p1 = 1 - p;
+		var t1k = [];
+		t1k.push(1);
+		for (var k=1; k<=K; k++) {
 			t1k.splice(0, 0, p1*t1k[0]);
 		}
+		return t1k;
 	};
 
     ///////////////// INSTANCE ///////////////
@@ -58,7 +72,7 @@ PHFactory = require("./PHFactory");
 		for (var k=0; k <= DEGREE; k++) {
 			var b5c = b5.coefficient(k, p);
 			sum += that.sik(i,k) * b5c;
-			that.logger.trace("sit k:", k, " sum:", sum, " b5c:", b5c, " p:", p);
+			//that.logger.trace("sit k:", k, " sum:", sum, " b5c:", b5c, " p:", p);
 		}
 		return sum;
 	};
@@ -141,17 +155,21 @@ PHFactory = require("./PHFactory");
 		i.should.not.be.above(that.N);
 		p.should.not.be.below(0);
 		p.should.not.be.above(1);
-		that.logger.trace("rit(", i, ",", p, ")");
 		var sum = new Complex();
-		var tk = [];
-		var t1k = [];
-		powert(p,tk,t1k,5);
+		var tk = tk_cache[p];
+		var t1k;
+		if (tk == null) {
+			tk = powertk(p, 5);
+			t1k = powert1k(p, 5);
+		} else {
+			t1k = t1k_cache[p];
+		}
 		for (var k=0; k<=5; k++) {
 			var re = Util.choose(5,k) * t1k[k] * tk[k];
 			var c = Complex.times(that.pik(i,k), re);
 			sum.add(c);
-			that.logger.trace("rit k:", k, " re:", re, " c:", c, " sum:", sum, 
-				" pik:", that.pik(i,k), " choose:", Util.choose(5,k));
+			//that.logger.trace("rit k:", k, " re:", re, " c:", c, " sum:", sum, 
+				//" pik:", that.pik(i,k), " choose:", Util.choose(5,k));
 		}
 		return sum;
 	};
@@ -179,6 +197,11 @@ PHFactory = require("./PHFactory");
 	};
 	PH5Curve.prototype.wij = function(i,j) {
 		var that = this;
+		var key = i*10 + j;
+		var result = that.wij_cache[key];
+		if (result) {
+			return result;
+		}
 		if (i === 1) {
 			return that.w1j(j);
 		}
@@ -191,32 +214,63 @@ PHFactory = require("./PHFactory");
 		zi.should.instanceOf(Complex);
 		that.z[i-1].should.instanceOf(Complex);
 		switch (j) {
-		case 0:return Complex.times(1/2,that.z[i-1].plus(zi));
-		case 1:return zi;
-		case 2:return Complex.times(1/2,zi.plus(that.z[i+1]));
-		default: should.fail("wij j:"+j);
+		case 0:
+			result = Complex.times(1/2,that.z[i-1].plus(zi));
+			break;
+		case 1:
+			result = zi;
+			break;
+		case 2:
+			result = Complex.times(1/2,zi.plus(that.z[i+1]));
+			break;
+		default: 
+			should.fail("wij j:"+j);
+			break;
 		}
+		that.wij_cache[key] = result;
+		return result;
 	};
 	PH5Curve.prototype.pik = function(i,k) {
 		var that = this;
+		var key = i*10 + k;
+		var result = that.pik_cache[key];
+		if (result) {
+			return result;
+		}
 		i.should.be.above(0);
 		i.should.not.be.above(that.N);
 
 		switch (k) {
-		case 0: return that.q[i-1];
-		case 1: return that.pik(i,0)
-			.plus(Complex.times(1/5,that.wij(i,0).times(that.wij(i,0))));
-		case 2: return that.pik(i,1)
-			.plus(Complex.times(1/5,that.wij(i,0).times(that.wij(i,1))));
-		case 3: return that.pik(i,2)
-			.plus(Complex.times(2/15,that.wij(i,1).times(that.wij(i,1))))
-			.plus(Complex.times(1/15,that.wij(i,0).times(that.wij(i,2))));
-		case 4: return that.pik(i,3)
-			.plus(Complex.times(1/5,that.wij(i,1).times(that.wij(i,2))));
-		case 5: return that.pik(i,4)
-			.plus(Complex.times(1/5,that.wij(i,2).times(that.wij(i,2))));
-		default: should.fail("invalid k:" + k);
+		case 0: 
+			result = that.q[i-1];
+			break;
+		case 1: 
+			result = that.pik(i,0)
+				.plus(Complex.times(1/5,that.wij(i,0).times(that.wij(i,0))));
+			break;
+		case 2: 
+			result = that.pik(i,1)
+				.plus(Complex.times(1/5,that.wij(i,0).times(that.wij(i,1))));
+			break;
+		case 3: 
+			result = that.pik(i,2)
+				.plus(Complex.times(2/15,that.wij(i,1).times(that.wij(i,1))))
+				.plus(Complex.times(1/15,that.wij(i,0).times(that.wij(i,2))));
+			break;
+		case 4: 
+			result = that.pik(i,3)
+				.plus(Complex.times(1/5,that.wij(i,1).times(that.wij(i,2))));
+			break;
+		case 5: 
+			result = that.pik(i,4)
+				.plus(Complex.times(1/5,that.wij(i,2).times(that.wij(i,2))));
+			break;
+		default: 
+			should.fail("invalid k:" + k);
+			break;
 		}
+		that.pik_cache[key] = result;
+		return result;
 	};
 
 	///////////////// CLASS //////////
@@ -346,5 +400,27 @@ PHFactory = require("./PHFactory");
 		testxy(1600,-6400);
 		testxy(6400,-6400);
 		testxy(6400,-1600);
+	});
+	it("TESTTESTshould compute quickly", function() {
+		var values = [ 9563, 8839, 7879, 6822, 6039, 
+			5486, 5145, 5007, 5070, 5335, 5808, 
+			6504, 7455, 8735, 9996, 11119, ];
+		var pts = [];
+		for (var i=0; i<values.length; i++) {
+			pts.push(new Complex(values[i],i*1000));
+		}
+		var ph = new PHFactory(pts).quintic();
+		var N = 150;
+		var e = 0.00000001;
+		for (var i=1; i<=N; i++) {
+			var tau = i/N;
+			var v = ph.r(tau);
+			if (i%10 === 0) {
+				v.re.should.within(values[i/10]-e,values[i/10]+e);
+				v.im.should.within(i*100-e, i*100+e);
+				logger.info("i:", i, " ", ph.r(tau));
+			}
+		}
+
 	});
 })
