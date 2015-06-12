@@ -106,7 +106,7 @@ XYZPositioner = require("./XYZPositioner");
 		var pts3 = [];
 		var dIm = 1000; 
 		for (var i=0; i<waypoints.length; i++) {
-			logger.info("waypoints[",i,"]:", waypoints[i]);
+			//logger.info("waypoints[",i,"]:", waypoints[i]);
 			pts1.push({re:waypoints[i].p1, im:i*dIm});
 			pts2.push({re:waypoints[i].p2, im:i*dIm});
 			pts3.push({re:waypoints[i].p3, im:i*dIm});
@@ -139,8 +139,8 @@ XYZPositioner = require("./XYZPositioner");
 			var dv1 = dr1 - v1;
 			var dv2 = dr2 - v2;
 			var dv3 = dr3 - v3;
-			logger.info("i:", i, " tau:", tau, " r1:", r1, " r2:", r2, " r3:", r3,
-				" dv1:", dv1, " dv2:", dv2, " dv3:", dv3);
+			//logger.info("i:", i, " tau:", tau, " r1:", r1, " r2:", r2, " r3:", r3,
+				//" dv1:", dv1, " dv2:", dv2, " dv3:", dv3);
 			v1 += dv1;
 			v2 += dv2;
 			v3 += dv3;
@@ -245,7 +245,6 @@ XYZPositioner = require("./XYZPositioner");
 		XYZPositioner.validate(new FireStep());
 	});
 	it("TESTTESTjumpTo() should traverse pick and place path", function() {
-		this.timeout(20000);
 		var fs = new FireStep({write:testWrite});
 		fs.move({x:100,y:0,z:-70});
 		testCmd(function(){ fs.jumpTo({x:-100,y:0,z:-80}); },

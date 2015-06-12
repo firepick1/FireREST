@@ -29,6 +29,10 @@ PHFactory = require("./PHFactory");
 		that.q = phq;
 		that.pik_cache = [];
 		that.wij_cache = [];
+		that.sigma_cache = [];
+		that.sit1_cache = [];
+		that.sigmaij_cache = [];
+		that.sik_cache = [];
 		return that;
     };
 
@@ -55,13 +59,17 @@ PHFactory = require("./PHFactory");
     ///////////////// INSTANCE ///////////////
 	PH5Curve.prototype.s = function(p) { // arc length 
 		var that = this;
-		p.should.not.be.below(0);
-		p.should.not.be.above(1);
 		var PN = p * that.N;
 		var iPN = Math.ceil(PN) || 1;
 		var sum = 0;
-		for (var iSeg=1; iSeg < iPN; iSeg++) {
-			sum += that.sit(iSeg, 1);
+		var sit_iPN = that.sit1_cache[iPN];
+		if (sit_iPN == null) {
+			p.should.not.be.below(0);
+			p.should.not.be.above(1);
+			for (var iSeg=1; iSeg < iPN; iSeg++) {
+				sum += that.sit(iSeg, 1);
+			}
+			sit_iPN = that.sit1_cache[iPN] = sum;
 		}
 		sum += that.sit(iPN, PN-iPN+1);
 		return sum;
@@ -70,7 +78,7 @@ PHFactory = require("./PHFactory");
 		var that = this;
 		var sum = 0;
 		for (var k=0; k <= DEGREE; k++) {
-			var b5c = b5.coefficient(k, p);
+			var b5c = Bernstein.coefficient_nocheck(5, k, p);
 			sum += that.sik(i,k) * b5c;
 			//that.logger.trace("sit k:", k, " sum:", sum, " b5c:", b5c, " p:", p);
 		}
@@ -78,14 +86,26 @@ PHFactory = require("./PHFactory");
 	};
 	PH5Curve.prototype.sik = function(i, k) { // arc length 
 		var that = this;
+		var key = k*10 + i;
+		var result = that.sik_cache[key];
+		if (result != null) {
+			return result;
+		}
 		var sum = 0;
 		for (var j=0; j<=k-1; j++) {
 			sum += that.sigmaij(i,j);
 		}
-		return sum/DEGREE;
+		result = sum/DEGREE;
+		that.sik_cache[key] = result;
+		return result;
 	};
 	PH5Curve.prototype.sigmaij = function(i,j) {
 		var that = this;
+		var key = j*10 + i;
+		var result = that.sigmaij_cache[key];
+		if (result != null) {
+			return result;
+		};
 		var wi0 = that.wij(i,0);
 		var wi1 = that.wij(i,1);
 		var wi2 = that.wij(i,2);
@@ -96,17 +116,37 @@ PHFactory = require("./PHFactory");
 		var u2 = wi2.re;
 		var v2 = wi2.im;
 		switch(j) {
-		case 0: return u0*u0 + v0*v0;
-		case 1: return u0*u1 + v0*v1;
-		case 2: return (2/3)*(u1*u1+v1*v1) + (1/3)*(u0*u2+v0*v2);
-		case 3: return u1*u2 + v1*v2;
-		case 4: return u2*u2 + v2*v2;
-		default: should.fail("invalid j:" + j);
+		case 0: 
+			result = u0*u0 + v0*v0;
+			break;
+		case 1: 
+			result = u0*u1 + v0*v1;
+			break;
+		case 2: 
+			result = (2/3)*(u1*u1+v1*v1) + (1/3)*(u0*u2+v0*v2);
+			break;
+		case 3: 
+			result = u1*u2 + v1*v2;
+			break;
+		case 4: 
+			result = u2*u2 + v2*v2;
+			break;
+		default: 
+			should.fail("invalid j:" + j);
+			break;
 		}
+		that.sigmaij_cache[key] = result;
+		return result;
 	};
 	PH5Curve.prototype.sigma = function(p) { // curve parametric speed
 		var that = this;
-		return that.rprime(p).modulus();
+		//var result = that.sigma_cache[p];
+		//if (result != null) {
+			//return result;
+		//}
+		result = that.rprime(p).modulus();
+		//that.sigma_cache[p] = result;
+		return result;
 	};
 	PH5Curve.prototype.rprime = function(p) { // hodograph
 		var that = this;

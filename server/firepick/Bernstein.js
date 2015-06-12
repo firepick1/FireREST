@@ -4,6 +4,7 @@ var should = require("should"),
 Logger = require("./Logger");
 
 (function(firepick) {
+	var logger = new Logger();
     function Bernstein(n,options) {
 		var that = this;
 		options = options || {};
@@ -11,7 +12,6 @@ Logger = require("./Logger");
 		n.should.be.above(0);
 		that.n = n;
 		that.n2 = Math.ceil(n/2);
-		that.logger = options.logger || new Logger(options);
 		return that;
     };
 
@@ -22,10 +22,7 @@ Logger = require("./Logger");
 	};
 
 	///////////////// CLASS //////////
-	Bernstein.coefficient = function(n,k,t) {
-		n.should.not.below(0);
-		k.should.within(0,n);
-		t.should.be.within(0,1);
+	Bernstein.coefficient_nocheck = function(n,k,t) {
 		var result = Util.choose(n,k);
 		var t1 = (1-t);
 		for (var i = 0; i < n-k; i++) {
@@ -37,7 +34,14 @@ Logger = require("./Logger");
 		return result;
 	};
 
-    Logger.logger.info("loaded firepick.Bernstein");
+	Bernstein.coefficient = function(n,k,t) {
+		n.should.not.below(0);
+		k.should.within(0,n);
+		t.should.be.within(0,1);
+		return Bernstein.coefficient_nocheck(n,k,t);
+	};
+
+    logger.info("loaded firepick.Bernstein");
     module.exports = firepick.Bernstein = Bernstein;
 })(firepick || (firepick = {}));
 

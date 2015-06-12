@@ -196,13 +196,13 @@ PH5Curve = require("./PH5Curve");
 			var fs = F - s;
 			dE = (F - s)/sigma;
 			Ekr = Math.min(1,Math.max(0,Ekr + dE));
-			that.logger.debug("Ekt() r:", r, " tau:", tau, 
-				" F:", ""+Util.roundN(F,places), 
-				" fs:", fs,
-				" dE:", ""+dE,
-				" Ekr:", ""+Ekr,
-				" s:", ""+Util.roundN(s,places),
-				" sigma:", sigma);
+			//that.logger.debug("Ekt() r:", r, " tau:", tau, 
+				//" F:", ""+Util.roundN(F,places), 
+				//" fs:", fs,
+				//" dE:", ""+dE,
+				//" Ekr:", ""+Ekr,
+				//" s:", ""+Util.roundN(s,places),
+				//" sigma:", sigma);
 			if (Math.abs(dE) < that.epsilon) {
 				break;
 			}
