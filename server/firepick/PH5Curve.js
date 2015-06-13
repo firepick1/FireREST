@@ -61,15 +61,15 @@ PHFactory = require("./PHFactory");
 		var that = this;
 		var PN = p * that.N;
 		var iPN = Math.ceil(PN) || 1;
-		var sum = 0;
-		var sit_iPN = that.sit1_cache[iPN];
-		if (sit_iPN == null) {
+		var sum = that.sit1_cache[iPN];
+		if (sum == null) {
 			p.should.not.be.below(0);
 			p.should.not.be.above(1);
+			sum = 0;
 			for (var iSeg=1; iSeg < iPN; iSeg++) {
 				sum += that.sit(iSeg, 1);
 			}
-			sit_iPN = that.sit1_cache[iPN] = sum;
+			that.sit1_cache[iPN] = sum;
 		}
 		sum += that.sit(iPN, PN-iPN+1);
 		return sum;
@@ -140,12 +140,7 @@ PHFactory = require("./PHFactory");
 	};
 	PH5Curve.prototype.sigma = function(p) { // curve parametric speed
 		var that = this;
-		//var result = that.sigma_cache[p];
-		//if (result != null) {
-			//return result;
-		//}
 		result = that.rprime(p).modulus();
-		//that.sigma_cache[p] = result;
 		return result;
 	};
 	PH5Curve.prototype.rprime = function(p) { // hodograph
@@ -201,6 +196,8 @@ PHFactory = require("./PHFactory");
 		if (tk == null) {
 			tk = powertk(p, 5);
 			t1k = powert1k(p, 5);
+			tk_cache[p] = tk;
+			t1k_cache[p] = t1k;
 		} else {
 			t1k = t1k_cache[p];
 		}
@@ -441,7 +438,7 @@ PHFactory = require("./PHFactory");
 		testxy(6400,-6400);
 		testxy(6400,-1600);
 	});
-	it("TESTTESTshould compute quickly", function() {
+	it("should compute quickly", function() {
 		var values = [ 9563, 8839, 7879, 6822, 6039, 
 			5486, 5145, 5007, 5070, 5335, 5808, 
 			6504, 7455, 8735, 9996, 11119, ];

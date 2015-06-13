@@ -703,8 +703,8 @@ PH5Curve = require("./PH5Curve");
 		}
 		testScale(-0.5, "D2");
 		testScale(0.5, "D2");
-		testScale(-1, "D2");
-		testScale(1, "D2");
+		testScale(-1, "D1"); // D1 or D2 acceptable
+		testScale(1, "D1"); // D1 or D2 acceptable
 		testScale(-2, "D1");
 		testScale(2, "D1");
 	});
@@ -722,7 +722,8 @@ PH5Curve = require("./PH5Curve");
 				vMax:Math.max(Math.abs(x), Math.abs(y)),
 				tvMax:1,
 			});
-			phf.tS.should.equal(2);
+			var e = 0.00000001;
+			phf.tS.should.within(2-e,2+e);
 		}
 		testxy(-6400,0);
 		testxy(6400,0);

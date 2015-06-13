@@ -241,7 +241,7 @@ XYZPositioner = require("./XYZPositioner");
 		);
 		shouldEqualT(fs.getXYZ(), {x:0,y:0,z:0});
 	});
-	it("TESTTESTshould implement XYZPositioner", function() {
+	it("should implement XYZPositioner", function() {
 		XYZPositioner.validate(new FireStep());
 	});
 	it("TESTTESTjumpTo() should traverse pick and place path", function() {

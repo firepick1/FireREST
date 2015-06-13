@@ -18,6 +18,8 @@ PH5Curve = require("./PH5Curve");
 		pts.length.should.be.above(1);
 		initz(that,pts);
 		that.N = that.q.length-1;
+		that.Mij_cache = [];
+		that.zz_cache = [];
 		return that;
     };
 
@@ -69,6 +71,7 @@ PH5Curve = require("./PH5Curve");
 		that.logger.setLevel(options.logLevel || logLevel);
 		for (; loop && iteration<=iterationsMax; iteration++) {
 			// Newton-Raphson
+			that.zz_cache = [];
 			var a = [];
 			var b = [];
 			var c = [];
@@ -106,6 +109,16 @@ PH5Curve = require("./PH5Curve");
 		that.logger.setLevel(logLevel);
 		return result;
 	};
+	PHFactory.prototype.zz = function(i,j) {
+		var that = this;
+		var key = 1000*i + j;
+		var result = that.zz_cache[key];
+		if (result == null) {
+			result = that.z[i].times(that.z[j]);
+			that.zz_cache[key] = result;
+		}
+		return result;
+	};
 	PHFactory.prototype.fi = function(i) {
 		var that = this;
 		var N = that.N;
@@ -114,6 +127,31 @@ PH5Curve = require("./PH5Curve");
 		var sum = new Complex();
 		var q = that.q;
 		var z = that.z;
+		if (i === 1) {
+			var z1 = z[1];
+			var z2 = z[2];
+			sum.add(Complex.times(13, that.zz(1,1)));
+			sum.add(that.zz(2,2)); 
+			sum.add(Complex.times(-2, that.zz(1,2)));
+			sum.add(Complex.times(-12,q[1].minus(q[0])));
+		} else if (i === N) {
+			var N1 = N - 1;
+			var zN = z[N];
+			var zN1 = z[N1];
+			sum.add(Complex.times(13, that.zz(N,N))); 
+			sum.add(that.zz(N1,N1));
+			sum.add(Complex.times(-2, that.zz(N,N1))); 
+			sum.add(Complex.times(-12,q[N].minus(q[N1])));
+		} else {
+			sum.add(Complex.times(3,  that.zz(i-1,i-1))); 
+			sum.add(Complex.times(27, that.zz(i,i)));
+			sum.add(Complex.times(3,  that.zz(i+1,i+1))); 
+			sum.add(that.zz(i-1,i+1));
+			sum.add(Complex.times(13, that.zz(i-1,i))); 
+			sum.add(Complex.times(13, that.zz(i,i+1))); 
+			sum.add(Complex.times(-60,q[i].minus(q[i-1])));
+		}
+		/*
 		if (i === 1) {
 			var z1 = z[1];
 			var z2 = z[2];
@@ -136,12 +174,19 @@ PH5Curve = require("./PH5Curve");
 			sum.add(Complex.times(	  z[i-1],z[i+1]));
 			sum.add(Complex.times(13, z[i-1],z[i]));
 			sum.add(Complex.times(13, z[i],  z[i+1]));
+
 			sum.add(Complex.times(-60,q[i].minus(q[i-1])));
 		}
+		*/
 		return sum;
 	};
 	PHFactory.prototype.Mij = function(i,j) {
 		var that = this;
+		var key = i*1000 + j;
+		//var result = that.Mij_cache[key];
+		//if (result != null) {
+			//return result;
+		//}
 		var N = that.N;
 		var N1 = N-1;
 		i.should.be.above(0);
@@ -187,6 +232,7 @@ PH5Curve = require("./PH5Curve");
 		} else {
 			// zero
 		}
+		//that.Mij_cache[key] = sum; // cannot cache => Mij changes with each Newton-Raphson iteration
 		return sum;
 	};
 	PHFactory.prototype.dumpJacobian = function(nPlaces) {
@@ -299,8 +345,10 @@ PH5Curve = require("./PH5Curve");
 		shouldEqualT(ph.r(1), new Complex(5,3));
 
 		ph.s(0).should.equal(0);
-		ph.s(0.5).should.equal(Math.sqrt(20)/2);
-		ph.s(1).should.equal(Math.sqrt(20));
+		var e = 0.000000001;
+		var sqrt20 = Math.sqrt(20);
+		ph.s(0.5).should.within(sqrt20/2-e, sqrt20/2+e);
+		ph.s(1).should.within(sqrt20-e,sqrt20+e);
 	});
 	it("solvez() should solve interpolate a 3-point curve", function() {
 		var phf = new PHFactory([
