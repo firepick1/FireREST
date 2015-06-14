@@ -97,14 +97,17 @@ XYZPositioner = require("./XYZPositioner");
 			y: xyz.y == null ? that.position.y : xyz.y,
 			z: xyz.z == null ? that.position.z : xyz.z,
 		};
+		var nTakeoff = 5;
 		var pnp = new PnPPath(that.position, dst, {
-			hCruise: that.hCruise
+			hCruise: that.hCruise,
+			tauTakeoff: 1/nTakeoff,
 		});
 		var waypoints = pnp.waypointPulses(that.delta);
 		var pts1 = [];
 		var pts2 = [];
 		var pts3 = [];
-		var dIm = 1000; 
+		var dIm = Math.abs(that.delta.homePulses.p1/nTakeoff); 
+		logger.info("dIm:", dIm);
 		for (var i=0; i<waypoints.length; i++) {
 			//logger.info("waypoints[",i,"]:", waypoints[i]);
 			pts1.push({re:waypoints[i].p1, im:i*dIm});
@@ -121,26 +124,27 @@ XYZPositioner = require("./XYZPositioner");
 		var N = 128;
 		var E = phf.Ekt(0,0);
 		var posPulses = that.delta.calcPulses(that.position);
-		var r1Prev = posPulses.p1;
-		var r2Prev = posPulses.p2;
-		var r3Prev = posPulses.p3;
+		var scale = 4;
+		var r1Prev = Math.round(posPulses.p1/scale);
+		var r2Prev = Math.round(posPulses.p2/scale);
+		var r3Prev = Math.round(posPulses.p3/scale);
 		var v1 = 0;
 		var v2 = 0;
 		var v3 = 0;
 		for (var i=1; i<=N; i++) {
 			var tau = i/N;
 			E = phf.Ekt(E, tau);
-			var r1 = Math.round(ph1.r(E).re);
-			var r2 = Math.round(ph2.r(E).re);
-			var r3 = Math.round(ph3.r(E).re);
+			var r1 = Math.round(ph1.r(E).re/scale);
+			var r2 = Math.round(ph2.r(E).re/scale);
+			var r3 = Math.round(ph3.r(E).re/scale);
 			var dr1 = r1 - r1Prev;
 			var dr2 = r2 - r2Prev;
 			var dr3 = r3 - r3Prev;
 			var dv1 = dr1 - v1;
 			var dv2 = dr2 - v2;
 			var dv3 = dr3 - v3;
-			//logger.info("i:", i, " tau:", tau, " r1:", r1, " r2:", r2, " r3:", r3,
-				//" dv1:", dv1, " dv2:", dv2, " dv3:", dv3);
+			logger.withPlaces(5).info("i:", i, " tau:", tau, " r1:", r1, " r2:", r2, " r3:", r3,
+				" dv1:", dv1, " dv2:", dv2, " dv3:", dv3);
 			v1 += dv1;
 			v2 += dv2;
 			v3 += dv3;

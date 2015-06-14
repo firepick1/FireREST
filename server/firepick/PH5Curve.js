@@ -460,4 +460,27 @@ PHFactory = require("./PHFactory");
 		}
 
 	});
+	it("complex path should be smooth", function() {
+		var pts = [
+			new Complex(10656,0),
+			new Complex(9282, 1000),
+			new Complex(7714, 2000),
+			new Complex(7404, 3000),
+			new Complex(8426, 4000),
+			new Complex(10303, 5000),
+			new Complex(12477, 6000),
+		];
+		var ph = new PHFactory(pts).quintic();
+		var N = 100;
+		var rPrev = ph.r(0);
+		for (var i=1; i<=N; i++) {
+			var tau = i/N;
+			var r = ph.r(tau);
+			var dr = Math.abs(r.re-rPrev.re);
+			logger.withPlaces(5).debug(", ", tau, ", ", r.re, ", ", r.im, ", ", dr);
+			dr.should.below(136);
+			rPrev = r;
+		}
+		logger.info("done");
+	});
 })
