@@ -14,6 +14,7 @@ XYZPositioner = require("./XYZPositioner");
 (function(firepick) {
 	var logger = new Logger();
 	var nullWriter = function(msg) {};
+	var byteHex = ['0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'];
 
     function FireStep(options) {
 		var that = this;
@@ -160,6 +161,9 @@ XYZPositioner = require("./XYZPositioner");
 	FireStep.getLogger = function() {
 		return logger || new Logger();
 	}
+	FireStep.byteToHex = function(byte) {
+		return byteHex[(byte>>4)&0xf] + byteHex[byte&0xf];
+	}
 
     Logger.logger.info("loaded firepick.FireStep");
     module.exports = firepick.FireStep = FireStep;
@@ -247,6 +251,24 @@ XYZPositioner = require("./XYZPositioner");
 	});
 	it("should implement XYZPositioner", function() {
 		XYZPositioner.validate(new FireStep());
+	});
+	it("TESTTESTbyteToHex() should return hex string of byte", function() {
+		FireStep.byteToHex(0x00).should.equal("00");
+		FireStep.byteToHex(0x10).should.equal("10");
+		FireStep.byteToHex(0x02).should.equal("02");
+		FireStep.byteToHex(0x30).should.equal("30");
+		FireStep.byteToHex(0x04).should.equal("04");
+		FireStep.byteToHex(0x50).should.equal("50");
+		FireStep.byteToHex(0x06).should.equal("06");
+		FireStep.byteToHex(0x70).should.equal("70");
+		FireStep.byteToHex(0x08).should.equal("08");
+		FireStep.byteToHex(0x90).should.equal("90");
+		FireStep.byteToHex(0x0A).should.equal("0A");
+		FireStep.byteToHex(0xB0).should.equal("B0");
+		FireStep.byteToHex(0x0C).should.equal("0C");
+		FireStep.byteToHex(0xD0).should.equal("D0");
+		FireStep.byteToHex(0x0E).should.equal("0E");
+		FireStep.byteToHex(0xFF).should.equal("FF");
 	});
 	it("TESTTESTjumpTo() should traverse pick and place path", function() {
 		var fs = new FireStep({write:testWrite});
