@@ -108,7 +108,7 @@ XYZPositioner = require("./XYZPositioner");
 		var pts2 = [];
 		var pts3 = [];
 		var dIm = Math.abs(that.delta.homePulses.p1/nTakeoff); 
-		logger.info("dIm:", dIm);
+		logger.debug("dIm:", dIm);
 		for (var i=0; i<waypoints.length; i++) {
 			//logger.info("waypoints[",i,"]:", waypoints[i]);
 			pts1.push({re:waypoints[i].p1, im:i*dIm});
@@ -125,6 +125,7 @@ XYZPositioner = require("./XYZPositioner");
 		var N = 128;
 		var E = phf.Ekt(0,0);
 		var posPulses = that.delta.calcPulses(that.position);
+		logger.debug("posPulses:", posPulses);
 		var scale = 4;
 		var r1Prev = Math.round(posPulses.p1/scale);
 		var r2Prev = Math.round(posPulses.p2/scale);
@@ -132,6 +133,9 @@ XYZPositioner = require("./XYZPositioner");
 		var v1 = 0;
 		var v2 = 0;
 		var v3 = 0;
+		var p1 = "";
+		var p2 = "";
+		var p3 = "";
 		for (var i=1; i<=N; i++) {
 			var tau = i/N;
 			E = phf.Ekt(E, tau);
@@ -144,12 +148,37 @@ XYZPositioner = require("./XYZPositioner");
 			var dv1 = dr1 - v1;
 			var dv2 = dr2 - v2;
 			var dv3 = dr3 - v3;
-			logger.withPlaces(5).info("i:", i, " tau:", tau, " r1:", r1, " r2:", r2, " r3:", r3,
+			p1 += FireStep.byteToHex(dv1);
+			p2 += FireStep.byteToHex(dv2);
+			p3 += FireStep.byteToHex(dv3);
+			logger.withPlaces(5).debug("i:", i, " tau:", tau, " r1:", r1, " r2:", r2, " r3:", r3,
 				" dv1:", dv1, " dv2:", dv2, " dv3:", dv3);
 			v1 += dv1;
 			v2 += dv2;
 			v3 += dv3;
 		}
+		logger.debug("p1:", p1);
+		logger.debug("p2:", p2);
+		logger.debug("p3:", p3);
+		var endPulses = that.delta.calcPulses(xyz);
+		logger.debug("endPulses:", endPulses);
+		var dvs = {'dvs':{
+			'sc':scale,
+			'us':Math.round(phf.tS * 1000000),
+			'dp':{
+				'1':endPulses.p1-posPulses.p1,
+				'2':endPulses.p2-posPulses.p2,
+				'3':endPulses.p3-posPulses.p3,
+				},
+			'1':p1,
+			'2':p2,
+			'3':p3,
+		}};
+		var dvsJson = JSON.stringify(dvs);
+		logger.info("dvs:", dvsJson.length, "B ", dvsJson);
+		that.write(dvsJson);
+		that.write("\n");
+		that.position = xyz;
 		return that;
 	}
 
@@ -274,7 +303,20 @@ XYZPositioner = require("./XYZPositioner");
 		var fs = new FireStep({write:testWrite});
 		fs.move({x:100,y:0,z:-70});
 		testCmd(function(){ fs.jumpTo({x:-100,y:0,z:-80}); },
-			''
+			'{"dvs":{' +
+			'"1":"000000FF00FFFEFEFDFCFBF9F9F6F5F4F1EFEDEBE9E6E5E2E0DEDDDAD9D7D5D5'+
+			     'D4D3D3D4D5D6D8DADDE0E3E6E9ECEFF1F4F6F8FAFCFEFF0103040607080A0B0C'+
+				 '0D0E1010111313141416161618171919191A1B1A1C1C1C1D1D1D1E1F1F1F2020'+
+				 '202221222323232423242222211F1E1B191714110E0C0A070604020200010000",' +
+			'"2":"0000FF00FFFEFEFCFBF9F7F6F4F2F1EEEDECEAEAE8E9E8E8E8E9E9EAEBEBECED'+
+				 'EFF0F2F3F6F8FAFD000206080B0D0F1113151617191A1A1C1C1E1E1F20202122'+
+				 '2223242424252626262627272728272828282828282828292828282828282828'+
+				 '282827282827272727252423221F1D1B181513100E0B09070504020101000000",' +
+			'"3":"0000000000FFFFFFFFFEFDFDFBFBF9F7F5F4F0EFEBE8E5E1DFDBD7D4D1CDCAC7'+
+				'C5C3C1C0BFBFC0C1C2C5C8CACCD0D2D5D7DADCDFE1E3E5E7EAEBEDEFF0F2F4F5'+
+				'F7F8F9FBFCFDFEFF000102020404050507070709090A0A0B0C0D0D0E0F101011'+
+				'1214131516171718191A191A191818161413100F0C0B08060503030100010000",' +
+			'"sc":4,"us":1873817,"dp":{"1":1556,"2":7742,"3":-4881}}}\n'
 		);
 	});
 })
