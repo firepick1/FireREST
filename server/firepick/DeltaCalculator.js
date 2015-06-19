@@ -120,9 +120,9 @@ Logger = require("./Logger");
         }
         var z = -0.5 * (b + Math.sqrt(d)) / a;
         return {
-            z: z + that.dz,
             x: (a1 * z + b1) / dnm,
-            y: (a2 * z + b2) / dnm
+            y: (a2 * z + b2) / dnm,
+            z: z + that.dz,
         }
     };
     DeltaCalculator.prototype.calcAngleYZ = function(X, Y, Z) {
