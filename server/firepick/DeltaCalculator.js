@@ -72,6 +72,16 @@ Logger = require("./Logger");
     };
     DeltaCalculator.prototype.calcXYZ = function(angles) {
 		var that = this;
+		if (angles.theta1 == null && angles.p1 != null) {
+			angles.p1.should.be.Number;
+			angles.p2.should.be.Number;
+			angles.p3.should.be.Number;
+			return that.calcXYZ({
+				theta1:angles.p1/that.degreePulses,
+				theta2:angles.p2/that.degreePulses,
+				theta3:angles.p3/that.degreePulses,
+			});
+		}
         angles.theta1.should.be.Number;
         angles.theta2.should.be.Number;
         angles.theta3.should.be.Number;
@@ -287,6 +297,13 @@ Logger = require("./Logger");
 		shouldEqualT(dc.calcPulses({x:1, y:2, z:3}), {p1:-227,p2:-406,p3:-326});
 		shouldEqualT(dc.calcPulses({x:1, y:2, z:-3}), {p1:407,p2:233,p3:311});
 		shouldEqualT(dc.calcPulses({x:1, y:2, z:-90}), {p1:9658,p2:9521,p3:9582});
+	});
+	it("TESTTESTcalcXYZ() should compute XYZ from stepper pulse coordinates", function() {
+        var dc = new DeltaCalculator();
+		shouldEqualT(dc.calcXYZ({p1:0, p2:0, p3:0}), {x:0,y:0,z:0});
+		shouldEqualT(dc.calcXYZ({p1:-227, p2:-406, p3:-326}), {x:1,y:2,z:3}, 0.007);
+		shouldEqualT(dc.calcXYZ({p1:407, p2:233, p3:311}), {x:1,y:2,z:-3}, 0.007);
+		shouldEqualT(dc.calcXYZ({p1:9658, p2:9521, p3:9582}), {x:1,y:2,z:-90}, 0.009);
 	});
 	it("should generate thetaerr.csv", function() {
         var dc = new firepick.DeltaCalculator();

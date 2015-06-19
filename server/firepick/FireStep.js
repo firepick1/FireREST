@@ -91,6 +91,10 @@ XYZPositioner = require("./XYZPositioner");
 		that.move({x:0,y:0,z:0});
 		return that;
 	}
+	FireStep.prototype.getPulses = function() {
+		var that = this;
+		return that.delta.calcPulses(that.position);
+	}
 	FireStep.prototype.jumpTo = function(xyz) {
 		var that = this;
 		var dst = {
@@ -110,7 +114,7 @@ XYZPositioner = require("./XYZPositioner");
 		var dIm = Math.abs(that.delta.homePulses.p1/nTakeoff); 
 		logger.debug("dIm:", dIm);
 		for (var i=0; i<waypoints.length; i++) {
-			//logger.info("waypoints[",i,"]:", waypoints[i]);
+			logger.info("waypoints[",i,"]:", waypoints[i]);
 			pts1.push({re:waypoints[i].p1, im:i*dIm});
 			pts2.push({re:waypoints[i].p2, im:i*dIm});
 			pts3.push({re:waypoints[i].p3, im:i*dIm});
@@ -122,11 +126,11 @@ XYZPositioner = require("./XYZPositioner");
 		var ph = ph1.s(1) > ph2.s(1) ? ph1 : ph2;
 		ph = ph.s(1) > ph3.s(1) ? ph : ph3;
 		var phf = new PHFeed(ph, feedOpts);
-		var N = 128;
+		var N = 64;
 		var E = phf.Ekt(0,0);
 		var posPulses = that.delta.calcPulses(that.position);
 		logger.debug("posPulses:", posPulses);
-		var scale = 4;
+		var scale = 2;
 		var r1Prev = Math.round(posPulses.p1/scale);
 		var r2Prev = Math.round(posPulses.p2/scale);
 		var r3Prev = Math.round(posPulses.p3/scale);
@@ -139,9 +143,12 @@ XYZPositioner = require("./XYZPositioner");
 		for (var i=1; i<=N; i++) {
 			var tau = i/N;
 			E = phf.Ekt(E, tau);
-			var r1 = Math.round(ph1.r(E).re/scale);
-			var r2 = Math.round(ph2.r(E).re/scale);
-			var r3 = Math.round(ph3.r(E).re/scale);
+			var pre1 = ph1.r(E).re;
+			var pre2 = ph2.r(E).re;
+			var pre3 = ph3.r(E).re;
+			var r1 = Math.round(pre1/scale);
+			var r2 = Math.round(pre2/scale);
+			var r3 = Math.round(pre3/scale);
 			var dr1 = r1 - r1Prev;
 			var dr2 = r2 - r2Prev;
 			var dr3 = r3 - r3Prev;
@@ -151,11 +158,15 @@ XYZPositioner = require("./XYZPositioner");
 			p1 += FireStep.byteToHex(dv1);
 			p2 += FireStep.byteToHex(dv2);
 			p3 += FireStep.byteToHex(dv3);
-			logger.withPlaces(5).debug("i:", i, " tau:", tau, " r1:", r1, " r2:", r2, " r3:", r3,
-				" dv1:", dv1, " dv2:", dv2, " dv3:", dv3);
+			var xyzi = that.delta.calcXYZ({p1:pre1, p2:pre2, p3:pre3});
+			logger.withPlaces(2).info("i:", i, " tau:", tau, " r1:", r1, " r2:", r2, " r3:", r3,
+				" dv1:", dv1, " dv2:", dv2, " dv3:", dv3, " xyzi:", xyzi);
 			v1 += dv1;
 			v2 += dv2;
 			v3 += dv3;
+			r1Prev = r1;
+			r2Prev = r2;
+			r3Prev = r3;
 		}
 		logger.debug("p1:", p1);
 		logger.debug("p2:", p2);
@@ -255,6 +266,10 @@ XYZPositioner = require("./XYZPositioner");
 		testCmd(function(){ fs.home(); },'{"hom":{"x":-11200,"y":-11200,"z":-11200}}\n');
 		shouldEqualT(fs.position, fs.delta.calcXYZ(fs.delta.homeAngles));
 	});
+	it("getPulses() should return pulse position", function() {
+		var fs = new FireStep();
+		shouldEqualT(fs.move({x:1,y:2,z:3}).getPulses(), {p1:-227,p2:-406,p3:-326});
+	});
 	it("should implement getXYZ()", function() {
 		shouldEqualT(new FireStep().getXYZ(), {x:0,y:0,z:0});
 		shouldEqualT(new FireStep({position:{x:1,y:2,z:3}}).getXYZ(), {x:1,y:2,z:3});
@@ -281,7 +296,7 @@ XYZPositioner = require("./XYZPositioner");
 	it("should implement XYZPositioner", function() {
 		XYZPositioner.validate(new FireStep());
 	});
-	it("TESTTESTbyteToHex() should return hex string of byte", function() {
+	it("byteToHex() should return hex string of byte", function() {
 		FireStep.byteToHex(0x00).should.equal("00");
 		FireStep.byteToHex(0x10).should.equal("10");
 		FireStep.byteToHex(0x02).should.equal("02");
@@ -299,24 +314,36 @@ XYZPositioner = require("./XYZPositioner");
 		FireStep.byteToHex(0x0E).should.equal("0E");
 		FireStep.byteToHex(0xFF).should.equal("FF");
 	});
-	it("TESTTESTjumpTo() should traverse pick and place path", function() {
+	it("jumpTo() should traverse pick and place path", function() {
 		var fs = new FireStep({write:testWrite});
 		fs.move({x:100,y:0,z:-70});
+		shouldEqualT(fs.getPulses(), {p1:9563, p2:5959, p3:12228});
 		testCmd(function(){ fs.jumpTo({x:-100,y:0,z:-80}); },
-			'{"dvs":{' +
-			'"1":"000000FF00FFFEFEFDFCFBF9F9F6F5F4F1EFEDEBE9E6E5E2E0DEDDDAD9D7D5D5'+
-			     'D4D3D3D4D5D6D8DADDE0E3E6E9ECEFF1F4F6F8FAFCFEFF0103040607080A0B0C'+
-				 '0D0E1010111313141416161618171919191A1B1A1C1C1C1D1D1D1E1F1F1F2020'+
-				 '202221222323232423242222211F1E1B191714110E0C0A070604020200010000",' +
-			'"2":"0000FF00FFFEFEFCFBF9F7F6F4F2F1EEEDECEAEAE8E9E8E8E8E9E9EAEBEBECED'+
-				 'EFF0F2F3F6F8FAFD000206080B0D0F1113151617191A1A1C1C1E1E1F20202122'+
-				 '2223242424252626262627272728272828282828282828292828282828282828'+
-				 '282827282827272727252423221F1D1B181513100E0B09070504020101000000",' +
-			'"3":"0000000000FFFFFFFFFEFDFDFBFBF9F7F5F4F0EFEBE8E5E1DFDBD7D4D1CDCAC7'+
-				'C5C3C1C0BFBFC0C1C2C5C8CACCD0D2D5D7DADCDFE1E3E5E7EAEBEDEFF0F2F4F5'+
-				'F7F8F9FBFCFDFEFF000102020404050507070709090A0A0B0C0D0D0E0F101011'+
-				'1214131516171718191A191A191818161413100F0C0B08060503030100010000",' +
-			'"sc":4,"us":1873817,"dp":{"1":1556,"2":7742,"3":-4881}}}\n'
-		);
+			'{"dvs":{'+
+				'"1":"FF01FDFBFAF7F5F2F1EFEEF0EFF0F3F4FA00080E161818161311100D0D0C0A0A'+
+					 '090808070606040405040304040303040304040300FCF6F1EEECEAEDF0F6FAFE",'+
+				'"2":"FF00FBF9F6F1F3F0F5F5FBFE030306070A0D1113181515110E0C090907060606'+
+					 '0504040303030102000101000000FFFF01FE00FEFCF7F2EEEDEAECEDF2F6FBFE",'+
+				'"3":"0000FEFFFCFBF7F6F0EDE9E6E5E6E3E8ECF3FA050F13151515141211100F0D0D'+
+					 '0C0A090A070608050507040606060607060708070501FDF8F3F0EFF1F2F7FAFF",'+
+				'"sc":2,"us":1873817,"dp":{"1":1556,"2":7742,"3":-4881}}}'
+		+'\n');
+		shouldEqualT(fs.getPulses(), {p1:11119, p2:13701, p3:7347});
+	});
+	it("TESTTESTjumpTo() should avoid obstacles", function() {
+		var fs = new FireStep({write:testWrite});
+		fs.move({x:90,y:30,z:-70});
+		shouldEqualT(fs.getPulses(), {p1:10337, p2:5443, p3:11339});
+		testCmd(function(){ fs.jumpTo({x:30,y:90,z:-80}); },
+			'{"dvs":{'+
+				'"1":"FF01FDFBFAF7F5F2F1EFEEF0EFF0F3F4FA00080E161818161311100D0D0C0A0A'+
+					 '090808070606040405040304040303040304040300FCF6F1EEECEAEDF0F6FAFE",'+
+				'"2":"FF00FBF9F6F1F3F0F5F5FBFE030306070A0D1113181515110E0C090907060606'+
+					 '0504040303030102000101000000FFFF01FE00FEFCF7F2EEEDEAECEDF2F6FBFE",'+
+				'"3":"0000FEFFFCFBF7F6F0EDE9E6E5E6E3E8ECF3FA050F13151515141211100F0D0D'+
+					 '0C0A090A070608050507040606060607060708070501FDF8F3F0EFF1F2F7FAFF",'+
+				'"sc":2,"us":1873817,"dp":{"1":1556,"2":7742,"3":-4881}}}'
+		+'\n');
+		shouldEqualT(fs.getPulses(), {p1:11119, p2:13701, p3:7347});
 	});
 })
