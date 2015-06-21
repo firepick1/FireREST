@@ -75,9 +75,9 @@ XYZPositioner = require("./XYZPositioner");
 		var pulses = that.delta.calcPulses(dst);
 		var cmd = {
 			mov:{
-				x:pulses.p1,
-				y:pulses.p2,
-				z:pulses.p3,
+				"1":pulses.p1,
+				"2":pulses.p2,
+				"3":pulses.p3,
 			}
 		};
 		that.write(JSON.stringify(cmd));
@@ -87,8 +87,15 @@ XYZPositioner = require("./XYZPositioner");
 	}
 	FireStep.prototype.origin = function() {
 		var that = this;
-		that.home();
-		that.move({x:0,y:0,z:0});
+		var hp = that.delta.homePulses;
+		that.position = {x:0, y:0, z:0};
+		var dstPulses = that.delta.calcPulses(that.position);
+		var cmd = [
+			{hom:{"1":hp.p1, "2":hp.p2, "3":hp.p3}},
+			{mov:{"1":dstPulses.p1, "2":dstPulses.p2, "3":dstPulses.p3}}
+		];
+		that.write(JSON.stringify(cmd));
+		that.write("\n");
 		return that;
 	}
 	FireStep.prototype.getPulses = function() {
@@ -291,22 +298,22 @@ XYZPositioner = require("./XYZPositioner");
 		shouldEqualT(new FireStep().getXYZ(), {x:0,y:0,z:0});
 		shouldEqualT(new FireStep({position:{x:1,y:2,z:3}}).getXYZ(), {x:1,y:2,z:3});
 	});
-	it("should implement move()", function() {
+	it("TESTTESTshould implement move()", function() {
 		var fs = new FireStep({write:testWrite});
 		testCmd(function(){ fs.move({x:1,y:2,z:3}); },
-			'{"mov":{"x":-227,"y":-406,"z":-326}}\n'
+			'{"mov":{"1":-227,"2":-406,"3":-326}}\n'
 		);
 		shouldEqualT(fs.getXYZ(),{x:1,y:2,z:3});
 		testCmd(function(){ fs.move({x:0,y:0,z:0}); },
-			'{"mov":{"x":0,"y":0,"z":0}}\n'
+			'{"mov":{"1":0,"2":0,"3":0}}\n'
 		);
 		shouldEqualT(new FireStep().getXYZ(), {x:0,y:0,z:0});
 	});
-	it("should implement origin()", function() {
+	it("TESTTESTshould implement origin()", function() {
 		var fs = new FireStep({write:testWrite});
 		testCmd(function(){ fs.origin(); },
-			'{"hom":{"x":-11200,"y":-11200,"z":-11200}}\n' +
-			'{"mov":{"x":0,"y":0,"z":0}}\n'
+			'[{"hom":{"1":-11200,"2":-11200,"3":-11200}},' +
+			'{"mov":{"1":0,"2":0,"3":0}}]\n'
 		);
 		shouldEqualT(fs.getXYZ(), {x:0,y:0,z:0});
 	});
