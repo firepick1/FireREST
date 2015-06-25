@@ -298,7 +298,7 @@ Logger = require("./Logger");
 		shouldEqualT(dc.calcPulses({x:1, y:2, z:-3}), {p1:407,p2:233,p3:311});
 		shouldEqualT(dc.calcPulses({x:1, y:2, z:-90}), {p1:9658,p2:9521,p3:9582});
 	});
-	it("TESTTESTcalcXYZ() should compute XYZ from stepper pulse coordinates", function() {
+	it("calcXYZ() should compute XYZ from stepper pulse coordinates", function() {
         var dc = new DeltaCalculator();
 		shouldEqualT(dc.calcXYZ({p1:0, p2:0, p3:0}), {x:0,y:0,z:0});
 		shouldEqualT(dc.calcXYZ({p1:-227, p2:-406, p3:-326}), {x:1,y:2,z:3}, 0.007);
@@ -384,6 +384,22 @@ Logger = require("./Logger");
 		shouldEqualT(dc_minus1.calcXYZ(angles[0]),{x:-100.025,y:-0.218,z:-71.238});
 		shouldEqualT(dc_minus1.calcXYZ(angles[1]),{x:0,y:0,z:-71.491});
 		shouldEqualT(dc_minus1.calcXYZ(angles[2]),{x:100.025,y:-0.218,z:-71.238});
+	});
+	it("TESTTESThoming error affects perspective", function() {
+		var dc = new DeltaCalculator();
+		for (var z=0; z>=-100; z-=10) {
+			var row = [];
+			var angles = dc.calcAngles({x:0,y:0,z:z});
+			for (var a=-5; a<=5; a++) {
+				var xyz = dc.calcXYZ({
+					theta1:angles.theta1+a,
+					theta2:angles.theta2+a,
+					theta3:angles.theta3+a,
+					});
+				row.push(xyz.z);
+			}
+			logger.info(z,row);
+		}
 	});
 	it("eTheta1..3 should compensate for homing error", function() {
 		var dc0 = new DeltaCalculator({eTheta1:0, eTheta2:0, eTheta3:0});

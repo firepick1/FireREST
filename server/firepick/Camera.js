@@ -71,17 +71,20 @@ temp.track();
         return this;
     }
 
+	///////////// CLASS ///////////
+	
     Logger.logger.info("loaded firepick.Camera");
     module.exports = firepick.Camera = Camera;
 })(firepick || (firepick = {}));
 
 (typeof describe === 'function') && describe("firepick.Camera test", function() {
+	var Camera = firepick.Camera;
     var emptyCamera = new firepick.Camera();
     var camera = new firepick.Camera([
         "test/camX0Y0Z0a.jpg",
         "test/camX0Y0Z0b.jpg",
     ]);
 
-    firepick.Camera.validate(camera);
-    firepick.Camera.validate(emptyCamera);
+    Camera.validate(camera);
+    Camera.validate(emptyCamera);
 });

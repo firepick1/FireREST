@@ -298,7 +298,7 @@ XYZPositioner = require("./XYZPositioner");
 		shouldEqualT(new FireStep().getXYZ(), {x:0,y:0,z:0});
 		shouldEqualT(new FireStep({position:{x:1,y:2,z:3}}).getXYZ(), {x:1,y:2,z:3});
 	});
-	it("TESTTESTshould implement move()", function() {
+	it("should implement move()", function() {
 		var fs = new FireStep({write:testWrite});
 		testCmd(function(){ fs.move({x:1,y:2,z:3}); },
 			'{"mov":{"1":-227,"2":-406,"3":-326}}\n'
@@ -309,7 +309,7 @@ XYZPositioner = require("./XYZPositioner");
 		);
 		shouldEqualT(new FireStep().getXYZ(), {x:0,y:0,z:0});
 	});
-	it("TESTTESTshould implement origin()", function() {
+	it("should implement origin()", function() {
 		var fs = new FireStep({write:testWrite});
 		testCmd(function(){ fs.origin(); },
 			'[{"hom":{"1":-11200,"2":-11200,"3":-11200}},' +
@@ -370,7 +370,7 @@ XYZPositioner = require("./XYZPositioner");
 		+'\n');
 		shouldEqualT(fs.getPulses(), {p1:11119, p2:13701, p3:7347});
 	});
-	it("TESTTESTjumpTo() should avoid obstacles", function() {
+	it("jumpTo() should avoid obstacles", function() {
 		var fs = new FireStep({write:testWrite});
 		fs.move({x:90,y:30,z:-70});
 		shouldEqualT(fs.getPulses(), {p1:10337, p2:5443, p3:11339});
