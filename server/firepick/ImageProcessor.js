@@ -11,10 +11,11 @@ ImageStore = require("./ImageStore");
 Logger = require("./Logger");
 
 (function(firepick) {
+	var logger = new Logger();
     function ImageProcessor(options) {
+		var that = this;
 		options = options || {};
-		this.logger = options.logger || new Logger(options);
-        return this;
+        return that;
     }
 
     /////////////// INSTANCE ////////////
@@ -26,7 +27,7 @@ Logger = require("./Logger");
         }
         var out = child_process.execSync(cmd);
         var jout = JSON.parse(out.toString());
-		that.logger.trace(cmd, " => ", jout);
+		logger.trace(cmd, " => ", jout);
         return jout;
     };
     ImageProcessor.prototype.health = function() {
@@ -59,6 +60,7 @@ Logger = require("./Logger");
     };
 
     /////////////// GLOBAL /////////////
+	ImageProcessor.logger = logger;
     ImageProcessor.validate = function(ip) {
         describe("ImageProcessor.validate(" + ip.constructor.name + ")", function() {
             var ref000a = {
