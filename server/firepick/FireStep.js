@@ -33,6 +33,14 @@ XYZPositioner = require("./XYZPositioner");
 		that.vMax.should.above(0);
 		that.tvMax = options.tvMax || 0.4;
 		that.tvMax.should.above(0);
+		that.bounds = {
+			xMax: 90,
+			xMin: -90,
+			yMax: 90,
+			yMin: -90,
+			zMax: 40,
+			zMin: -90,
+		};
 
 		return that;
     };

@@ -11,6 +11,14 @@ function isNumeric(obj) {
     function XYZPositioner(options) {
 		var that = this;
 		options = options || {};
+		that.bounds = options.bounds || {
+			xMax:null, 
+			xMin:null, 
+			yMax:null, 
+			yMin:null, 
+			zMax:null, 
+			zMin:null
+		};
         that.feedRate = options.feedRate || 6000;
         that.sync = options.sync || "M400";
         that.xyz = {};
@@ -18,38 +26,38 @@ function isNumeric(obj) {
 		that.logger = options.logger || new Logger(options);
         return that;
     }
-    XYZPositioner.validate = function(xyzPositioner) {
-		should.exist(xyzPositioner);
-		xyzPositioner.home.should.be.Function;
-		xyzPositioner.getXYZ.should.be.Function;
-		xyzPositioner.move.should.be.Function;
-		xyzPositioner.origin.should.be.Function;
-		xyzPositioner.health.should.be.Function;
-		if (xyzPositioner.health() === 0) {
-		//	it("should throw errors when not available", function() {
-				should.throws(function() {
-					xyzPositioner.home();
-				});
-				should.throws(function() {
-					xyzPositioner.origin();
-				});
-				should.throws(function() {
-					xyzPositioner.move();
-				});
-		//	});
+
+    XYZPositioner.validate = function(xyz) {
+		xyz.should.exist;
+		xyz.home.should.be.Function;
+		xyz.getXYZ.should.be.Function;
+		xyz.move.should.be.Function;
+		xyz.origin.should.be.Function;
+		xyz.health.should.be.Function;
+		if (xyz.health() === 0) {
+			//	should throw errors when not available
+			should.throws(function() {
+				xyz.home();
+			});
+			should.throws(function() {
+				xyz.origin();
+			});
+			should.throws(function() {
+				xyz.move();
+			});
 		} else {
 		//	it("should move to origin", function() {
 		//		this.timeout(5000);
-				should.equal(xyzPositioner, xyzPositioner.origin());
+				should.equal(xyz, xyz.origin());
 				should.deepEqual({
 					x: 0,
 					y: 0,
 					z: 0
-				}, xyzPositioner.getXYZ());
+				}, xyz.getXYZ());
 		//	});
 		//	it("should move to a single position {x:1,y:2,z:3}", function() {
 		//		this.timeout(5000);
-				should.equal(xyzPositioner, xyzPositioner.move({
+				should.equal(xyz, xyz.move({
 					x: 1,
 					y: 2,
 					z: 3
@@ -58,11 +66,11 @@ function isNumeric(obj) {
 					x: 1,
 					y: 2,
 					z: 3
-				}, xyzPositioner.getXYZ());
+				}, xyz.getXYZ());
 		//	});
 		//	it("move([{x:1},{y:2},{z:3}]) should follow a path", function() {
 		//		this.timeout(5000);
-				xyzPositioner.move({
+				xyz.move({
 					x: 0,
 					y: 0,
 					z: 0
@@ -71,16 +79,19 @@ function isNumeric(obj) {
 				moves.push({x:1});
 				moves.push({y:2});
 				moves.push({z:3});
-				should.equal(xyzPositioner.move(moves), xyzPositioner);
-				should.deepEqual(xyzPositioner.getXYZ(), {
+				should.equal(xyz.move(moves), xyz);
+				should.deepEqual(xyz.getXYZ(), {
 					x: 1,
 					y: 2,
 					z: 3
 				});
 		//	});
+			XYZPositioner.validateBounds(xyz);
 		}
         return true;
     }
+
+	/////////////////// INSTANCE //////////////////
     XYZPositioner.prototype.withWriter = function(writer) {
 		var that = this;
         should.exist(writer);
@@ -165,6 +176,37 @@ function isNumeric(obj) {
 		var that = this;
         return 1;
     }
+
+	/////////////////// CLASS /////////////////////
+	XYZPositioner.validateBounds = function(xyz) {
+		xyz.should.exist;
+		xyz.bounds.should.exist;
+		var b = xyz.bounds;
+		b.should.have.properties([
+			"xMax", // for Y=0 and some Z
+			"xMin", // for Y=0 and some Z
+			"yMax",	// for X=0 and some Z
+			"yMin",	// for X=0 and some Z
+			"zMax", // for X=0 and Y=0
+			"zMin", // for X=0 and Y=0
+		]);
+		if (b.xMax != null || b.xMin != null) {
+			b.xMax.should.exist;
+			b.xMin.should.exist;
+			b.xMax.should.not.below(b.xMin);
+		}
+		if (b.yMax != null || b.yMin != null) {
+			b.yMax.should.exist;
+			b.yMin.should.exist;
+			b.yMax.should.not.below(b.yMin);
+		}
+		if (b.zMax != null || b.zMin != null) {
+			b.zMax.should.exist;
+			b.zMin.should.exist;
+			b.zMax.should.not.below(b.zMin);
+		}
+		return true;
+	}
 
     Logger.logger.info("loaded firepick.XYZPositioner");
     module.exports = firepick.XYZPositioner = XYZPositioner;
@@ -288,4 +330,19 @@ function isNumeric(obj) {
     it("should validate as XYZPositioner", function() {
         should.ok(firepick.XYZPositioner.validate(xyz, "XYZPositioner"));
     });
+	it("TESTTESTgetBounds() should return min/max XYZ travel", function() {
+		var xyzNoBounds = new XYZPositioner();
+		XYZPositioner.validateBounds(xyzNoBounds);
+		var xyzBounds = new XYZPositioner({
+			bounds: {
+				xMax:1,
+				xMin:-1,
+				yMax:2,
+				yMin:1,
+				zMax:-1,
+				zMin:-2,
+			}
+		});
+		XYZPositioner.validateBounds(xyzBounds);
+	});
 })

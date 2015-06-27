@@ -65,7 +65,6 @@ Logger = require("./Logger");
 		var x = cmdResult["grid.x"] || null;
 		var y = cmdResult["grid.y"] || null;
 		var result = {grid:{}}
-		x && (result.grid.x = x);
 		if (x) { result.grid.x = x; }
 		if (y) { result.grid.y = y; }
 		
@@ -130,8 +129,8 @@ Logger = require("./Logger");
                     var result = ip.meanStdDev(ref000a);
                     //console.log(JSON.stringify(result));
                     should.deepEqual(result, {
-                        "mean": [252.6633875, 254.64116250000001, 251.63050625000002, 0.0],
-                        "stdDev": [2.1166523155330208, 1.9238660682581448, 9.6636286206944533, 0.0]
+                        "mean": [252.663, 254.641, 251.631, 0.0],
+                        "stdDev": [2.11665, 1.92387, 9.66363, 0.0]
                     });
                 });
             });
@@ -139,7 +138,7 @@ Logger = require("./Logger");
                 it("sharpness(imgRef) should calculate the sharpness of an image", function() {
                     var result = ip.sharpness(ref000a);
                     should.deepEqual(result, {
-                        "sharpness": 3.0546240601503762
+                        "sharpness": 3.05462
                     });
                 });
             });
@@ -147,7 +146,7 @@ Logger = require("./Logger");
                 it("PSNR(imgRef1,imgRef2) should calculate the Power Signal to Noise Ratio of two images", function() {
                     var result = ip.PSNR(ref000a, ref000b);
                     should.deepEqual(result, {
-                        "PSNR": 52.54224351193264
+                        "PSNR": 52.5422
                     });
                 });
             });

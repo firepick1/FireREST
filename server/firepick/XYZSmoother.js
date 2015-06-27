@@ -17,6 +17,14 @@ Util = require("./Util");
         that.xyz = options.xyz || new XYZPositioner(options);
         that.write = options.write || function(cmd) { /* default discards data */ }
 		that.logger = options.logger || new Logger(options);
+		that.bounds = {
+			xMax: null,
+			xMin: null,
+			yMax: null,
+			yMin: null,
+			zMax: null,
+			zMin: null,
+		};
         return that;
     }
     XYZSmoother.prototype.setFeedRate = function(feedRate) { // Fxxx: Feed rate in mm/min
