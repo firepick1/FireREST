@@ -1,0 +1,16 @@
+[
+	{"op":"matchTemplate",
+		"name":"match",
+		"template":"{{template}}",
+		"corr":"{{corr||0.8}}",
+		"threshold":"{{threshold||0.6}}",
+		"method":"{{method}}",
+		"angle":"{{angle}}",
+		"output":"{{output}}" },
+	{"op":"matchGrid", 
+		"name":"result", 
+		"calibrate":"{{calibrate}}", 
+		"scale":"{{scale}}",
+		"sep":"{{sep}}",
+		"model":"match" }
+]
