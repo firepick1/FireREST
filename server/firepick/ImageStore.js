@@ -12,6 +12,7 @@ function isNumeric(obj) {
 }
 
 (function(firepick) {
+	var logger = new Logger();
     function ImageStore(camera, options) {
         var that = this;
         options = options || {};
@@ -70,9 +71,18 @@ function isNumeric(obj) {
         that.camera.capture();
         return that.load(imgRef, that.camera.path);
     }
+	ImageStore.prototype.serialize = function(fname) {
+		var that = this;
+		fs.writeFileSync(fname, JSON.stringify(that.images));
+	}
+	ImageStore.prototype.deserialize = function(fname) {
+		var that = this;
+		var json = fs.readFileSync(fname);
+		that.images = JSON.parse(json);
+	}
 
     /////////////// GLOBAL /////////////
-    ImageStore.validate = function(imgStore) {
+    ImageStore.validatex = function(imgStore) {
         var storeClass = imgStore.constructor.name;
         describe("ImageStore.validate(" + storeClass + ")", function() {
             var ref123 = new firepick.ImageRef(1, 2, 3, {
@@ -168,8 +178,8 @@ function isNumeric(obj) {
         prefix: "Test",
         suffix: ".JPG"
     });
-    firepick.ImageStore.validate(imgStore);
-    firepick.ImageStore.validate(imgStoreTest);
+    firepick.ImageStore.validatex(imgStore);
+    firepick.ImageStore.validatex(imgStoreTest);
 
     describe("Test ImageStore extensions", function() {
         var ref123 = new firepick.ImageRef(1, 2, 3, {
@@ -181,4 +191,23 @@ function isNumeric(obj) {
             should.not.exist(imgStore.peek(ref123));
         });
     });
+	it("serialize() should save ImageStore to file", function() {
+		var fname = "test_ImageStore_serialize.json";
+		var imgStore1 = new ImageStore();
+		var imgRef1 = new ImageRef(0,0,0,{tag:"red"});
+		var imgRef1Copy = ImageRef.copy(imgRef1);
+		var imgPath1 = "test/XP005_Z0X0Y0@1#1.jpg";
+		var imgRef2 = new ImageRef(0,0,-10,{tag:"blue"});
+		var imgRef2Copy = ImageRef.copy(imgRef2);
+		var imgPath2 = "test/XP005_Z-010X0Y0@1#1.jpg";
+		imgStore1.load(imgRef1, imgPath1);
+		imgStore1.load(imgRef2, imgPath2);
+		imgStore1.peek(imgRef1Copy).should.have.properties({"path":"/tmp/ImageStore_0_0_0#red.jpg"});
+		imgStore1.serialize(fname);
+		var imgStore2 = new ImageStore();
+		imgStore2.deserialize(fname);
+		logger.info("imgStore2:", imgStore2);
+		imgStore2.peek(imgRef1Copy).should.have.properties({"path":"/tmp/ImageStore_0_0_0#red.jpg"});
+		fs.unlink(fname);
+	});
 })

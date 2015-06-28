@@ -385,7 +385,7 @@ Logger = require("./Logger");
 		shouldEqualT(dc_minus1.calcXYZ(angles[1]),{x:0,y:0,z:-71.491});
 		shouldEqualT(dc_minus1.calcXYZ(angles[2]),{x:100.025,y:-0.218,z:-71.238});
 	});
-	it("TESTTESThoming error affects perspective", function() {
+	it("homing error affects perspective", function() {
 		var dc = new DeltaCalculator();
 		for (var z=0; z>=-100; z-=10) {
 			var row = [];

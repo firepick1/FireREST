@@ -5,8 +5,10 @@ var child_process = require('child_process');
 var fs = require('fs');
 var temp = require('temp');
 temp.track();
+var Logger = require("./Logger");
 
 (function(firepick) {
+	var logger = new Logger();
     function Camera(mockImages) {
 		var that = this;
         that.tmpFile = temp.openSync({
@@ -50,22 +52,26 @@ temp.track();
 		var that = this;
         return that.mockImages.length > 0 ? 1 : 0;
     }
-    Camera.prototype.capture = function() {
+    Camera.prototype.capture = function(imgRef) {
 		var that = this;
         if (that.mockImages.length === 0) {
             throw new Error("Camera has no mockImages");
         }
 
         var image = that.mockImages[0];
+		image.should.be.ok;
         that.mockImages = that.mockImages.slice(1);
         var cmd = "cp " + image + " " + that.path;
-        //console.log(cmd);
+        logger.debug(cmd);
         var out = child_process.execSync(cmd);
         return that;
     }
-	Camera.prototype.pushMock = function(image) {
+	Camera.prototype.pushMock = function(mockImage) {
 		var that = this;
-		that.mockImages.push(image);
+		var stat = fs.statSync(mockImage);
+		stat.should.exist;
+		stat.size.should.above(0);
+		that.mockImages.push(mockImage);
 		return that;
 	}
 

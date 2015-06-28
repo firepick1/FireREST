@@ -38,7 +38,7 @@ var should = require("should"),
 (typeof describe === 'function') && describe("firepick.Perspective test", function() {
 	var Perspective = firepick.Perspective;
 
-	it("TESTTESTshould create a Perspective given two reference images", function() {
+	it("should create a Perspective given two reference images", function() {
 		var refImg1 = 3;	// reference image size at pos1
 		var pos1 = 10;	// reference image1 position
 		var refImg2 = 6;	// reference image size at pos2
@@ -49,7 +49,7 @@ var should = require("should"),
 		pv.pos1.should.equal(pos1);
 		pv.pos2.should.equal(pos2);
 	});
-	it("TESTTESTobjectPosition() should return the object position", function() {
+	it("objectPosition() should return the object position", function() {
 		var refImg1 = 3;	// reference image size at pos1
 		var pos1 = 10;	// reference image1 position
 		var refImg2 = 6;	// reference image size at pos2
@@ -57,7 +57,7 @@ var should = require("should"),
 		var pv = new Perspective(refImg1, pos1, refImg2, pos2);
 		pv.objectPosition().should.equal(30);
 	});
-	it("TESTTESTviewPosition() should return viewer position given an image size", function() {
+	it("viewPosition() should return viewer position given an image size", function() {
 		var refImg1 = 3;	// reference image size at pos1
 		var pos1 = 10;	// reference image1 position
 		var refImg2 = 6;	// reference image size at pos2

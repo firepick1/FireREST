@@ -27,11 +27,13 @@ var should = require("should"),
 			write:		that.write,
 		});
 	};
-	Logger.prototype.message = function(args) {
+	Logger.prototype.message = function(args, quote) {
 		var that = this;
 		var msg = "";
 		for (var i=0; i < args.length; i++) {
-			if (typeof args[i] ==="object") {
+			if (args[i] == null) {
+				msg += "null";
+			} else if (typeof args[i] ==="object") {
 				if (args[i]["stringify"] != null) {
 					msg += args[i].stringify({nPlaces:that.nPlaces});
 				} else if (args[i] instanceof Array) {
@@ -42,7 +44,7 @@ var should = require("should"),
 							if (nPrev) {
 								msg += ", ";
 							}
-							msg += that.message([args[i][k]]);
+							msg += that.message([args[i][k]],true);
 							nPrev++;
 						}
 					}
@@ -55,12 +57,14 @@ var should = require("should"),
 							if (nPrev) {
 								msg += ", ";
 							}
-							msg += k + ":" + that.message([args[i][k]]);
+							msg += k + ":" + that.message([args[i][k]],true);
 							nPrev++;
 						}
 					}
 					msg += "}";
 				}
+			} else if (quote && typeof args[i] === "string") {
+				msg += '"' + args[i] + '"';
 			} else if (typeof args[i] === "number") {
 				msg += that.round(args[i]);
 			} else {

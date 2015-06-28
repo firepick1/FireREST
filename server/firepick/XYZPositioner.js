@@ -330,7 +330,7 @@ function isNumeric(obj) {
     it("should validate as XYZPositioner", function() {
         should.ok(firepick.XYZPositioner.validate(xyz, "XYZPositioner"));
     });
-	it("TESTTESTgetBounds() should return min/max XYZ travel", function() {
+	it("getBounds() should return min/max XYZ travel", function() {
 		var xyzNoBounds = new XYZPositioner();
 		XYZPositioner.validateBounds(xyzNoBounds);
 		var xyzBounds = new XYZPositioner({

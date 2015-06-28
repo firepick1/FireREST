@@ -15,69 +15,86 @@ Logger = require("./Logger");
     function ImageProcessor(options) {
 		var that = this;
 		options = options || {};
+		that.imgStore = options.imageStore || new ImageStore();
         return that;
     }
 
     /////////////// INSTANCE ////////////
-    ImageProcessor.prototype.firesight_cmd = function(fname1, pipeline, args) {
+    ImageProcessor.prototype.firesight_cmd = function(imgRef, pipeline, args, resultFilter) {
 		var that = this;
-        var cmd = "firesight -i " + fname1 + " -p server/json/" + pipeline;
+		var fname = ImageProcessor.getPath(imgRef);
+        var cmd = "firesight -i " + ImageProcessor.getPath(imgRef) + " -p server/json/" + pipeline;
         if (args) {
             cmd += " " + args;
         }
-		try {
-			var out = child_process.execSync(cmd);
-			var jout = JSON.parse(out.toString());
-			logger.trace(cmd, " => ", jout);
-			return jout;
-		} catch(err) {
-			logger.info("ERROR:", err);
-			return err;
+		var imgRefCmd = ImageRef.copy(imgRef);
+		imgRefCmd.setTag(cmd);
+		var imgRefCached = that.imgStore.peek(imgRefCmd);
+		var result;
+		if (imgRefCached == null) {
+			try {
+				var out = child_process.execSync(cmd);
+				var jout = JSON.parse(out.toString());
+				logger.trace(cmd, " => ", jout);
+				result = jout;
+			} catch(err) {
+				logger.info("ERROR:", err == null ? err : err.cmd);
+				result = err;
+			}
+			result = resultFilter ? {result:resultFilter(result)} : result;
+			imgRefCmd.result = result;
+			logger.info("imgRefCmd:", imgRefCmd);
+			that.imgStore.load(imgRefCmd);
+		} else {
+			result = imgRefCached.result;
 		}
+		return result;
     };
     ImageProcessor.prototype.health = function() {
         return 1;
     };
     ImageProcessor.prototype.calcOffset = function(imgRef1, imgRef2) {
 		var that = this;
-        var jout = that.firesight_cmd(imgRef1.path, "calcOffset.json",
+        var jout = that.firesight_cmd(imgRef1, "calcOffset.json",
             "-Dtemplate=" + imgRef2.path);
         return jout.result.channels && jout.result.channels['0'] ?
 			jout.result.channels : null;
     };
     ImageProcessor.prototype.meanStdDev = function(imgRef) {
 		var that = this;
-        return that.firesight_cmd(imgRef.path, "meanStdDev.json").result;
+        return that.firesight_cmd(imgRef, "meanStdDev.json").result;
     };
     ImageProcessor.prototype.matchTemplate = function(imgRef, tmpltRef) {
 		var that = this;
-        return that.firesight_cmd(imgRef.path, "matchTemplate.json", 
+        return that.firesight_cmd(imgRef, "matchTemplate.json", 
 			"-Dtemplate="+tmpltRef.path).result;
     };
     ImageProcessor.prototype.sharpness = function(imgRef) {
 		var that = this;
-        return that.firesight_cmd(imgRef.path, "sharpness.json").result;
+        return that.firesight_cmd(imgRef, "sharpness.json").result;
     };
     ImageProcessor.prototype.measureGrid = function(imgRef) {
 		var that = this;
-        var cmdResult = that.firesight_cmd(imgRef.path, "measureGrid.json",
-			"-Dtemplate=server/img/cross32.png").result;
-		var x = cmdResult["grid.x"] || null;
-		var y = cmdResult["grid.y"] || null;
-		var result = {grid:{}}
-		if (x) { result.grid.x = x; }
-		if (y) { result.grid.y = y; }
-		
-		return result;
+        return that.firesight_cmd(imgRef, "measureGrid.json",
+			"-Dtemplate=server/img/cross32.png", function(rawResult) {
+			return {grid:{
+				x: rawResult && rawResult.result && rawResult.result["grid.x"] || null,
+				y: rawResult && rawResult.result && rawResult.result["grid.y"] || null,
+			}};
+		}).result;
     };
     ImageProcessor.prototype.PSNR = function(imgRef1, imgRef2) {
 		var that = this;
-        return that.firesight_cmd(imgRef1.path, "PSNR.json",
+        return that.firesight_cmd(imgRef1, "PSNR.json",
             "-Dpath=" + imgRef2.path).result;
     };
 
     /////////////// GLOBAL /////////////
 	ImageProcessor.logger = logger;
+	ImageProcessor.getPath = function(imgRef) {
+		imgRef.should.have.properties(["path"]);
+		return imgRef.path;
+	}
     ImageProcessor.validate = function(ip) {
         describe("ImageProcessor.validate(" + ip.constructor.name + ")", function() {
             var ref000a = {
@@ -223,7 +240,7 @@ Logger = require("./Logger");
 		var result = ip.calcOffset(ref000a, refDuck);
 		should.not.exist(result);
 	});
-	it("TESTTESTshould calculate the mean and standard deviation of an image", function() {
+	it("should calculate the mean and standard deviation of an image", function() {
 		var result = ip.meanStdDev(ref000a);
 		//console.log(JSON.stringify(result));
 		should.deepEqual(result, {
@@ -237,13 +254,13 @@ Logger = require("./Logger");
 			"sharpness": 3.05462
 		});
 	});
-	it("TESTTESTPSNR(imgRef1,imgRef2) should calculate the Power Signal to Noise Ratio of two images", function() {
+	it("PSNR(imgRef1,imgRef2) should calculate the Power Signal to Noise Ratio of two images", function() {
 		var result = ip.PSNR(ref000a, ref000b);
 		should.deepEqual(result, {
 			"PSNR": 52.5422
 		});
 	});
-	it("TESTTESTmeasureGrid(imgRef1,imgRef2) should measure grid line separation", function() {
+	it("measureGrid(imgRef1,imgRef2) should measure grid line separation", function() {
 		should.deepEqual(ip.measureGrid(refZ_40), {
 			"grid":{
 				x:8.79561, 
@@ -251,7 +268,7 @@ Logger = require("./Logger");
 			}
 		});
 		should.deepEqual(ip.measureGrid(refZ_80), {
-			"grid":{}
+			"grid":{x:null,y:null}
 		});
 	});
 });
