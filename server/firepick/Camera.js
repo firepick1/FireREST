@@ -27,10 +27,10 @@ var Logger = require("./Logger");
 		} else {
 			// take a picture
 			var stat1;
-			should(camera.capture()).equal(camera);
-			should.exist(camera.path);
+			var imgRef = camera.capture();
+			should.exist(imgRef.path);
 			should.doesNotThrow(function() {
-				stat1 = fs.statSync(camera.path);
+				stat1 = fs.statSync(imgRef.path);
 			});
 			should(stat1.size).above(0);
 
@@ -57,14 +57,16 @@ var Logger = require("./Logger");
         if (that.mockImages.length === 0) {
             throw new Error("Camera has no mockImages");
         }
+		var result = imgRef ? ImageRef.copy(imgRef) : new ImageRef(null,null,null);
 
-        var image = that.mockImages[0];
-		image.should.be.ok;
+        var imgPath = that.mockImages[0];
+		imgPath.should.be.ok;
         that.mockImages = that.mockImages.slice(1);
-        var cmd = "cp " + image + " " + that.path;
-        logger.debug(cmd);
-        var out = child_process.execSync(cmd);
-        return that;
+        //var cmd = "cp " + imgPath + " " + that.path;
+        //logger.debug(cmd);
+        //var out = child_process.execSync(cmd);
+		result.path = imgPath;
+        return result;
     }
 	Camera.prototype.pushMock = function(mockImage) {
 		var that = this;

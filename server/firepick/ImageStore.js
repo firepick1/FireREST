@@ -68,8 +68,8 @@ function isNumeric(obj) {
     ImageStore.prototype.capture = function(imgRef) {
         var that = this;
         should.exist(imgRef);
-        that.camera.capture();
-        return that.load(imgRef, that.camera.path);
+        var capturedRef = that.camera.capture(imgRef);
+        return that.load(capturedRef, capturedRef.path);
     }
 	ImageStore.prototype.serialize = function(fname) {
 		var that = this;

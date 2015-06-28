@@ -56,7 +56,6 @@ Logger = require("./Logger");
 		that.samples[z] = imgRef;
         if (!imgRef.exists() || imgRef.sharpness == null) {
             that.captureCount++;
-            //imgRef = that.xyzCam.moveTo(imgRef).capture("calibration");
             imgRef = that.xyzCam.moveTo(imgRef).capture();
             imgRef.sharpness = that.ip.sharpness(imgRef).sharpness;
 			that.logger.debug("IMG(",z,")"," sharp:",
