@@ -6,6 +6,7 @@ var fs = require('fs');
 var temp = require('temp');
 temp.track();
 var Logger = require("./Logger");
+var ImageRef = require("./ImageRef");
 
 (function(firepick) {
 	var logger = new Logger();

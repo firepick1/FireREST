@@ -117,13 +117,13 @@ var SECONDS_PER_MINUTE = 60;
 		that.xyzCam.setFeedRate(that.feedMin);
 		that.xyzCam.origin(); // recalibrate
 		that.xyzCam.moveTo(that.basis);
-		that.basis = that.xyzCam.capture("PHCalibrater-basis");
+		that.basis = that.xyzCam.capture({tag:"PHCalibrater-basis"});
 		that.xyzCam.setFeedRate(feedRate);
 		var quality = 0;
 		var result;
 		for (var i = 0; i < that.pathIterations; i++) {
 			that.testPath(i,feedRate,1);
-			var imgRef = that.xyzCam.capture("PHCalibrater_feedRate"+i, feedRate);
+			var imgRef = that.xyzCam.capture({tag:"PHCalibrater_feedRate"+i, version:feedRate});
 			var q;
 			result = that.ip.PSNR(that.basis, imgRef);
 			var psnr = result.PSNR;
@@ -153,12 +153,12 @@ var SECONDS_PER_MINUTE = 60;
 		that.xyzCam.setFeedRate(that.feedMin);
 		that.xyzCam.origin(); // recalibrate
 		that.xyzCam.moveTo(that.basis);
-		that.basis = that.xyzCam.capture("PHCalibrater-basis");
+		that.basis = that.xyzCam.capture({tag:"PHCalibrater-basis"});
 		var quality = 0;
 		var result;
 		for (var i = 0; i < that.pathIterations; i++) {
 			that.testPath(i,that.feedMin,tvMax);
-			var imgRef = that.xyzCam.capture("PHCalibrater_tvMax"+i, tvMax);
+			var imgRef = that.xyzCam.capture({tag:"PHCalibrater_tvMax"+i, version:tvMax});
 			var q;
 			result = that.ip.PSNR(that.basis, imgRef);
 			var psnr = result.PSNR;

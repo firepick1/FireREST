@@ -135,13 +135,13 @@ Logger = require("./Logger");
 		that.xyzCam.setFeedRate(that.feedMin);
 		that.xyzCam.origin(); // recalibrate
 		that.xyzCam.moveTo(that.basis);
-		that.basis = that.xyzCam.capture("feedrate-basis");
+		that.basis = that.xyzCam.capture({tag:"feedrate-basis"});
 		that.xyzCam.setFeedRate(feedRate);
 		var quality = 0;
 		var result;
 		for (var i = 0; i < that.pathIterations; i++) {
 			that.testPathC(i);
-			var imgRef = that.xyzCam.capture("feedrate"+i, feedRate);
+			var imgRef = that.xyzCam.capture({tag:"feedrate"+i, version:feedRate});
 			var q;
 			result = that.ip.PSNR(that.basis, imgRef);
 			var psnr = result.PSNR;

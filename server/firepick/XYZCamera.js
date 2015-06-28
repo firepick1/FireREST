@@ -74,16 +74,15 @@ Logger = require("./Logger");
         var that = this;
         return that.position;
     };
-    XYZCamera.prototype.capture = function(tag, version) {
+    XYZCamera.prototype.capture = function(imgRef) {
         var that = this;
-        var imgRef = ImageRef.copy(that.position);
-        if (tag != null) {
-            imgRef.tag = tag;
-        }
-        if (version != null) {
-            imgRef.version = version;
-        }
-        return that.imageRef(imgRef);
+        var imgRefCopy = new ImageRef(
+			that.position.x,
+			that.position.y,
+			that.position.z,
+			imgRef
+		);
+        return that.imageRef(imgRefCopy);
     }
     XYZCamera.prototype.imageRef = function(imgRef) {
         var that = this;
@@ -234,8 +233,8 @@ Logger = require("./Logger");
             stat00m5.size.should.not.equal(stat000.size);
         });
         var imgTest;
-        it("should tag captured image with {tag:'attempt',version:7} using capture('attempt',7)", function() {
-            imgTest = xyzCam.capture('attempt', 7);
+        it("capture() can decorate result with tag and version", function() {
+            imgTest = xyzCam.capture({tag:'attempt', version:7});
             should.exist(imgTest);
             should(imgTest).properties({
                 x: 0,

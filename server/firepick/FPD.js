@@ -68,18 +68,17 @@ XYZCamera = require("./XYZCamera");
 		that.feedRate = feedRate;
 		return that;
 	};
-    FPD.prototype.capture = function(tag, version) {
+    FPD.prototype.capture = function(imgRef) {
         var that = this;
         var xyz = that.getXYZ();
-        var imgRef = {
-            x: xyz.x,
-            y: xyz.y,
-            z: xyz.z,
-            tag: tag,
-            version: version,
-        };
-        var theRef = that.$imgStore.peek(imgRef);
-        return that.$imgStore.capture(theRef || imgRef);
+        var imgRefCopy = new ImageRef(
+            xyz.x,
+            xyz.y,
+            xyz.z, 
+			imgRef
+		);
+        var theRef = that.$imgStore.peek(imgRefCopy);
+        return that.$imgStore.capture(theRef || imgRefCopy);
     };
     FPD.prototype.imageStore = function() {
         var that = this;

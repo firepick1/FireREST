@@ -16,7 +16,7 @@ temp.track();
 		that.y.should.be.Number;
 		that.z.should.be.Number;
         if (properties) {
-            should.ok(typeof properties === 'object');
+            should.equal(typeof properties, 'object');
             for (var prop in properties) {
                 if (properties.hasOwnProperty(prop) && properties[prop] != null) {
                     that[prop] = properties[prop];
