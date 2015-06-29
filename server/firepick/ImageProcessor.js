@@ -16,6 +16,7 @@ Logger = require("./Logger");
 		var that = this;
 		options = options || {};
 		that.imgStore = options.imageStore || new ImageStore();
+		that.version = 1;
         return that;
     }
 
@@ -28,7 +29,8 @@ Logger = require("./Logger");
             cmd += " " + args;
         }
 		var imgRefCmd = ImageRef.copy(imgRef);
-		imgRefCmd.setTag(cmd);
+		imgRefCmd.setTag(pipeline);
+		imgRefCmd.setVersion(that.version);
 		var imgRefCached = that.imgStore.peek(imgRefCmd);
 		var result;
 		if (imgRefCached == null) {
@@ -48,6 +50,7 @@ Logger = require("./Logger");
 		} else {
 			result = imgRefCached.result;
 		}
+		logger.info("firesight_cmd(", result,") ", cmd);
 		return result;
     };
     ImageProcessor.prototype.health = function() {
@@ -96,6 +99,7 @@ Logger = require("./Logger");
 		return imgRef.path;
 	}
     ImageProcessor.validate = function(ip) {
+		ip.version++;
         describe("ImageProcessor.validate(" + ip.constructor.name + ")", function() {
             var ref000a = {
                 x: 0,
@@ -123,6 +127,7 @@ Logger = require("./Logger");
             };
             describe("validating calcOffset", function() {
                 it("should show zero offset for two images at same location", function() {
+					ip.version++;
                     var result = ip.calcOffset(ref000a, ref000b);
 					should.exist(result);
 					should.exist(result[0]);
@@ -130,6 +135,7 @@ Logger = require("./Logger");
                     should.equal(result[0].dy, 0);
                 });
                 it("should show non-zero offset for two images at different location", function() {
+					ip.version++;
                     var result = ip.calcOffset(ref000a, ref100);
 					should.exist(result);
 					should.exist(result[0]);
@@ -137,12 +143,14 @@ Logger = require("./Logger");
                     should(result[0].dy * result[0].dy).below(5);
                 });
                 it("should return nothing for dissimilar images", function() {
+					ip.version++;
                     var result = ip.calcOffset(ref000a, refDuck);
                     should.not.exist(result);
                 });
             });
             describe("validating meanStdDev", function() {
                 it("should calculate the mean and standard deviation of an image", function() {
+					ip.version++;
                     var result = ip.meanStdDev(ref000a);
                     //console.log(JSON.stringify(result));
                     should.deepEqual(result, {
@@ -153,6 +161,7 @@ Logger = require("./Logger");
             });
             describe("validating sharpness", function() {
                 it("sharpness(imgRef) should calculate the sharpness of an image", function() {
+					ip.version++;
                     var result = ip.sharpness(ref000a);
                     should.deepEqual(result, {
                         "sharpness": 3.05462
@@ -161,6 +170,7 @@ Logger = require("./Logger");
             });
             describe("validating PSNR", function() {
                 it("PSNR(imgRef1,imgRef2) should calculate the Power Signal to Noise Ratio of two images", function() {
+					ip.version++;
                     var result = ip.PSNR(ref000a, ref000b);
                     should.deepEqual(result, {
                         "PSNR": 52.5422
@@ -222,14 +232,22 @@ Logger = require("./Logger");
 		z: -80,
 		path: "test/XP005_Z-080X0Y0@1#1.jpg"
 	};
-	it("should show zero offset for two images at same location", function() {
+	it("TESTTESTimage calculations are cached by operation unless version is incremented", function() {
+		ip.calcOffset(ref000a, ref000b)[0].dx.should.equal(0);
+		ip.calcOffset(ref000a, ref100)[0].dx.should.equal(0);
+		ip.version++;
+		ip.calcOffset(ref000a, ref100)[0].dx.should.not.equal(0);
+	});
+	it("TESTTESTshould show zero offset for two images at same location", function() {
+		ip.version++;
 		var result = ip.calcOffset(ref000a, ref000b);
 		should.exist(result);
 		should.exist(result[0]);
 		should.equal(result[0].dx, 0);
 		should.equal(result[0].dy, 0);
 	});
-	it("should show non-zero offset for two images at different location", function() {
+	it("TESTTESTshould show non-zero offset for two images at different location", function() {
+		ip.version++;
 		var result = ip.calcOffset(ref000a, ref100);
 		should.exist(result);
 		should.exist(result[0]);
@@ -237,10 +255,12 @@ Logger = require("./Logger");
 		should(result[0].dy * result[0].dy).below(5);
 	});
 	it("should return nothing for dissimilar images", function() {
+		ip.version++;
 		var result = ip.calcOffset(ref000a, refDuck);
 		should.not.exist(result);
 	});
 	it("should calculate the mean and standard deviation of an image", function() {
+		ip.version++;
 		var result = ip.meanStdDev(ref000a);
 		//console.log(JSON.stringify(result));
 		should.deepEqual(result, {
@@ -249,18 +269,21 @@ Logger = require("./Logger");
 		});
 	});
 	it("sharpness(imgRef) should calculate the sharpness of an image", function() {
+		ip.version++;
 		var result = ip.sharpness(ref000a);
 		should.deepEqual(result, {
 			"sharpness": 3.05462
 		});
 	});
 	it("PSNR(imgRef1,imgRef2) should calculate the Power Signal to Noise Ratio of two images", function() {
+		ip.version++;
 		var result = ip.PSNR(ref000a, ref000b);
 		should.deepEqual(result, {
 			"PSNR": 52.5422
 		});
 	});
 	it("measureGrid(imgRef1,imgRef2) should measure grid line separation", function() {
+		ip.version++;
 		should.deepEqual(ip.measureGrid(refZ_40), {
 			"grid":{
 				x:8.79561, 

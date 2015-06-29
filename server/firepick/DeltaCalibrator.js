@@ -78,9 +78,9 @@ Perspective = require("./Perspective");
 		cal.xyz.should.equal(fs);
 	});
 	it("TESTTESTcalibrateHome() should measure the delta homing error", function() {
-		var fname = "test/DeltaCalibrator_calibrateHome.json";
-		this.timeout(10000);
 		// https://github.com/firepick1/fpd-vision/tree/master/XP008-Homing-Error
+		var fname = "test/DeltaCalibrator_calibrateHome.json";
+		//this.timeout(10000);
 		fs.bounds.zMax = 20;
 		fs.bounds.zMin = -100;
 		camera.pushMock("test/XP005_Z-100X0Y0@1#1.jpg");

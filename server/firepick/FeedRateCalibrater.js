@@ -141,7 +141,8 @@ Logger = require("./Logger");
 		var result;
 		for (var i = 0; i < that.pathIterations; i++) {
 			that.testPathC(i);
-			var imgRef = that.xyzCam.capture({tag:"feedrate"+i, version:feedRate});
+			that.ip.version = feedRate;
+			var imgRef = that.xyzCam.capture({tag:"feedrate"+i});
 			var q;
 			result = that.ip.PSNR(that.basis, imgRef);
 			var psnr = result.PSNR;
@@ -210,7 +211,7 @@ var mock = {};
 	};
 
 	/////////////// INSTANCE ////////////
-	MockXYZCamera.prototype.capture = function(tag, version) {
+	MockXYZCamera.prototype.capture = function(imgRef) {
 		var that = this;
 		if (that.xyzCam.feedRate > 6000) {
 			return that.badImage;
