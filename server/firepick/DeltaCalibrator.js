@@ -27,8 +27,16 @@ Perspective = require("./Perspective");
         options = options || {};
 		return that;
 	}
-	
+
 	///////////////// INSTANCE  //////////////////
+	DeltaCalibrator.prototype.dxAtZ = function(z) {
+		var that = this;
+		var imgRef = new ImageRef(0,0,z,{tag:"calibrateHome"});
+		that.xyz.move(imgRef);
+		imgRef = that.camera.capture(imgRef);
+		var dx = that.ip.measureGrid(imgRef).grid.x;
+		return dx ? {z:z, dx:dx} : null;
+	}
 	DeltaCalibrator.prototype.calibrateHome = function() {
 		var that = this;
 		var result;
@@ -36,26 +44,19 @@ Perspective = require("./Perspective");
 		var zMin = that.xyz.bounds.zMin+zStep; // camera likely useless at zMin
 		var zMax = that.xyz.bounds.zMax-zStep; // camera likely useless at zMax
 		zMin.should.below(zMax);
-		var gridx = [];
-		for (var z=zMin; z<zMax; z+=zStep) {
-			var imgRef = new ImageRef(0,0,z);
-			that.xyz.move(imgRef);
-			var imgPath = that.camera.capture().path;
-			logger.info("imgPath:", imgPath);
-			imgPath.should.exist;
-			imgPath.should.be.String;
-			imgRef.setPath(imgPath);
-			var measurement = that.ip.measureGrid(imgRef);
-			if (measurement.grid.x != null) {
-				var m = {z:z, dx:measurement.grid.x};
-				logger.info("z:", z, " m:", m);
-				gridx.push(m);
-			} else {
-				logger.info("z:", z, " (nogrid)");
-			}
+		var zHalf = (zMin+zMax)/2;
+		var mHalf = that.dxAtZ(zHalf);
+		var mLow = that.dxAtZ(zHalf-zStep);
+		var pv = new Perspective(mLow.dx, mLow.z, mHalf.dx, mHalf.z);
+		var z = Math.min(zMax, zHalf+6*zStep);
+		var mHigh = that.dxAtZ(z);
+		while (!mHigh && zHalf < z) {
+			z -= zStep;
+			mHigh = that.dxAtZ(z);
+			logger.debug(" mHigh:", mHigh);
 		}
-
-	
+		var zHigh = pv.viewPosition(mHigh.dx);
+		logger.info("zHigh:", zHigh, " mHigh:", mHigh, " mHalf:", mHalf, " mLow:", mLow);
 	}
 	
 	///////////////// CLASS //////////////////
