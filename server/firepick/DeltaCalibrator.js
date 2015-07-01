@@ -8,6 +8,7 @@ Util = require("./Util");
 Logger = require("./Logger");
 FireStep = require("./FireStep");
 Perspective = require("./Perspective");
+Maximizer = require("./Maximizer");
 
 (function(firepick) {
 	var logger = new Logger();
@@ -39,28 +40,67 @@ Perspective = require("./Perspective");
 	}
 	DeltaCalibrator.prototype.calibrateHome = function() {
 		var that = this;
+		var dc = new DeltaCalculator();
 		var result;
+
 		var zStep = 10; // 10mm gives us reasonable perspective range mid-range
 		var zMin = that.xyz.bounds.zMin+zStep; // camera likely useless at zMin
 		var zMax = that.xyz.bounds.zMax-zStep; // camera likely useless at zMax
 		zMin.should.below(zMax);
-		var zHalf = (zMin+zMax)/2;
-		var mHalf = that.dxAtZ(zHalf);
-		var mLow = that.dxAtZ(zHalf-zStep);
-		var pv = new Perspective(mLow.dx, mLow.z, mHalf.dx, mHalf.z);
-		var z = Math.min(zMax, zHalf+6*zStep);
-		var mHigh = that.dxAtZ(z);
-		while (!mHigh && zHalf < z) {
-			z -= zStep;
-			mHigh = that.dxAtZ(z);
-			logger.debug(" mHigh:", mHigh);
+
+		var zhalf = (zMin+zMax)/2;
+		var nominal = {
+			z1: zhalf-zStep,
+			z2: zhalf,
+			z3: Math.min(zMax, zhalf+6*zStep),
+		};
+		var img1 = that.dxAtZ(nominal.z1);
+		var img2 = that.dxAtZ(nominal.z2);
+		var img3 = that.dxAtZ(nominal.z3);
+		while (!img3 && nominal.z2 < nominal.z3) {
+			nominal.z3 -= zStep;
+			img3 = that.dxAtZ(nominal.z3);
+			logger.debug(" img3:", img3);
 		}
-		var zHigh = pv.viewPosition(mHigh.dx);
-		logger.info("zHigh:", zHigh, " mHigh:", mHigh, " mHalf:", mHalf, " mLow:", mLow);
+		nominal.a1 = dc.calcAngles({x:0,y:0,z:nominal.z1}).theta1;
+		nominal.a2 = dc.calcAngles({x:0,y:0,z:nominal.z2}).theta1;
+		nominal.a3 = dc.calcAngles({x:0,y:0,z:nominal.z3}).theta1;
+		nominal.da31 = nominal.a3 - nominal.a1;
+		nominal.da21 = nominal.a2 - nominal.a1;
+
+		var fitness = {evaluate:function(a1) {
+			var z1 = dc.calcXYZ({theta1:a1,theta2:a1,theta3:a1}).z;
+			var a2 = a1 + nominal.da21;
+			var z2 = dc.calcXYZ({theta1:a2,theta2:a2,theta3:a2}).z;
+			var a3 = a1 + nominal.da31;
+			var z3 = dc.calcXYZ({theta1:a3,theta2:a3,theta3:a3}).z;
+			var pv = new Perspective(img1.dx, z1, img2.dx, z2);
+			var z3pv = pv.viewPosition(img3.dx);
+			var dz = -Math.abs(z3pv - z3);
+			logger.withPlaces(10).info(
+				" a1:", a1, 
+				" z1:", z1, 
+				" z2:", z2, 
+				" z3:", z3, 
+				" z3pv:", z3pv, 
+				" dz:", dz
+			);
+			return dz;
+		}};
+		var solver = new Maximizer(fitness, {
+			nPlaces: 2,
+			logLevel:"debug",
+			////dxPolyFit:that.dzPolyFit,
+		});
+		var thetaErr = 10;
+		var thetaMin = nominal.a1-thetaErr;
+		var thetaMax = nominal.a1+thetaErr;
+        var rawResult = solver.solve(thetaMin, thetaMax);
+		logger.info("rawResult:", rawResult, " nominal:", nominal);
 	}
 	
 	///////////////// CLASS //////////////////
-	DeltaCalibrator.logger = logger;
+		DeltaCalibrator.logger = logger;
 
     Logger.logger.info("loaded firepick.DeltaCalibrator");
     module.exports = firepick.DeltaCalibrator = DeltaCalibrator;
