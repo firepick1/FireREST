@@ -23,6 +23,16 @@ Maximizer = require("./Maximizer");
         that.xyz = xyz;
 		that.camera = camera;
 		that.imgProc = that.options.imageProcessor || new ImageProcessor();
+		that.eTheta = that.options.eTheta || 0;
+		that.zStep = that.options.zStep || 10; // 10mm gives us reasonable perspective range mid-range
+		that.zMin = that.options.zMin == null ? 0 : that.options.zMin;
+		that.zMid = that.options.zMid == null ? -40 : that.options.zMid;
+		that.zMax = that.options.zMax == null ? -50 : that.options.zMax;
+		that.dc = new DeltaCalculator({
+			eTheta1: that.eTheta,
+			eTheta2: that.eTheta,
+			eTheta3: that.eTheta,
+		});
 
 		// Options
         options = options || {};
@@ -30,54 +40,57 @@ Maximizer = require("./Maximizer");
 	}
 
 	///////////////// INSTANCE  //////////////////
-	DeltaCalibrator.prototype.dxAtZ = function(z) {
+	DeltaCalibrator.prototype.gridAtZ = function(z) {
 		var that = this;
 		var imgRef = new ImageRef(0,0,z,{tag:"calibrateHome"});
 		that.xyz.move(imgRef);
 		imgRef = that.camera.capture(imgRef);
 		var dx = that.ip.measureGrid(imgRef).grid.x;
-		return dx ? {z:z, dx:dx} : null;
+		var dy = that.ip.measureGrid(imgRef).grid.y;
+		return dx ? {z:z, dx:dx, dy:dy} : null;
+	}
+	DeltaCalibrator.prototype.calibrateHome_nominal = function() {
+		var that = this;
+
+		//var zMin = that.xyz.bounds.zMin+that.zStep; // camera likely useless at zMin
+		//var zMax = that.xyz.bounds.zMax-that.zStep; // camera likely useless at zMax
+		//zMin.should.below(zMax);
+		//var zhalf = (zMin+zMax)/2;
+		var nominal = {
+			z1: that.zMin,
+			z2: that.zMid,
+			z3: that.zMax,
+		};
+		nominal.img1 = that.gridAtZ(nominal.z1);
+		nominal.img2 = that.gridAtZ(nominal.z2);
+		nominal.img3 = that.gridAtZ(nominal.z3);
+		//while (!nominal.img3 && nominal.z2 < nominal.z3) {
+			//nominal.z3 -= that.zStep;
+			//nominal.img3 = that.gridAtZ(nominal.z3);
+		//}
+		nominal.a1 = that.dc.calcAngles({x:0,y:0,z:nominal.z1}).theta1;
+		nominal.a2 = that.dc.calcAngles({x:0,y:0,z:nominal.z2}).theta1;
+		nominal.a3 = that.dc.calcAngles({x:0,y:0,z:nominal.z3}).theta1;
+		nominal.da31 = nominal.a3 - nominal.a1;
+		nominal.da21 = nominal.a2 - nominal.a1;
+		logger.trace("nominal:",nominal);
+
+		return nominal; 
 	}
 	DeltaCalibrator.prototype.calibrateHome = function() {
 		var that = this;
-		var dc = new DeltaCalculator();
-		var result;
-
-		var zStep = 10; // 10mm gives us reasonable perspective range mid-range
-		var zMin = that.xyz.bounds.zMin+zStep; // camera likely useless at zMin
-		var zMax = that.xyz.bounds.zMax-zStep; // camera likely useless at zMax
-		zMin.should.below(zMax);
-
-		var zhalf = (zMin+zMax)/2;
-		var nominal = {
-			z1: zhalf-zStep,
-			z2: zhalf,
-			z3: Math.min(zMax, zhalf+6*zStep),
-		};
-		var img1 = that.dxAtZ(nominal.z1);
-		var img2 = that.dxAtZ(nominal.z2);
-		var img3 = that.dxAtZ(nominal.z3);
-		while (!img3 && nominal.z2 < nominal.z3) {
-			nominal.z3 -= zStep;
-			img3 = that.dxAtZ(nominal.z3);
-			logger.debug(" img3:", img3);
-		}
-		nominal.a1 = dc.calcAngles({x:0,y:0,z:nominal.z1}).theta1;
-		nominal.a2 = dc.calcAngles({x:0,y:0,z:nominal.z2}).theta1;
-		nominal.a3 = dc.calcAngles({x:0,y:0,z:nominal.z3}).theta1;
-		nominal.da31 = nominal.a3 - nominal.a1;
-		nominal.da21 = nominal.a2 - nominal.a1;
+		var nominal = that.calibrateHome_nominal();
 
 		var fitness = {evaluate:function(a1) {
-			var z1 = dc.calcXYZ({theta1:a1,theta2:a1,theta3:a1}).z;
+			var z1 = that.dc.calcXYZ({theta1:a1,theta2:a1,theta3:a1}).z;
 			var a2 = a1 + nominal.da21;
-			var z2 = dc.calcXYZ({theta1:a2,theta2:a2,theta3:a2}).z;
+			var z2 = that.dc.calcXYZ({theta1:a2,theta2:a2,theta3:a2}).z;
 			var a3 = a1 + nominal.da31;
-			var z3 = dc.calcXYZ({theta1:a3,theta2:a3,theta3:a3}).z;
-			var pv = new Perspective(img1.dx, z1, img2.dx, z2);
-			var z3pv = pv.viewPosition(img3.dx);
+			var z3 = that.dc.calcXYZ({theta1:a3,theta2:a3,theta3:a3}).z;
+			var pv = new Perspective(nominal.img1.dx, z1, nominal.img2.dx, z2);
+			var z3pv = pv.viewPosition(nominal.img3.dx);
 			var dz = -Math.abs(z3pv - z3);
-			logger.withPlaces(10).info(
+			logger.withPlaces(10).debug(
 				" a1:", a1, 
 				" z1:", z1, 
 				" z2:", z2, 
@@ -87,20 +100,31 @@ Maximizer = require("./Maximizer");
 			);
 			return dz;
 		}};
-		var solver = new Maximizer(fitness, {
-			nPlaces: 2,
-			logLevel:"debug",
-			////dxPolyFit:that.dzPolyFit,
-		});
-		var thetaErr = 10;
-		var thetaMin = nominal.a1-thetaErr;
-		var thetaMax = nominal.a1+thetaErr;
-        var rawResult = solver.solve(thetaMin, thetaMax);
-		logger.info("rawResult:", rawResult, " nominal:", nominal);
+		if (!nominal.img1) {
+			logger.warn("calibrateHome() could not process grid image at z:", nominal.z1);
+		} else if (!nominal.img2) {
+			logger.warn("calibrateHome() could not process grid image at z:", nominal.z2);
+		} else if (!nominal.img3) {
+			logger.warn("calibrateHome() could not process grid image at z:", nominal.z3);
+		} else {
+			nominal.eTheta = null;
+			var solver = new Maximizer(fitness, {
+				//nPlaces: 3,
+				logLevel:logger.logLevel,
+				//dxPolyFit:true,
+			});
+			var thetaErr = 10;
+			var thetaMin = nominal.a1-thetaErr;
+			var thetaMax = nominal.a1+thetaErr;
+			var rawResult = solver.solve(thetaMin, thetaMax);
+			logger.debug("rawResult:", rawResult);
+			nominal.eTheta = rawResult.xBest - nominal.a1;
+		}
+		return nominal;	
 	}
 	
 	///////////////// CLASS //////////////////
-		DeltaCalibrator.logger = logger;
+	DeltaCalibrator.logger = logger;
 
     Logger.logger.info("loaded firepick.DeltaCalibrator");
     module.exports = firepick.DeltaCalibrator = DeltaCalibrator;
@@ -121,9 +145,9 @@ Maximizer = require("./Maximizer");
 	it("TESTTESTcalibrateHome() should measure the delta homing error", function() {
 		// https://github.com/firepick1/fpd-vision/tree/master/XP008-Homing-Error
 		var fname = "test/DeltaCalibrator_calibrateHome.json";
-		//this.timeout(10000);
-		fs.bounds.zMax = 20;
-		fs.bounds.zMin = -100;
+		logger.setLevel("debug");
+		//fs.bounds.zMax = 30;
+		//fs.bounds.zMin = fs.bounds.zMax-120;
 		camera.pushMock("test/XP005_Z-100X0Y0@1#1.jpg");
 		camera.pushMock("test/XP005_Z-090X0Y0@1#1.jpg");
 		camera.pushMock("test/XP005_Z-080X0Y0@1#1.jpg");
@@ -140,8 +164,17 @@ Maximizer = require("./Maximizer");
 		var imgStore = new ImageStore(camera);
 		imgStore.deserialize(fname);
 		var imgProc = new ImageProcessor({imageStore:imgStore});
-		var cal = new DeltaCalibrator(fs, camera, {imageProcessor: imgProc});
-		cal.calibrateHome();
-		//imgStore.serialize(fname);
+		var cal = new DeltaCalibrator(fs, camera, {
+			zMax: -00, // upper comparison point
+			zMid: -40,
+			zMin: -50, // lower comparison point
+			imageProcessor: imgProc,
+		});
+		var result = cal.calibrateHome();
+		//imgStore.serialize(fname); /* uncomment this line to save new values */
+		logger.debug("calibrateHome(): ", result);
+		should.exist(result.eTheta, "eTheta is null");
+		result.eTheta.should.within(3.200,3.201);
+		return result;
 	});
 });

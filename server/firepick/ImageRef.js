@@ -5,6 +5,7 @@ var child_process = require('child_process');
 var fs = require('fs');
 var temp = require('temp');
 temp.track();
+Logger = require("./Logger");
 
 (function(firepick) {
     function ImageRef(x, y, z, properties) {
