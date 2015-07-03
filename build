@@ -128,6 +128,10 @@ if [ "$(type -p mocha)" == "" ]; then
 fi
 echo "STATUS	: mocha installed"
 
+if [ ! -e node_modules/should ]; then
+	sudo npm install should
+fi
+
 if [ "$(type -p redis-cli)" == "" ]; then
 	echo "COMMAND	: sudo apt-get install -y build-essential"
 	sudo apt-get install -y build-essential
