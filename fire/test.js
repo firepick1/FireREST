@@ -1,4 +1,4 @@
-#! /usr/bin/nodejs
+#! /usr/local/bin/node
 
 Util = require("../server/firepick/Util");
 Bernstein = require("../server/firepick/Bernstein");

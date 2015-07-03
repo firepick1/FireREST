@@ -1,4 +1,4 @@
-#! /usr/bin/nodejs
+#! /usr/local/bin/node
 
 console.log("SCRIPT	: etheta.js");
 console.log("HELP	: computes FirePick Delta global homing angle error");
