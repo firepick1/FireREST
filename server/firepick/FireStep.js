@@ -10,11 +10,13 @@ PHFeed = require("./PHFeed");
 PnPPath = require("./PnPPath");
 DeltaCalculator = require("./DeltaCalculator");
 XYZPositioner = require("./XYZPositioner");
+Maximizer = require("./Maximizer");
 
 (function(firepick) {
 	var logger = new Logger();
 	var nullWriter = function(msg) {};
 	var byteHex = ['0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'];
+	var deg60 = Math.PI / 3;
 
     function FireStep(options) {
 		var that = this;
@@ -29,6 +31,8 @@ XYZPositioner = require("./XYZPositioner");
 		that.position = options.position || {x:0,y:0,z:0};
 		that.hCruise = options.hCruise == null ? 20 : options.hCruise;
 		var revPulses = that.delta.steps360*that.delta.microsteps;
+		that.pinProbe = options.pinProbe == null ? 2 : options.pinProbe;
+		that.invertProbe = options.invertProbe == null ? false : options.invertProbeo
 		that.vMax = options.vMax || 2*revPulses;
 		that.vMax.should.above(0);
 		that.tvMax = options.tvMax || 0.4;
@@ -49,6 +53,13 @@ XYZPositioner = require("./XYZPositioner");
 	FireStep.prototype.health = function() {
 		return 1;
 	}
+	FireStep.prototype.writeln = function(value) {
+		var that = this;
+		if (value != null) {
+			that.write(value);
+		}
+		that.write("\n");
+	}
 	FireStep.prototype.home = function() {
 		var that = this;
 		var cmd = {
@@ -58,8 +69,7 @@ XYZPositioner = require("./XYZPositioner");
 				z:that.delta.homePulses.p3,
 			}
 		};
-		that.write(JSON.stringify(cmd));
-		that.write("\n");
+		that.writeln(JSON.stringify(cmd));
 		that.position = that.delta.calcXYZ(that.delta.homeAngles);
 		return that;
 	}
@@ -88,8 +98,7 @@ XYZPositioner = require("./XYZPositioner");
 				"3":pulses.p3,
 			}
 		};
-		that.write(JSON.stringify(cmd));
-		that.write("\n");
+		that.writeln(JSON.stringify(cmd));
 		that.position = dst;
 		return that;
 	}
@@ -102,13 +111,176 @@ XYZPositioner = require("./XYZPositioner");
 			{hom:{"1":hp.p1, "2":hp.p2, "3":hp.p3}},
 			{mov:{"1":dstPulses.p1, "2":dstPulses.p2, "3":dstPulses.p3}}
 		];
-		that.write(JSON.stringify(cmd));
-		that.write("\n");
+		that.writeln(JSON.stringify(cmd));
 		return that;
+	}
+	FireStep.prototype.probe = function(dxyz) {
+		var that = this;
+		var xyz = {
+			x: that.position.x + (dxyz.x==null ? 0 : dxyz.x),
+			y: that.position.y + (dxyz.y==null ? 0 : dxyz.y),
+			z: that.position.z + (dxyz.z==null ? 0 : dxyz.z),
+		}
+		var pulses = that.delta.calcPulses(xyz);
+		var cmd = {prb:{
+			1:pulses.p1,
+			2:pulses.p2,
+			3:pulses.p3,
+			pn:that.pinProbe,
+			ip:that.invertProbe
+		}};
+		that.writeln(JSON.stringify(cmd));
 	}
 	FireStep.prototype.getPulses = function() {
 		var that = this;
 		return that.delta.calcPulses(that.position);
+	}
+	FireStep.prototype.calibrateZProbe = function(pulseProbes) {
+		var that = this;
+		var fitnessTheta = {evaluate:function(eTheta) {
+			var dc = that.delta;
+			dc.eTheta1 = eTheta;
+			dc.eTheta2 = eTheta;
+			dc.eTheta3 = eTheta;
+			var xyzProbes = [];
+			var zSum = 0;
+			var xyzCenter;
+			var n = pulseProbes.length;
+			for (var i=0; i<n; i++) {
+				var xyz = dc.calcXYZ(pulseProbes[i]);
+				xyzProbes.push(xyz);
+				zSum += xyz.z;
+			}
+			var xyzCenter = xyzProbes[0];
+			var zAvg = (zSum - xyzCenter.z) / (n-1);
+			var result = Math.abs(zAvg - xyzCenter.z);
+			logger.info("eTheta:", eTheta, " result:", result, " zAvg:", zAvg);
+			return -result;
+		}};
+		var fitnessGearRatio = {evaluate:function(gearRatio) {
+			var dc = that.delta;
+			dc.gearRatio = gearRatio;
+			var xyzProbes = [];
+			var zSum = 0;
+			var xyzCenter;
+			var n = pulseProbes.length;
+			for (var i=0; i<n; i++) {
+				var xyz = dc.calcXYZ(pulseProbes[i]);
+				xyzProbes.push(xyz);
+				zSum += xyz.z;
+			}
+			var xyzCenter = xyzProbes[0];
+			var zAvg = (zSum - xyzCenter.z) / (n-1);
+			var dz = zAvg - xyzCenter.z;
+			var result = -dz*dz;
+			logger.info(" gearRatio:", gearRatio, " dz:", dz, " zAvg:", zAvg, " result:", result);
+			return result;
+		}};
+		var fitness_re = {evaluate:function(re) {
+			var dc = that.delta;
+			dc.re = re;
+			var xyzProbes = [];
+			var zSum = 0;
+			var xyzCenter;
+			var n = pulseProbes.length;
+			for (var i=0; i<n; i++) {
+				var xyz = dc.calcXYZ(pulseProbes[i]);
+				xyzProbes.push(xyz);
+				zSum += xyz.z;
+			}
+			var xyzCenter = xyzProbes[0];
+			var zAvg = (zSum - xyzCenter.z) / (n-1);
+			var dz = zAvg - xyzCenter.z;
+			var result = -dz*dz;
+			logger.info(" re:", re, " dz:", dz, " zAvg:", zAvg, " result:", result, " xyz:", xyzCenter);
+			return result;
+		}};
+		var fitness_f = {evaluate:function(f) {
+			var dc = that.delta;
+			dc.f = f;
+			var xyzProbes = [];
+			var zSum = 0;
+			var xyzCenter;
+			var n = pulseProbes.length;
+			for (var i=0; i<n; i++) {
+				var xyz = dc.calcXYZ(pulseProbes[i]);
+				xyzProbes.push(xyz);
+				zSum += xyz.z;
+			}
+			var xyzCenter = xyzProbes[0];
+			var zAvg = (zSum - xyzCenter.z) / (n-1);
+			var dz = zAvg - xyzCenter.z;
+			var result = -dz*dz;
+			logger.info(" f:", f, " dz:", dz, " zAvg:", zAvg, " result:", result, " xyz:", xyzCenter);
+			return result;
+		}};
+		var fitnessPulses = {evaluate:function(dp) {
+			var dc = that.delta;
+			var xyzProbes = [];
+			var zSum = 0;
+			var xyzCenter;
+			var n = pulseProbes.length;
+			for (var i=0; i<n; i++) {
+				var pulses = {
+					p1:pulseProbes[i].p1+dp,
+					p2:pulseProbes[i].p2+dp,
+					p3:pulseProbes[i].p3+dp,
+				};
+				var xyz = dc.calcXYZ(pulses);
+				if (xyz == null) {
+					return -1000000;
+				}
+				xyzProbes.push(xyz);
+				zSum += xyz.z;
+			}
+			var xyzCenter = xyzProbes[0];
+			var zAvg = (zSum - xyzCenter.z) / (n-1);
+			var result = -Math.abs(zAvg - xyzCenter.z);
+			logger.withPlaces(4).info("dp:", dp, " result:", result, " zCtr:", xyzCenter.z, " zAvg:", zAvg);
+			return result;
+		}};
+		var thetaErr = 10;
+		var thetaMin = -thetaErr;
+		var thetaMax = +thetaErr;
+		var gearRatio = 150/16;
+		var dRatio = 1;
+		var re = that.delta.re;
+		var dre = 40;
+		var f = that.delta.f;
+		var df = 40;
+		var dpulses = 10000;
+		//var solver = new Maximizer(fitnessPulses, {
+		var solver = new Maximizer(fitnessGearRatio, {
+			//nPlaces: 3,
+			logLevel:logger.logLevel,
+			//dxPolyFit:true,
+		});
+		//var rawResult = solver.solve(-5000,5000);
+		//var rawResult = solver.solve(thetaMin, thetaMax);
+		//var rawResult = solver.solve(f-df,f+df);
+		//var rawResult = solver.solve(re-dre, re+dre);
+		var rawResult = solver.solve(gearRatio-dRatio, gearRatio+dRatio);
+		logger.info("level:", that.delta.calcPulses({x:0,y:0,z:0}));
+		logger.info("rawResult:", rawResult);
+		return rawResult;	
+	}
+	FireStep.prototype.hexaProbe = function(z,options) {
+		var that = this;
+		options = options || {};
+		z.should.be.Number;
+		var dz = options.dz == null ? 20 : options.dz;
+		var r = options.r == null ? 50 : options.r;
+		that.home();
+		that.move({z:z});
+		var xyzmin00 = that.probe({z:-dz});
+		for (var i=0; i<6; i++) {
+			var a = i * deg60;
+			var x = r * Math.sin(a);
+			var y = r * Math.cos(a);
+			var xyzUp = {x:x,y:y,z:z};
+			that.move(xyzUp);
+			that.probe({z:-dz});
+		}
 	}
 	FireStep.prototype.pnpSample = function(xyz1, xyz2, N) {
 		var that = this;
@@ -219,8 +391,7 @@ XYZPositioner = require("./XYZPositioner");
 		}};
 		var dvsJson = JSON.stringify(dvs);
 		logger.info("dvs:", dvsJson.length, "B ", dvsJson);
-		that.write(dvsJson);
-		that.write("\n");
+		that.writeln(dvsJson);
 		that.position = xyz;
 		return that;
 	}
@@ -294,8 +465,11 @@ XYZPositioner = require("./XYZPositioner");
 		testOut.should.equal("hello");
 	});
 	it("should implement home()", function() {
-		var fs = new FireStep({write:testWrite});
-		testCmd(function(){ fs.home(); },'{"hom":{"x":-11200,"y":-11200,"z":-11200}}\n');
+		var fs = new FireStep({
+			steps360: 200,
+			write:testWrite,
+		});
+		testCmd(function(){ fs.home(); },'{"hom":{"x":-5600,"y":-5600,"z":-5600}}\n');
 		shouldEqualT(fs.position, fs.delta.calcXYZ(fs.delta.homeAngles));
 	});
 	it("getPulses() should return pulse position", function() {
@@ -394,5 +568,72 @@ XYZPositioner = require("./XYZPositioner");
 		+'\n');
 		shouldEqualT(fs.getPulses(), {p1:13427, p2:7775, p3:10020});
 		shouldEqualT(fs.getXYZ(), {x:30,y:90,z:-80});
+	});
+	it("TESTTESTprobe() should detect obstacle", function() {
+		var fs = new FireStep({
+			steps360: 200,
+			write:testWrite,
+		});
+		fs.move({z:-90});
+		var result;
+		testCmd(function(){ 
+			result = fs.probe({z:-20}); 
+		}, '{"prb":{"1":6921,"2":6921,"3":6921,"pn":2,"ip":false}}\n');
+	});
+	it("TESTTESTshould probe a hexagon", function() {
+		var fs = new FireStep({
+			steps360: 200,
+			write:testWrite,
+		});
+		testCmd(function(){ 
+			fs.hexaProbe(-40);
+		},
+		'{"hom":{"x":-5600,"y":-5600,"z":-5600}}\n'+
+		'{"mov":{"1":2009,"2":2009,"3":2009}}\n'+
+		'{"prb":{"1":3019,"2":3019,"3":3019,"pn":2,"ip":false}}\n'+
+		'{"mov":{"1":3184,"2":1761,"3":1761}}\n'+
+		'{"prb":{"1":4144,"2":2807,"3":2807,"pn":2,"ip":false}}\n'+
+		'{"mov":{"1":2734,"2":1252,"3":2734}}\n'+
+		'{"prb":{"1":3728,"2":2315,"3":3728,"pn":2,"ip":false}}\n'+
+		'{"mov":{"1":1761,"2":1761,"3":3184}}\n'+
+		'{"prb":{"1":2807,"2":2807,"3":4144,"pn":2,"ip":false}}\n'+
+		'{"mov":{"1":1252,"2":2734,"3":2734}}\n'+
+		'{"prb":{"1":2315,"2":3728,"3":3728,"pn":2,"ip":false}}\n'+
+		'{"mov":{"1":1761,"2":3184,"3":1761}}\n'+
+		'{"prb":{"1":2807,"2":4144,"3":2807,"pn":2,"ip":false}}\n'+
+		'{"mov":{"1":2734,"2":2734,"3":1252}}\n'+
+		'{"prb":{"1":3728,"2":3728,"3":2315,"pn":2,"ip":false}}\n'+
+		''
+		);
+	});
+	it("TESTTESTshould hexaprobe", function() {
+		var fs = new FireStep({
+			steps360: 200,
+			write:testWrite,
+		});
+		var pulsesPlanned = [
+			{"p1":2009,"p2":2009,"p3":2009},
+			{"p1":2729,"p2":1253,"p3":1253},
+			{"p1":2259,"p2":732,"p3":2259},
+			{"p1":1253,"p2":1253,"p3":2729},
+			{"p1":732,"p2":2259,"p3":2259},
+			{"p1":1253,"p2":2729,"p3":1253},
+			{"p1":2259,"p2":2259,"p3":732},
+		];
+		var pulsesMeasured = [
+			{"p1":2214,"p2":2214,"p3":2214},
+			{"p1":3402,"p2":1999,"p3":1999},
+			{"p1":2951,"p2":1484,"p3":2951},
+			{"p1":1974,"p2":1974,"p3":3379},
+			{"p1":1457,"p2":2926,"p3":2926},
+			{"p1":1975,"p2":3380,"p3":1975},
+			{"p1":2952,"p2":2952,"p3":1485},
+		];
+		for (var i=0; i<pulsesPlanned.length; i++){
+			var xyzM = fs.delta.calcXYZ(pulsesMeasured[i]);
+			var xyzP = fs.delta.calcXYZ(pulsesPlanned[i]);
+			logger.withPlaces(2).info("measured:", i, " ", xyzM, "\tplanned:", xyzP);
+		}
+		fs.calibrateZProbe(pulsesMeasured);
 	});
 })

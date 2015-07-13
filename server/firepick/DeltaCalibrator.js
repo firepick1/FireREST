@@ -12,6 +12,7 @@ Maximizer = require("./Maximizer");
 
 (function(firepick) {
 	var logger = new Logger();
+	var deg30 = Math.PI / 6;
 
     function DeltaCalibrator(xyz, camera, options) {
         var that = this;
@@ -142,7 +143,7 @@ Maximizer = require("./Maximizer");
 		cal.camera.should.equal(camera);
 		cal.xyz.should.equal(fs);
 	});
-	it("TESTTESTcalibrateHome() should measure the delta homing error", function() {
+	it("calibrateHome() should measure the delta homing error", function() {
 		// https://github.com/firepick1/fpd-vision/tree/master/XP008-Homing-Error
 		var fname = "test/DeltaCalibrator_calibrateHome.json";
 		logger.setLevel("debug");

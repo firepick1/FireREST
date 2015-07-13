@@ -25,18 +25,15 @@ Logger = require("./Logger");
 		that.steps360 = options.steps360 == null ? 400 : options.steps360;
 		that.microsteps = options.microsteps == null ? 16 : options.microsteps;
 		that.gearRatio = options.gearRatio == null ? 150/16 : options.gearRatio;
-		that.degreePulses = options.degreePulses == null ?
-			that.steps360 * that.microsteps * that.gearRatio / 360 :
-			options.degreePulses;
 		if (options.homePulses) {
 			options.homePulses.p1.should.be.Number;
 			options.homePulses.p2.should.be.Number;
 			options.homePulses.p3.should.be.Number;
 			that.homePulses = options.homePulses;
 			that.homeAngles = {
-				theta1:that.homePulses.p1/that.degreePulses,
-				theta2:that.homePulses.p2/that.degreePulses,
-				theta3:that.homePulses.p3/that.degreePulses,
+				theta1:that.homePulses.p1/that.degreePulses(),
+				theta2:that.homePulses.p2/that.degreePulses(),
+				theta3:that.homePulses.p3/that.degreePulses(),
 			};
 		} else {
 			that.homeAngles = options.homeAngles || {theta1:-67.2, theta2:-67.2, theta3:-67.2};
@@ -44,9 +41,9 @@ Logger = require("./Logger");
 			that.homeAngles.theta2.should.be.Number;
 			that.homeAngles.theta3.should.be.Number;
 			that.homePulses = options.homePulses || {
-				p1:that.homeAngles.theta1*that.degreePulses,
-				p2:that.homeAngles.theta2*that.degreePulses,
-				p3:that.homeAngles.theta3*that.degreePulses,
+				p1:that.homeAngles.theta1*that.degreePulses(),
+				p2:that.homeAngles.theta2*that.degreePulses(),
+				p3:that.homeAngles.theta3*that.degreePulses(),
 			};
 		}
 		that.dz = 0;
@@ -70,16 +67,21 @@ Logger = require("./Logger");
 
         return that;
     };
+	DeltaCalculator.prototype.degreePulses = function() {
+		var that = this;
+		return that.steps360 * that.microsteps * that.gearRatio / 360;
+	}
     DeltaCalculator.prototype.calcXYZ = function(angles) {
 		var that = this;
 		if (angles.theta1 == null && angles.p1 != null) {
 			angles.p1.should.be.Number;
 			angles.p2.should.be.Number;
 			angles.p3.should.be.Number;
+			var degreePulses = that.degreePulses();
 			return that.calcXYZ({
-				theta1:angles.p1/that.degreePulses,
-				theta2:angles.p2/that.degreePulses,
-				theta3:angles.p3/that.degreePulses,
+				theta1:angles.p1/degreePulses,
+				theta2:angles.p2/degreePulses,
+				theta3:angles.p3/degreePulses,
 			});
 		}
         angles.theta1.should.be.Number;
@@ -148,10 +150,11 @@ Logger = require("./Logger");
 		if (angles == null) { // no solution
 			return null;
 		}
+		var degreePulses = that.degreePulses();
 		return {
-			p1: Math.round(angles.theta1*that.degreePulses ),
-			p2: Math.round(angles.theta2*that.degreePulses ),
-			p3: Math.round(angles.theta3*that.degreePulses ),
+			p1: Math.round(angles.theta1*degreePulses ),
+			p2: Math.round(angles.theta2*degreePulses ),
+			p3: Math.round(angles.theta3*degreePulses ),
 		}
 	}
     DeltaCalculator.prototype.calcAngles = function(xyz) {
@@ -255,10 +258,6 @@ Logger = require("./Logger");
 	it("has pulley gear ratio option", function() {
 		new DeltaCalculator().gearRatio.should.equal(150/16);
 		new DeltaCalculator({gearRatio:100/16}).gearRatio.should.equal(100/16);
-	});
-	it("has degreePulses option", function() {
-		new DeltaCalculator().degreePulses.should.equal(500/3);
-		new DeltaCalculator({degreePulses:100}).degreePulses.should.equal(100);
 	});
 	it("has home origin offset option", function() {
 		new DeltaCalculator().dz.should.within(247.893,247.894);
@@ -415,6 +414,42 @@ Logger = require("./Logger");
 			theta3:angles_x100.theta3 + 1,
 		});
 		shouldEqualT(dc1.calcXYZ(dc1.calcAngles(xyz)), xyz);
+	});
+	it("TESTTESTgradient", function() {
+		var dc1 = new DeltaCalculator({steps360:200});
+		var dc2 = new DeltaCalculator({steps360:200});
+
+		var em = 0.05;
+		var dp = 200;
+		var dim = 1;
+		var epulse 		= 800; 			 // 0.510
+		dc2.gearRatio	*= 1 - dim*1*em; // 0.053
+		dc2.f			*= 1 - dim*1*em; // 0.045
+		dc2.re			*= 1 + dim*1*em; // 0.04
+		dc2.e			*= 1 + dim*1*em; // 0.029
+		dc2.rf			*= 1 - dim*1*em; // 0.023
+		logger.info("p\tz\tdx\tdy\tdz\tdz_x50\tzbowl");
+		for (var p=-600; p<=2200; p+=dp) {
+			var pulses = {p1:p,p2:p,p3:p};
+			var xyz0 = dc1.calcXYZ(pulses);
+			var pulses_x50 = dc1.calcPulses({x:50,y:0,z:xyz0.z});
+			var exyz50 = dc2.calcXYZ({
+				p1:pulses_x50.p1+epulse,
+				p2:pulses_x50.p2+epulse,
+				p3:pulses_x50.p3+epulse,
+			});
+			var exyz0 = dc2.calcXYZ({
+				p1:pulses.p1+epulse,
+				p2:pulses.p2+epulse,
+				p3:pulses.p3+epulse,
+			});
+			logger.withPlaces(3).info(p, "\t", xyz0.z, 
+				"\t", exyz50.x-50, "\t", exyz50.y, "\t", exyz0.z-xyz0.z, "\t", exyz50.z-xyz0.z,
+				"\t", exyz50.z-exyz0.z); 
+			pulses_x50.p1 += dp;
+			pulses_x50.p2 += dp;
+			pulses_x50.p3 += dp;
+		}
 	});
 });
 /*
